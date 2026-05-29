@@ -573,6 +573,178 @@
           text-align: center;
         }
 
+        /* v6.5 S2 Bloom 金字塔 */
+        .figure-card.rich-04 .bloom-pyramid {
+          display: flex; flex-direction: column;
+          align-items: center; gap: 6px;
+          padding: 14px 0 6px;
+        }
+        .figure-card.rich-04 .bp-row {
+          display: grid; grid-template-columns: 96px 1fr 56px;
+          gap: 12px; align-items: center;
+          width: 100%; max-width: 380px;
+        }
+        .figure-card.rich-04 .bp-lvl {
+          text-align: right;
+          font-family: var(--serif-cn); font-size: 13.5px;
+          color: var(--ink); font-weight: 500;
+        }
+        .figure-card.rich-04 .bp-lvl small {
+          font-family: var(--mono); font-size: 11px;
+          color: var(--mute); margin-right: 6px;
+        }
+        .figure-card.rich-04 .bp-bar-wrap {
+          display: flex; justify-content: center; align-items: center;
+          min-height: 26px;
+        }
+        .figure-card.rich-04 .bp-bar {
+          height: 24px;
+          border-radius: 3px;
+          display: flex; align-items: center; justify-content: flex-end;
+          padding: 0 10px;
+          font-family: var(--mono); font-size: 12px;
+          color: var(--ivory); font-weight: 700;
+          letter-spacing: 0.02em;
+          transition: width .3s ease;
+          min-width: 36px;
+        }
+        .figure-card.rich-04 .bp-bar.is-high  { background: var(--amber-deep); }
+        .figure-card.rich-04 .bp-bar.is-mid   { background: var(--amber, #d97757); }
+        .figure-card.rich-04 .bp-bar.is-low   { background: var(--sage); }
+        .figure-card.rich-04 .bp-bar.is-empty {
+          background: transparent;
+          border: 1px dashed var(--rule);
+          color: var(--mute);
+        }
+        .figure-card.rich-04 .bp-cov {
+          display: flex; gap: 3px; align-items: center;
+        }
+        .figure-card.rich-04 .bp-cov i {
+          width: 10px; height: 10px; border-radius: 2px;
+          background: var(--sage); display: inline-block;
+        }
+        .figure-card.rich-04 .bp-cov i.is-empty {
+          background: transparent;
+          border: 1px dashed var(--rule);
+        }
+        .figure-card.rich-04 .bp-meta {
+          margin: 12px 22px 4px;
+          font-family: var(--mono); font-size: 11px;
+          color: var(--mute); letter-spacing: 0.04em;
+          text-align: center;
+        }
+        .figure-card.rich-04 .bp-meta b { color: var(--amber-deep); }
+
+        /* v6.5 S2 目标↔证据 5 对配对 */
+        .figure-card.rich-04 .goal-evidence-pairs {
+          margin: 14px 22px 6px;
+          padding-top: 12px;
+          border-top: 1px dashed rgba(168,73,42,0.18);
+        }
+        .figure-card.rich-04 .ge-pairs-h {
+          font-family: var(--mono); font-size: 11px;
+          color: var(--mute); letter-spacing: 0.06em;
+          margin-bottom: 10px;
+        }
+        .figure-card.rich-04 .ge-pair {
+          display: grid; grid-template-columns: 1fr 28px 1fr;
+          gap: 10px; align-items: center;
+          padding: 7px 0;
+          font-family: var(--serif-cn); font-size: 12.5px;
+          line-height: 1.55;
+        }
+        .figure-card.rich-04 .ge-pair + .ge-pair {
+          border-top: 1px dotted rgba(168,73,42,0.12);
+        }
+        .figure-card.rich-04 .ge-goal {
+          color: var(--ink); text-align: right;
+          font-weight: 500;
+        }
+        .figure-card.rich-04 .ge-arrow {
+          font-family: var(--mono); font-size: 14px;
+          color: var(--amber-deep);
+          text-align: center; font-weight: 600;
+        }
+        .figure-card.rich-04 .ge-evidence {
+          color: var(--ink-soft);
+          font-size: 12.5px;
+        }
+
+        /* v6.4 S8 议程兑现 5×4 热力矩阵 */
+        .figure-card.rich-11 .fulfill-matrix {
+          display: grid;
+          grid-template-columns: 110px repeat(4, 1fr) 52px;
+          gap: 5px 6px;
+          padding: 8px 0 4px;
+        }
+        .figure-card.rich-11 .fm-corner,
+        .figure-card.rich-11 .fm-row-h {
+          font-family: var(--serif-cn); font-size: 12.5px;
+          color: var(--ink); align-self: center;
+          padding: 4px 0;
+        }
+        .figure-card.rich-11 .fm-col-h {
+          font-family: var(--mono); font-size: 11.5px;
+          color: var(--mute); letter-spacing: 0.06em;
+          text-align: center;
+          align-self: end; padding-bottom: 4px;
+          font-weight: 600;
+        }
+        .figure-card.rich-11 .fm-cell {
+          height: 28px;
+          border-radius: 4px;
+          display: flex; align-items: center; justify-content: center;
+          font-family: var(--mono); font-size: 13px; font-weight: 700;
+          transition: transform .14s, box-shadow .14s;
+        }
+        .figure-card.rich-11 .fm-cell.is-fulfilled {
+          background: var(--sage, #6a9a7b); color: var(--ivory);
+        }
+        .figure-card.rich-11 .fm-cell.is-empty {
+          background: rgba(168,73,42,0.04);
+          border: 1px dashed rgba(168,73,42,0.3);
+          color: var(--mute-2);
+        }
+        .figure-card.rich-11 .fm-cell:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        .figure-card.rich-11 .fm-score {
+          text-align: center; align-self: center;
+          font-family: var(--mono); font-size: 13px; font-weight: 700;
+          color: var(--ink); padding: 0 4px;
+        }
+        .figure-card.rich-11 .fm-score.is-low   { color: var(--amber-deep); }
+        .figure-card.rich-11 .fm-score.is-full  { color: var(--sage); }
+        .figure-card.rich-11 .fm-totals-h {
+          padding: 8px 0 0; margin-top: 4px;
+          border-top: 1px dashed var(--rule);
+          font-family: var(--mono); font-size: 11px;
+          color: var(--mute); letter-spacing: 0.04em;
+          align-self: center;
+        }
+        .figure-card.rich-11 .fm-col-total {
+          padding: 8px 0 4px; margin-top: 4px;
+          border-top: 1px dashed var(--rule);
+          text-align: center;
+          font-family: var(--mono); font-size: 13.5px; font-weight: 700;
+          color: var(--amber-deep);
+        }
+        .figure-card.rich-11 .fm-corner-bot {
+          padding-top: 8px; margin-top: 4px;
+          border-top: 1px dashed var(--rule);
+        }
+        .figure-card.rich-11 .fm-unfulfill-section {
+          margin-top: 14px;
+          padding-top: 10px;
+          border-top: 1px dashed rgba(168,73,42,0.18);
+        }
+        .figure-card.rich-11 .fm-unfulfill-h {
+          font-family: var(--mono); font-size: 10.5px;
+          color: var(--amber-deep); letter-spacing: 0.06em;
+          margin-bottom: 8px;
+        }
+
         /* v6.4 S2 参与度 2×2 象限图 */
         .figure-card.rich-02 .participation-quads {
           display: grid; grid-template-columns: 1fr 1fr;
@@ -647,11 +819,10 @@
         }
         .figure-card.rich-08 .sankey-svg {
           width: 100%; height: auto; display: block;
-          max-height: 220px;
         }
         .figure-card.rich-08 .sk-agenda-label,
         .figure-card.rich-08 .sk-role-label {
-          font-family: var(--serif-cn); font-size: 11px;
+          font-family: var(--serif-cn); font-size: 13px;
           fill: var(--ink); font-weight: 500;
         }
         .figure-card.rich-08 .sk-agenda-node {
@@ -669,6 +840,80 @@
         }
         .figure-card.rich-08 .sk-flow:hover {
           opacity: 1; stroke: var(--amber-deep);
+        }
+
+        /* v6.5 Dark mode 系统补全 — v6+ 新加的组件统一覆盖 */
+        html[data-theme="dark"] .figure-card.rich-04 .bp-lvl { color: #faf6ee; }
+        html[data-theme="dark"] .figure-card.rich-04 .bp-lvl small { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-04 .bp-meta { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-04 .bp-cov i.is-empty { border-color: rgba(255,253,247,.16); }
+        html[data-theme="dark"] .figure-card.rich-04 .goal-evidence-pairs { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-04 .ge-pairs-h { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-04 .ge-pair + .ge-pair { border-top-color: rgba(255,253,247,.06); }
+        html[data-theme="dark"] .figure-card.rich-04 .ge-goal { color: #faf6ee; }
+        html[data-theme="dark"] .figure-card.rich-04 .ge-evidence { color: #c5bda9; }
+        html[data-theme="dark"] .figure-card.rich-04 .ge-arrow { color: var(--amber-soft); }
+
+        /* S2 参与度象限 dark mode */
+        html[data-theme="dark"] .figure-card.rich-02 .participation-quads { border-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-02 .participation-quads::before,
+        html[data-theme="dark"] .figure-card.rich-02 .participation-quads::after { background: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-02 .pq-label { color: #faf6ee; }
+        html[data-theme="dark"] .figure-card.rich-02 .pq-axis-x,
+        html[data-theme="dark"] .figure-card.rich-02 .pq-axis-y { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-02 .pq-meta { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-02 .pq-h { color: #908a7a; border-top-color: rgba(255,253,247,.10); }
+
+        /* S5 Sankey dark mode */
+        html[data-theme="dark"] .figure-card.rich-08 .sankey-wrap { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-08 .sankey-h { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-08 .sk-agenda-label,
+        html[data-theme="dark"] .figure-card.rich-08 .sk-role-label { fill: #faf6ee; }
+
+        /* S6 规则卡片 dark mode */
+        html[data-theme="dark"] .figure-card.rich-09 .rule-card { background: rgba(255,253,247,.04); }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-id {
+          background: rgba(217,119,87,0.22); color: var(--amber-soft);
+        }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-t { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-label { color: #faf6ee; }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-format { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-if,
+        html[data-theme="dark"] .figure-card.rich-09 .rc-then { color: #d6cfbe; }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-kw {
+          background: rgba(255,253,247,.06); color: var(--amber-soft);
+        }
+
+        /* S8 议程兑现矩阵 dark mode */
+        html[data-theme="dark"] .figure-card.rich-11 .fm-corner,
+        html[data-theme="dark"] .figure-card.rich-11 .fm-row-h { color: #faf6ee; }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-col-h,
+        html[data-theme="dark"] .figure-card.rich-11 .fm-totals-h { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-cell.is-empty {
+          background: rgba(255,253,247,.04);
+          border-color: rgba(255,253,247,.18);
+        }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-score { color: #faf6ee; }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-dim-total,
+        html[data-theme="dark"] .figure-card.rich-11 .fm-col-total {
+          border-top-color: rgba(255,253,247,.10);
+          color: var(--amber-soft);
+        }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-corner-bot { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-unfulfill-section { border-top-color: rgba(255,253,247,.10); }
+
+        /* v6+ 题链 controls dark mode 补充 */
+        html[data-theme="dark"] .qstep-reset { color: #908a7a; border-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .qstep-reset:hover { color: var(--amber-soft); background: rgba(217,119,87,.10); border-color: var(--amber-soft); }
+        html[data-theme="dark"] .chain-completed-cta { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .chain-reflection-helper { color: #908a7a; }
+        html[data-theme="dark"] .chain-wrong-toast {
+          background: rgba(217,119,87,.12); color: var(--amber-soft);
+        }
+        html[data-theme="dark"] .chain-q-actions { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .chain-q-actions .chain-meta { color: #908a7a; }
+        html[data-theme="dark"] .chain-transfer-saved-note {
+          background: rgba(106,154,123,.10); color: #d6cfbe;
         }
 
         /* v6.3: figure cell ↔ question 选项 hover 联动高亮 */
@@ -2360,11 +2605,24 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
     // ============================================================
     function figureFor(s) {
       if (s.id === 2)  return figureStation02();
-      if (s.id === 4)  return figureStation04();
+      if (s.id === 4) {
+        // S2 两段：4-a 目标 → 认知层级金字塔 + 目标↔证据；4-b 量规 → 5 维量规矩阵 + 证据覆盖热图
+        const sk = effectiveSubKey();
+        const sub = sk ? SUB_NODES[sk] : null;
+        return (sub && sub.focus === "rubric") ? figureStation04Rubric() : figureStation04();
+      }
       if (s.id === 6)  return figureStation06();
       if (s.id === 8)  return figureStation08();
       if (s.id === 9)  return figureStation09();
-      if (s.id === 10) return figureStation10();
+      if (s.id === 10) {
+        // S7 三段：10-a 评分 → 评分+Pareto；10-b 反馈画像 → 量规雷达；10-c 量规修订 → 反向修订对照
+        const sk = effectiveSubKey();
+        const sub = sk ? SUB_NODES[sk] : null;
+        const f = sub && sub.focus;
+        if (f === "scoring") return figureStation10Scoring();
+        if (f === "rubric-revision") return figureStation10Revision();
+        return figureStation10(); // feedback-profile（画像）+ 兜底
+      }
       if (s.id === 11) return figureStation11();
       return figureScaffold(s);
     }
@@ -2420,7 +2678,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           </div>
           <div class="pre-callout">
             <span class="pre-mark">★</span>
-            <span><b>高频误区</b> · ${topMisconception ? esc(topMisconception.q.replace(/.*·\s*/, "")) + " · " + esc(topMisconception.commonMisconception) : "Q4 · 38% 学生认为 S 与 T 互斥"} — 本节问题链需主动触发概念边界澄清。</span>
+            <span><b>怎么用</b> · 最低正确率题背后藏的不是"基础差"而是具体误区(本班 → <b>${esc(topMisconception ? topMisconception.commonMisconception : "S 与 T 互斥")}</b>) — 本节问题链要专门做这个边界的澄清。</span>
           </div>
           ${(() => {
             // v6.4: 参与度 2×2 象限图 — 还原"主动/被动 × 高知/低知"二维诊断
@@ -2470,49 +2728,149 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
     // 04 · 学习目标 — Bloom 层级 × 证据覆盖（payload 驱动）
     function figureStation04() {
       const e4 = efigOf(4);
+      // 默认 6 层 [lvl, name, percent, evidence-coverage 0-3]
       const defaultRows = [
-        ['L6', '创造', 0, 0],
-        ['L5', '评价', 1, 1],
-        ['L4', '分析', 2, 3],
-        ['L3', '应用', 2, 2],
-        ['L2', '理解', 3, 2],
-        ['L1', '记忆', 2, 3],
+        ['L6', '创造', 6,  0],
+        ['L5', '评价', 14, 1],
+        ['L4', '分析', 22, 3],
+        ['L3', '应用', 28, 2],
+        ['L2', '理解', 22, 2],
+        ['L1', '记忆', 8,  3],
       ];
-      // payload.bloomDistribution: [{level:"创造", percent:6}, ...]
+      // payload.bloomDistribution: [{level:"创造", percent:6}, ...] — 从 L1 到 L6 顺序
       const bloom = (e4 && e4.bloomDistribution) || null;
+      // v6.5: 重构为金字塔形 — L6(高阶/最稀)在顶,L1(基础)在底
+      // bloomDistribution 数据顺序是 L1→L6,我反转为 L6→L1
       const rows = bloom
         ? [...bloom].reverse().map((b, i) => {
             const lvl = `L${6 - i}`;
-            const n = Math.max(0, Math.round((b.percent / 100) * 10));
-            const cov = Math.min(3, Math.max(0, Math.round(n * 0.45)));
-            return [lvl, b.level, n, cov];
+            const pct = b.percent;
+            // v6.5 修正:证据覆盖按"高阶覆盖率低"的语义 — L6 创造 0/3 (难配评价证据),
+            // L1 记忆 3/3 (容易出题)。i=0 是 L6,所以 cov 随 i 上升。
+            const cov = Math.min(3, Math.max(0, Math.round(i * 0.65)));
+            return [lvl, b.level, pct, cov];
           })
         : defaultRows;
+      // 找高阶覆盖薄弱点(percent > 10 但 cov < 2)
+      const weakHighOrder = rows.find(([lv, cn, pct, cov]) => (lv === "L5" || lv === "L6") && pct >= 10 && cov < 2);
+      // 金字塔最大宽度像素(用于把 percent 映射到 px)
+      const PYRAMID_MAX = 240;
       return `
         <div class="figure-card rich-04">
-          <div class="fcard-lbl"><span>FIGURE · 目标分布</span><b>Bloom 6 层 × 证据覆盖</b></div>
-          <div class="bloom-body">
-            <div class="bloom-head">
-              <span>认知层级</span><span>目标</span><span>证据覆盖</span>
-            </div>
-            ${rows.map(([lv, cn, n, cov]) => `
-              <div class="bloom-row${n === 0 ? ' is-empty' : ''}${n === 1 ? ' is-low' : ''}">
-                <span class="bl-lvl"><b>${cn}</b>${n === 1 ? ' ★' : ''}</span>
-                <span class="bl-n">${n || '—'}</span>
-                <span class="bl-cov">
-                  ${[0,1,2].map(i => `<i class="${i < cov ? '' : 'cov-empty'}"></i>`).join("")}
-                </span>
-              </div>
-            `).join("")}
+          <div class="fcard-lbl"><span>FIGURE · 认知层级金字塔</span><b>Bloom 6 层 × 证据覆盖</b></div>
+          <div class="bloom-pyramid">
+            ${rows.map(([lv, cn, pct, cov]) => {
+              // 颜色梯度:L5/L6 高阶(amber-deep),L3/L4 中阶(amber),L1/L2 基础(sage)
+              const tier = (lv === "L5" || lv === "L6") ? "is-high"
+                          : (lv === "L3" || lv === "L4") ? "is-mid"
+                          : "is-low";
+              // 宽度:percent 直接映射,最小 36px 保证可见
+              const barW = Math.max(36, Math.round(PYRAMID_MAX * (pct / 32)));
+              const barCls = pct === 0 ? "is-empty" : tier;
+              return `
+                <div class="bp-row">
+                  <span class="bp-lvl"><small>${esc(lv)}</small>${esc(cn)}</span>
+                  <div class="bp-bar-wrap">
+                    <div class="bp-bar ${barCls}" style="width:${barW}px;">${pct}%</div>
+                  </div>
+                  <div class="bp-cov" title="证据覆盖 ${cov}/3">
+                    ${[0,1,2].map(j => `<i class="${j < cov ? "" : "is-empty"}"></i>`).join("")}
+                  </div>
+                </div>
+              `;
+            }).join("")}
           </div>
+          <p class="bp-meta">
+            ↑ 高阶能力(评价/创造) · ↓ 基础能力(记忆/理解) · 条宽 ~ 目标占比 · 右侧方块 = 评价证据覆盖
+          </p>
+          ${(() => {
+            // v6.5: 目标↔证据 5 对配对 — Backward Design 闭环可视化
+            const gem = (e4 && e4.goalEvidenceMap) || [];
+            if (!gem.length) return "";
+            return `
+              <div class="goal-evidence-pairs">
+                <div class="ge-pairs-h">目标 ↔ 评价证据 · Backward Design 闭环</div>
+                ${gem.map((p) => `
+                  <div class="ge-pair">
+                    <div class="ge-goal">${esc(p.goal || "")}</div>
+                    <div class="ge-arrow">→</div>
+                    <div class="ge-evidence">${esc(p.evidence || "")}</div>
+                  </div>
+                `).join("")}
+              </div>
+            `;
+          })()}
           <div class="bloom-gap">
-            <b>★ 证据缺口</b> · 评价层只有 1 项"小组互评" — 缺"教师量规复评"与"同伴自评"两类证据。
+            <b>★ 怎么用</b> · ${weakHighOrder
+              ? `${esc(weakHighOrder[1])}层有目标但右侧证据方块亮得少 — 给"能${esc(weakHighOrder[1])}"配可观察证据,否则目标无法被评估`
+              : "高阶层证据覆盖良好"}
           </div>
           <div class="figure-foot">
             <span>来源 · 目标设计稿 v0.2 · 10 个学习目标</span>
-            <details class="figure-drill"><summary>展开证据矩阵 →</summary>
+            <details class="figure-drill"><summary>展开数据 →</summary>
               <ol class="drill-list">
-                ${rows.map(([lv, cn, n, cov]) => `<li><b>${esc(cn)}（${esc(lv)}）</b> · 目标 ${n || 0} 项 · 证据覆盖 ${cov}/3${n === 1 ? ' <span class="drill-misc">★ 薄弱层</span>' : ""}</li>`).join("")}
+                ${rows.map(([lv, cn, pct, cov]) => `<li><b>${esc(cn)}（${esc(lv)}）</b> · ${pct}% · 证据覆盖 ${cov}/3</li>`).join("")}
+              </ol>
+            </details>
+          </div>
+        </div>
+      `;
+    }
+
+    // 04 (4-b) · 量规设计 — 5 维量规矩阵 × 4 等级 + 证据覆盖热图（payload 可覆盖 e4.rubric5d）
+    function figureStation04Rubric() {
+      const e4 = efigOf(4);
+      const defaultRubric = [
+        { dim: "一致性", full: "目标—活动—评价对齐", cur: 3, cov: 2,
+          levels: ["目标与评价脱节", "部分目标有证据", "多数目标可被产出证明", "每条目标都配对齐证据"] },
+        { dim: "真实性", full: "药事情境真实度", cur: 3, cov: 2,
+          levels: ["纯课本概念", "贴药事标签", "嵌入真实政策/案例", "高仿真集采决策情境"] },
+        { dim: "学情", full: "学情诊断与差异支持", cur: 2, cov: 1,
+          levels: ["不分层", "提到前测", "目标回应低分项", "为差异学生留不同入口"] },
+        { dim: "高阶", full: "认知参与与高阶思维", cur: 2, cov: 1,
+          levels: ["停在记忆/理解", "到应用", "到分析", "到评价/创造·TOWS"] },
+        { dim: "评价", full: "评价证据与反馈效度", cur: 2, cov: 1,
+          levels: ["无可采集证据", "有分数无描述符", "有 4 等级描述符", "可解释达成并导改进"] },
+      ];
+      const rubric = (e4 && e4.rubric5d && e4.rubric5d.length) ? e4.rubric5d : defaultRubric;
+      const weak = rubric.filter((r) => (r.cov || 0) < 2).map((r) => r.dim);
+      const row = (r) => {
+        const cells = (r.levels || []).map((lv, i) => {
+          const lvl = i + 1;
+          const isCur = lvl === r.cur;
+          return `<div class="r4r-cell${isCur ? " is-cur" : ""}" style="flex:1;min-width:0;padding:4px 5px;border:1px solid ${isCur ? "var(--amber-deep)" : "var(--rule,#e7e1d8)"};border-radius:4px;background:${isCur ? "rgba(217,119,87,.12)" : "transparent"};font-size:10.5px;line-height:1.3;color:${isCur ? "var(--amber-deep)" : "var(--mute,#8a8178)"};"><b style="display:block;font-size:9px;letter-spacing:.04em;opacity:.7;">L${lvl}</b>${esc(lv)}</div>`;
+        }).join("");
+        const cov = Math.max(0, Math.min(3, Number(r.cov) || 0));
+        const covBlocks = [0, 1, 2].map((j) => `<i style="display:inline-block;width:8px;height:8px;margin-left:2px;border-radius:1px;background:${j < cov ? "var(--amber-deep)" : "rgba(168,73,42,.15)"};"></i>`).join("");
+        return `
+          <div class="r4r-row" style="display:flex;align-items:stretch;gap:8px;margin:6px 0;">
+            <div class="r4r-dim" style="width:84px;flex:none;">
+              <b style="display:block;font-size:12.5px;color:var(--ink);">${esc(r.dim)}</b>
+              <small style="font-size:9.5px;color:var(--mute,#8a8178);line-height:1.25;">${esc(r.full || "")}</small>
+            </div>
+            <div class="r4r-levels" style="flex:1;display:flex;gap:4px;">${cells}</div>
+            <div class="r4r-cov" style="width:32px;flex:none;text-align:right;align-self:center;" title="证据覆盖 ${cov}/3">${covBlocks}</div>
+          </div>
+        `;
+      };
+      return `
+        <div class="figure-card rich-04b">
+          <div class="fcard-lbl"><span>FIGURE · 5 维量规矩阵</span><b>5 维 × 4 等级 · 证据覆盖热图</b></div>
+          <div style="display:flex;gap:10px;font-size:10px;color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">
+            <span><i style="display:inline-block;width:8px;height:8px;border:1px solid var(--amber-deep);border-radius:2px;background:rgba(217,119,87,.12);vertical-align:middle;"></i> 当前设计等级</span>
+            <span style="margin-left:auto;"><i style="display:inline-block;width:8px;height:8px;background:var(--amber-deep);border-radius:1px;vertical-align:middle;"></i> 证据覆盖 /3</span>
+          </div>
+          ${rubric.map(row).join("")}
+          <div class="bloom-gap" style="margin-top:8px;">
+            <b>★ 怎么用</b> · ${weak.length
+              ? `${esc(weak.join(" / "))} 维只到 L2、证据覆盖偏低 — 先为高阶目标（TOWS / 批判）配可观察证据，并补「批判意识」描述符，否则量规判不出高低`
+              : "5 维均 ≥ L3 且证据覆盖良好"}
+          </div>
+          <div class="figure-foot">
+            <span>来源 · 量规设计稿 v0.2 · 5 维 × 4 等级</span>
+            <details class="figure-drill"><summary>展开量规细则 →</summary>
+              <ol class="drill-list">
+                ${rubric.map((r) => `<li><b>${esc(r.dim)} · ${esc(r.full || "")}</b><br/>${(r.levels || []).map((lv, i) => `<span style="display:block;padding-left:6px;font-size:11.5px;">· L${i + 1} ${esc(lv)}</span>`).join("")}</li>`).join("")}
               </ol>
             </details>
           </div>
@@ -2577,7 +2935,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             ` : ""}
           </div>
           <div class="evd-callout">
-            <b>★ 待补</b> · ${bars.filter((b) => (b[2] || {}).status === "miss").map((b) => esc(b[0])).join(" / ") || "无"} — 缺这两维证据会让学生 SWOT 退化为常识填表。
+            <b>★ 怎么用</b> · miss 状态 = 学生只能凭常识填表的维度 — 不补上,SWOT 就退化为"猜想 + 形容词"。
           </div>
           <div class="figure-foot">
             <span>来源 · ${esc(subject)} 材料包 · 议程对照表（来自学习者议程环节）</span>
@@ -2640,48 +2998,51 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             <span><i class="seg-output"></i>产出</span>
           </div>
           <div class="swim-callout">
-            <b>★ 干预点</b> · 组 3 在 5' 卡在数据解读 — 教师介入"立场切换提示"，补救后仍在 13' 内产出。
+            <b>★ 怎么用</b> · 卡壳段(amber-deep)= 教师必须介入点 — 备好"立场切换 / 反例对照 / 数据解读模板"3 类追问脚本。
           </div>
           ${(() => {
             // v6.4: 议程→角色 Sankey 流向图 — 还原议程贯通第 3 回响点的"映射关系"
+            // v6.5: 扩大 viewBox + 给标签留足空间(原版 320×180 → 议程/角色标签被裁剪)
             const sugg = (e8 && e8.roleSuggestions) || [];
             if (!sugg.length) return "";
             // 4 角色固定顺序
             const ROLES = ["资料员", "判断员", "质询员", "汇报员"];
-            const W = 320, H = 180;
-            const leftX = 20, rightX = 290;
+            // 布局:左标签 150 + 流线 200 + 右标签 130 = 总 480
+            const W = 480, H = 220;
+            const leftX = 150;   // 议程节点位置(标签向左延伸 150px)
+            const rightX = 350;  // 角色节点位置(标签向右延伸 130px)
             const nodeW = 10;
             const agendaCount = sugg.length;
-            // 议程节点位置
-            const agendaY = (i) => 25 + (i / Math.max(agendaCount - 1, 1)) * (H - 50);
+            // 议程节点位置(垂直均匀分布)
+            const agendaY = (i) => 30 + (i / Math.max(agendaCount - 1, 1)) * (H - 60);
             // 角色节点位置
-            const roleY = (i) => 25 + (i / Math.max(ROLES.length - 1, 1)) * (H - 50);
+            const roleY = (i) => 30 + (i / Math.max(ROLES.length - 1, 1)) * (H - 60);
             // 流线 SVG bezier curve
             const flows = sugg.map((s, i) => {
               const ri = ROLES.indexOf(s.suggestedRole);
               if (ri < 0) return "";
               const y1 = agendaY(i), y2 = roleY(ri);
-              const cx1 = leftX + 80, cx2 = rightX - 80;
+              const cx1 = leftX + 70, cx2 = rightX - 70;
               return `<path class="sk-flow" d="M${leftX + nodeW} ${y1} C ${cx1} ${y1}, ${cx2} ${y2}, ${rightX} ${y2}" data-agenda="${esc(s.agendaKey)}" data-role="${esc(s.suggestedRole)}"><title>${esc(s.agendaText)} → ${esc(s.suggestedRole)} · ${esc(s.reason)}</title></path>`;
             }).join("");
             const agendaNodes = sugg.map((s, i) => {
               const y = agendaY(i);
               return `
                 <rect class="sk-agenda-node" x="${leftX}" y="${y - 8}" width="${nodeW}" height="16" />
-                <text class="sk-agenda-label" x="${leftX - 4}" y="${y + 3}" text-anchor="end">${esc(s.agendaText)}</text>
+                <text class="sk-agenda-label" x="${leftX - 6}" y="${y + 4}" text-anchor="end">${esc(s.agendaText)}</text>
               `;
             }).join("");
             const roleNodes = ROLES.map((r, i) => {
               const y = roleY(i);
               return `
                 <rect class="sk-role-node" x="${rightX}" y="${y - 10}" width="${nodeW}" height="20" />
-                <text class="sk-role-label" x="${rightX + nodeW + 4}" y="${y + 3}" text-anchor="start">${esc(r)}</text>
+                <text class="sk-role-label" x="${rightX + nodeW + 6}" y="${y + 4}" text-anchor="start">${esc(r)}</text>
               `;
             }).join("");
             return `
               <div class="sankey-wrap">
                 <div class="sankey-h">议程 → 角色 推荐流向 · 5 议程 × 4 角色 · 还原议程贯通第 3 回响点</div>
-                <svg class="sankey-svg" viewBox="0 0 ${W} ${H}" aria-label="议程到角色 Sankey 流向图">
+                <svg class="sankey-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" aria-label="议程到角色 Sankey 流向图">
                   ${flows}
                   ${agendaNodes}
                   ${roleNodes}
@@ -2705,6 +3066,9 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
 
     // 09 · 动态学情触发 — 理解曲线 + 学情校准点（payload 驱动，对齐任务链环节时间线）
     function figureStation09() {
+      // S6 三锚点共用一图（同一 45' 时间轴）：高亮当前锚点而非拆图
+      const __sk09 = effectiveSubKey();
+      const activeAnchor = (__sk09 && SUB_NODES[__sk09] && SUB_NODES[__sk09].anchorId) || null;
       // 锚点优先取 station7 payload；fallback 用 station9 payload 的 pulseRules
       const e7 = efigOf(7);
       const e9 = efigOf(9);
@@ -2731,11 +3095,12 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         const r = rulesByAnchor[a.id] || {};
         const isSet = !!(r.ifCond || r.thenAct);
         return `
-          <div class="rule-card ${isSet ? "is-set" : "is-empty"}" data-anchor="${esc(a.id)}">
+          <div class="rule-card ${isSet ? "is-set" : "is-empty"}${a.id === activeAnchor ? " is-active" : ""}" data-anchor="${esc(a.id)}"${a.id === activeAnchor ? ' style="outline:2px solid var(--amber-deep);outline-offset:1px;border-radius:5px;background:rgba(217,119,87,.06);"' : ""}>
             <div class="rc-head">
               <span class="rc-id">${esc(a.id)}</span>
               <span class="rc-t">${a.t}'</span>
               <span class="rc-label">${esc(a.label || r.microFormat || "")}</span>
+              ${a.id === activeAnchor ? '<span style="margin-left:auto;font-size:9px;font-weight:600;color:var(--amber-deep);letter-spacing:.06em;">▶ 当前</span>' : ""}
             </div>
             ${r.microFormat ? `<div class="rc-format">微评估: ${esc(r.microFormat)}</div>` : ""}
             <div class="rc-if">
@@ -2755,7 +3120,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const tickVals = [0, totalMin / 3, (totalMin * 2) / 3, totalMin].map((v) => Math.round(v));
       return `
         <div class="figure-card rich-09">
-          <div class="fcard-lbl"><span>FIGURE · 反馈触发</span><b>理解曲线 + ${anchors.length} 学情校准点 · 总 ${totalMin}'</b></div>
+          <div class="fcard-lbl"><span>FIGURE · 反馈触发</span><b>理解曲线 + ${anchors.length} 学情校准点${activeAnchor ? ` · 当前 ${esc(activeAnchor)}` : ""} · 总 ${totalMin}'</b></div>
           <div class="pulse-wrap">
             <svg class="pulse-svg" viewBox="0 0 320 200" aria-label="理解曲线">
               <line x1="40" y1="20" x2="40" y2="160" stroke="var(--rule)"/>
@@ -2775,9 +3140,11 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
               <!-- ZPD anchors（按 payload t 值动态定位） -->
               ${anchors.map((a) => {
                 const x = xOf(a.t);
+                const on = a.id === activeAnchor;
                 return `
-                  <g transform="translate(${x.toFixed(1)},160)"><polygon points="0,-7 -6,4 6,4" fill="var(--amber-deep)"/></g>
-                  <text x="${x.toFixed(1)}" y="178" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--amber-deep)" font-weight="600">${esc(a.id)}</text>
+                  ${on ? `<circle cx="${x.toFixed(1)}" cy="160" r="9" fill="none" stroke="var(--amber-deep)" stroke-width="1.5"/>` : ""}
+                  <g transform="translate(${x.toFixed(1)},160)"><polygon points="0,-7 -6,4 6,4" fill="var(--amber-deep)" opacity="${on ? 1 : 0.4}"/></g>
+                  <text x="${x.toFixed(1)}" y="178" text-anchor="middle" font-family="var(--mono)" font-size="${on ? 10 : 9}" fill="var(--amber-deep)" font-weight="${on ? 700 : 500}" opacity="${on ? 1 : 0.55}">${esc(a.id)}</text>
                 `;
               }).join("")}
             </svg>
@@ -2792,7 +3159,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             ${ruleCardsHtml}
           </div>
           <div class="pulse-callout">
-            <b>★ 风险段</b> · 22-28' 区间理解率跌至 55% — 此时教师按 Z2 规则(若误答 ≥ 40% 则切分歧锚点)即可重启讨论。
+            <b>★ 怎么用</b> · 曲线每跌破阈值线 → 立即查对应锚点规则卡 → 1 分钟内决定继续/暂停/重启。
           </div>
           <div class="figure-foot">
             <span>动态学情触发 · 实时采集自 AI 虚拟班</span>
@@ -2887,7 +3254,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             </div>
           ` : ""}
           <div class="rubric-wrap">
-            <svg class="rubric-svg" viewBox="0 0 280 260" aria-label="量规雷达">
+            <svg class="rubric-svg" viewBox="-50 -20 380 290" preserveAspectRatio="xMidYMid meet" aria-label="量规雷达">
               <g transform="translate(${cx},${cy})">
                 <polygon points="${ringPolyAt(0.33)}" fill="none" stroke="rgba(168,73,42,0.10)"/>
                 <polygon points="${ringPolyAt(0.66)}" fill="none" stroke="rgba(168,73,42,0.10)"/>
@@ -2917,7 +3284,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             </div>
           </div>
           <div class="rubric-callout">
-            <b>★ 低分维度</b> · ${lowDims.length ? lowDims.join(" · ") : "无（全维度达标）"} — 写入 S8 复盘与决策 → 下一轮在对应节点补强。
+            <b>★ 怎么用</b> · 高阶维度(批判 / TOWS)需专题训练 — 基础维度(证据性)1 节课即可改善 — 优先级见 S8 复盘。
           </div>
           <div class="figure-foot">
             <span>来源 · ${esc((e10 && e10.subtitle) || "课后作品 32 份")}</span>
@@ -2929,6 +3296,84 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
               </details>
             ` : `<span class="figure-foot-note">量规细则（5 维已在雷达图展示）</span>`}
           </div>
+        </div>
+      `;
+    }
+
+    // 10 (10-a) · 评分采集 — 5 维原始评分条 + 低分维度 Pareto
+    function figureStation10Scoring() {
+      const e10 = efigOf(10);
+      const bars = (e10 && e10.bars && e10.bars.length) ? e10.bars : [
+        ["条目证据性", 46, { status: "miss" }], ["内外分类准确性", 78, { status: "ok" }],
+        ["条目精炼度", 62, { status: "warn" }], ["TOWS 可操作性", 44, { status: "miss" }],
+        ["批判意识", 38, { status: "miss" }],
+      ];
+      const pareto = (e10 && e10.paretoLowDimensions && e10.paretoLowDimensions.length) ? e10.paretoLowDimensions : [
+        { dim: "批判意识", mean: 38, weightInTotal: 0.28 },
+        { dim: "TOWS 可操作性", mean: 44, weightInTotal: 0.24 },
+        { dim: "条目证据性", mean: 46, weightInTotal: 0.22 },
+      ];
+      const col = (st) => st === "miss" ? "var(--amber-deep)" : st === "warn" ? "var(--amber,#b8860b)" : "var(--sage)";
+      const barRow = (b) => {
+        const v = Math.max(0, Math.min(100, Number(b[1]) || 0));
+        const st = (b[2] || {}).status;
+        return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+          <span style="width:96px;flex:none;font-size:11px;color:var(--ink);">${esc(b[0])}</span>
+          <div style="flex:1;height:12px;background:rgba(0,0,0,.05);border-radius:3px;overflow:hidden;"><i style="display:block;height:100%;width:${v}%;background:${col(st)};border-radius:3px;"></i></div>
+          <span style="width:28px;flex:none;text-align:right;font-size:11px;font-weight:600;color:${col(st)};">${v}</span>
+        </div>`;
+      };
+      const maxW = Math.max(...pareto.map((p) => p.weightInTotal || 0), 0.01);
+      const totW = pareto.reduce((a, p) => a + (p.weightInTotal || 0), 0) || 1;
+      let cum = 0;
+      const paretoRow = (p) => {
+        cum += (p.weightInTotal || 0);
+        const cumPct = Math.round((cum / totW) * 100);
+        return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:11px;">
+          <span style="width:96px;flex:none;color:var(--amber-deep);font-weight:600;">${esc(p.dim)}</span>
+          <span style="width:46px;flex:none;color:var(--mute,#8a8178);">均分 ${p.mean}</span>
+          <div style="flex:1;height:8px;background:rgba(168,73,42,.10);border-radius:2px;overflow:hidden;"><i style="display:block;height:100%;width:${Math.round(((p.weightInTotal || 0) / maxW) * 100)}%;background:var(--amber-deep);"></i></div>
+          <span style="width:54px;flex:none;text-align:right;color:var(--mute,#8a8178);">累计 ${cumPct}%</span>
+        </div>`;
+      };
+      const lowest = pareto[0] || { dim: "—", mean: "—" };
+      return `
+        <div class="figure-card rich-10a">
+          <div class="fcard-lbl"><span>FIGURE · 评分采集</span><b>5 维原始评分 · 低分维度 Pareto</b></div>
+          <div style="font-size:10px;color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">5 组作品均分 · 只采集数据，不做定性、不写反馈</div>
+          ${bars.map(barRow).join("")}
+          <div style="margin-top:9px;font-size:10px;color:var(--mute,#8a8178);letter-spacing:.04em;">低分维度 Pareto · 排下一轮优先项</div>
+          ${pareto.map(paretoRow).join("")}
+          <div class="bloom-gap" style="margin-top:8px;"><b>★ 怎么用</b> · 最该优先补的是「${esc(lowest.dim)}」（均分 ${lowest.mean}）— 本步只采集，反馈语在下一步「反馈与画像」写</div>
+          <div class="figure-foot"><span>来源 · 课后作品 32 份 · 5 组</span></div>
+        </div>
+      `;
+    }
+
+    // 10 (10-c) · 量规反向修订 — 低分维 → 修订建议 → 回写 S2
+    function figureStation10Revision() {
+      const e10 = efigOf(10);
+      const pareto = (e10 && e10.paretoLowDimensions && e10.paretoLowDimensions.length) ? e10.paretoLowDimensions : [
+        { dim: "批判意识", mean: 38 }, { dim: "TOWS 可操作性", mean: 44 }, { dim: "条目证据性", mean: 46 },
+      ];
+      const proposals = pareto.map((p) => ({
+        dim: p.dim, mean: p.mean,
+        fix: (Number(p.mean) || 0) < 45
+          ? "4 等级描述符区分度不足 — 补行为锚点 + 药事实例，明确合格线"
+          : "证据要求偏宽 — 收紧合格线，要求可复核出处",
+      }));
+      const row = (q) => `
+        <div style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;padding:6px 8px;border:1px solid var(--rule,#e7e1d8);border-radius:5px;background:rgba(217,119,87,.04);">
+          <span style="flex:none;width:86px;font-size:11.5px;font-weight:600;color:var(--amber-deep);line-height:1.3;">${esc(q.dim)}<br/><small style="font-weight:400;color:var(--mute,#8a8178);">均分 ${q.mean}</small></span>
+          <span style="flex:1;font-size:11px;line-height:1.45;color:var(--ink);">${esc(q.fix)}</span>
+        </div>`;
+      return `
+        <div class="figure-card rich-10c">
+          <div class="fcard-lbl"><span>FIGURE · 量规反向修订</span><b>低分维 → 修订项 → 回写 S2</b></div>
+          <div style="font-size:10px;color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">把本轮量规暴露的问题反向修订到「环节 02 目标与量规」</div>
+          ${proposals.map(row).join("")}
+          <div class="bloom-gap" style="margin-top:6px;"><b>↩ 回写通道</b> · 确认后经 rubricRevision 通道送回 S2；S2 须显式确认或驳回后方可继续（教学评一体化闭环）</div>
+          <div class="figure-foot"><span>来源 · 本轮 5 维评分 · ${proposals.length} 条修订建议</span></div>
         </div>
       `;
     }
@@ -2952,34 +3397,72 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
 
       // v4.2: 议程未兑现原因记录（从 Store 读，配合 saveAgendaUnfulfillmentNote）
       const unfulfillNotes = (Store && Store.getAgendaUnfulfillmentNotes && Store.getAgendaUnfulfillmentNotes()) || {};
-      const traceRows = agendas.length ? agendas.map((a) => {
-        const cells = [4, 6, 8].map((sid) => {
-          const has = af[sid] && af[sid][a.key];
-          return has ? `<span class="ar-cell ar-yes" title="${esc(stageNameByEcho[sid])} 已兑现">●</span>` : `<span class="ar-cell ar-no">○</span>`;
-        }).join("");
-        const reviewed = (af[11] && af[11][a.key]) ? `<span class="ar-cell ar-yes">●</span>` : `<span class="ar-cell ar-no">○</span>`;
-        const score = [4, 6, 8, 11].filter((sid) => af[sid] && af[sid][a.key]).length;
-        const isFullyUnfulfilled = score === 0;  // 4 站都未兑现 → 显示原因输入入口
-        const isPartiallyUnfulfilled = score > 0 && score < 4;
-        const showNoteInput = isFullyUnfulfilled || isPartiallyUnfulfilled;
-        const existingNote = unfulfillNotes[a.key] && unfulfillNotes[a.key].reason;
-        return `<div class="ar-row">
-          <span class="ar-text">${esc(a.text || a.key)}</span>
-          <span class="ar-cells">${cells}${reviewed}</span>
-          <span class="ar-score">${score}/4</span>
-          ${showNoteInput ? `
-            <details class="ar-note" style="grid-column: 1 / -1; margin-top: 4px;">
-              <summary style="cursor:pointer;font-family:var(--mono);font-size:10.5px;color:var(--amber-deep,#a8492a);list-style:none;padding:3px 0;">
-                <span>${existingNote ? '✏ 已记录原因（点击修改）' : '＋ 记录未兑现原因'}</span>
-              </summary>
-              <div style="display:flex;gap:6px;margin-top:5px;">
-                <textarea class="ar-note-input" data-agenda-key="${esc(a.key)}" placeholder="例：学生未在小组讨论中提及 / 证据材料不足 / 时间不够…" rows="2" style="flex:1;font-family:inherit;font-size:12px;padding:5px 7px;border:1px solid rgba(168,73,42,.25);border-radius:4px;resize:vertical;">${esc(existingNote || "")}</textarea>
-                <button class="btn-s ar-note-save" data-agenda-key="${esc(a.key)}" style="white-space:nowrap;padding:5px 10px;font-size:11.5px;">保存</button>
-              </div>
-            </details>
-          ` : ""}
-        </div>`;
-      }).join("") : `<div class="ar-empty">无议程数据 · 先到 S1 / S3 采集</div>`;
+      // v6.4: 重构为 5×4 热力矩阵——议程行 × 站点列 + 列底总分
+      const STATIONS_4 = [4, 6, 8, 11]; // S2 / S4 / S5 / S8
+      const STATION_LABELS = ["S2", "S4", "S5", "S8"];
+      let matrixHtml = "";
+      if (agendas.length) {
+        // 矩阵主体
+        const matrixCells = [
+          `<div class="fm-corner">议程＼站点</div>`,
+          ...STATION_LABELS.map((lbl) => `<div class="fm-col-h">${esc(lbl)}</div>`),
+          `<div class="fm-col-h">兑现</div>`,
+        ];
+        // 议程行
+        agendas.forEach((a) => {
+          matrixCells.push(`<span class="fm-row-h">${esc(a.text || a.key)}</span>`);
+          STATIONS_4.forEach((sid) => {
+            const has = af[sid] && af[sid][a.key];
+            matrixCells.push(has
+              ? `<div class="fm-cell is-fulfilled" title="${esc(stageNameByEcho[sid])} 已兑现">✓</div>`
+              : `<div class="fm-cell is-empty" title="${esc(stageNameByEcho[sid])} 未兑现"></div>`
+            );
+          });
+          const score = STATIONS_4.filter((sid) => af[sid] && af[sid][a.key]).length;
+          const scoreCls = score === 4 ? "is-full" : (score === 0 ? "is-low" : "");
+          matrixCells.push(`<span class="fm-score ${scoreCls}">${score}/4</span>`);
+        });
+        // 列底总分行
+        matrixCells.push(`<span class="fm-totals-h">合计兑现</span>`);
+        STATIONS_4.forEach((sid) => {
+          const total = agendas.filter((a) => af[sid] && af[sid][a.key]).length;
+          matrixCells.push(`<div class="fm-col-total">${total} / ${agendas.length}</div>`);
+        });
+        matrixCells.push(`<div class="fm-corner-bot"></div>`);
+
+        // 未兑现议程的原因记录(在矩阵下方,只显示有缺口的议程)
+        const incompleteAgendas = agendas.filter((a) => {
+          const sc = STATIONS_4.filter((sid) => af[sid] && af[sid][a.key]).length;
+          return sc < STATIONS_4.length;
+        });
+        const unfulfillSection = incompleteAgendas.length ? `
+          <div class="fm-unfulfill-section">
+            <div class="fm-unfulfill-h">未兑现原因记录 (${incompleteAgendas.length} 条有缺口)</div>
+            ${incompleteAgendas.map((a) => {
+              const existingNote = unfulfillNotes[a.key] && unfulfillNotes[a.key].reason;
+              return `
+                <details class="ar-note" style="margin: 6px 0;">
+                  <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--amber-deep);list-style:none;padding:4px 0;">
+                    <span>${existingNote ? "✏ " + esc(a.text) + " · 已记录" : "＋ " + esc(a.text)}</span>
+                  </summary>
+                  <div style="display:flex;gap:6px;margin-top:5px;">
+                    <textarea class="ar-note-input" data-agenda-key="${esc(a.key)}" placeholder="例：学生未在小组讨论中提及 / 证据材料不足 / 时间不够…" rows="2" style="flex:1;font-family:inherit;font-size:12px;padding:5px 7px;border:1px solid rgba(168,73,42,.25);border-radius:4px;resize:vertical;">${esc(existingNote || "")}</textarea>
+                    <button class="btn-s ar-note-save" data-agenda-key="${esc(a.key)}" style="white-space:nowrap;padding:5px 10px;font-size:11.5px;">保存</button>
+                  </div>
+                </details>
+              `;
+            }).join("")}
+          </div>
+        ` : "";
+
+        matrixHtml = `
+          <div class="fulfill-matrix">${matrixCells.join("")}</div>
+          ${unfulfillSection}
+        `;
+      } else {
+        matrixHtml = `<div class="ar-empty">无议程数据 · 先到 S1 / S3 采集</div>`;
+      }
+      const traceRows = matrixHtml;
 
       const pulseRows = zpdAnchors.length ? zpdAnchors.map((a) => {
         const r = pulseRules[a.id] || {};
@@ -3252,13 +3735,9 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
               }).join("")}
             `).join("")}
 
-            <!-- 总分行 -->
+            <!-- 总分行 (推荐项通过 is-top 高亮 amber 背景传达,不再单独画状态行) -->
             <span class="rm-dim rm-dim-total">总分 / 100</span>
             ${cols.map((c) => `<div class="rm-total ${c.cls}">${c.val}</div>`).join("")}
-
-            <!-- 状态行 -->
-            <span class="rm-dim rm-dim-status">状态</span>
-            ${cols.map((c) => `<div class="rm-status ${c.cls}">${c.statusLabel}</div>`).join("")}
           </div>
 
           <!-- 详情区：默认显示 top 1（综合）,click 列切换 -->

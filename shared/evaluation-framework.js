@@ -567,11 +567,14 @@
       const baseComposite = compositeOf(ev0, ev.dims);
       const delta = (composite != null && baseComposite != null)
         ? +(composite - baseComposite).toFixed(2) : null;
+      // 证据等级：优先用导入数据里的 per-node evidence（如真实迁移测试接入后 EV4 由 C→A/B），
+      // 否则回退到 STUDENT_EVENTS 的静态默认。这样"导入真数据 → 自动从预测转实测"，无需改代码。
+      const evidence = (cur && typeof cur.evidence === 'string') ? cur.evidence : ev.evidence;
       return {
         id: ev.id, num: ev.num, name: ev.name,
         composite, delta,
         scores: cur || null,
-        evidence: ev.evidence,
+        evidence,
         whenLabel: ev.whenLabel,
         anchorEnv: ev.anchorEnv,
         anchor: ev.anchor,
@@ -622,7 +625,10 @@
   //     label?: string,
   //     evidenceLevel?: 'A' | 'B' | 'C',
   //     teacher: { cumulative: {T1..T8}, weekly: {...}, single: {...} },
-  //     student: { cumulative: {S1..S7}, weekly: {...}, single: {...} }
+  //     student: { cumulative: {S1..S7}, weekly: {...}, single: {...} },
+  //     // 可选：双时间轴版 5 节点绝对分数；每节点可带 evidence 覆盖静态默认，
+  //     // 真实迁移测试接入后给 EV4 填实测分 + evidence:'A'，节点即从"≈预测"自动转为实测。
+  //     studentEvents?: { EV0:{S1..S7}, EV1:{...}, EV2:{...}, EV3:{...}, EV4:{S1..S7, evidence?:'A'} }
   //   }
   const LIVE_LS_KEY = 'pp.liveDataset';
   let LIVE_DATASET = null;

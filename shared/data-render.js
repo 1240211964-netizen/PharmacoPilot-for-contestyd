@@ -158,6 +158,18 @@
       </linearGradient>
     </defs>`;
     svg.innerHTML = defs + paths.join('') + dots.join('');
+
+    // a11y：用最强的 1-2 条连线概述，写进 svg 的 aria-label
+    const strongest = [...bridges].sort((a, b) => b.strength - a.strength).slice(0, 2)
+      .map(b => {
+        const ev = EF.STUDENT_EVENTS.find(e => e.id === b.eventId);
+        return `${EF.ENVIRONMENTS[b.envIndex]?.short || b.envId} → ${ev?.name || b.eventId}（强度 ${b.strength}）`;
+      });
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label',
+      `COUPLING 连线图：教师 9 个教学环节通过 ${bridges.length} 条连线连到学生 5 个产出节点。` +
+      (strongest.length ? `最强连线：${strongest.join('；')}。` : '') +
+      `各连线强度见对应节点 tooltip。`);
   }
 
   // 把节点 dims 数组格式化为短标签：全 7 维 → "综合 7 维"（基线 → "7 维基线"），否则 S·S·S
