@@ -1,0 +1,12 @@
+# OS / editor junk
+.DS_Store
+**/.DS_Store
+.thumbnail
+.design-canvas.state.json
+.claude/
+
+# 申报 / 内部文档（非网页代码）
+*.docx
+申报书引用段落.md
+虚拟班32人数据.md
+design-review-2026-05-29.md

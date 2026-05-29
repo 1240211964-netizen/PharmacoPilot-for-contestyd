@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Station 01 · 课程定位与目标分析舱 — 重写草稿</title>
+<link rel="stylesheet" href="shared/tokens.css" />
+<style>
+  /* —— 仅本草稿用到的样式（视觉沿用 nav-detail.html，差异处会注释） —— */
+
+  body { background: var(--paper); padding: 36px 28px 80px; }
+  .draft-shell { max-width: 1080px; margin: 0 auto; }
+
+  .draft-banner {
+    margin-bottom: 22px; padding: 10px 14px;
+    border: 1px dashed var(--amber-deep); border-radius: 8px;
+    background: var(--amber-wash); color: var(--ink-2);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+    display: flex; justify-content: space-between; gap: 12px;
+  }
+  .draft-banner b { color: var(--amber-deep); }
+
+  /* 本节点说明（沿用） */
+  .station-intro-disclosure {
+    border: 1px solid var(--rule); border-radius: 8px; padding: 12px 16px;
+    background: var(--paper-2); margin-bottom: 18px;
+  }
+  .sid-summary {
+    display: flex; align-items: baseline; gap: 14px; cursor: pointer;
+    font-family: var(--serif-cn); font-size: 13.5px; color: var(--ink-soft);
+    list-style: none;
+  }
+  .sid-summary::-webkit-details-marker { display: none; }
+  .sid-summary .sid-k {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--amber-deep); flex-shrink: 0;
+  }
+
+  /* core-grid: 沿用 1.2fr 1fr */
+  .core-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; }
+
+  /* figure-card / question-card 基础 */
+  .figure-card, .question-card {
+    border: 1px solid var(--rule); border-radius: 10px; padding: 16px; background: var(--paper);
+  }
+  .fcard-lbl, .qcard-lbl {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--mute); margin-bottom: 10px;
+    display: flex; justify-content: space-between;
+  }
+  .fcard-lbl b, .qcard-lbl b { color: var(--ink); }
+  .figure-foot {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--rule);
+    font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+    display: flex; justify-content: space-between;
+  }
+  .figure-foot a { color: var(--amber-deep); text-decoration: none; cursor: pointer; }
+
+  /* —— 三角图 —— */
+  .tri-wrap { padding: 4px 0 12px; }
+  .tri-svg { width: 100%; height: auto; display: block; }
+  /* SVG text 用 class 控制字体(presentation attribute 上 CSS var 不解析) */
+  .tri-mono { font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace); }
+  .tri-serif { font-family: var(--serif-cn, "Songti SC", "Source Han Serif SC", serif); }
+
+  /* sr-only: 视觉隐藏但屏幕阅读器可读 */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* details 折叠指示器 */
+  .sid-summary { position: relative; padding-right: 24px; }
+  .sid-toggle {
+    margin-left: auto;
+    font-family: var(--mono); font-size: 14px; color: var(--mute);
+    transition: transform .2s ease;
+    line-height: 1;
+  }
+  details[open] .sid-toggle { transform: rotate(180deg); }
+
+  /* figure-foot 链接按钮化 */
+  .figure-foot-link {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font-family: inherit; font-size: inherit;
+    color: var(--amber-deep); letter-spacing: inherit;
+  }
+  .figure-foot-link:hover { text-decoration: underline; }
+  .figure-foot-link:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 3px; }
+
+  /* 改动 1 · 权重溯源 chip（替换原来的纯数字标注） */
+  .weight-source {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 9.5px; color: var(--mute);
+    letter-spacing: 0.04em; background: var(--paper-2);
+    padding: 2px 7px; border-radius: 3px; cursor: help;
+    border: 1px solid var(--rule);
+  }
+  .weight-source b { color: var(--amber-deep); font-weight: 600; }
+  .weight-source-row {
+    display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+    margin-top: -2px; margin-bottom: 8px;
+  }
+
+  /* spiral-context（沿用） */
+  .spiral-context {
+    display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 1px;
+    background: var(--rule); border: 1px solid var(--rule); border-radius: 6px;
+    overflow: hidden; margin-top: 10px;
+  }
+  .spiral-context .ctx-cell {
+    background: var(--paper-2); padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .spiral-context .ctx-cell.is-here { background: var(--amber-wash); }
+  .spiral-context .ctx-lbl {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--mute);
+  }
+  .spiral-context .is-here .ctx-lbl { color: var(--amber-deep); font-weight: 600; }
+  .spiral-context .ctx-body {
+    font-family: var(--serif-cn); font-size: 13px; color: var(--ink); font-weight: 500;
+    line-height: 1.4;
+  }
+  .spiral-context .ctx-body small {
+    display: block; font-family: var(--mono); font-size: 10px; color: var(--mute);
+    margin-top: 2px; font-weight: 400; letter-spacing: 0.02em;
+  }
+
+  /* —— 决策面板（右侧） —— */
+  .qcard-prompt {
+    font-family: var(--serif-cn); font-size: 14px; line-height: 1.7;
+    color: var(--ink-soft); margin: 6px 0 12px; padding: 10px 12px;
+    background: var(--amber-wash); border-left: 3px solid var(--amber-deep);
+    border-radius: 0 6px 6px 0;
+  }
+
+  /* 改动 2 · 决策选项：从 .qchain（一行一项）改为 .qopt（多行卡片，承得下理由 + 承接） */
+  .qopts { list-style: none; padding: 0; margin: 0; counter-reset: q; }
+  .qopt {
+    counter-increment: q;
+    position: relative; padding: 12px 14px 12px 40px;
+    border: 1px solid var(--rule); border-radius: 8px;
+    background: var(--paper-2); margin-bottom: 8px;
+    cursor: pointer; transition: background .14s, border-color .14s;
+  }
+  .qopt:hover { background: var(--ivory); border-color: var(--rule-2); }
+  .qopt:focus-visible {
+    outline: 2px solid var(--amber-deep);
+    outline-offset: 2px;
+    background: var(--ivory);
+  }
+  .qopt.is-selected { background: var(--ivory); border-color: var(--amber-deep); }
+  .qopt[aria-checked="true"] { border-width: 2px; padding: 11px 13px 11px 39px; }
+  .qopt::before {
+    content: counter(q, decimal-leading-zero);
+    position: absolute; left: 14px; top: 12px;
+    font-family: var(--serif-en); font-style: italic;
+    font-size: 14px; color: var(--amber-deep); font-weight: 500;
+  }
+  .qopt-head {
+    display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    font-family: var(--serif-cn); font-size: 13.5px; color: var(--ink);
+    line-height: 1.5;
+  }
+  .qopt-label { font-weight: 500; }
+  .qopt-ann {
+    font-family: var(--mono); font-size: 10px; padding: 1px 7px;
+    border-radius: 3px; letter-spacing: 0.04em; flex-shrink: 0;
+    border: 1px solid transparent;
+  }
+  .qopt-ann.ann-rec    { background: var(--amber-wash); color: var(--amber-deep); border-color: var(--amber-deep); font-weight: 600; }
+  .qopt-ann.ann-alt    { background: var(--paper-3); color: var(--ink-2); }
+  .qopt-ann.ann-avoid  { background: transparent; color: var(--mute); border-color: var(--rule-2); }
+  .qopt-score {
+    font-family: var(--mono); font-size: 10px; color: var(--mute);
+    letter-spacing: 0.02em; margin-left: auto;
+  }
+  .qopt-score b { color: var(--ink-2); font-weight: 600; }
+  .qopt-rationale {
+    margin-top: 5px;
+    font-family: var(--serif-cn); font-size: 12.5px; line-height: 1.55;
+    color: var(--ink-soft);
+  }
+  /* 改动 3 · 承前/启后 微行 */
+  .qopt-bridge {
+    margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 10px; color: var(--mute);
+    letter-spacing: 0.02em;
+  }
+  .qopt-bridge span b {
+    color: var(--ink-2); font-weight: 600;
+    margin-right: 3px;
+  }
+  .qopt-bridge .ok    { color: var(--sage); }
+  .qopt-bridge .warn  { color: var(--amber-deep); }
+
+  /* 改动 4 · 决策计数 */
+  .qchain-foot {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--rule);
+    display: flex; justify-content: space-between; font-family: var(--mono);
+    font-size: 10.5px; color: var(--mute);
+  }
+  .qchain-foot b { color: var(--ink); }
+  .qchain-foot .qchain-note { color: var(--amber-deep); }
+
+  /* —— 决策码头 —— */
+  .decision-dock {
+    margin-top: 18px; background: var(--paper-2); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .decision-dock .dd-l { font-size: 13.5px; line-height: 1.6; }
+  .decision-dock .dd-l strong { display: block; font-family: var(--serif-cn); font-size: 14px; margin-bottom: 4px; }
+  .decision-dock .dd-l p { margin: 0; color: var(--ink-soft); }
+  .decision-dock .dd-l p b { color: var(--amber-deep); }
+  .decision-dock .dd-actions {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    padding-top: 10px; border-top: 1px dashed var(--rule);
+  }
+
+  .btn-s {
+    font-family: var(--mono); font-size: 11px; padding: 7px 12px;
+    border: 1px solid var(--rule-2); background: var(--ivory); color: var(--ink);
+    border-radius: 5px; cursor: pointer; letter-spacing: 0.02em;
+    transition: background .12s, border-color .12s, color .12s;
+  }
+  .btn-s:hover { background: var(--paper-2); }
+  .btn-s.is-recommend { border-color: var(--amber-deep); color: var(--amber-deep); }
+  .btn-s.is-selected  { background: var(--amber-wash); border-color: var(--amber-deep); color: var(--amber-deep); font-weight: 600; }
+  .btn-s.is-avoid     { color: var(--mute); border-style: dashed; }
+  .btn-s.fill         { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+  .btn-s.fill[disabled] {
+    background: var(--paper-3); color: var(--mute-2); border-color: var(--rule);
+    cursor: not-allowed;
+  }
+
+  /* 改动 5 · 选完才解锁的产物区 */
+  .artifact-region {
+    margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--rule);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .artifact-region .ar-lbl {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em;
+    color: var(--mute); display: flex; gap: 8px; align-items: baseline;
+  }
+  .artifact-region .ar-lbl b { color: var(--ink); }
+  .artifact-region .ar-lbl small {
+    font-family: var(--mono); font-size: 10px; color: var(--amber-deep);
+  }
+  .artifact-region .ar-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .artifact-region.is-locked .ar-btns .btn-s {
+    color: var(--mute-2); border-style: dashed; cursor: not-allowed;
+  }
+  .artifact-region.is-locked .ar-btns .btn-s:hover { background: var(--ivory); }
+
+  /* 改动 6 · 保存后展开的反馈 */
+  .feedback-strip {
+    margin-top: 12px; padding: 12px 14px;
+    background: var(--ivory); border: 1px solid var(--rule); border-radius: 8px;
+    border-left: 3px solid var(--amber-deep);
+    display: none; flex-direction: column; gap: 6px;
+  }
+  .feedback-strip.is-on { display: flex; }
+  .feedback-strip.is-warn { border-left-color: var(--mute); }
+  .fb-head {
+    font-family: var(--serif-cn); font-size: 13.5px; font-weight: 500;
+    color: var(--ink); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  }
+  .fb-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .fb-badge {
+    font-family: var(--mono); font-size: 10px; padding: 1px 6px; border-radius: 3px;
+    letter-spacing: 0.04em; background: var(--paper-2); color: var(--ink-2);
+  }
+  .fb-badge.ok    { background: rgba(77,98,87,0.14);  color: var(--sage); }
+  .fb-badge.warn  { background: var(--amber-wash);    color: var(--amber-deep); }
+  .fb-detail {
+    font-family: var(--serif-cn); font-size: 12.5px; line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  /* 小工具 */
+  .hint-popover {
+    position: relative; display: inline-block;
+  }
+  .hint-popover[data-hint]:hover::after {
+    content: attr(data-hint);
+    position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: var(--ivory);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.02em;
+    padding: 5px 8px; border-radius: 4px; white-space: nowrap;
+    box-shadow: var(--shadow-2); z-index: 10;
+  }
+
+  /* === 移动端单列堆叠 (2026-05-29 修复) === */
+  @media (max-width: 720px) {
+    body { padding: 20px 14px 60px; }
+    .core-grid { grid-template-columns: 1fr; gap: 14px; }
+    .spiral-context { grid-template-columns: 1fr; }
+    .spiral-context .ctx-cell + .ctx-cell {
+      border-top: 1px solid var(--rule);
+    }
+    .qopt-head { gap: 6px; }
+    .qopt-score { margin-left: 0; flex-basis: 100%; }
+    .figure-foot { flex-direction: column; gap: 6px; align-items: flex-start; }
+    .draft-banner { flex-direction: column; gap: 6px; }
+    .decision-dock .dd-actions { flex-direction: column; align-items: stretch; }
+    .decision-dock .dd-actions .btn-s { text-align: left; }
+  }
+
+  /* === a11y · 尊重 prefers-reduced-motion === */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* 顶部对比说明（草稿专用） */
+  .diff-note {
+    margin-top: 28px; padding: 16px 18px;
+    background: var(--paper-2); border: 1px dashed var(--rule-2);
+    border-radius: 8px;
+    font-family: var(--serif-cn); font-size: 13px; color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .diff-note h4 {
+    margin: 0 0 8px; font-size: 13px; color: var(--ink);
+    font-family: var(--mono); letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .diff-note ol { margin: 0; padding-left: 20px; }
+  .diff-note li { margin: 2px 0; }
+  .diff-note code {
+    font-family: var(--mono); font-size: 11.5px; background: var(--paper-3);
+    padding: 1px 5px; border-radius: 3px; color: var(--amber-deep);
+  }
+</style>
+</head>
+<body>
+
+<main class="draft-shell">
+
+  <h1 class="sr-only">Station 01 · 课程定位与目标分析舱 · 重写草稿</h1>
+
+  <div class="draft-banner" role="note" aria-label="草稿状态说明">
+    <span><b>草稿</b> · Station 01 重写 · 修复「4 个推荐 = 0 个推荐」的决策悖论</span>
+    <span>独立文件，不影响 nav-detail.html 运行管线</span>
+  </div>
+
+  <!-- 本节点说明（沿用） -->
+  <details class="station-intro-disclosure">
+    <summary class="sid-summary">
+      <span class="sid-k">本节点说明</span>
+      <span>明确本节课在课程体系、专业能力培养和学生任务产出中的位置，写清它与前一节、下一节的承接关系。</span>
+      <span class="sid-toggle" aria-hidden="true">⌄</span>
+    </summary>
+  </details>
+
+  <section class="core-grid" aria-label="课程定位决策">
+
+    <!-- ====================== 左：FIGURE ====================== -->
+    <div class="figure-card">
+      <div class="fcard-lbl">
+        <span>FIGURE · 课程对齐</span>
+        <b>课程目标 — 药事任务 — 学生产出</b>
+      </div>
+
+      <div class="tri-wrap">
+        <!-- 重心 cx,cy 由权重 0.40 / 0.32 / 0.28 加权计算：
+             cx = 160·w0 + 32·w1 + 288·w2  = 160·.40 + 32·.32 + 288·.28 = 154.88
+             cy =  28·w0 +208·w1 +208·w2   =  28·.40 +208·.32 +208·.28  = 135.6 -->
+        <svg class="tri-svg" viewBox="0 0 320 230" role="img" aria-labelledby="tri-title tri-desc">
+          <title id="tri-title">课程对齐三角图</title>
+          <desc id="tri-desc">三角形三个顶点分别代表课程目标(权重 40%)、药事任务(权重 32%)、学生产出(权重 28%);本节 SWOT 的重心按权重加权后落在「综合决策型」区域,偏向课程目标一侧。</desc>
+          <polygon points="160,28 32,208 288,208" fill="rgba(217,119,87,0.05)" stroke="var(--ink)" stroke-width="1.5"/>
+          <line x1="160" y1="28"  x2="160" y2="208" stroke="rgba(168,73,42,0.18)" stroke-dasharray="2,3"/>
+          <line x1="32"  y1="208" x2="288" y2="208" stroke="rgba(168,73,42,0.18)" stroke-dasharray="2,3"/>
+          <text x="160" y="14"  text-anchor="middle" class="tri-mono" font-size="10.5" fill="var(--ink)" letter-spacing="0.08em">
+            课程目标 · <tspan fill="var(--amber-deep)" font-weight="600">40%</tspan>
+          </text>
+          <text x="20"  y="224" text-anchor="start"  class="tri-mono" font-size="10.5" fill="var(--ink)" letter-spacing="0.06em">
+            药事任务 · <tspan fill="var(--amber-deep)" font-weight="600">32%</tspan>
+          </text>
+          <text x="300" y="224" text-anchor="end"    class="tri-mono" font-size="10.5" fill="var(--ink)" letter-spacing="0.06em">
+            学生产出 · <tspan fill="var(--amber-deep)" font-weight="600">28%</tspan>
+          </text>
+          <!-- 重心：现在真的会动 -->
+          <circle cx="154.88" cy="135.6" r="11" fill="var(--amber-deep)" fill-opacity="0.18"/>
+          <circle cx="154.88" cy="135.6" r="6"  fill="var(--amber-deep)"/>
+          <text x="154.88" y="126.6" text-anchor="middle" class="tri-serif" font-size="11" fill="var(--ink)" font-weight="500">本节 · SWOT</text>
+          <text x="154.88" y="151.6" text-anchor="middle" class="tri-mono" font-size="9" fill="var(--amber-deep)" letter-spacing="0.05em">综合决策型</text>
+        </svg>
+      </div>
+
+      <!-- 改动 1 · 权重溯源 chip -->
+      <div class="weight-source-row">
+        <span class="weight-source hint-popover" data-hint="重心 = w·课程目标顶点 + w·药事任务顶点 + w·学生产出顶点">
+          <b>重心</b> = ΣwᵢVᵢ
+        </span>
+        <span class="weight-source hint-popover" data-hint="来源：本课程培养方案 §02 课程目标分配表 · 教师可调">
+          <b>权重源</b> §02 培养方案
+        </span>
+        <span class="weight-source">最近修订 2026-04-18</span>
+      </div>
+
+      <!-- spiral-context · PREV / HERE / NEXT -->
+      <div class="spiral-context">
+        <div class="ctx-cell">
+          <span class="ctx-lbl">前序 · PREV</span>
+          <div class="ctx-body">管理学原理 · 战略管理章<br/><small>SWOT 概念首次出现 · 偏定义</small></div>
+        </div>
+        <div class="ctx-cell is-here">
+          <span class="ctx-lbl">本节 · HERE</span>
+          <div class="ctx-body">药事管理 · SWOT 应用<br/><small>本节 · 把 SWOT 应用到药企 · 加 TOWS</small></div>
+        </div>
+        <div class="ctx-cell">
+          <span class="ctx-lbl">后续 · NEXT</span>
+          <div class="ctx-body">药事管理 · PESTLE/Porter<br/><small>下节 · 引入更结构化战略工具 · 暴露 SWOT 局限</small></div>
+        </div>
+      </div>
+
+      <div class="figure-foot">
+        <span>课程位置 · 第 03 节 / 共 18 节</span>
+        <button type="button" class="figure-foot-link">展开目标矩阵 →</button>
+      </div>
+    </div>
+
+    <!-- ====================== 右：DECISION ====================== -->
+    <div class="question-card" aria-labelledby="decision-prompt">
+      <div class="qcard-lbl">
+        <span>DECISION · 4 个选项</span>
+        <b>课程定位段落</b>
+      </div>
+
+      <p class="qcard-prompt" id="decision-prompt">本节 SWOT 课最应该被定位为什么？</p>
+
+      <!-- 改动 2 · 选项现在带 rationale + 承接 + 单一推荐 -->
+      <ol class="qopts" id="qopts" role="radiogroup" aria-labelledby="decision-prompt">
+
+        <li class="qopt" data-key="comprehensive" role="radio" tabindex="0" aria-checked="false">
+          <div class="qopt-head">
+            <span class="qopt-label">综合决策型定位</span>
+            <span class="qopt-ann ann-rec">推荐</span>
+            <span class="qopt-score">score <b>3.8</b></span>
+          </div>
+          <div class="qopt-rationale">贯通「病—证—管」四类决策。SWOT 是工具不是目的，主目标是循证决策训练——与课程主线一致。</div>
+          <div class="qopt-bridge">
+            <span class="ok"><b>↰ 承前</b>把战略章的「定义」推进到「应用」</span>
+            <span class="ok"><b>↳ 启后</b>为下节 PESTLE/Porter 暴露 SWOT 局限留出对照面</span>
+          </div>
+        </li>
+
+        <li class="qopt" data-key="research" role="radio" tabindex="0" aria-checked="false">
+          <div class="qopt-head">
+            <span class="qopt-label">证据研究型定位</span>
+            <span class="qopt-ann ann-alt">备选</span>
+            <span class="qopt-score">score <b>3.4</b></span>
+          </div>
+          <div class="qopt-rationale">强化文献检索与综述训练。若本班型偏研究方向（如药学+情报双学位）可选；否则会让 SWOT 的判断属性被稀释。</div>
+          <div class="qopt-bridge">
+            <span class="ok"><b>↰ 承前</b>顺战略章的概念延伸去查文献</span>
+            <span class="warn"><b>↳ 启后</b>与下节战略工具的对照变弱</span>
+          </div>
+        </li>
+
+        <li class="qopt" data-key="policy" role="radio" tabindex="0" aria-checked="false">
+          <div class="qopt-head">
+            <span class="qopt-label">政策治理型定位</span>
+            <span class="qopt-ann ann-avoid">不建议</span>
+            <span class="qopt-score">score <b>3.2</b></span>
+          </div>
+          <div class="qopt-rationale">与「集采常态化」情境契合，但会让 W/T 维分析过度政治化——SWOT 退化为政策辩论。</div>
+          <div class="qopt-bridge">
+            <span class="warn"><b>⚠ 承前</b>跳过战略工具应用，直接进入政策层面</span>
+            <span class="warn"><b>⚠ 启后</b>下节难以聚焦在结构化战略工具本身</span>
+          </div>
+        </li>
+
+        <li class="qopt" data-key="service" role="radio" tabindex="0" aria-checked="false">
+          <div class="qopt-head">
+            <span class="qopt-label">服务运营型定位</span>
+            <span class="qopt-ann ann-avoid">不建议</span>
+            <span class="qopt-score">score <b>2.8</b></span>
+          </div>
+          <div class="qopt-rationale">贴近基层药学服务实务，但 SWOT 分析对象通常是企业不是门店——定位与本案例对象（华海药业）错位。</div>
+          <div class="qopt-bridge">
+            <span class="warn"><b>⚠ 承前</b>与战略章对企业战略的铺垫断开</span>
+            <span class="warn"><b>⚠ 启后</b>PESTLE/Porter 的企业级对照失效</span>
+          </div>
+        </li>
+      </ol>
+
+      <div class="qchain-foot">
+        <span><b>1</b> 推荐 · <b>1</b> 备选 · <b>2</b> 不建议</span>
+        <span class="qchain-note">本节点只做一个判断 →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== 决策码头 ====================== -->
+  <div class="decision-dock">
+    <div class="dd-l">
+      <strong>本节点只做一个判断 ——</strong>
+      <p>本节 SWOT 课最应该被定位为什么？ 推荐路径：<b>综合决策型定位</b>（与课程主线一致，且为下节 SWOT 局限的暴露留出对照面）。</p>
+    </div>
+
+    <div class="dd-actions" id="ddActions">
+      <button class="btn-s is-recommend" data-key="comprehensive">综合决策型定位（推荐）</button>
+      <button class="btn-s"              data-key="research">证据研究型定位（备选）</button>
+      <button class="btn-s is-avoid"     data-key="policy">政策治理型定位（不建议）</button>
+      <button class="btn-s is-avoid"     data-key="service">服务运营型定位（不建议）</button>
+      <button class="btn-s fill" id="saveBtn" disabled>保存判断</button>
+    </div>
+
+    <!-- 改动 6 · 选中后的反馈 -->
+    <div class="feedback-strip" id="feedbackStrip">
+      <div class="fb-head">
+        <span id="fbSummary">—</span>
+        <span class="fb-badges" id="fbBadges"></span>
+      </div>
+      <div class="fb-detail" id="fbDetail">—</div>
+    </div>
+
+    <!-- 改动 5 · 产物区，保存判断后才解锁 -->
+    <div class="artifact-region is-locked" id="artifactRegion">
+      <div class="ar-lbl">
+        <b>产物生成区</b>
+        <small id="artifactGate">⛌ 先保存判断才能解锁</small>
+      </div>
+      <div class="ar-btns">
+        <button class="btn-s" disabled>⬇ 生成课程任务定位段落 + 课程位置说明</button>
+        <button class="btn-s" disabled>⬇ 生成学习目标—评价证据对齐表（L3 输出至节点 4）</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== 差异说明 ====================== -->
+  <div class="diff-note">
+    <h4>本草稿对原版的 6 处修改</h4>
+    <ol>
+      <li><b>推荐收敛</b>：分数差异化后，只有 <code>comprehensive</code> 是「推荐」，<code>research</code> 是「备选」，另两个标「不建议」并给出理由。数据已存在于 <code>shared/station1.payload.js</code>，原渲染器读的是 <code>shared/nav-decision-bank.js</code>（4 个分数都 ≥3.7 → 全部命中阈值）。</li>
+      <li><b>计数修正</b>：底部从「4 个推荐 · 0 个不建议」改为「1 推荐 · 1 备选 · 2 不建议」，与上面选项标签一致。</li>
+      <li><b>承接关系入决策</b>：每个选项下加「↰ 承前 / ↳ 启后」一行，PREV/HERE/NEXT 不再只是顶部装饰，而是参与判断。</li>
+      <li><b>三角形权重溯源</b>：40/32/28 加上「权重源 §02 培养方案」chip，可悬停查看公式与修订日期；红点位置真的按权重加权计算（cx = 154.88, cy = 135.6），不再是「画在中间」。</li>
+      <li><b>产物联动</b>：「保存判断」之前，产物按钮置灰；保存后解锁。判断与产物不再解耦。</li>
+      <li><b>反馈面板</b>：保存后弹出 <code>feedbackByKey</code> 的 summary + riskBadges + detail，告诉用户选择的后果（例如「△ 偏离判断属性」「定位起点」），而不是只有一个 toast。</li>
+    </ol>
+  </div>
+
+</main>
+
+<script>
+  // —— 把 station1.payload.js 里的 feedbackByKey 内联进来（草稿独立运行用） ——
+  const FEEDBACK = {
+    comprehensive: { tone: "ok",   summary: "✓ 与课程主线对齐",   badges: [["定位起点","ok"],["高一致性","ok"]],
+      detail: "本定位下，节点 4 目标会被改写为「能用 SWOT 完成药事管理决策」；节点 7 时间线 30 分钟实战段是合理预算。" },
+    research:      { tone: "warn", summary: "△ 偏离判断属性",     badges: [["定位偏移","warn"]],
+      detail: "证据型定位会让 30 分钟实战变成「查资料」，丧失高阶判断训练机会。" },
+    service:       { tone: "warn", summary: "△ 分析对象不匹配",   badges: [["对象错位","warn"]],
+      detail: "门店级 SWOT 与药企 SWOT 在权重维度上差异显著，建议换案例对象再选此项。" },
+    policy:        { tone: "warn", summary: "△ 张力维度被放大",   badges: [["政治化风险","warn"]],
+      detail: "若学生议程已经偏向政策（节点 3 显示集采伦理为最高票），叠加此定位会让 SWOT 退化为政策辩论。" },
+  };
+
+  let selectedKey = null;
+  let saved = false;
+
+  const qopts = document.querySelectorAll(".qopt");
+  const ddBtns = document.querySelectorAll("#ddActions .btn-s[data-key]");
+  const saveBtn = document.getElementById("saveBtn");
+  const fbStrip = document.getElementById("feedbackStrip");
+  const fbSummary = document.getElementById("fbSummary");
+  const fbBadges = document.getElementById("fbBadges");
+  const fbDetail = document.getElementById("fbDetail");
+  const artifactRegion = document.getElementById("artifactRegion");
+  const artifactGate = document.getElementById("artifactGate");
+
+  function select(key) {
+    selectedKey = key;
+    qopts.forEach(el => {
+      const on = el.dataset.key === key;
+      el.classList.toggle("is-selected", on);
+      el.setAttribute("aria-checked", on ? "true" : "false");
+      // 选中项加入 tab 序列;未选中项 tabindex=-1,方便方向键内部循环
+      el.setAttribute("tabindex", on ? "0" : "-1");
+    });
+    ddBtns.forEach(b => b.classList.toggle("is-selected", b.dataset.key === key));
+    saveBtn.disabled = false;
+    // 选中即预览反馈（不算保存）
+    renderFeedback(key, /*previewOnly*/ true);
+  }
+
+  function renderFeedback(key, previewOnly) {
+    const fb = FEEDBACK[key]; if (!fb) return;
+    fbSummary.textContent = (previewOnly ? "预览：" : "已保存：") + fb.summary;
+    fbBadges.innerHTML = fb.badges.map(([t, tone]) => `<span class="fb-badge ${tone}">${t}</span>`).join("");
+    fbDetail.textContent = fb.detail;
+    fbStrip.classList.add("is-on");
+    fbStrip.classList.toggle("is-warn", fb.tone === "warn");
+  }
+
+  const qoptsArr = Array.from(qopts);
+  qopts.forEach((el, idx) => {
+    el.addEventListener("click", () => { select(el.dataset.key); el.focus(); });
+    // 键盘可达:Enter / Space 选中;ArrowUp/Down 在 radiogroup 内移动
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        select(el.dataset.key);
+      } else if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+        e.preventDefault();
+        const next = qoptsArr[(idx + 1) % qoptsArr.length];
+        select(next.dataset.key); next.focus();
+      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        const prev = qoptsArr[(idx - 1 + qoptsArr.length) % qoptsArr.length];
+        select(prev.dataset.key); prev.focus();
+      }
+    });
+  });
+  // 初始:第一个进入 tab 序列
+  if (qoptsArr[0]) qoptsArr[0].setAttribute("tabindex", "0");
+  qoptsArr.slice(1).forEach(el => el.setAttribute("tabindex", "-1"));
+  ddBtns.forEach(b => b.addEventListener("click", () => select(b.dataset.key)));
+
+  saveBtn.addEventListener("click", () => {
+    if (!selectedKey) return;
+    saved = true;
+    renderFeedback(selectedKey, false);
+    // 解锁产物区
+    artifactRegion.classList.remove("is-locked");
+    artifactGate.textContent = "✓ 已解锁 · 判断已记入 L3 产物链";
+    artifactRegion.querySelectorAll(".btn-s").forEach(b => b.disabled = false);
+    saveBtn.textContent = "已保存判断 ✓";
+    saveBtn.disabled = true;
+  });
+</script>
+
+</body>
+</html>

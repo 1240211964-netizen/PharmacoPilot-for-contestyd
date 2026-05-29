@@ -1,0 +1,2687 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>PharmacoPilot — Editorial Workbench</title>
+<link rel="stylesheet" href="./shared/tokens.css" />
+<link rel="stylesheet" href="./shared/bc-chrome.css" />
+<style>
+/* ============== Direction BC — Editorial × Workbench ============== */
+body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01", "cv11", "tnum"; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 48px; }
+
+/* ============ Masthead (from C) + App-shell hooks (from B) ============ */
+.issue-strip {
+  background: var(--ink); color: var(--ivory);
+  padding: 7px 48px; font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.06em; display: flex; gap: 20px; align-items: center;
+  white-space: nowrap; overflow: hidden;
+}
+.issue-strip > span { flex: 0 0 auto; }
+.issue-strip .r {
+  margin-left: auto; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0; flex: 0 1 auto;
+}
+.issue-strip i { width: 4px; height: 4px; border-radius: 50%; background: var(--amber); display: inline-block; margin: 0 6px; vertical-align: middle; }
+.issue-strip .sep { color: rgba(255,253,247,.3); }
+.issue-strip .pulse {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
+  animation: pulse 1.6s infinite ease-in-out; display: inline-block; margin-right: 5px;
+  vertical-align: middle;
+}
+@keyframes pulse { 50% { opacity: 0.4; } }
+.issue-strip .r { margin-left: auto; }
+
+.masthead {
+  border-bottom: 1px solid var(--ink);
+  background: var(--paper);
+  position: sticky; top: 0; z-index: 20;
+}
+.masthead-inner {
+  display: grid; grid-template-columns: auto 1fr auto auto;
+  align-items: center; gap: 16px; padding: 14px 40px;
+}
+.mast-brand { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; text-decoration: none; color: inherit; }
+.mast-brand .logo {
+  font-family: var(--serif-en); font-size: 26px; font-weight: 600;
+  letter-spacing: -0.025em; line-height: 1;
+}
+.mast-brand .logo .it { font-style: italic; color: var(--amber-deep); }
+.mast-brand .ed {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--mute); padding-left: 12px;
+  border-left: 1px solid var(--rule-2); white-space: nowrap;
+}
+
+/* B-style app tabs in the masthead */
+.app-tabs {
+  display: flex; gap: 2px; padding: 2px; justify-self: center;
+  background: var(--paper-2); border-radius: 8px; border: 1px solid var(--rule);
+  white-space: nowrap;
+}
+.app-tabs a {
+  padding: 6px 12px; font-size: 12.5px; color: var(--mute); border-radius: 6px;
+  display: inline-flex; align-items: center; gap: 6px; font-family: var(--serif-cn);
+  white-space: nowrap;
+}
+.app-tabs a:hover { color: var(--ink); }
+.app-tabs a.is-active { background: var(--ivory); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.app-tabs a kbd { font-family: var(--mono); font-size: 10px; padding: 0 4px;
+                  background: var(--paper-3); border-radius: 3px; color: var(--mute); }
+
+.cmdbar {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 6px 6px 11px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper-2);
+  font-size: 12.5px; color: var(--mute); cursor: text;
+  white-space: nowrap; min-width: 0;
+  transition: border-color .18s, background .18s, box-shadow .18s;
+}
+.cmdbar:hover {
+  border-color: color-mix(in oklab, var(--amber-deep) 35%, var(--rule));
+  background: var(--ivory);
+}
+.cmdbar:focus-within {
+  border-color: var(--amber-deep);
+  background: var(--ivory);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--amber-deep) 14%, transparent);
+}
+.cmdbar kbd {
+  margin-left: 0;
+  font-family: var(--mono); font-size: 10px;
+  background: var(--paper-2); color: var(--mute);
+  padding: 2px 7px;
+  border: 1px solid var(--rule); border-radius: 999px;
+  letter-spacing: 0.04em;
+  transition: background .18s, color .18s, border-color .18s;
+}
+.cmdbar:focus-within kbd {
+  background: var(--amber-deep); color: var(--ivory);
+  border-color: var(--amber-deep);
+}
+.cmdbar-form {
+  display: inline-flex; align-items: center; gap: 6px;
+  width: 100%;
+}
+.cmdbar-brand {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--serif-cn, var(--serif-en, serif));
+  font-size: 12.5px;
+  color: color-mix(in oklab, var(--amber-deep) 70%, var(--ink));
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+  font-weight: 500;
+  padding-right: 2px;
+}
+.cmdbar-brand-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--amber-deep);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--amber-deep) 18%, transparent);
+  animation: cmdbarDot 2.4s ease-in-out infinite;
+}
+@keyframes cmdbarDot {
+  50% { box-shadow: 0 0 0 5px color-mix(in oklab, var(--amber-deep) 8%, transparent); }
+}
+.cmdbar-sep { display: none; }
+.cmdbar-input {
+  flex: 0 1 60px;
+  min-width: 0; width: 60px;
+  border: 0; outline: 0; background: transparent;
+  font: inherit; color: var(--ink);
+  padding: 0;
+  caret-color: var(--amber-deep);
+  transition: width .2s, flex-basis .2s;
+}
+.cmdbar:focus-within .cmdbar-input { width: 200px; flex-basis: 200px; }
+.cmdbar-input::placeholder { color: var(--mute); }
+.cmdbar-input::-webkit-search-cancel-button { display: none; }
+
+.pill-cap {
+  font-size: 13px; padding: 8px 16px; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  transition: all .2s; white-space: nowrap;
+  text-decoration: none;
+}
+.pill-cap.ghost { border: 1px solid var(--ink); color: var(--ink); background: transparent; }
+.pill-cap.ghost:hover { background: var(--ink); color: var(--ivory); }
+.pill-cap.fill { background: var(--amber-deep); color: var(--ivory); border: 1px solid var(--amber-deep); }
+.pill-cap.fill:hover { background: var(--maroon); border-color: var(--maroon); }
+
+.btn-s {
+  font-size: 12.5px; padding: 6px 12px; border-radius: 6px;
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  background: transparent; border: 1px solid var(--rule-2); color: var(--ink);
+}
+.btn-s:hover { background: var(--paper-2); }
+
+/* Universal pill */
+.pill { font-family: var(--mono); font-size: 10.5px; padding: 2px 8px;
+        border-radius: 4px; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 5px; }
+.pill-live { background: rgba(77,98,87,0.14); color: var(--sage); }
+.pill-live i { width: 5px; height: 5px; border-radius: 50%; background: var(--sage); animation: pulse 1.6s infinite ease-in-out; }
+.pill-amber { background: var(--amber-wash); color: var(--amber-deep); }
+.pill-ink { background: var(--ink); color: var(--ivory); }
+.pill-sage { background: var(--sage-soft); color: var(--sage); }
+.pill-indigo { background: var(--indigo-soft); color: var(--indigo); }
+.pill-mute { background: var(--paper-2); color: var(--mute); }
+
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--amber-deep); font-weight: 600;
+  margin-bottom: 18px;
+}
+.eyebrow::before { content: ""; width: 20px; height: 1px; background: var(--amber-deep); }
+
+/* ============ HERO — C's typography + B's KPI + console ============ */
+.hero { padding: 64px 0 60px; min-height: 720px; }
+.hero-grid {
+  display: grid; grid-template-columns: 1.18fr 0.82fr; gap: 48px;
+  align-items: end;
+}
+.hero-left { display: flex; flex-direction: column; }
+.hero h1 {
+  font-family: var(--serif-cn); font-weight: 500;
+  font-size: 64px; line-height: 1.12; letter-spacing: -0.02em;
+  margin: 0; color: var(--ink); white-space: nowrap;
+}
+@media (max-width: 1100px) {
+  .hero h1 { white-space: normal; font-size: 48px; }
+}
+.hero h1 .it {
+  font-family: var(--serif-en); font-style: italic; font-weight: 500;
+  color: var(--amber-deep);
+  display: inline-block; padding: 0 0.1em;
+}
+/* CJK 斜体防交叉：所有 .it 都加点呼吸位（logo 单独豁免） */
+.it { display: inline-block; padding-inline: 0.08em; }
+.logo .it { display: inline; padding: 0; }
+.hero h1 .stk { text-decoration: line-through; text-decoration-thickness: 3px; color: var(--mute-2); }
+.hero .tiny {
+  font-family: var(--sans); font-size: 16.5px; font-weight: 400;
+  color: var(--mute); margin-top: 26px; line-height: 1.6;
+  max-width: 480px;
+}
+.hero-cta { margin-top: 30px; display: flex; gap: 12px; align-items: center; }
+.hero-cta .hint {
+  font-family: var(--mono); font-size: 11px; color: var(--mute); padding-left: 8px;
+  border-left: 1px solid var(--rule); margin-left: 4px;
+}
+
+/* KPI strip — B's pattern, but inside C's editorial frame */
+.kpi-row {
+  margin-top: 24px;
+  display: grid; grid-template-columns: 1.2fr 0.9fr 0.9fr;
+  border: 1px solid var(--ink); border-radius: 12px; overflow: hidden;
+}
+.kpi-cell {
+  padding: 10px 14px; border-right: 1px solid var(--rule-2);
+  background: var(--ivory);
+}
+.kpi-cell:last-child { border-right: 0; }
+.kpi-cell .l { font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+               letter-spacing: 0.08em; text-transform: uppercase; }
+.kpi-cell .v {
+  font-family: var(--serif-en); font-size: 32px; font-weight: 500;
+  letter-spacing: -0.02em; margin: 4px 0 0; color: var(--ink);
+  display: flex; align-items: baseline; gap: 6px;
+}
+.kpi-cell .v small { font-size: 12px; color: var(--mute); font-family: var(--sans); font-weight: 400; }
+.kpi-cell .delta { font-family: var(--mono); font-size: 11px; color: var(--sage); margin-top: 2px; }
+.kpi-spark { height: 22px; margin-top: 4px; }
+
+/* triple-score variant for 双向能力 cell */
+.kpi-cell.kpi-trio { padding-bottom: 14px; }
+.kpi-cell .trio {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 0; margin-top: 6px;
+}
+.kpi-cell .trio-i {
+  padding: 0 10px;
+  border-right: 1px dashed var(--rule-2);
+}
+.kpi-cell .trio-i:first-child { padding-left: 0; }
+.kpi-cell .trio-i:last-child  { padding-right: 0; border-right: 0; }
+.kpi-cell .trio-lab {
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--mute);
+}
+.kpi-cell .trio-num {
+  font-family: var(--serif-en); font-size: 22px; font-weight: 500;
+  letter-spacing: -0.02em; color: var(--ink);
+  margin-top: 4px;
+  display: flex; align-items: baseline; gap: 3px;
+}
+.kpi-cell .trio-num small {
+  font-family: var(--sans); font-size: 10.5px;
+  color: var(--mute); font-weight: 400;
+}
+.kpi-cell .trio-i.is-coup .trio-lab { color: var(--amber-deep); }
+.kpi-cell .trio-i.is-coup .trio-num { color: var(--amber-deep); }
+.kpi-cell .trio-i.is-coup .trio-num .it {
+  font-family: var(--serif-en); font-style: italic;
+}
+
+/* ============ HERO console — B's dark console wrapped in a C-style frame ============ */
+.console-card {
+  background: var(--ivory); border: 1px solid var(--ink); border-radius: 16px;
+  padding: 14px; box-shadow: 8px 8px 0 var(--ink);
+  transform: rotate(-0.6deg);
+  container-type: inline-size;
+}
+.console-card .frame-h {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 6px 12px; border-bottom: 1px dashed var(--rule-2);
+}
+.console-card .frame-h .ll {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--ink);
+}
+.console-card .frame-h .rr {
+  font-family: var(--mono); font-size: 11px; color: var(--amber-deep);
+  display: flex; align-items: center; gap: 6px;
+}
+.console-card .frame-h .rr i {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--amber-deep);
+  animation: pulse 1.6s infinite ease-in-out;
+}
+.console-inner {
+  background: var(--ink); color: #e6e2da;
+  border-radius: 10px; overflow: hidden; margin-top: 12px;
+}
+.console-tabs {
+  display: flex; gap: 0; background: #15130f;
+  padding: 8px 8px 0; border-bottom: 1px solid rgba(255,255,255,.06);
+  align-items: flex-end;
+}
+.c-tab {
+  padding: 7px 11px; font-size: 11.5px; color: rgba(255,250,240,.55);
+  border-radius: 6px 6px 0 0; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); white-space: nowrap;
+}
+.c-tab i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.5; flex-shrink: 0; }
+.c-tab.is-active { background: var(--ink); color: var(--ivory); }
+.c-tab.is-active i { background: var(--sage); opacity: 1; box-shadow: 0 0 0 3px rgba(77,98,87,.2); }
+.c-right { margin-left: auto; padding: 7px 10px; font-family: var(--mono); font-size: 10.5px;
+           color: rgba(255,250,240,.4); white-space: nowrap; }
+.console-body {
+  height: 340px; display: grid; grid-template-columns: 138px 1fr;
+}
+.c-side {
+  background: #15130f; padding: 12px 0;
+  border-right: 1px solid rgba(255,255,255,.06); overflow: hidden;
+}
+.c-side-h { padding: 6px 12px; font-family: var(--mono); font-size: 9.5px;
+            letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,250,240,.35); }
+.c-side-i {
+  padding: 6px 12px; font-size: 11.5px; color: rgba(255,250,240,.7);
+  display: flex; align-items: center; gap: 8px; cursor: default;
+  border-left: 2px solid transparent;
+}
+.c-side-i .num { font-family: var(--mono); font-size: 9.5px; color: rgba(255,250,240,.3); }
+.c-side-i.done .num { color: var(--sage); }
+.c-side-i.act { background: rgba(217,119,87,.1); border-left-color: var(--amber);
+                color: var(--ivory); }
+.c-side-i.act .num { color: var(--amber); }
+.c-side-i .ph { font-family: var(--serif-en); font-style: italic; font-size: 9.5px;
+                color: rgba(217,119,87,.5); margin-left: auto; }
+.c-main { padding: 14px 16px; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.c-prompt {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;
+  display: flex; flex-direction: column; gap: 6px; font-size: 12.5px;
+}
+.c-prompt .who {
+  font-family: var(--mono); font-size: 9.5px; color: var(--amber-soft);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.c-prompt .what { color: rgba(255,250,240,.92); line-height: 1.55; }
+
+/* container-query adaptivity — at narrower widths the tabs/side-rail tighten further */
+@container (max-width: 520px) {
+  .console-body { grid-template-columns: 118px 1fr; }
+  .c-tab { padding: 6px 9px; font-size: 11px; }
+  .c-right { display: none; }
+  .c-side-i, .c-side-h { padding-left: 10px; padding-right: 10px; }
+  .c-main { padding: 12px 14px; }
+}
+.stream { flex: 1; min-height: 0; font-size: 12px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end; }
+.s-row {
+  padding: 6px 0; display: flex; gap: 10px; font-family: var(--mono);
+  color: rgba(255,250,240,.55); opacity: 0; transform: translateY(4px);
+  transition: all .4s; border-bottom: 1px dashed rgba(255,255,255,.05);
+}
+.s-row.show { opacity: 1; transform: none; }
+.s-row .ts { color: rgba(255,250,240,.3); flex-shrink: 0; font-size: 10.5px; padding-top: 1px; }
+.s-row .kind { color: var(--sage); flex-shrink: 0; min-width: 52px; font-size: 10.5px; }
+.s-row.tool .kind { color: var(--amber); }
+.s-row.write .kind { color: var(--indigo-soft); }
+.s-row.cite .kind { color: #d4b75a; }
+.s-row .msg .wenda-q {
+  color: var(--amber-soft);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+  padding: 0 2px; margin: 0 -2px; border-radius: 3px;
+}
+.s-row .msg .wenda-q:hover {
+  color: var(--ivory);
+  background: rgba(217,119,87,.18);
+}
+.s-row .msg { color: rgba(255,250,240,.88); flex: 1; line-height: 1.5; }
+.s-row .msg b { color: var(--ivory); font-weight: 500; }
+.s-row .msg .ok { color: var(--sage); }
+.s-row .msg .tag {
+  background: rgba(217,119,87,.15); color: var(--amber-soft);
+  font-size: 10px; padding: 1px 5px; border-radius: 3px;
+  font-family: var(--mono);
+}
+.console-foot {
+  padding: 8px 14px; background: #15130f; border-top: 1px solid rgba(255,255,255,.06);
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 10px; color: rgba(255,250,240,.4);
+}
+
+/* ============ Atlas strip — replaces marquee, previews training map ============ */
+.atlas-strip {
+  background: var(--ink); color: var(--ivory);
+  padding: 36px 48px 30px;
+  border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+  margin-top: 24px;
+  position: relative; overflow: hidden;
+}
+.atlas-strip-head {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 30px; gap: 24px;
+}
+.atlas-strip-head .eyebrow-d {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--amber-soft);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.atlas-strip-head .eyebrow-d::before { content: ""; width: 20px; height: 1px; background: var(--amber-soft); }
+.atlas-strip-head h4 {
+  font-family: var(--serif-cn); font-size: 24px; font-weight: 500; margin: 8px 0 0;
+  line-height: 1.25; letter-spacing: -0.005em;
+}
+.atlas-strip-head h4 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-soft); }
+.atlas-strip-head .subline {
+  font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.55);
+  letter-spacing: 0.04em; margin-top: 10px;
+  display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.atlas-strip-head .subline .sep { color: rgba(255,255,255,.2); }
+.atlas-strip-head .subline .here {
+  background: rgba(217,119,87,.18); color: var(--amber-soft);
+  padding: 2px 10px; border-radius: 999px;
+  font-family: var(--mono); letter-spacing: 0.04em;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.atlas-strip-head .subline .here::before {
+  content: ""; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--amber); animation: pulse 1.6s infinite ease-in-out;
+}
+.atlas-strip-head .subline .here b {
+  color: var(--ivory); font-weight: 500;
+  font-family: var(--serif-cn); letter-spacing: 0;
+}
+.atlas-strip-head .head-r { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.atlas-strip-head .stat {
+  font-family: var(--mono); font-size: 11.5px; color: rgba(255,255,255,.55);
+  letter-spacing: 0.04em;
+}
+.atlas-strip-head .stat b { color: var(--ivory); font-weight: 500; }
+.atlas-strip-head .stat .sep { color: rgba(255,255,255,.2); margin: 0 8px; }
+.atlas-strip-head .btn-d {
+  font-size: 12.5px; padding: 7px 14px; border-radius: 6px;
+  background: transparent; border: 1px solid rgba(255,255,255,.25);
+  color: var(--ivory); cursor: pointer; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: all .15s; white-space: nowrap;
+}
+.atlas-strip-head .btn-d:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.45); }
+
+/* ============================================================
+   Atlas v2 — 3 parallel lanes + traveling spotlight
+   课前 / 课中 / 课后 share length but each has its own thread.
+   A pulse travels across nodes; a spotlight card explains the
+   current station's teacher-do · AI-do · output · key question.
+   ============================================================ */
+.atlas-v2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 4px;
+}
+.atlas-lanes {
+  display: grid;
+  /* 5 : 3 : 2  — proportional to station counts */
+  grid-template-columns: 5fr 3fr 2fr;
+  gap: 18px;
+  position: relative;
+}
+.atlas-lane {
+  position: relative;
+  padding: 16px 14px 10px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
+  border: 1px solid rgba(255,255,255,.06);
+  transition: border-color .2s, background .2s;
+}
+.atlas-lane.is-current {
+  border-color: color-mix(in oklab, var(--lane-c, var(--amber)) 38%, transparent);
+  background: linear-gradient(180deg,
+              color-mix(in oklab, var(--lane-c, var(--amber)) 10%, transparent),
+              rgba(255,255,255,0));
+}
+.atlas-lane.lane-pre  { --lane-c: #d97757; }   /* amber */
+.atlas-lane.lane-in   { --lane-c: #6a9a7b; }   /* sage  */
+.atlas-lane.lane-post { --lane-c: #8b9bc4; }   /* indigo-soft */
+
+.lane-head {
+  display: flex; align-items: baseline; gap: 10px;
+  margin-bottom: 14px; padding: 0 2px;
+}
+.lane-head .lh-stage {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: rgba(255,255,255,.42);
+}
+.lane-head .lh-title {
+  font-family: var(--serif-cn); font-size: 13.5px; color: var(--ivory);
+  font-weight: 500; letter-spacing: 0.01em;
+}
+.lane-head .lh-cnt {
+  margin-left: auto; font-family: var(--mono); font-size: 10.5px;
+  color: rgba(255,255,255,.4);
+}
+.atlas-lane.is-current .lh-stage { color: var(--lane-c); }
+.atlas-lane.is-current .lh-cnt   { color: color-mix(in oklab, var(--lane-c) 70%, white); }
+
+.lane-rail {
+  position: relative;
+  padding: 18px 0 4px;
+}
+.lane-rail::before {
+  content: ""; position: absolute; left: 4px; right: 4px; top: 25px;
+  height: 1px;
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,.22) 0 6px, transparent 6px 11px);
+}
+.lane-rail .lane-fill {
+  position: absolute; left: 4px; top: 25px; height: 1px;
+  width: 0;
+  background: linear-gradient(90deg,
+              color-mix(in oklab, var(--lane-c) 55%, transparent),
+              var(--lane-c));
+  transition: width .55s cubic-bezier(.65,.05,.36,1);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--lane-c) 50%, transparent);
+}
+
+.lane-nodes {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  position: relative;
+}
+.lane-node {
+  appearance: none; background: none; border: 0; padding: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: inherit; cursor: pointer;
+  position: relative;
+  font: inherit;
+}
+.lane-node .lnd {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--ink);
+  border: 1.5px solid rgba(255,255,255,.32);
+  position: relative; z-index: 1;
+  transition: all .25s;
+}
+.lane-node.is-done .lnd {
+  background: rgba(255,255,255,.55);
+  border-color: rgba(255,255,255,.55);
+}
+.lane-node.is-done .lnd::after {
+  content: ""; position: absolute; left: 3px; top: 4.5px;
+  width: 4px; height: 2px;
+  border-left: 1.2px solid var(--ink);
+  border-bottom: 1.2px solid var(--ink);
+  transform: rotate(-45deg);
+}
+.lane-node.is-active .lnd {
+  width: 16px; height: 16px;
+  background: var(--lane-c); border-color: var(--lane-c);
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--lane-c) 22%, transparent),
+    0 0 0 10px color-mix(in oklab, var(--lane-c) 8%, transparent);
+  animation: lanePulse 2.2s ease-in-out infinite;
+}
+@keyframes lanePulse {
+  50% {
+    box-shadow:
+      0 0 0 6px color-mix(in oklab, var(--lane-c) 18%, transparent),
+      0 0 0 14px color-mix(in oklab, var(--lane-c) 4%, transparent);
+  }
+}
+.lane-node .lnl {
+  display: flex; flex-direction: column; align-items: center; line-height: 1.2;
+}
+.lane-node .lnl .ln-num {
+  font-family: var(--mono); font-size: 9.5px;
+  color: rgba(255,255,255,.42); letter-spacing: 0.04em;
+}
+.lane-node .lnl .ln-cn {
+  font-family: var(--serif-cn); font-size: 12.5px;
+  color: rgba(255,255,255,.74); font-weight: 500;
+  margin-top: 2px;
+}
+.lane-node.is-done .lnl { opacity: .5; }
+.lane-node.is-active .ln-num { color: var(--lane-c); }
+.lane-node.is-active .ln-cn  { color: var(--ivory); font-size: 13px; }
+.lane-node:hover:not(.is-active) .lnd { transform: scale(1.18); border-color: rgba(255,255,255,.6); }
+.lane-node:hover:not(.is-active) .ln-cn { color: var(--ivory); }
+.lane-node:focus-visible { outline: 0; }
+.lane-node:focus-visible .lnd { box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+
+/* ---- Spotlight card (cycles through stations) ---- */
+.atlas-spot {
+  position: relative;
+  border: 1px solid rgba(255,255,255,.1);
+  border-left: 3px solid var(--spot-c, var(--amber));
+  border-radius: 8px;
+  padding: 14px 18px 12px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--spot-c, var(--amber)) 8%, transparent),
+      rgba(255,255,255,.015));
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) 1fr 1fr 1fr;
+  gap: 20px;
+  overflow: hidden;
+}
+.atlas-spot[data-stage="pre"]  { --spot-c: #d97757; }
+.atlas-spot[data-stage="in"]   { --spot-c: #6a9a7b; }
+.atlas-spot[data-stage="post"] { --spot-c: #8b9bc4; }
+
+.atlas-spot .sp-anim {
+  /* fade-in animation key — re-applied per station change */
+  animation: spotFade .55s cubic-bezier(.2,.7,.2,1);
+}
+@keyframes spotFade {
+  from { opacity: 0; transform: translateY(6px); filter: blur(2px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+
+.atlas-spot .sp-id {
+  display: flex; flex-direction: column; gap: 4px;
+  padding-right: 18px; border-right: 1px dashed rgba(255,255,255,.1);
+  align-items: flex-start;
+}
+.atlas-spot .sp-id-row {
+  display: flex; align-items: baseline; gap: 12px;
+}
+.atlas-spot .sp-num {
+  font-family: var(--serif-en); font-size: 44px; line-height: 0.9;
+  font-weight: 300; font-style: italic;
+  color: var(--spot-c);
+  letter-spacing: -0.04em;
+}
+.atlas-spot .sp-stage {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: color-mix(in oklab, var(--spot-c) 80%, white);
+}
+.atlas-spot .sp-name {
+  font-family: var(--serif-cn); font-size: 16px; color: var(--ivory);
+  font-weight: 500; letter-spacing: -0.005em;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.atlas-spot .sp-name .em {
+  font-family: var(--mono); font-size: 10.5px; color: rgba(255,255,255,.5);
+  letter-spacing: 0.06em; font-weight: 400;
+}
+
+.atlas-spot .sp-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.atlas-spot .sp-lbl {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: rgba(255,255,255,.42);
+  display: flex; align-items: center; gap: 6px;
+}
+.atlas-spot .sp-lbl::before {
+  content: ""; width: 3px; height: 3px; border-radius: 50%;
+  background: rgba(255,255,255,.35);
+}
+.atlas-spot .sp-col.is-ai .sp-lbl::before { background: var(--spot-c); }
+.atlas-spot .sp-col p {
+  margin: 0;
+  font-family: var(--serif-cn); font-size: 12px; line-height: 1.5;
+  color: rgba(255,250,240,.85); text-wrap: pretty;
+}
+.atlas-spot .sp-col.is-ai p {
+  color: color-mix(in oklab, var(--spot-c) 40%, white);
+}
+
+/* footer line within spotlight: key question */
+.atlas-spot-q {
+  grid-column: 1 / -1;
+  margin-top: 4px; padding-top: 10px;
+  border-top: 1px dashed rgba(255,255,255,.1);
+  display: flex; align-items: baseline; gap: 12px;
+  font-family: var(--serif-cn); font-size: 12.5px; color: rgba(255,250,240,.78);
+  font-style: italic;
+}
+.atlas-spot-q::before {
+  content: "本节点只回答一个判断";
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--spot-c);
+  font-style: normal; flex-shrink: 0;
+}
+.atlas-spot-q b { color: var(--ivory); font-weight: 500; }
+
+/* auto-advance progress hint (small bar at top-right of spotlight) */
+.atlas-spot-progress {
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: rgba(255,255,255,.04); overflow: hidden;
+}
+.atlas-spot-progress .bar {
+  height: 100%; width: 0;
+  background: color-mix(in oklab, var(--spot-c, var(--amber)) 70%, transparent);
+  transition: width 3s linear;
+}
+.atlas-spot.is-paused .bar { transition: none; }
+.atlas-spot.is-paused .sp-pause-hint { opacity: 1; }
+.sp-pause-hint {
+  position: absolute; top: 6px; right: 12px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(255,255,255,.45);
+  opacity: 0; transition: opacity .2s;
+  display: flex; align-items: center; gap: 5px;
+}
+.sp-pause-hint::before {
+  content: ""; width: 5px; height: 7px;
+  border-left: 2px solid currentColor; border-right: 2px solid currentColor;
+}
+
+@media (max-width: 1180px) {
+  .atlas-spot { grid-template-columns: 1fr 1fr; }
+  .atlas-spot .sp-id { grid-column: 1 / -1; border-right: 0; padding-right: 0;
+    border-bottom: 1px dashed rgba(255,255,255,.1); padding-bottom: 14px; }
+}
+@media (max-width: 860px) {
+  .atlas-lanes { grid-template-columns: 1fr; }
+  .atlas-spot { grid-template-columns: 1fr; gap: 16px; }
+}
+
+.atlas-strip-track {
+  position: relative; padding: 22px 0 6px;
+}
+.atlas-strip-track::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 30px;
+  height: 1px; background: rgba(255,255,255,.16);
+}
+/* progress fill over the line up to the active node */
+.atlas-strip-track::after {
+  content: ""; position: absolute; left: 0; top: 30px; height: 1px;
+  width: calc((100% / 10) * 3.5);
+  background: linear-gradient(90deg, var(--amber-soft), var(--amber));
+}
+.atlas-nodes {
+  display: grid; grid-template-columns: repeat(10, 1fr); gap: 0;
+  position: relative;
+}
+.anode {
+  display: flex; flex-direction: column; align-items: center;
+  position: relative; cursor: pointer; padding-bottom: 4px;
+  transition: transform .15s;
+}
+.anode .adot {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--ink); border: 1.5px solid rgba(255,255,255,.35);
+  position: relative; z-index: 1; transition: all .15s;
+}
+.anode.done .adot {
+  background: rgba(255,255,255,.55); border-color: rgba(255,255,255,.55);
+}
+.anode.done .adot::after {
+  content: "✓"; position: absolute; inset: 0; display: grid; place-items: center;
+  color: var(--ink); font-size: 8px; font-weight: 700;
+}
+.anode.active .adot {
+  width: 20px; height: 20px; background: var(--amber); border-color: var(--amber);
+  box-shadow: 0 0 0 5px rgba(217,119,87,.18), 0 0 0 12px rgba(217,119,87,.08);
+  animation: nodePulse 2s ease-in-out infinite;
+}
+@keyframes nodePulse {
+  50% { box-shadow: 0 0 0 7px rgba(217,119,87,.14), 0 0 0 16px rgba(217,119,87,.04); }
+}
+.anode .alabel {
+  margin-top: 12px; text-align: center; line-height: 1.25; padding: 0 4px;
+}
+.anode .alabel .num {
+  font-family: var(--mono); font-size: 9.5px; color: rgba(255,255,255,.45);
+  letter-spacing: 0.04em; display: block;
+}
+.anode .alabel .cn {
+  font-family: var(--serif-cn); font-size: 13px; color: rgba(255,255,255,.78);
+  display: block; margin-top: 3px; white-space: nowrap; font-weight: 500;
+}
+.anode .alabel .em {
+  font-family: var(--mono); font-size: 9.5px; color: rgba(255,255,255,.35);
+  display: block; margin-top: 2px; letter-spacing: 0.04em;
+}
+.anode.active .alabel .num { color: var(--amber); }
+.anode.active .alabel .cn { color: var(--ivory); font-size: 14px; }
+.anode.active .alabel .em { color: var(--amber-soft); }
+.anode.done .alabel { opacity: 0.55; }
+.anode:hover { transform: translateY(-2px); }
+.anode:hover .adot { transform: scale(1.15); }
+
+/* Stage divider — bracket the 课前 / 课中 / 课后 spans above the track */
+.atlas-stages {
+  display: grid; grid-template-columns: repeat(10, 1fr);
+  margin-bottom: 8px; padding: 0;
+}
+.atlas-stages .seg {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: rgba(255,255,255,.45);
+  position: relative; padding-bottom: 6px;
+}
+.atlas-stages .seg::after {
+  content: ""; flex: 1; height: 1px; background: rgba(255,255,255,.18);
+}
+.atlas-stages .seg.s-pre { grid-column: 1 / 6; color: var(--amber-soft); }
+.atlas-stages .seg.s-pre::after { background: linear-gradient(90deg, rgba(217,119,87,.5), rgba(217,119,87,.15)); }
+.atlas-stages .seg.s-in  { grid-column: 6 / 9; }
+.atlas-stages .seg.s-post{ grid-column: 9 / 11; }
+.atlas-stages .seg b { color: var(--ivory); font-weight: 500; font-family: var(--serif-cn); font-size: 12.5px; letter-spacing: 0; text-transform: none; }
+
+/* You-are-here marker above active node */
+.you-here {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+  margin-bottom: 12px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em;
+  color: var(--amber); text-transform: uppercase; white-space: nowrap;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.you-here::after {
+  content: ""; width: 0; height: 0; border-left: 4px solid transparent;
+  border-right: 4px solid transparent; border-top: 5px solid var(--amber);
+}
+
+.atlas-strip-foot {
+  margin-top: 24px; padding-top: 18px; border-top: 1px dashed rgba(255,255,255,.12);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px;
+}
+.atlas-strip-foot .legend {
+  display: flex; gap: 22px; font-family: var(--mono); font-size: 10.5px;
+  color: rgba(255,255,255,.5);
+}
+.atlas-strip-foot .legend .item { display: flex; align-items: center; gap: 6px; }
+.atlas-strip-foot .legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.atlas-strip-foot .legend .l-done i { background: rgba(255,255,255,.55); }
+.atlas-strip-foot .legend .l-active i { background: var(--amber); }
+.atlas-strip-foot .legend .l-pharm i { border: 1.5px solid var(--amber-soft); background: rgba(217,119,87,.08); }
+.atlas-strip-foot .legend .l-todo i { border: 1.5px solid rgba(255,255,255,.3); background: transparent; }
+.atlas-strip-foot .legend .l-pre i  { background: #d97757; }
+.atlas-strip-foot .legend .l-in i   { background: #6a9a7b; }
+.atlas-strip-foot .legend .l-post i { background: #8b9bc4; }
+.atlas-strip-foot .handoff {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.55);
+  letter-spacing: 0.08em;
+}
+.atlas-strip-foot .handoff .arrow-d {
+  display: inline-block; width: 14px; height: 14px;
+  border-right: 1.5px solid var(--amber); border-bottom: 1.5px solid var(--amber);
+  transform: rotate(45deg) translateY(-2px);
+  animation: arrowDown 1.6s ease-in-out infinite;
+}
+@keyframes arrowDown {
+  0%, 100% { transform: rotate(45deg) translateY(-2px); opacity: 0.6; }
+  50% { transform: rotate(45deg) translateY(2px); opacity: 1; }
+}
+
+/* ============ Flow handoff — bridges adjacent feature sections ============ */
+.flow-handoff {
+  padding: 26px 48px;
+  background: var(--paper-2);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+.flow-handoff.dark {
+  background: var(--ink);
+  border-top-color: rgba(255,255,255,.08);
+  border-bottom-color: rgba(255,255,255,.08);
+}
+.flow-handoff-inner {
+  max-width: 1280px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 36px;
+  align-items: center;
+}
+.flow-handoff .end {
+  display: flex; flex-direction: column; gap: 6px;
+  min-width: 0;
+}
+.flow-handoff .end.to { text-align: right; align-items: flex-end; }
+.flow-handoff .lbl {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--mute);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.flow-handoff.dark .lbl { color: rgba(255,255,255,.45); }
+.flow-handoff .lbl b {
+  font-weight: 600; color: var(--ink); letter-spacing: 0.06em;
+}
+.flow-handoff.dark .lbl b { color: var(--amber-soft); }
+.flow-handoff .lbl::before {
+  content: ""; width: 18px; height: 1px; background: var(--rule);
+}
+.flow-handoff .end.to .lbl { flex-direction: row-reverse; }
+.flow-handoff.dark .lbl::before { background: rgba(255,255,255,.18); }
+.flow-handoff .what {
+  font-family: var(--serif-cn); font-size: 16.5px; line-height: 1.45;
+  color: var(--ink); font-weight: 500;
+}
+.flow-handoff.dark .what { color: var(--ivory); }
+.flow-handoff .what .it {
+  font-family: var(--serif-en); font-style: italic;
+  color: var(--amber-deep); padding: 0 2px;
+}
+.flow-handoff.dark .what .it { color: var(--amber-soft); }
+.flow-handoff .what code {
+  font-family: var(--mono); font-size: 13px;
+  background: rgba(217,119,87,.08);
+  color: var(--amber-deep);
+  padding: 1px 6px; border-radius: 3px;
+  letter-spacing: 0;
+}
+.flow-handoff.dark .what code {
+  background: rgba(255,255,255,.06); color: var(--amber-soft);
+}
+.flow-handoff .meta {
+  font-family: var(--mono); font-size: 10.5px;
+  color: var(--mute); letter-spacing: 0.05em; line-height: 1.5;
+}
+.flow-handoff.dark .meta { color: rgba(255,255,255,.45); }
+.flow-handoff .arrow {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 9.5px;
+  color: var(--mute); letter-spacing: 0.14em; text-transform: uppercase;
+}
+.flow-handoff.dark .arrow { color: rgba(255,255,255,.4); }
+.flow-handoff .arrow-line {
+  position: relative;
+  width: 88px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amber-deep) 20%, var(--amber-deep) 80%, transparent);
+}
+.flow-handoff.dark .arrow-line {
+  background: linear-gradient(90deg, transparent, var(--amber-soft) 20%, var(--amber-soft) 80%, transparent);
+}
+.flow-handoff .arrow-line::after {
+  content: ""; position: absolute;
+  right: 4px; top: -3.5px;
+  width: 8px; height: 8px;
+  border-top: 1.5px solid var(--amber-deep);
+  border-right: 1.5px solid var(--amber-deep);
+  transform: rotate(45deg);
+}
+.flow-handoff.dark .arrow-line::after {
+  border-top-color: var(--amber-soft);
+  border-right-color: var(--amber-soft);
+}
+@media (max-width: 780px) {
+  .flow-handoff-inner {
+    grid-template-columns: 1fr;
+    gap: 18px; text-align: left;
+  }
+  .flow-handoff .end.to { text-align: left; align-items: flex-start; }
+  .flow-handoff .end.to .lbl { flex-direction: row; }
+  .flow-handoff .arrow-line {
+    width: 1px; height: 36px;
+    background: linear-gradient(180deg, transparent, var(--amber-deep) 20%, var(--amber-deep) 80%, transparent);
+  }
+  .flow-handoff .arrow-line::after {
+    right: -3.5px; top: auto; bottom: 4px;
+    transform: rotate(135deg);
+  }
+}
+
+/* ============ Section header ============ */
+.section { padding: 80px 0; }
+.section.dark { background: var(--ink); color: var(--ivory); padding: 80px 48px; }
+.section.dark .pad { padding: 0; }
+.section.dark .pill-mute { background: rgba(255,255,255,.08); color: rgba(255,255,255,.6); }
+.sec-h {
+  display: grid; grid-template-columns: 0.6fr 1.4fr; gap: 48px; align-items: end;
+  margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid var(--rule);
+}
+.section.dark .sec-h { border-bottom-color: rgba(255,255,255,.15); }
+.sec-h .num {
+  font-family: var(--serif-en); font-size: 84px; line-height: 0.85;
+  font-style: italic; font-weight: 500; color: var(--amber-deep);
+  letter-spacing: -0.04em;
+}
+.section.dark .sec-h .num { color: var(--amber-soft); }
+.sec-h .num small {
+  font-family: var(--mono); font-size: 11px; font-style: normal;
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--mute);
+  display: block; margin-top: 12px;
+}
+.section.dark .sec-h .num small { color: rgba(255,255,255,.5); }
+.sec-h h2 {
+  font-family: var(--serif-cn); font-weight: 500; font-size: 42px;
+  margin: 0 0 14px; line-height: 1.12; letter-spacing: -0.01em;
+}
+.sec-h h2 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-deep); }
+.section.dark .sec-h h2 .it { color: var(--amber-soft); }
+.sec-h .lede {
+  font-size: 14.5px; line-height: 1.75; color: var(--ink-soft); max-width: 540px; margin: 0;
+}
+.section.dark .sec-h .lede { color: rgba(255,255,255,.7); }
+.sec-h .toolbar {
+  display: flex; gap: 8px; margin-top: 14px;
+}
+
+/* ============ ∴ 工程架构 section (homepage 结尾) ============ */
+.arch-section-home { padding: 80px 0 56px; }
+.arch-section-home .sec-h .num {
+  /* "∴" 比数字稍小一些，避免压住中文标题 */
+  font-size: 72px;
+  line-height: 0.95;
+}
+.arch-figure-home {
+  background: var(--ivory);
+  border: 1px solid var(--ink);
+  border-radius: 16px;
+  padding: 20px 36px 32px;
+  box-shadow: 6px 6px 0 var(--ink);
+  max-width: 920px;
+  margin: 8px auto 0;
+}
+.arch-figure-tag {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-bottom: 12px; margin-bottom: 18px;
+  border-bottom: 1px dashed var(--rule);
+  flex-wrap: wrap; gap: 8px;
+}
+.arch-figure-tag .tag-lbl {
+  font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--amber-deep); font-weight: 600;
+  position: relative; padding-left: 22px;
+}
+.arch-figure-tag .tag-lbl::before {
+  content: ""; position: absolute; left: 0; top: 50%;
+  width: 14px; height: 1px; background: var(--amber-deep);
+}
+.arch-figure-tag .tag-note {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--mute); letter-spacing: 0.04em;
+}
+.arch-svg-home {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ============ 01 教学导航 — three-column workbench inside editorial frame ============ */
+.workbench {
+  background: var(--ivory);
+  border: 1px solid var(--ink); border-radius: 16px;
+  overflow: hidden; box-shadow: 6px 6px 0 var(--ink);
+  display: grid; grid-template-columns: 280px 1fr 300px;
+}
+.wb-pane { padding: 20px; border-right: 1px solid var(--rule); min-height: 540px; }
+.wb-pane:last-child { border-right: 0; }
+.wb-pane .ph {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--rule);
+}
+.wb-pane .ph h4 { font-family: var(--serif-cn); font-size: 16px; font-weight: 500; margin: 0; }
+.wb-pane .ph .meta { font-family: var(--mono); font-size: 10.5px; color: var(--mute); }
+.filter-row { display: flex; gap: 6px; margin-bottom: 12px; }
+.filter-chip {
+  font-size: 11.5px; padding: 4px 10px; border-radius: 5px;
+  background: var(--paper-2); color: var(--ink-soft); cursor: pointer; border: 1px solid transparent;
+}
+.filter-chip.is-active { background: var(--ink); color: var(--ivory); }
+
+.node-list { list-style: none; padding: 0; margin: 0; max-height: 460px; }
+.node-item {
+  padding: 8px 10px; border-radius: 6px; display: flex; align-items: center; gap: 10px;
+  font-size: 13px; cursor: pointer; transition: background .12s;
+  border-left: 2px solid transparent; margin-bottom: 2px;
+  font-family: var(--serif-cn);
+}
+.node-item:hover { background: var(--paper-2); }
+.node-item .num { font-family: var(--mono); font-size: 10.5px; color: var(--mute); min-width: 16px; }
+.node-item.is-done { color: var(--mute); }
+.node-item.is-active {
+  background: var(--amber-wash); border-left-color: var(--amber-deep);
+  font-weight: 500; color: var(--ink);
+}
+.node-item.is-active .num { color: var(--amber-deep); }
+.node-item.is-pharm::after {
+  content: "Rx"; font-family: var(--serif-en); font-style: italic;
+  font-size: 11px; color: var(--maroon); margin-left: auto;
+}
+.node-item.is-done .check { color: var(--sage); }
+.node-item .check { margin-left: auto; }
+.node-item.is-pharm.is-done::after { color: var(--mute); }
+
+/* Detail pane — editorial */
+.wb-detail .dh-tags { display: flex; gap: 6px; margin-bottom: 12px; }
+.wb-detail .dh-title {
+  font-family: var(--serif-cn); font-size: 30px; font-weight: 500;
+  margin: 0 0 8px; line-height: 1.2; letter-spacing: -0.005em;
+}
+.wb-detail .dh-title .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-deep); }
+.wb-detail .dh-sub {
+  font-size: 12.5px; color: var(--mute); display: flex; gap: 14px; margin-bottom: 22px;
+  padding-bottom: 18px; border-bottom: 1px dashed var(--rule);
+}
+.wb-detail .dh-sub b { color: var(--ink); font-weight: 500; }
+
+.db-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.db {
+  border: 1px solid var(--rule); border-radius: 8px; padding: 14px;
+  background: var(--paper);
+}
+.db .lbl {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--mute); margin-bottom: 8px;
+  display: flex; justify-content: space-between;
+}
+.db .lbl span { color: var(--ink); }
+.db ul { padding: 0; margin: 0; list-style: none; }
+.db ul li { padding: 3px 0; display: flex; gap: 8px; font-size: 12.5px; color: var(--ink-2); line-height: 1.6; font-family: var(--serif-cn); }
+.db ul li::before { content: "—"; color: var(--mute-2); }
+.db.full {
+  grid-column: 1 / -1; background: var(--ink); color: var(--ivory);
+  margin-top: 4px;
+}
+.db.full .lbl { color: var(--amber-soft); }
+.db.full .lbl span { color: var(--ivory); }
+.db.full p { color: rgba(255,250,240,.8); font-family: var(--mono); font-size: 11.5px; line-height: 1.7; margin: 0; }
+
+/* Right rail */
+.wb-rail { background: var(--paper-2); }
+.rail-h { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+          text-transform: uppercase; color: var(--mute); margin-bottom: 10px; }
+.activity-item {
+  padding: 10px 12px; background: var(--ivory); border: 1px solid var(--rule);
+  border-radius: 6px; margin-bottom: 6px;
+}
+.activity-item .t { font-family: var(--mono); font-size: 10px; color: var(--mute); margin-bottom: 4px; }
+.activity-item .b { color: var(--ink-2); line-height: 1.55; font-size: 12.5px; font-family: var(--serif-cn); }
+.activity-item .b b { color: var(--ink); font-weight: 500; }
+.activity-item.next { background: var(--amber-wash); border-color: var(--amber-soft); }
+.activity-item.next .t { color: var(--amber-deep); }
+
+/* ============ 02 教学实践 — pipeline + film treatment ============ */
+.pf-bar {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px;
+}
+.pf-cell {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px; padding: 16px; position: relative;
+}
+.pf-cell .top { display: flex; justify-content: space-between; align-items: center; }
+.pf-cell .top .n {
+  font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,.5);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.pf-cell h5 { font-family: var(--serif-cn); font-size: 17px; font-weight: 500; margin: 10px 0 6px; }
+.pf-cell p { font-size: 12.5px; line-height: 1.65; color: rgba(255,255,255,.65); margin: 0 0 12px; }
+.pf-progress {
+  height: 3px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; margin-bottom: 10px;
+}
+.pf-progress i { display: block; height: 100%; background: var(--amber); border-radius: 2px; }
+.pf-meta { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px;
+           color: rgba(255,255,255,.5); }
+.pf-cell.act { background: rgba(217,119,87,.08); border-color: rgba(217,119,87,.35); }
+.pf-cell.act .pf-progress i { background: var(--amber); }
+
+/* Scene + insights row */
+.scene-layout {
+  display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px;
+}
+.scene {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px; padding: 26px 28px;
+}
+.scene-h {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 14px;
+  gap: 16px;
+}
+.scene-h .doc {
+  font-family: var(--serif-cn); font-size: 22px; font-weight: 500; margin: 0;
+  line-height: 1.3;
+}
+.scene-h .doc small {
+  display: block; font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.5);
+  letter-spacing: 0.04em; font-weight: 400; margin-top: 4px;
+}
+.scene-h .info {
+  font-family: var(--mono); font-size: 10.5px; color: var(--amber-soft);
+  letter-spacing: 0.08em; text-transform: uppercase; text-align: right;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.beat-row {
+  display: grid; grid-template-columns: 48px 70px 1fr; gap: 12px; align-items: start;
+  padding: 9px 0; border-bottom: 1px dashed rgba(255,255,255,.08);
+  font-size: 13px;
+}
+.beat-row .t { font-family: var(--mono); font-size: 10.5px; color: rgba(255,255,255,.4); padding-top: 4px; }
+.beat-row .role {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 6px; border-radius: 4px; text-align: center; height: 22px;
+}
+.role-T { background: rgba(217,119,87,.2); color: var(--amber-soft); }
+.role-S { background: rgba(77,98,87,.25); color: #b5cdba; }
+.role-A { background: rgba(255,255,255,.08); color: var(--ivory); }
+.beat-row .what { color: rgba(255,253,247,.92); line-height: 1.7; font-family: var(--serif-cn); font-size: 13.5px; }
+.beat-row .what .em { color: var(--amber); font-style: italic; font-family: var(--serif-en); }
+.beat-row.note .what {
+  background: rgba(217,119,87,.1); padding: 8px 12px; border-radius: 6px;
+  color: var(--amber-soft); font-family: var(--mono); font-size: 11.5px; line-height: 1.6;
+}
+.beat-row.note .what b { color: var(--ivory); font-weight: 500; }
+
+.scene-foot {
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.1);
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.5);
+}
+.scene-foot b { color: var(--ivory); }
+
+/* Insights rail */
+.insights { display: flex; flex-direction: column; gap: 10px; }
+.insights h5 { font-family: var(--serif-cn); font-size: 14px; margin: 0 0 4px; color: rgba(255,255,255,.85); }
+.insight-card {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px; padding: 14px;
+}
+.insight-card .ll {
+  font-family: var(--mono); font-size: 9.5px; color: var(--amber-soft);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.insight-card .tt {
+  font-family: var(--serif-cn); font-size: 14px; font-weight: 500; margin: 4px 0 6px; line-height: 1.4;
+  color: var(--ivory);
+}
+.insight-card .bb { font-size: 12px; color: rgba(255,255,255,.7); line-height: 1.65; }
+.insight-card .bb b { color: var(--ivory); font-weight: 500; }
+
+/* ============ 03 教学数据 — portraits + KPI mini sparks + wave ============ */
+.data-summary {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+  margin-bottom: 28px;
+}
+.summary-cell {
+  background: var(--ivory); border: 1px solid var(--rule); border-radius: 12px;
+  padding: 16px 18px;
+}
+.summary-cell .l { font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+                   letter-spacing: 0.08em; text-transform: uppercase; }
+.summary-cell .v {
+  font-family: var(--serif-en); font-size: 36px; font-weight: 500; letter-spacing: -0.02em;
+  margin: 6px 0 0; color: var(--ink); display: flex; align-items: baseline; gap: 6px;
+}
+.summary-cell .v .it { font-style: italic; color: var(--amber-deep); }
+.summary-cell .v small { font-size: 12px; color: var(--mute); font-family: var(--sans); font-weight: 400; }
+.summary-cell .d { font-family: var(--mono); font-size: 11px; color: var(--sage); margin-top: 2px; }
+.summary-cell svg.spark { width: 100%; height: 28px; margin-top: 8px; display: block; }
+
+.duo {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.portrait {
+  background: var(--ivory); border: 1px solid var(--ink); border-radius: 14px;
+  padding: 26px; position: relative;
+}
+.portrait::before {
+  content: ""; position: absolute; inset: 6px; border: 1px solid var(--rule);
+  border-radius: 9px; pointer-events: none;
+}
+.portrait .ph-head { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+.portrait .avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--amber-wash); color: var(--amber-deep);
+  display: grid; place-items: center;
+  font-family: var(--serif-cn); font-size: 22px; font-weight: 500;
+  border: 1.5px solid var(--ink);
+}
+.portrait.s .avatar { background: var(--sage-soft); color: var(--sage); }
+.portrait .ph-id strong {
+  font-family: var(--serif-cn); font-size: 18px; font-weight: 500; display: block;
+  line-height: 1.2;
+}
+.portrait .ph-id span { font-size: 12px; color: var(--mute); font-family: var(--mono); }
+.portrait .ph-id .tag {
+  display: inline-block; margin-top: 6px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.08em; padding: 2px 8px; border-radius: 4px;
+  background: var(--ink); color: var(--ivory);
+}
+.portrait.s .ph-id .tag { background: var(--sage); }
+
+.delta-big {
+  display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;
+  padding-bottom: 20px; border-bottom: 1px dashed var(--rule-2);
+}
+.delta-big .n {
+  font-family: var(--serif-en); font-style: italic; font-weight: 600;
+  font-size: 68px; line-height: 0.9; color: var(--amber-deep);
+  letter-spacing: -0.04em;
+}
+.portrait.s .delta-big .n { color: var(--sage); }
+.delta-big .u { font-family: var(--serif-en); font-size: 24px; color: var(--ink-soft); font-weight: 500; }
+.delta-big .lab { font-size: 11px; color: var(--mute); font-family: var(--mono);
+                  letter-spacing: 0.1em; text-transform: uppercase; }
+.portrait .mini-spark { width: 100%; height: 36px; margin-bottom: 18px; display: block; }
+
+.ability {
+  display: grid; grid-template-columns: 110px 1fr 50px; gap: 14px;
+  padding: 8px 0; align-items: center; font-size: 13.5px;
+  border-bottom: 1px dotted var(--rule);
+}
+.ability:last-child { border-bottom: 0; }
+.ability .lab { font-family: var(--serif-cn); }
+.ability .bar { height: 2px; background: var(--rule); position: relative; }
+.ability .bar::before {
+  content: ""; position: absolute; left: 0; top: -3px; height: 8px;
+  background: var(--amber-deep); width: var(--w, 50%);
+}
+.ability .bar::after {
+  content: ""; position: absolute; left: 0; top: -3px; height: 8px;
+  background: var(--amber-soft); width: var(--prev, 30%);
+}
+.portrait.s .ability .bar::before { background: var(--sage); }
+.portrait.s .ability .bar::after { background: var(--sage-soft); }
+.ability .val { font-family: var(--serif-en); font-size: 16px; color: var(--ink); text-align: right; font-weight: 500; }
+.ability .delta { font-family: var(--mono); font-size: 10px; color: var(--sage); margin-left: 2px; }
+
+/* Wave band — full width across duo */
+.wave-band {
+  grid-column: 1 / -1; margin-top: 16px;
+  background: var(--ink); color: var(--ivory); border-radius: 14px; padding: 28px 32px;
+}
+.wave-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
+.wave-head h4 { font-family: var(--serif-cn); font-size: 24px; font-weight: 500; margin: 0; line-height: 1.2; }
+.wave-head h4 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-soft); }
+.wave-head .meta { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.5);
+                   letter-spacing: 0.08em; text-align: right; }
+.wave-head .meta b { color: var(--amber-soft); font-weight: 500; }
+.wave-chart { height: 140px; position: relative; }
+.wave-chart svg { width: 100%; height: 100%; display: block; }
+.wave-legend {
+  display: flex; gap: 28px; margin-top: 16px; font-family: var(--mono); font-size: 11px;
+  color: rgba(255,255,255,.6);
+}
+.wave-legend i { display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 6px; }
+.wave-legend .l-t i { background: var(--amber); }
+.wave-legend .l-s i { background: #94b0a2; }
+.wave-legend .l-x i { background: var(--ivory); }
+
+/* Top exchange callouts on top of wave */
+.wave-callouts {
+  position: relative;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  margin-top: 18px;
+}
+.wave-callout {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px; padding: 10px 12px; flex: 1; min-width: 200px;
+}
+.wave-callout .l { font-family: var(--mono); font-size: 10px; color: var(--amber-soft);
+                   letter-spacing: 0.08em; text-transform: uppercase; }
+.wave-callout .b { font-family: var(--serif-cn); font-size: 13px; color: var(--ivory); margin-top: 4px; line-height: 1.5; }
+.wave-callout .b b { color: var(--amber); }
+
+/* ============ Wenda ============ */
+.wenda-c {
+  margin-top: 32px;
+  background: var(--paper-2); border: 1px solid var(--ink); border-radius: 16px;
+  padding: 24px 28px;
+  display: grid; grid-template-columns: 1fr 1.3fr; gap: 28px; align-items: center;
+}
+.wenda-c h3 {
+  font-family: var(--serif-cn); font-size: 28px; font-weight: 500; margin: 8px 0 10px;
+  line-height: 1.2;
+}
+.wenda-c h3 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-deep); }
+.wenda-c p { font-size: 14px; line-height: 1.7; color: var(--ink-soft); margin: 0 0 16px; }
+.wenda-form {
+  background: var(--ivory); border: 1px solid var(--ink); border-radius: 12px;
+  padding: 14px;
+}
+.wenda-form textarea {
+  width: 100%; border: 0; resize: none; font-family: var(--serif-cn);
+  font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); min-height: 76px;
+  outline: 0; background: transparent; margin-bottom: 12px;
+}
+.wenda-actions { display: flex; justify-content: space-between; align-items: center;
+                 padding-top: 12px; border-top: 1px dashed var(--rule-2); }
+.wenda-actions .hint { font-family: var(--mono); font-size: 10.5px; color: var(--mute); }
+
+/* ============ Colophon ============ */
+.colophon { background: var(--ink); color: var(--ivory); padding: 50px 48px 36px; }
+.colo-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; }
+.colo-brand .logo { font-family: var(--serif-en); font-size: 32px; font-weight: 600; letter-spacing: -0.02em; }
+.colo-brand .logo .it { font-style: italic; color: var(--amber); }
+.colo-brand p { color: rgba(255,255,255,.55); font-size: 13px; line-height: 1.7; margin: 10px 0 0; }
+.colo h5 { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em;
+           text-transform: uppercase; color: rgba(255,255,255,.4); margin: 0 0 14px; }
+.colo a { display: block; font-family: var(--serif-cn); font-size: 14px;
+          color: rgba(255,255,255,.85); padding: 4px 0; text-decoration: none; }
+.colo a:hover { color: var(--amber-soft); }
+.colo-foot {
+  margin-top: 36px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.1);
+  display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px;
+  color: rgba(255,255,255,.4);
+}
+
+/* Theory citation row — academic basis under sec-h */
+.theory-row {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--rule);
+}
+.section.dark .theory-row { border-top-color: rgba(255,255,255,.15); }
+.theory-h {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--mute); margin-right: 6px;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.section.dark .theory-h { color: rgba(255,255,255,.5); }
+.theory-h::before { content: ""; width: 14px; height: 1px; background: var(--mute); }
+.theory-chip {
+  font-family: var(--serif-cn); font-size: 12.5px;
+  padding: 4px 12px; border-radius: 999px;
+  background: var(--paper-2); border: 1px solid var(--rule);
+  color: var(--ink); display: inline-flex; align-items: center; gap: 6px;
+  cursor: default;
+}
+.theory-chip small {
+  font-family: var(--serif-en); font-style: italic; font-size: 10.5px;
+  color: var(--mute); font-weight: 400;
+}
+
+/* ============ Density variants — body-scoped feel knobs ============ */
+/* .dx-bal is the baseline (no overrides) */
+
+body.dx-mag .hero { padding: 80px 0 72px; }
+body.dx-mag .hero h1 { font-size: 84px; line-height: 1.08; }
+body.dx-mag .hero .tiny { font-size: 18px; line-height: 1.7; margin-top: 32px; }
+body.dx-mag .kpi-row { margin-top: 48px; }
+body.dx-mag .section { padding: 104px 0; }
+body.dx-mag .section.dark { padding: 104px 48px; }
+body.dx-mag .sec-h { margin-bottom: 56px; padding-bottom: 36px; }
+body.dx-mag .sec-h .num { font-size: 108px; }
+body.dx-mag .sec-h h2 { font-size: 50px; }
+body.dx-mag .sec-h .lede { font-size: 16.5px; }
+body.dx-mag .atlas-strip { padding: 48px 48px 42px; }
+body.dx-mag .data-summary { gap: 18px; margin-bottom: 36px; }
+body.dx-mag .duo { gap: 22px; }
+
+body.dx-bench .hero { padding: 36px 0 32px; }
+body.dx-bench .hero h1 { font-size: 54px; line-height: 1.15; }
+body.dx-bench .hero .tiny { font-size: 14px; line-height: 1.55; margin-top: 18px; }
+body.dx-bench .hero-cta { margin-top: 20px; }
+body.dx-bench .kpi-row { margin-top: 24px; }
+body.dx-bench .section { padding: 52px 0; }
+body.dx-bench .section.dark { padding: 52px 48px; }
+body.dx-bench .sec-h { margin-bottom: 28px; padding-bottom: 18px; gap: 32px; }
+body.dx-bench .sec-h .num { font-size: 56px; }
+body.dx-bench .sec-h .num small { margin-top: 8px; }
+body.dx-bench .sec-h h2 { font-size: 28px; margin-bottom: 8px; }
+body.dx-bench .sec-h .lede { font-size: 13px; line-height: 1.65; }
+body.dx-bench .atlas-strip { padding: 24px 48px 22px; }
+body.dx-bench .atlas-strip-head { margin-bottom: 22px; }
+body.dx-bench .atlas-strip-head h4 { font-size: 18px; }
+body.dx-bench .data-summary { gap: 8px; margin-bottom: 18px; }
+body.dx-bench .summary-cell { padding: 12px 14px; }
+body.dx-bench .summary-cell .v { font-size: 28px; }
+body.dx-bench .duo { gap: 10px; }
+body.dx-bench .portrait { padding: 20px; }
+body.dx-bench .delta-big .n { font-size: 54px; }
+body.dx-bench .marquee, body.dx-bench .atlas-strip { margin-top: 16px; }
+body.dx-bench footer.colophon { padding: 38px 48px 28px; }
+
+/* console card rotation softens in bench mode — feel more product */
+body.dx-bench .console-card { transform: rotate(0deg); box-shadow: 4px 4px 0 var(--ink); }
+body.dx-mag .console-card { transform: rotate(-1deg); box-shadow: 12px 12px 0 var(--ink); }
+
+</style>
+</head>
+<body>
+  <script src="./shared/wendao.js" defer></script>
+  <script src="./shared/fanya.js" defer></script>
+  <script src="./shared/live-stats.js" defer></script>
+  <script src="./shared/toast.js" defer></script>
+  <script src="./shared/faq.js" defer></script>
+  <div class="issue-strip">
+    <span>VOL. 药事管理 · 2026 春季</span>
+    <span class="sep">—</span>
+    <span>课程设计</span>
+    <span class="sep">—</span>
+    <span><span class="pulse"></span><span data-live="teachers" data-baseline="17">17</span> 教师 LIVE</span>
+    <span class="r">SESSION #3417 · 节点 03 / 9 · 已耗时 <span data-live="timer" data-start="132">02:12</span></span>
+  </div>
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a class="mast-brand" href="./index.html">
+        <span class="logo">Pharmaco<span class="it">Pilot</span></span>
+        <span class="ed">for Pharmacy Education</span>
+      </a>
+      <div class="app-tabs">
+        <a href="./index.html" class="is-active">概览</a>
+        <a href="./nav-detail.html">教学导航 <kbd>1</kbd></a>
+        <a href="./practice-detail.html">教学实践 <kbd>2</kbd></a>
+        <a href="./data-detail.html">教学数据 <kbd>3</kbd></a>
+      </div>
+      <div class="cmdbar">⌕ 搜索 <kbd>⌘K</kbd></div>
+      <div style="display:flex;gap:8px;white-space:nowrap">
+        <a class="pill-cap ghost" href="./login.html">登录</a>
+        <a class="pill-cap fill" href="./nav-detail.html">进入工作台 →</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-left">
+          <h1>
+            与<span class="it">新教师</span>协同，<br/>
+            走向<span class="it">药学教育</span>新范式。
+          </h1>
+          <!-- Wenda -->
+          <div class="wenda-c">
+            <div>
+              <div class="eyebrow">教学研究入口</div>
+              <h3>闻道<span class="it">·</span>科学探索</h3>
+              <div style="display:flex;gap:10px;margin-top:8px;">
+                <button class="pill-cap fill" data-wendao="launch" data-wendao-source="#wenda-prompt">启动探索 →</button>
+                <button class="pill-cap ghost" data-wendao="home">查看上一份</button>
+              </div>
+            </div>
+            <div class="wenda-form">
+              <textarea id="wenda-prompt" data-wendao="textarea">请基于药事管理本科课程目标，围绕 2024 国家医保谈判 设计一个 45 分钟 SWOT 课堂任务。</textarea>
+              <div class="wenda-actions">
+                <span class="hint">⌘+Enter 提交 · 上一份已存档 #316</span>
+                <span class="pill pill-live"><i></i>闻道接入正常</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kpi-row">
+            <div class="kpi-cell">
+              <div class="l">本周协同会话</div>
+              <div class="v">142 <small>次</small></div>
+              <div class="delta">+24% / 上周</div>
+              <svg class="kpi-spark" viewBox="0 0 140 22" preserveAspectRatio="none">
+                <polyline points="0,16 14,15 28,13 42,14 56,11 70,9 84,8 98,5 112,7 126,4 140,2"
+                          fill="none" stroke="#a8492a" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <div class="kpi-cell">
+              <div class="l">平均节点</div>
+              <div class="v">8.4 <small>分</small></div>
+              <div class="delta">↓ 1.2'</div>
+            </div>
+            <div class="kpi-cell kpi-trio">
+              <div class="l">双向能力</div>
+              <div class="trio">
+                <div class="trio-i">
+                  <div class="trio-lab">教师</div>
+                  <div class="trio-num">4.6<small>/5</small></div>
+                </div>
+                <div class="trio-i">
+                  <div class="trio-lab">学生</div>
+                  <div class="trio-num">4.2<small>/5</small></div>
+                </div>
+                <div class="trio-i is-coup">
+                  <div class="trio-lab">耦合</div>
+                  <div class="trio-num"><span class="it">+9.2</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HERO console — bold frame around B's console -->
+        <div class="console-card">
+          <div class="frame-h">
+            <span class="ll">运行实况</span>
+            <span class="rr"><i></i>LIVE · 02:12</span>
+          </div>
+          <div class="console-inner">
+            <div class="console-tabs">
+              <div class="c-tab is-active"><i></i>03 知识 · 问题链</div>
+              <div class="c-tab"><i></i>plan.md</div>
+              <div class="c-tab"><i></i>cite.txt</div>
+              <span class="c-right">session #3417</span>
+            </div>
+            <div class="console-body">
+              <div class="c-side">
+                <div class="c-side-h">9 个教学环节 · 课前</div>
+                <div class="c-side-i done"><span class="num">01</span>学情<span style="margin-left:auto;color:var(--sage)">✓</span></div>
+                <div class="c-side-i done"><span class="num">02</span>目标<span style="margin-left:auto;color:var(--sage)">✓</span></div>
+                <div class="c-side-i act"><span class="num">03</span>知识</div>
+                <div class="c-side-i"><span class="num">04</span>案例</div>
+                <div class="c-side-i"><span class="num">05</span>任务</div>
+                <div class="c-side-h" style="margin-top: 6px;">课中</div>
+                <div class="c-side-i"><span class="num">06</span>课中</div>
+                <div class="c-side-h" style="margin-top: 6px;">课后</div>
+                <div class="c-side-i"><span class="num">07</span>评价</div>
+                <div class="c-side-i"><span class="num">08</span>复盘</div>
+                <div class="c-side-i"><span class="num">09</span>资产</div>
+              </div>
+              <div class="c-main">
+                <div class="c-prompt">
+                  <div class="who">prompt</div>
+                  <div class="what">围绕节点 03（知识与误区 · 问题链），为《管理学原理》— SWOT 分析课设计一条 4-6 题的递进式课堂问题链，预设 2-3 个学生分歧锚点。</div>
+                </div>
+                <div class="stream" id="streamBC"></div>
+              </div>
+            </div>
+            <div class="console-foot">
+              <span>tokens 12.4k · 8 步 / 5 工具调用</span>
+              <span>下一站 · 04 案例</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= Atlas Strip — 9 个教学环节预览，承接教学导航 ================= -->
+  <section class="atlas-strip" aria-label="9 个教学环节预览">
+    <div class="atlas-strip-head">
+      <div>
+        <span class="eyebrow-d">FROM HERE · 9 个教学环节预览</span>
+        <h4>一节课的<span class="it">9 个教学环节</span>地图——<br/>新教师按图行进，每个教学环节只做一个关键教学判断。</h4>
+        <div class="subline">
+          <span>课前 5</span><span class="sep">/</span>
+          <span>课中 1</span><span class="sep">/</span>
+          <span>课后 3</span>
+          <span class="sep">—</span>
+          <span class="here">你在这里 · <b>03 · 知识结构与关键误区</b></span>
+        </div>
+      </div>
+      <div class="head-r">
+        <span class="stat">
+          <b>2</b> 完成<span class="sep">·</span>
+          <b style="color:var(--amber)">1</b> 进行中<span class="sep">·</span>
+          <b>6</b> 待开始
+        </span>
+        <button class="btn-d" onclick="location.href='./nav-detail.html'">打开完整工作台 →</button>
+      </div>
+    </div>
+
+    <!-- Atlas v2 — 3 lanes + traveling spotlight -->
+    <div class="atlas-v2" id="atlasV2">
+      <div class="atlas-lanes" role="tablist" aria-label="9 个教学环节">
+        <div class="atlas-lane lane-pre" data-stage="pre">
+          <div class="lane-head">
+            <span class="lh-stage">PRE · 课前</span>
+            <span class="lh-title">设计与准备</span>
+            <span class="lh-cnt">5 节点</span>
+          </div>
+          <div class="lane-rail">
+            <div class="lane-fill"></div>
+            <div class="lane-nodes">
+              <button class="lane-node" data-st="1" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">01</span><span class="ln-cn">学情</span></span></button>
+              <button class="lane-node" data-st="2" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">02</span><span class="ln-cn">目标</span></span></button>
+              <button class="lane-node" data-st="3" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">03</span><span class="ln-cn">知识</span></span></button>
+              <button class="lane-node" data-st="4" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">04</span><span class="ln-cn">案例</span></span></button>
+              <button class="lane-node" data-st="5" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">05</span><span class="ln-cn">任务</span></span></button>
+            </div>
+          </div>
+        </div>
+        <div class="atlas-lane lane-in" data-stage="in">
+          <div class="lane-head">
+            <span class="lh-stage">IN · 课中</span>
+            <span class="lh-title">实施与调控</span>
+            <span class="lh-cnt">1 节点</span>
+          </div>
+          <div class="lane-rail">
+            <div class="lane-fill"></div>
+            <div class="lane-nodes">
+              <button class="lane-node" data-st="6" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">06</span><span class="ln-cn">课中</span></span></button>
+            </div>
+          </div>
+        </div>
+        <div class="atlas-lane lane-post" data-stage="post">
+          <div class="lane-head">
+            <span class="lh-stage">POST · 课后</span>
+            <span class="lh-title">评价与改进</span>
+            <span class="lh-cnt">3 节点</span>
+          </div>
+          <div class="lane-rail">
+            <div class="lane-fill"></div>
+            <div class="lane-nodes">
+              <button class="lane-node" data-st="7" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">07</span><span class="ln-cn">评价</span></span></button>
+              <button class="lane-node" data-st="8" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">08</span><span class="ln-cn">复盘</span></span></button>
+              <button class="lane-node" data-st="9" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">09</span><span class="ln-cn">资产</span></span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="atlas-spot" id="atlasSpot" data-stage="pre" aria-live="polite">
+        <div class="atlas-spot-progress"><div class="bar" id="atlasBar"></div></div>
+        <span class="sp-pause-hint">已暂停</span>
+        <div class="sp-id sp-anim">
+          <div class="sp-stage" id="spStage">PRE · 设计与准备</div>
+          <div class="sp-num" id="spNum">03</div>
+          <div class="sp-name" id="spName">知识<span class="em" id="spEm">问题链</span></div>
+        </div>
+        <div class="sp-col sp-do sp-anim">
+          <div class="sp-lbl">教师在这一站做的</div>
+          <p id="spDo"></p>
+        </div>
+        <div class="sp-col is-ai sp-anim">
+          <div class="sp-lbl">AI 协同</div>
+          <p id="spAi"></p>
+        </div>
+        <div class="sp-col sp-out sp-anim">
+          <div class="sp-lbl">产出</div>
+          <p id="spOut"></p>
+        </div>
+        <div class="atlas-spot-q sp-anim" id="spQ"></div>
+      </div>
+    </div>
+
+    <div class="atlas-strip-foot">
+      <div class="legend">
+        <span class="item l-pre"><i></i>课前 · 设计</span>
+        <span class="item l-in"><i></i>课中 · 调控</span>
+        <span class="item l-post"><i></i>课后 · 改进</span>
+        <span style="color:rgba(255,255,255,.4); font-family:var(--mono); font-size:10.5px;">· 每一站只回答一个判断 · 自动巡演中</span>
+      </div>
+      <div class="handoff">
+        <span>↓ 在下方完整工作台中操作 · 教学导航</span>
+        <span class="arrow-d"></span>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <!-- ================= 01 教学导航 ================= -->
+    <section class="section" id="nav">
+      <div class="sec-h">
+        <div class="num">
+          01
+          <small>FEATURE · 教学导航</small>
+        </div>
+        <div>
+          <h2>一节课的<span class="it">9 个教学环节</span>，<br/>新教师按图行进。</h2>
+          <p class="lede">把"一节课怎么备、怎么上、怎么复盘"拆成可推进的 9 个教学环节。每个教学环节只做一个关键教学判断、产出一份可被审校的材料——课前 5 个、课中 1 个、课后 3 个。</p>
+          <div class="theory-row">
+            <span class="theory-h">理论底盘 · INFORMED BY</span>
+            <span class="theory-chip">ADDIE 教学设计 <small>Branson 1975</small></span>
+            <span class="theory-chip">Backward Design <small>Wiggins &amp; McTighe 1998</small></span>
+            <span class="theory-chip">建设性对齐 <small>Biggs 1996</small></span>
+            <span class="theory-chip">OBE 成果导向教育 <small>Spady 1994</small></span>
+            <span class="theory-chip">教学事件九步 <small>Gagné 1985</small></span>
+            <span class="theory-chip">5E 教学模型 <small>Bybee 1989</small></span>
+            <span class="theory-chip">经验学习圈 <small>Kolb 1984</small></span>
+            <span class="theory-chip">最近发展区 ZPD <small>Vygotsky 1978</small></span>
+            <span class="theory-chip">认知负荷 <small>Sweller 1988</small></span>
+            <span class="theory-chip">情境学习 <small>Lave &amp; Wenger 1991</small></span>
+            <span class="theory-chip">ICAP 参与层级 <small>Chi 2014</small></span>
+            <span class="theory-chip">TPACK <small>Mishra &amp; Koehler 2006</small></span>
+            <span class="theory-chip">形成性评价 <small>Black &amp; Wiliam 1998</small></span>
+            <span class="theory-chip">教学评一体化 <small>崔允漷</small></span>
+            <span class="theory-chip">课例研究 <small>顾泠沅</small></span>
+            <span class="theory-chip">反思性实践 <small>Schön 1983</small></span>
+            <span class="theory-chip">药事管理教育 <small>邵蓉 · 中国药大</small></span>
+            <span class="theory-chip">药学教育成果 CAPE <small>AACP 2013</small></span>
+          </div>
+          <div class="toolbar">
+            <button class="btn-s" onclick="location.href='./nav-detail.html'">▸ 打开 9 个教学环节工作台</button>
+            <button class="btn-s" data-demo-download>⤓ 导出当前节点 plan.md</button>
+            <button class="btn-s" data-demo-toast="标注功能 · 接入中">＋ 标注一个我的判断</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="workbench">
+        <!-- left: nodes -->
+        <div class="wb-pane">
+          <div class="ph">
+            <h4>9 环节</h4>
+            <span class="meta">3 / 9</span>
+          </div>
+          <div class="filter-row">
+            <div class="filter-chip is-active">全部</div>
+            <div class="filter-chip">课前</div>
+            <div class="filter-chip">课中</div>
+            <div class="filter-chip">课后</div>
+          </div>
+          <ul class="node-list">
+            <li class="node-item is-done"><span class="num">01</span>学情 · 学情诊断<span class="check">✓</span></li>
+            <li class="node-item is-done"><span class="num">02</span>目标 · 目标与量规<span class="check">✓</span></li>
+            <li class="node-item is-active"><span class="num">03</span>知识 · 知识与误区</li>
+            <li class="node-item"><span class="num">04</span>案例 · 案例与证据</li>
+            <li class="node-item"><span class="num">05</span>任务 · 任务链设计</li>
+            <li style="font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:0.1em;padding:10px 10px 4px;text-transform:uppercase;">课中</li>
+            <li class="node-item"><span class="num">06</span>课中 · 课中调控</li>
+            <li style="font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:0.1em;padding:10px 10px 4px;text-transform:uppercase;">课后</li>
+            <li class="node-item"><span class="num">07</span>评价 · 评价与画像</li>
+            <li class="node-item"><span class="num">08</span>复盘 · 复盘与决策</li>
+            <li class="node-item"><span class="num">09</span>资产 · 资产沉淀</li>
+          </ul>
+          <p style="font-family:var(--mono);font-size:10.5px;color:var(--mute);letter-spacing:0.04em;line-height:1.55;margin:18px 0 0;padding-top:14px;border-top:1px dashed var(--rule);">
+            课前 <b style="color:var(--ink)">5</b> · 课中 <b style="color:var(--ink)">1</b> · 课后 <b style="color:var(--ink)">3</b>
+          </p>
+        </div>
+
+        <!-- middle: detail -->
+        <div class="wb-pane wb-detail">
+          <div class="dh-tags">
+            <span class="pill pill-amber">节点 03</span>
+            <span class="pill pill-sage">课前 · 设计与准备</span>
+            <span class="pill pill-indigo">知识与误区 · 问题链</span>
+            <span class="pill pill-mute" style="margin-left:auto">耗时 8' · 产出 3 · 评价 6 维</span>
+          </div>
+          <h3 class="dh-title">知识与误区 · 问题链<br/><span class="it">— 从知识点到课堂的递进式提问</span></h3>
+          <div class="dh-sub">
+            <span><b>关键判断：</b>本课如何把 SWOT 拆成一条 4-6 题的问题链？</span>
+            <span>·</span>
+            <span><b>课程：</b>《管理学原理》本 · 药事管理本科班</span>
+          </div>
+
+          <div class="db-grid">
+            <div class="db">
+              <div class="lbl">任务 · TASKS <span>4 项</span></div>
+              <ul>
+                <li>从 SWOT 知识点展开 4-6 个递进式问题</li>
+                <li>每个问题对应一条学习目标 (接节点 02)</li>
+                <li>预设 2-3 个学生分歧锚点</li>
+                <li>留出与节点 04·案例的接口</li>
+              </ul>
+            </div>
+            <div class="db">
+              <div class="lbl">产出 · DELIVERABLES <span>3 项</span></div>
+              <ul>
+                <li>问题链 v0.2 · 4-6 题递进</li>
+                <li>学生分歧锚点 × 3</li>
+                <li>课前包片段 plan.md · 问题链部分</li>
+              </ul>
+            </div>
+            <div class="db">
+              <div class="lbl">评价依据 · RUBRIC <span>6 维</span></div>
+              <ul>
+                <li>问题递进性 · 识别→判断→决策</li>
+                <li>问题与目标的对应性</li>
+                <li>分歧锚点的真实性与可辩性</li>
+              </ul>
+            </div>
+            <div class="db">
+              <div class="lbl">可调用工具 · TOOLS <span>4 个</span></div>
+              <ul>
+                <li>闻道科学探索 · 案例检索</li>
+                <li>课程目标库 · 目标映射</li>
+                <li>分歧锚点预测器</li>
+                <li>AI 虚拟班</li>
+              </ul>
+            </div>
+            <div class="db full">
+              <div class="lbl">本节点参考资料 · CITATIONS <span>已审校 7 / 9</span></div>
+              <p>CMS-202407 国家医保谈判公告 · 《管理学原理》第七章 SWOT · 中华医院药事年报 (2024) · Backward Design (Wiggins &amp; McTighe) · 问题链设计范例库 · 学生认知负荷理论 (Sweller) · 课例与分歧预设·顾泲沅课例研究·三所医院匿名处方样本⋯</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- right: rail -->
+        <div class="wb-pane wb-rail">
+          <div class="rail-h">本节点协同活动</div>
+          <div class="activity-item">
+            <div class="t">2 分钟前 · Agent</div>
+            <div class="b">已完成 <b>SWOT 场景卡 × 3</b>，等待教师审校。</div>
+          </div>
+          <div class="activity-item">
+            <div class="t">12 分钟前 · 本节教师</div>
+            <div class="b">追加了"威胁(T)维度"的开放问题。</div>
+          </div>
+          <div class="activity-item">
+            <div class="t">38 分钟前 · Agent</div>
+            <div class="b">检索 CMS-202407 政策文件 · <b>3 处引用</b></div>
+          </div>
+          <div class="activity-item">
+            <div class="t">昨天 · 同事 林博</div>
+            <div class="b">评论 plan.md: <b>节奏可以再压缩 5 分钟</b></div>
+          </div>
+
+          <div class="rail-h" style="margin-top: 22px;">下一节点</div>
+          <div class="activity-item next">
+            <div class="t">系统建议</div>
+            <div class="b"><b>04 · 案例 · 案例与证据</b><br/>预计耗时 9 分钟 · 可复用本节点的 4 个问题作为案例起点。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= 承接条 · 01 → 02 ================= -->
+  <section class="flow-handoff dark" aria-label="教学导航 衔接 教学实践">
+    <div class="flow-handoff-inner">
+      <div class="end from">
+        <span class="lbl"><b>FROM · 01 教学导航</b> 产出</span>
+        <div class="what"><code>plan.md</code> · 9 环节材料 · 问题链 <span class="it">v0.2</span> · 评价量规</div>
+        <div class="meta">课前 5 + 课中 1 + 课后 3 · 每节点一份可审校材料</div>
+      </div>
+      <div class="arrow" aria-hidden="true">
+        <span>送入虚拟班</span>
+        <span class="arrow-line"></span>
+        <span>HAND-OFF</span>
+      </div>
+      <div class="end to">
+        <span class="lbl">下一步 · <b>TO · 02 教学实践</b></span>
+        <div class="what">把这份 <code>plan.md</code> 在 <span class="it">虚拟班</span> 里跑成一节课</div>
+        <div class="meta">三步循环：生成实践包 · 试错+证据 · 确认写回</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 02 教学实践 ================= -->
+  <section class="section dark" id="practice">
+    <div class="pad" style="max-width: 1280px; margin: 0 auto;">
+      <div class="sec-h">
+        <div class="num">
+          02
+          <small>FEATURE · 教学实践</small>
+        </div>
+        <div>
+          <h2>从课堂实践包，<br/>到<span class="it">可发布</span>的一节课。</h2>
+          <p class="lede">教师把真实班级的真实数据（课程主题 / 学生画像 / 课时 / 教案）放进来，跑三步运行循环——生成实践包 · 试错+证据 · 确认写回。专家批注与虚拟班关键时刻并列展示，每轮修改按 9 个教学环节归位作为可复用标签。</p>
+        </div>
+      </div>
+
+      <!-- Loop bar -->
+      <div class="pf-bar">
+        <div class="pf-cell">
+          <div class="top"><span class="n">i · A · GENERATE</span><span class="pill pill-ink">已完成</span></div>
+          <h5>生成实践包</h5>
+          <p>读取课程主题、导航段落、学生画像，输出含任务 · 角色 · 评价 · 资料的课堂实践包。</p>
+          <div class="pf-progress"><i style="width:100%"></i></div>
+          <div class="pf-meta"><span>产出 · 任务+角色+评价+资料</span><span>已生成</span></div>
+        </div>
+        <div class="pf-cell act">
+          <div class="top"><span class="n">ii · B · TRIAL &amp; EVIDENCE</span><span class="pill pill-amber">进行中</span></div>
+          <h5>试错+证据</h5>
+          <p>5 类专家批注与 AI 虚拟班并行跑；记录提问、答复、关键时刻与风险信号。</p>
+          <div class="pf-progress"><i style="width:58%"></i></div>
+          <div class="pf-meta"><span>虚拟班 SCENE 02 · 02:05 / 45:00</span><span>录制中</span></div>
+        </div>
+        <div class="pf-cell">
+          <div class="top"><span class="n">iii · C · WRITE-BACK</span><span class="pill pill-mute">待开始</span></div>
+          <h5>确认写回</h5>
+          <p>确认后按 9 个教学环节归位，写回本课实践包 / 教学数据 / 个人资产库。</p>
+          <div class="pf-progress"><i style="width:0%"></i></div>
+          <div class="pf-meta"><span>循环 #03 · 17 片段待写回</span><span>—</span></div>
+        </div>
+      </div>
+
+      <!-- Scene + Insights -->
+      <div class="scene-layout">
+        <div class="scene">
+          <div class="scene-h">
+            <h3 class="doc">plan.md · 教学剧本<small>《管理学原理》— SWOT 分析 · 45 min · 32 人虚拟班</small></h3>
+            <div class="info">
+              <span>SCENE 02 · 关键时刻</span>
+              <span style="color:rgba(255,255,255,.3)">v 0.3 · 录制中</span>
+            </div>
+          </div>
+
+          <div class="beat-row">
+            <span class="t">00:00</span>
+            <span class="role role-T">教师</span>
+            <span class="what">"同学们先看这张图——<span class="em">2024 国家医保谈判</span>中，有 3 个抗肿瘤药品成为今年的争议焦点。"</span>
+          </div>
+          <div class="beat-row">
+            <span class="t">00:18</span>
+            <span class="role role-A">Agent</span>
+            <span class="what">"已为这张图自动附上数据源 <em style="color:var(--amber)">CMS-202407</em>，并连接三家三甲医院的匿名处方样本。"</span>
+          </div>
+          <div class="beat-row">
+            <span class="t">01:02</span>
+            <span class="role role-T">教师</span>
+            <span class="what">"我们用 SWOT 来拆。先说 <span class="em">S 优势</span>——谁先来？"</span>
+          </div>
+          <div class="beat-row">
+            <span class="t">01:24</span>
+            <span class="role role-S">学生 A</span>
+            <span class="what">"优势在于支付方有谈判机制，可以压低药价、扩大可及性。"</span>
+          </div>
+          <div class="beat-row">
+            <span class="t">01:48</span>
+            <span class="role role-S">学生 B</span>
+            <span class="what">"但威胁是企业可能减少创新投入。"</span>
+          </div>
+          <div class="beat-row note">
+            <span class="t">02:05</span>
+            <span class="role role-A">Agent</span>
+            <span class="what">⚠ 关键时刻 · 学生 A / B 的观点存在 <b>结构性冲突</b>——建议教师引入"长期 vs 短期视角"的分组讨论。</span>
+          </div>
+          <div class="beat-row">
+            <span class="t">02:20</span>
+            <span class="role role-T">教师</span>
+            <span class="what">"好。A 组从 5 年视角谈，B 组从 1 年视角谈，5 分钟后回到课堂。"</span>
+          </div>
+
+          <div class="scene-foot">
+            <span>Δ Agent 介入 → 教师采纳，耗时 <b>15 秒</b></span>
+            <span>将写回本课实践包 · 编号 <b>P-03-α</b></span>
+          </div>
+        </div>
+
+        <div class="insights">
+          <h5>本节课 Insights</h5>
+          <div class="insight-card">
+            <div class="ll">关键时刻 · 02:05</div>
+            <div class="tt">学生观点结构性冲突</div>
+            <div class="bb">Agent 在 17 秒内识别冲突并给出介入建议；教师在 15 秒内采纳。</div>
+          </div>
+          <div class="insight-card">
+            <div class="ll">教师提问深度 · ↑</div>
+            <div class="tt">从封闭式 → 开放式</div>
+            <div class="bb">本节课开放式提问占比 <b>68%</b>，比上次模拟提升 21 个百分点。</div>
+          </div>
+          <div class="insight-card">
+            <div class="ll">学生参与 · 32 / 32</div>
+            <div class="tt">无沉默学生</div>
+            <div class="bb">所有学生在前 25 分钟均产生至少 1 次有效发言。</div>
+          </div>
+          <div class="insight-card">
+            <div class="ll">下一步 · ACTION</div>
+            <div class="tt">把 02:05 介入写入本课实践包</div>
+            <div class="bb">作为环节 03 的可复用片段；编号 <b>P-03-α</b>。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 承接条 · 02 → 03 ================= -->
+  <section class="flow-handoff" aria-label="教学实践 衔接 教学数据">
+    <div class="flow-handoff-inner">
+      <div class="end from">
+        <span class="lbl"><b>FROM · 02 教学实践</b> 沉淀</span>
+        <div class="what">关键时刻 · 学生发言 · Agent 介入 · 教师采纳片段 <span class="it">P-03-α</span></div>
+        <div class="meta">每个片段都已打上 9 个教学环节标签 · 可复用</div>
+      </div>
+      <div class="arrow" aria-hidden="true">
+        <span>按 9 环节归位</span>
+        <span class="arrow-line"></span>
+        <span>WRITE-BACK</span>
+      </div>
+      <div class="end to">
+        <span class="lbl">下一步 · <b>TO · 03 教学数据</b></span>
+        <div class="what">写回 <span class="it">教师 · 学生 · 耦合</span> 三张能力画像</div>
+        <div class="meta">看到双方各自前进了多少 · 在哪个节点互相影响</div>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <!-- ================= 03 教学数据 ================= -->
+    <section class="section" id="data">
+      <div class="sec-h">
+        <div class="num">
+          03
+          <small>FEATURE · 教学数据</small>
+        </div>
+        <div>
+          <h2>把课堂信号，<br/>写回<span class="it"> 9 个教学环节</span></h2>
+          <p class="lede">每一次模拟课堂同时捕捉教师与学生的能力变化——能看到双方各自前进了多少，以及彼此互相影响的具体节点。</p>
+          <div class="theory-row">
+            <span class="theory-h">评价依据 · INFORMED BY</span>
+            <span class="theory-chip">教学评一体化 <small>崔允漷</small></span>
+            <span class="theory-chip">建设性对齐 <small>Biggs 1996</small></span>
+            <span class="theory-chip">OBE 成果导向 <small>Spady 1994</small></span>
+            <span class="theory-chip">Bloom × SOLO 认知层级 <small>Biggs &amp; Collis 1982</small></span>
+            <span class="theory-chip">教师 PCK <small>Shulman 1987</small></span>
+            <span class="theory-chip">形成性评价 <small>Black &amp; Wiliam 1998</small></span>
+            <span class="theory-chip">可见的学习 <small>Hattie 2009</small></span>
+            <span class="theory-chip">ICAP 学习参与 <small>Chi &amp; Wylie 2014</small></span>
+            <span class="theory-chip">自我调节学习 <small>Zimmerman 2002</small></span>
+            <span class="theory-chip">药事管理教育 <small>邵蓉 · 中国药大</small></span>
+            <span class="theory-chip">药学服务评价 <small>史录文 · 北大</small></span>
+            <span class="theory-chip">药事法规与监管科学 <small>杨悦 · 沈药</small></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top summary KPI -->
+      <div class="data-summary">
+        <div class="summary-cell">
+          <div class="l">过去 7 周 · 教师能力 ↑</div>
+          <div class="v"><span class="it">+35.8</span><small>%</small></div>
+          <div class="d">T6 互动调控 +6.8 · T4 问题链 +5.7 · T7 证据反馈 +4.2 <small style="color:var(--mute)">· 10 分制</small></div>
+          <svg class="spark" viewBox="0 0 200 28" preserveAspectRatio="none">
+            <polyline points="0,22 20,21 40,19 60,18 80,15 100,13 120,10 140,8 160,5 180,4 200,2" fill="none" stroke="#a8492a" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <div class="summary-cell">
+          <div class="l">过去 7 周 · 学生能力 ↑</div>
+          <div class="v"><span class="it" style="color:var(--sage)">+27.0</span><small>%</small></div>
+          <div class="d">S3 利益相关者 +5.5 · S6 协作论证 +4.2 · S2 政策识读 +3.4 <small style="color:var(--mute)">· 10 分制</small></div>
+          <svg class="spark" viewBox="0 0 200 28" preserveAspectRatio="none">
+            <polyline points="0,24 20,22 40,20 60,18 80,17 100,14 120,12 140,10 160,8 180,7 200,6" fill="none" stroke="#4d6257" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <div class="summary-cell">
+          <div class="l">COUPLING INDEX · 双向</div>
+          <div class="v"><span class="it">+9.2</span></div>
+          <div class="d">17 次模拟课堂 · 3 个关注环节（05 / 06 / 07）</div>
+          <svg class="spark" viewBox="0 0 200 28" preserveAspectRatio="none">
+            <polyline points="0,25 20,22 40,18 60,16 80,12 100,10 120,8 140,6 160,5 180,3 200,2" fill="none" stroke="#1b1916" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="duo">
+        <!-- Teacher portrait -->
+        <div class="portrait">
+          <div class="ph-head">
+            <div class="avatar">师</div>
+            <div class="ph-id">
+              <strong>本节教师</strong>
+              <span>药事管理本科 · 工龄 1 年</span><br/>
+              </div>
+          </div>
+          <div class="delta-big">
+            <div>
+              <div class="n">+35.8<span class="u">%</span></div>
+              <div class="lab">能力提升 · 过去 7 周</div>
+            </div>
+          </div>
+          <svg class="mini-spark" viewBox="0 0 320 36" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gtbc" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#d97757" stop-opacity="0.2"/>
+                <stop offset="1" stop-color="#d97757" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,30 L32,28 L64,26 L96,24 L128,21 L160,18 L192,14 L224,11 L256,8 L288,5 L320,3 L320,36 L0,36 Z" fill="url(#gtbc)"/>
+            <polyline points="0,30 32,28 64,26 96,24 128,21 160,18 192,14 224,11 256,8 288,5 320,3" fill="none" stroke="#a8492a" stroke-width="1.6"/>
+          </svg>
+          <!-- 教师 8 维取 top-5 by cumulative Δ · 0-100 ability score + 7 周 Δ -->
+          <div class="ability" title="T6 探究协作与互动调控能力"><span class="lab">T6 互动调控</span><span class="bar" style="--w:78%;--prev:60%"></span><span class="val">78<span class="delta">+18</span></span></div>
+          <div class="ability" title="T4 内容结构与问题链设计能力"><span class="lab">T4 问题链</span><span class="bar" style="--w:72%;--prev:57%"></span><span class="val">72<span class="delta">+15</span></span></div>
+          <div class="ability" title="T7 证据反馈与评价诊断能力"><span class="lab">T7 证据反馈</span><span class="bar" style="--w:64%;--prev:52%"></span><span class="val">64<span class="delta">+12</span></span></div>
+          <div class="ability" title="T5 课堂流程与认知负荷管理能力"><span class="lab">T5 流程节奏</span><span class="bar" style="--w:65%;--prev:55%"></span><span class="val">65<span class="delta">+10</span></span></div>
+          <div class="ability" title="T1 课程定位与学情解释能力"><span class="lab">T1 学情解释</span><span class="bar" style="--w:61%;--prev:51%"></span><span class="val">61<span class="delta">+10</span></span></div>
+        </div>
+
+        <!-- Student portrait -->
+        <div class="portrait s">
+          <div class="ph-head">
+            <div class="avatar">班</div>
+            <div class="ph-id">
+              <strong>2026 级药事管理本科</strong>
+              <span>32 人 · 第 7 周</span><br/>
+            </div>
+          </div>
+          <div class="delta-big">
+            <div>
+              <div class="n">+27.0<span class="u">%</span></div>
+              <div class="lab">能力提升 · 过去 7 周</div>
+            </div>
+          </div>
+          <svg class="mini-spark" viewBox="0 0 320 36" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gsbc" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stop-color="#4d6257" stop-opacity="0.2"/>
+                <stop offset="1" stop-color="#4d6257" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,30 L32,29 L64,30 L96,26 L128,24 L160,22 L192,18 L224,15 L256,13 L288,10 L320,8 L320,36 L0,36 Z" fill="url(#gsbc)"/>
+            <polyline points="0,30 32,29 64,30 96,26 128,24 160,22 192,18 224,15 256,13 288,10 320,8" fill="none" stroke="#4d6257" stroke-width="1.6"/>
+          </svg>
+          <!-- 学生 7 维取 top-5 by cumulative Δ · 0-100 ability score + 7 周 Δ -->
+          <div class="ability" title="S3 利益相关者分析能力"><span class="lab">S3 利益相关者</span><span class="bar" style="--w:71%;--prev:55%"></span><span class="val">71<span class="delta">+16</span></span></div>
+          <div class="ability" title="S6 协作论证与表达能力"><span class="lab">S6 协作论证</span><span class="bar" style="--w:76%;--prev:60%"></span><span class="val">76<span class="delta">+16</span></span></div>
+          <div class="ability" title="S2 政策法规证据识读能力"><span class="lab">S2 政策识读</span><span class="bar" style="--w:62%;--prev:51%"></span><span class="val">62<span class="delta">+11</span></span></div>
+          <div class="ability" title="S4 风险与合规判断能力"><span class="lab">S4 风险合规</span><span class="bar" style="--w:53%;--prev:45%"></span><span class="val">53<span class="delta">+8</span></span></div>
+          <div class="ability" title="S5 决策方案可行性能力"><span class="lab">S5 方案可行性</span><span class="bar" style="--w:55%;--prev:48%"></span><span class="val">55<span class="delta">+7</span></span></div>
+        </div>
+
+        <!-- Wave -->
+        <div class="wave-band">
+          <div class="wave-head">
+            <div>
+              <h4>双向能力 <span class="it">指数</span> · 过去 7 周</h4>
+              <div style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.5);letter-spacing:0.06em;margin-top:6px;">
+                每条线是一类能力的 7 周走势；中间白色实线是 <b style="color:var(--amber-soft)">COUPLING INDEX</b>，反映双向影响的强度。
+              </div>
+            </div>
+            <div class="meta">
+              COUPLING · INDEX <b>+9.2</b><br/>
+              17 次模拟课堂 · 3 个关注环节（05 / 06 / 07）
+            </div>
+          </div>
+          <div class="wave-chart">
+            <svg viewBox="0 0 1100 140" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="exGrad" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0" stop-color="#d97757" stop-opacity="0.32"/>
+                  <stop offset="1" stop-color="#d97757" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- baseline -->
+              <g stroke="rgba(255,255,255,0.08)" stroke-dasharray="2,4">
+                <line x1="0" y1="35" x2="1100" y2="35"/>
+                <line x1="0" y1="70" x2="1100" y2="70"/>
+                <line x1="0" y1="105" x2="1100" y2="105"/>
+              </g>
+              <!-- area under teacher -->
+              <path d="M0,100 C80,95 140,88 200,86 C280,82 340,72 420,68 C500,62 560,54 640,46 C720,42 800,32 860,28 C940,22 1020,18 1100,14 L1100,140 L0,140 Z" fill="url(#exGrad)"/>
+              <!-- teacher line -->
+              <polyline points="0,90 90,84 180,76 270,72 360,62 450,54 540,48 630,38 720,32 810,24 900,20 990,14 1080,10"
+                        fill="none" stroke="#e8a070" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+              <!-- student line -->
+              <polyline points="0,108 90,104 180,100 270,94 360,86 450,80 540,72 630,66 720,58 810,52 900,48 990,42 1080,40"
+                        fill="none" stroke="#94b0a2" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+              <!-- exchange line (bold white) -->
+              <polyline points="0,118 90,110 180,98 270,88 360,76 450,66 540,56 630,46 720,38 810,30 900,22 990,16 1080,12"
+                        fill="none" stroke="#fffdf7" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+              <!-- session markers -->
+              <g fill="rgba(255,253,247,0.4)" font-family="ui-monospace" font-size="9.5">
+                <text x="0" y="135">w1</text>
+                <text x="180" y="135">w2</text>
+                <text x="360" y="135">w3</text>
+                <text x="540" y="135">w4</text>
+                <text x="720" y="135">w5</text>
+                <text x="900" y="135">w6</text>
+                <text x="1060" y="135">w7</text>
+              </g>
+              <!-- annotation at w5 -->
+              <g>
+                <line x1="720" y1="0" x2="720" y2="140" stroke="rgba(217,119,87,0.25)" stroke-dasharray="2,3"/>
+                <text x="726" y="14" font-family="ui-monospace" font-size="9.5" fill="rgba(217,119,87,0.85)" letter-spacing="0.05em">▲ W5 · 引入 05 任务链设计工作流</text>
+              </g>
+              <!-- end dot -->
+              <circle cx="1080" cy="12" r="4" fill="#fffdf7"/>
+              <circle cx="1080" cy="12" r="9" fill="#fffdf7" fill-opacity="0.18"/>
+            </svg>
+          </div>
+          <div class="wave-legend">
+            <span class="l-t"><i></i>教师能力</span>
+            <span class="l-s"><i></i>学生能力</span>
+            <span class="l-x"><i></i>师生能力耦合指数 COUPLING</span>
+          </div>
+          <div class="wave-callouts">
+            <div class="wave-callout">
+              <div class="l">★ 关联提示 · 05 任务链</div>
+              <div class="b">教师 <b>T4 问题链</b> ↑5.7 与学生 <b>S6 协作论证</b> ↑4.2 <b>同向上扬</b> · COUPLING 1.8 · 证据等级 B</div>
+            </div>
+            <div class="wave-callout">
+              <div class="l">★ 关联提示 · 06 课中调控</div>
+              <div class="b">教师 <b>T6 互动调控</b> ↑6.8 与学生 <b>S6 协作论证</b> ↑4.2 <b>共变</b> · COUPLING 2.2 · 证据等级 B</div>
+            </div>
+            <div class="wave-callout">
+              <div class="l">★ KEY · 第 5 周</div>
+              <div class="b">引入 <b>05 任务链设计 · 分歧锚点问题链</b>工作流后，COUPLING 单周 <b>↑ 3.4</b>；<b>建议</b>在真实课堂继续验证。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= ∴ 工程架构 · 一个主 LLM 三种工作模式 ================= -->
+    <section class="section arch-section-home">
+      <div class="sec-h">
+        <div class="num">
+          ∴
+          <small>ENGINEERING VIEW · 工程视图</small>
+        </div>
+        <div>
+          <h2>三个特性背后，是<span class="it">同一次</span>主 LLM 调用。</h2>
+          <p class="lede">导航是设计陪伴，实践是演练复盘，数据是评价回流——三个工作面背后是同一个大参数对话 LLM 在不同状态下与教师协作。规则性工作（实时事件分类、契约校验、离线评估）走旁路只调小参数模型或纯代码——这样比"多 Agent 编排"省钱、低延迟、更可控。</p>
+        </div>
+      </div>
+
+      <div class="arch-figure-home">
+        <div class="arch-figure-tag">
+          <span class="tag-lbl">ENGINEERING VIEW · 工程视图</span>
+          <span class="tag-note">实现细节 · 给工程师看的图 · 非产品营销示意</span>
+        </div>
+        <svg class="arch-svg-home" viewBox="0 0 800 660" aria-label="PharmacoPilot 工程架构 · 一个主 LLM · 三种工作模式">
+          <defs>
+            <marker id="arr-amber-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--amber-deep)"/>
+            </marker>
+            <marker id="arr-ink-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ink)"/>
+            </marker>
+            <marker id="arr-mute-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--mute)"/>
+            </marker>
+          </defs>
+
+          <!-- LAYER 1 · 教师 = DECISION AGENT -->
+          <rect x="270" y="14" width="260" height="50" rx="25" fill="var(--amber-deep)"/>
+          <text x="400" y="34" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="rgba(255,253,247,0.7)" letter-spacing="0.14em">DECISION AGENT</text>
+          <text x="400" y="54" text-anchor="middle" font-family="var(--serif-cn)" font-size="15" fill="var(--ivory)" font-weight="500">教师 · 不可替代的判断权</text>
+
+          <!-- bidirectional arrows -->
+          <line x1="392" y1="64" x2="392" y2="92" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr-ink-h)"/>
+          <line x1="408" y1="92" x2="408" y2="64" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr-ink-h)"/>
+          <text x="430" y="82" font-family="var(--mono)" font-size="9" fill="var(--mute)" letter-spacing="0.04em">自然语言对话</text>
+
+          <!-- LAYER 2 · 主 LLM 对话 -->
+          <rect x="36" y="96" width="728" height="80" rx="12" fill="var(--ink)"/>
+          <text x="56" y="121" font-family="var(--mono)" font-size="10.5" fill="var(--amber-soft)" letter-spacing="0.14em">MAIN LLM · 大参数对话模型 · 单一协作者</text>
+          <text x="56" y="146" font-family="var(--serif-cn)" font-size="17" fill="var(--ivory)" font-weight="500">一次主 LLM 调用 · 三种工作模式</text>
+          <text x="744" y="121" text-anchor="end" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.55)">引用强制</text>
+          <text x="744" y="146" text-anchor="end" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.55)">禁止编造 ID</text>
+          <text x="56" y="166" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.4)" letter-spacing="0.04em">System prompt = 当前工作面 + 上游产物链 + 检索材料 + 最近对话</text>
+
+          <!-- 3 arrows down to surfaces -->
+          <line x1="160" y1="176" x2="160" y2="208" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
+          <line x1="400" y1="176" x2="400" y2="208" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
+          <line x1="640" y1="176" x2="640" y2="208" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
+
+          <!-- LAYER 3 · 3 工作面 (surfaces) -->
+          <!-- 01 教学导航 · 设计 -->
+          <rect x="50" y="212" width="220" height="92" rx="10" fill="var(--ivory)" stroke="var(--amber-deep)" stroke-width="1.5"/>
+          <text x="62" y="232" font-family="var(--mono)" font-size="9.5" fill="var(--amber-deep)" letter-spacing="0.12em" font-weight="600">SURFACE · 01</text>
+          <text x="62" y="256" font-family="var(--serif-cn)" font-size="16" fill="var(--ink)" font-weight="500">教学导航</text>
+          <text x="62" y="276" font-family="var(--mono)" font-size="10.5" fill="var(--ink)">设计陪伴 · 走 9 个教学环节</text>
+          <text x="62" y="293" font-family="var(--mono)" font-size="10" fill="var(--mute)">问题链 · 量规 · 时间线</text>
+
+          <!-- 02 教学实践 · 演练 -->
+          <rect x="290" y="212" width="220" height="92" rx="10" fill="var(--ivory)" stroke="var(--amber)" stroke-width="1.5"/>
+          <text x="302" y="232" font-family="var(--mono)" font-size="9.5" fill="var(--amber)" letter-spacing="0.12em" font-weight="600">SURFACE · 02</text>
+          <text x="302" y="256" font-family="var(--serif-cn)" font-size="16" fill="var(--ink)" font-weight="500">教学实践</text>
+          <text x="302" y="276" font-family="var(--mono)" font-size="10.5" fill="var(--ink)">演练复盘 · 4 步一圈</text>
+          <text x="302" y="293" font-family="var(--mono)" font-size="10" fill="var(--mute)">关键时刻 · 同行评阅</text>
+
+          <!-- 03 教学数据 · 评价 -->
+          <rect x="530" y="212" width="220" height="92" rx="10" fill="var(--ivory)" stroke="var(--sage)" stroke-width="1.5"/>
+          <text x="542" y="232" font-family="var(--mono)" font-size="9.5" fill="var(--sage)" letter-spacing="0.12em" font-weight="600">SURFACE · 03</text>
+          <text x="542" y="256" font-family="var(--serif-cn)" font-size="16" fill="var(--ink)" font-weight="500">教学数据</text>
+          <text x="542" y="276" font-family="var(--mono)" font-size="10.5" fill="var(--ink)">评价回流 · 9 环节</text>
+          <text x="542" y="293" font-family="var(--mono)" font-size="10" fill="var(--mute)">双向能力 · 师生耦合</text>
+
+          <!-- 3 arrows down to tools -->
+          <line x1="160" y1="304" x2="160" y2="334" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
+          <line x1="400" y1="304" x2="400" y2="334" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
+          <line x1="640" y1="304" x2="640" y2="334" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
+          <text x="775" y="324" text-anchor="end" font-family="var(--mono)" font-size="9.5" fill="var(--mute)" letter-spacing="0.06em">tool calling ↓</text>
+
+          <!-- LAYER 4 · Tools layer (single wide bar with chips) -->
+          <rect x="36" y="340" width="728" height="70" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1"/>
+          <text x="56" y="360" font-family="var(--mono)" font-size="10" fill="var(--mute)" letter-spacing="0.12em">TOOLS · 确定性函数</text>
+          <text x="56" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">search_wendao()</text>
+          <text x="200" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">fetch_fanya()</text>
+          <text x="330" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">retrieve_cases()</text>
+          <text x="480" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">validate_chain()</text>
+          <text x="620" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">save_artifact()</text>
+          <text x="744" y="360" text-anchor="end" font-family="var(--mono)" font-size="9.5" fill="var(--mute)">闻道 · 泛雅 · 案例库 · 量规库</text>
+
+          <!-- arrows down to state -->
+          <line x1="160" y1="410" x2="160" y2="436" stroke="var(--mute)" stroke-width="1" marker-end="url(#arr-mute-h)" stroke-dasharray="2,2"/>
+          <line x1="400" y1="410" x2="400" y2="436" stroke="var(--mute)" stroke-width="1" marker-end="url(#arr-mute-h)" stroke-dasharray="2,2"/>
+          <line x1="640" y1="410" x2="640" y2="436" stroke="var(--mute)" stroke-width="1" marker-end="url(#arr-mute-h)" stroke-dasharray="2,2"/>
+
+          <!-- LAYER 5 · Persistence -->
+          <text x="36" y="430" font-family="var(--mono)" font-size="10" fill="var(--mute)" letter-spacing="0.12em">STATE · 持久层</text>
+
+          <rect x="50" y="442" width="220" height="64" rx="8" fill="var(--ivory)" stroke="var(--ink)" stroke-width="1.2"/>
+          <text x="62" y="462" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">Postgres</text>
+          <text x="62" y="479" font-family="var(--mono)" font-size="10" fill="var(--mute)">artifacts · decisions</text>
+          <text x="62" y="494" font-family="var(--mono)" font-size="10" fill="var(--mute)">per-class · per-teacher</text>
+
+          <rect x="290" y="442" width="220" height="64" rx="8" fill="var(--ivory)" stroke="var(--ink)" stroke-width="1.2"/>
+          <text x="302" y="462" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">Vector Store</text>
+          <text x="302" y="479" font-family="var(--mono)" font-size="10" fill="var(--mute)">复用资产 embedding</text>
+          <text x="302" y="494" font-family="var(--mono)" font-size="10" fill="var(--mute)">跨教师跨班级检索</text>
+
+          <rect x="530" y="442" width="220" height="64" rx="8" fill="var(--ivory)" stroke="var(--ink)" stroke-width="1.2"/>
+          <text x="542" y="462" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">Redis</text>
+          <text x="542" y="479" font-family="var(--mono)" font-size="10" fill="var(--mute)">session state · turn cache</text>
+          <text x="542" y="494" font-family="var(--mono)" font-size="10" fill="var(--mute)">热路径低延迟</text>
+
+          <!-- divider -->
+          <line x1="36" y1="528" x2="764" y2="528" stroke="var(--rule)" stroke-dasharray="6,4"/>
+
+          <!-- LAYER 6 · Bypass -->
+          <text x="36" y="546" font-family="var(--mono)" font-size="10" fill="var(--mute)" letter-spacing="0.12em">BYPASS · 旁路 · 不用主 LLM</text>
+
+          <rect x="50" y="558" width="220" height="68" rx="8" fill="var(--paper-2)" stroke="var(--mute)" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="62" y="578" font-family="var(--mono)" font-size="9.5" fill="var(--sage)" letter-spacing="0.1em" font-weight="600">L1 · 实时事件流</text>
+          <text x="62" y="598" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">小参数 LLM 分类 + 规则引擎</text>
+          <text x="62" y="616" font-family="var(--mono)" font-size="10" fill="var(--mute)">毫秒级响应 · 高吞吐</text>
+
+          <rect x="290" y="558" width="220" height="68" rx="8" fill="var(--paper-2)" stroke="var(--mute)" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="302" y="578" font-family="var(--mono)" font-size="9.5" fill="var(--amber-deep)" letter-spacing="0.1em" font-weight="600">L3 · 产物链校验</text>
+          <text x="302" y="598" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">纯代码 · 契约驱动</text>
+          <text x="302" y="616" font-family="var(--mono)" font-size="10" fill="var(--mute)">上游变更 → 下游 flag</text>
+
+          <rect x="530" y="558" width="220" height="68" rx="8" fill="var(--paper-2)" stroke="var(--mute)" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="542" y="578" font-family="var(--mono)" font-size="9.5" fill="var(--ink)" letter-spacing="0.1em" font-weight="600">EVALS · 离线评估</text>
+          <text x="542" y="598" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">每周 50 个测试场景</text>
+          <text x="542" y="616" font-family="var(--mono)" font-size="10" fill="var(--mute)">引用准确性 · 拒答边界</text>
+
+          <!-- Legend -->
+          <g transform="translate(36, 648)">
+            <text x="0" y="6" font-family="var(--mono)" font-size="9.5" fill="var(--mute)" letter-spacing="0.12em">LEGEND</text>
+            <g transform="translate(70, 0)">
+              <line x1="0" y1="2" x2="22" y2="2" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
+              <text x="30" y="6" font-family="var(--mono)" font-size="10" fill="var(--ink)">主路径 · LLM 调用</text>
+            </g>
+            <g transform="translate(220, 0)">
+              <line x1="0" y1="2" x2="22" y2="2" stroke="var(--mute)" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#arr-mute-h)"/>
+              <text x="30" y="6" font-family="var(--mono)" font-size="10" fill="var(--ink)">读写持久层</text>
+            </g>
+            <g transform="translate(370, -5)">
+              <rect x="0" y="0" width="16" height="12" rx="3" fill="var(--paper-2)" stroke="var(--mute)" stroke-dasharray="3,2"/>
+              <text x="22" y="10" font-family="var(--mono)" font-size="10" fill="var(--ink)">旁路 · 非 LLM</text>
+            </g>
+            <g transform="translate(530, -5)">
+              <rect x="0" y="0" width="16" height="12" rx="3" fill="var(--ink)"/>
+              <text x="22" y="10" font-family="var(--mono)" font-size="10" fill="var(--ink)">主 LLM · 大参数</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= Colophon ================= -->
+  <footer class="colophon">
+    <div class="colo-grid">
+      <div class="colo-brand">
+        <div class="logo">Pharmaco<span class="it">Pilot</span></div>
+        <p>全生命周期赋能药学类课程教学智能体。把课程纲要、政策案例与临床场景，编织成可审校、可复用、可追溯的教学材料，与新教师协同走向新教学范式。</p>
+      <p class="brand-demo-note">本 demo 以药事管理本科课程为先发场景。</p>
+      </div>
+      <div class="colo">
+        <h5>产品</h5>
+        <a href="./nav-detail.html">教学导航</a><a href="./practice-detail.html">教学实践</a><a href="./data-detail.html">教学数据</a>
+      </div>
+      <div class="colo">
+        <h5>方法论</h5>
+        <a href="https://en.wikipedia.org/wiki/Constructive_alignment" target="_blank" rel="noopener noreferrer">课程目标与对齐 · OBE × Biggs</a>
+        <a href="https://en.wikipedia.org/wiki/Zone_of_proximal_development" target="_blank" rel="noopener noreferrer">过程参与与支架 · ICAP × ZPD × UDL</a>
+        <a href="https://en.wikipedia.org/wiki/Cognitive_load" target="_blank" rel="noopener noreferrer">认知负荷与情境迁移 · CLT × 真实任务</a>
+        <a href="https://en.wikipedia.org/wiki/Formative_assessment" target="_blank" rel="noopener noreferrer">双向能力评价与沉淀 · 教学评一体化</a>
+      </div>
+      <div class="colo">
+        <h5>合作伙伴</h5>
+        <a data-wendao="home" style="cursor:pointer">闻道 · 科学探索</a>
+        <a data-fanya style="cursor:pointer">泛雅 · 课程平台</a>
+        <a href="#faq">常见问题 · FAQ</a>
+        <a href="mailto:editor@pharmacopilot.cn">联系编辑部</a>
+      </div>
+    </div>
+    <div class="colo-foot">
+      <span>© 2026 PharmacoPilot · v2.0.4 · Vol. II Issue 04</span>
+      <span>17 教师 LIVE · 312 次模拟课堂本月</span>
+    </div>
+  </footer>
+
+<script>
+(function(){
+  const root = document.getElementById('atlasV2');
+  const spot = document.getElementById('atlasSpot');
+  if (!root || !spot) return;
+
+  const STATIONS = [
+    { n:'01', cn:'学情', em:'冲突点', stage:'pre',
+      do_:'看清这届学生站在哪里——认知前测加上家人慢病/实习/药店这些真实经历，先用 v0 草拟定位，再综合学情+议程做 v1 回写。',
+      ai :'汇总上一节诊断热区 · 议程聚类回应 · 经验入口分布图。',
+      out:'学情画像 + 议程协商单 + 锁定版课程定位',
+      q  :'"本节最大冲突点是什么？"' },
+    { n:'02', cn:'目标', em:'5 维量规', stage:'pre',
+      do_:'先写 3-5 条可观察、可评价的学习目标，再配 5 维量规（含批判意识维度）。',
+      ai :'目标语义检查 · 自动拆出可收集的评价证据 · UbD 两段对齐草稿。',
+      out:'学习目标表 + 5 维量规',
+      q  :'"目标与量规第一应补强哪一项？"' },
+    { n:'03', cn:'知识', em:'问题链',   stage:'pre',
+      do_:'找出学生最易卡住的概念误区，把教材重构为围绕误区的 4-6 题递进问题链，预设 2-3 个分歧锚点。',
+      ai :'MAH/MA/生产证 概念边界检测 · 法规条文易混点扫描 · 问题链草稿。',
+      out:'问题链 + 误区清单',
+      q  :'"学生最易卡在哪个误区？"' },
+    { n:'04', cn:'案例', em:'证据包',   stage:'pre',
+      do_:'把真实药事案例转化为证据包，并核对每条议程都有对应证据。',
+      ai :'闻道·科学探索 检索 · 引用核验 · 议程兑现卡。',
+      out:'案例包 + 议程—证据对照表',
+      q  :'"议程关切对应的证据是否齐？"' },
+    { n:'05', cn:'任务', em:'时间+任务', stage:'pre',
+      do_:'先按经验排时间线 → 设计 4 角色协作任务 → 基于任务复杂度回写时间线，并标出 3 个 ZPD 锚点。',
+      ai :'节奏排程 · 4 角色生成（资料员/判断员/质询员/汇报员）· ZPD 锚点位置推荐。',
+      out:'锁定版时间线 + 协作任务单 + 3 个 ZPD 锚点',
+      q  :'"协作任务最应补强哪一项？"' },
+    { n:'06', cn:'课中', em:'即时干预', stage:'in',
+      do_:'为 3 个学情校准点分别写「如果 X 则 Y」即时干预规则——条文测温 / 推演投票 / 知识封闭。',
+      ai :'实时举手 / 答题热区 + 阈值触发提示 + 反馈语模板。',
+      out:'3 条 学情触发—反馈规则 + 反馈语模板',
+      q  :'"本校准点的「如果 X 则 Y」规则是什么？"' },
+    { n:'07', cn:'评价', em:'量规反修订', stage:'post',
+      do_:'用 5 维量规评分 → 写反馈语与能力画像 → 把量规问题反向回写到目标与量规。',
+      ai :'评分采集 · 低分维度 Pareto · 反馈语模板生成 · 量规反修订建议。',
+      out:'评分表 + 能力画像 + 反馈语 + 量规修订建议',
+      q  :'"下一轮要补强哪一维？"' },
+    { n:'08', cn:'复盘', em:'改进项',   stage:'post',
+      do_:'回顾议程兑现 + 即时干预触发摘要 + 学生作品低分诊断，定下一轮第 1 改进项。',
+      ai :'议程兑现度回顾表 · 即时干预触发摘要 · 改进决策候选。',
+      out:'复盘报告 + 改进决策',
+      q  :'"下一轮第一改进项是什么？"' },
+    { n:'09', cn:'资产', em:'知识库',   stage:'post',
+      do_:'挑选并入库本轮最值得保存的资产——案例 v2 / 量规 v2 / 法规更新日志。',
+      ai :'自动整理可复用片段 · 学期末汇编 · 写入个人教学资产库。',
+      out:'资产清单 + 知识库更新',
+      q  :'"本轮最值得沉淀什么？"' },
+  ];
+  const STAGE_LABEL = { pre: 'PRE · 设计与准备', in: 'IN · 实施与调控', post: 'POST · 评价与改进' };
+
+  const nodes = Array.from(root.querySelectorAll('.lane-node'));
+  const lanes = { pre: root.querySelector('.lane-pre'),
+                  in:  root.querySelector('.lane-in'),
+                  post:root.querySelector('.lane-post') };
+  const fills = {
+    pre:  lanes.pre.querySelector('.lane-fill'),
+    in:   lanes.in .querySelector('.lane-fill'),
+    post: lanes.post.querySelector('.lane-post')?.querySelector?.('.lane-fill')
+          || lanes.post.querySelector('.lane-fill'),
+  };
+  const STAGE_COUNT = { pre: 5, in: 1, post: 3 };
+  const stageOf  = i => STATIONS[i].stage;
+  const idxIn    = i => {
+    // index within current lane (0-based)
+    let c = 0;
+    for (let k = 0; k <= i; k++) if (STATIONS[k].stage === STATIONS[i].stage) c++;
+    return c - 1;
+  };
+  const fillPctFor = i => {
+    const s = stageOf(i);
+    const total = STAGE_COUNT[s];
+    // node centers are at (k + .5) / total, so fill up to (k+.5)/total
+    return ((idxIn(i) + 0.5) / total) * 100;
+  };
+
+  const els = {
+    stage:  spot.querySelector('#spStage'),
+    num:    spot.querySelector('#spNum'),
+    name:   spot.querySelector('#spName'),
+    do_:    spot.querySelector('#spDo'),
+    ai :    spot.querySelector('#spAi'),
+    out:    spot.querySelector('#spOut'),
+    q  :    spot.querySelector('#spQ'),
+    bar:    spot.querySelector('#atlasBar'),
+  };
+
+  let cur = 2; // index 2 == 节点 03 · 知识 · 问题链 (v4 cover focus)
+  let paused = false;
+  let timer = null;
+  const INTERVAL = 3200;
+
+  function render(i, opts = {}) {
+    const s = STATIONS[i];
+    // nodes class
+    nodes.forEach((nd, k) => {
+      nd.classList.toggle('is-active', k === i);
+      nd.classList.toggle('is-done',   k < i);
+      if (k === i) nd.setAttribute('aria-selected','true');
+      else nd.removeAttribute('aria-selected');
+    });
+    // lanes — highlight only the lane that contains the active station
+    Object.entries(lanes).forEach(([st, el]) => {
+      el.classList.toggle('is-current', st === s.stage);
+    });
+    // fills: completed lanes show 100%, current lane up to the active node,
+    //        future lanes are empty.
+    const stageOrder = ['pre','in','post'];
+    const curStageIdx = stageOrder.indexOf(s.stage);
+    stageOrder.forEach((st, k) => {
+      const f = fills[st];
+      if (!f) return;
+      if (k < curStageIdx) f.style.width = '100%';
+      else if (k > curStageIdx) f.style.width = '0%';
+      else f.style.width = fillPctFor(i) + '%';
+    });
+
+    // spot
+    spot.dataset.stage = s.stage;
+    els.stage.textContent = STAGE_LABEL[s.stage];
+    els.num.textContent = s.n;
+    els.name.innerHTML = `${s.cn}<span class="em">${s.em}</span>`;
+    els.do_.textContent = s.do_;
+    els.ai.textContent  = s.ai;
+    els.out.textContent = s.out;
+    els.q.innerHTML = `<b>${s.q}</b>`;
+
+    // re-trigger fade animation on spot-anim children
+    spot.querySelectorAll('.sp-anim').forEach(el => {
+      el.style.animation = 'none';
+      // force reflow
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
+
+    // progress bar reset → fill over INTERVAL
+    if (!opts.silent) {
+      els.bar.style.transition = 'none';
+      els.bar.style.width = '0%';
+      requestAnimationFrame(() => {
+        els.bar.style.transition = `width ${INTERVAL}ms linear`;
+        if (!paused) els.bar.style.width = '100%';
+      });
+    }
+  }
+
+  function next() { cur = (cur + 1) % STATIONS.length; render(cur); }
+  function start() { stop(); if (!paused) timer = setInterval(next, INTERVAL); }
+  function stop()  { if (timer) { clearInterval(timer); timer = null; } }
+
+  function setPaused(p) {
+    paused = p;
+    spot.classList.toggle('is-paused', p);
+    if (p) {
+      stop();
+      els.bar.style.transition = 'none';
+      // freeze the bar at its current computed width
+      const w = getComputedStyle(els.bar).width;
+      els.bar.style.width = w;
+    } else {
+      // resume by re-rendering current (resets the timer cycle)
+      render(cur);
+      start();
+    }
+  }
+
+  // Click any node to focus + pause auto-advance for a moment
+  nodes.forEach(nd => {
+    nd.addEventListener('click', () => {
+      cur = Number(nd.dataset.st) - 1;
+      render(cur);
+      start();
+    });
+  });
+
+  // Pause on hover anywhere in the atlas (track or spot)
+  root.addEventListener('mouseenter', () => setPaused(true));
+  root.addEventListener('mouseleave', () => setPaused(false));
+
+  // Pause when tab hidden
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else if (!paused) start();
+  });
+
+  // Boot
+  render(cur);
+  start();
+})();
+</script>
+
+<script>
+(function(){
+  const stream = document.getElementById('streamBC');
+  if (!stream) return;
+  const lines = [
+    { ts: '00:01', k: 'plan',  msg: '解析 prompt → 路由到 <b>节点 03</b> · 知识与误区 · 问题链' },
+    { ts: '00:03', k: 'tool',  msg: '调用 <b>闻道·科学探索</b> · <span class="wenda-q" data-wendao="launch" data-wendao-query="2024 国家医保谈判 抗肿瘤药品" title="点击在闻道打开此次检索">&quot;2024 国家医保谈判 抗肿瘤药品&quot;</span>' },
+    { ts: '00:08', k: 'cite',  msg: '收到 <b>7 份资料</b> <span class="tag">CMS-202407</span>' },
+    { ts: '00:11', k: 'tool',  msg: '调用 <b>循证药学库</b> · 3 个抗肿瘤药匿名样本' },
+    { ts: '00:15', k: 'tool',  msg: '调用 <b>处方场景生成器</b> · SWOT 场景 × 3' },
+    { ts: '00:23', k: 'write', msg: '写入 <b>plan.md</b> · 45 分钟剧本 v0.1 · <span class="ok">完成</span>' },
+    { ts: '00:25', k: 'plan',  msg: '检测到威胁(T)维度需开放问题 — 追加 1 处' },
+    { ts: '00:28', k: 'write', msg: '更新 <b>plan.md</b> · v0.2 · 加入"医保压价 vs 创新"' },
+    { ts: '00:31', k: 'cite',  msg: '所有引用通过审校 <span class="ok">✓ 7 / 7</span>' },
+    { ts: '00:33', k: 'plan',  msg: '准备移交教师审校 → <b>节点 03 完成度 92%</b>' },
+  ];
+  let i = 0;
+  function row(l) {
+    const el = document.createElement('div');
+    el.className = 's-row ' + l.k;
+    el.innerHTML = `<span class="ts">${l.ts}</span><span class="kind">${l.k.toUpperCase()}</span><span class="msg">${l.msg}</span>`;
+    stream.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    while (stream.children.length > 8) stream.removeChild(stream.firstElementChild);
+  }
+  function tick() {
+    if (i >= lines.length) { setTimeout(()=>{stream.innerHTML=''; i=0; tick();}, 3500); return; }
+    row(lines[i++]);
+    setTimeout(tick, 1100);
+  }
+  tick();
+})();
+</script>
+
+<!-- ============ Tweaks · 三个旋钮 ============ -->
+<div id="tweaks-root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="./tweaks-panel.jsx"></script>
+<script type="text/babel" src="./tweaks-bc.jsx"></script>
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="background:#d97757">
+    <rect width="200" height="200" fill="#d97757"/>
+    <text x="100" y="145" text-anchor="middle"
+          font-family="Georgia, serif" font-style="italic" font-weight="600"
+          font-size="130" fill="#fffdf7">P</text>
+    <text x="100" y="178" text-anchor="middle"
+          font-family="ui-monospace, Menlo, monospace" font-size="14"
+          letter-spacing="0.2em" fill="rgba(255,253,247,0.6)">V2</text>
+  </svg>
+</template>
+</body>
+</html>
