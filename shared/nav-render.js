@@ -88,14 +88,14 @@
         .agcl-row {
           display: grid; grid-template-columns: 26px 1fr 3fr auto;
           align-items: center; gap: 10px; padding: 5px 0;
-          font-family: var(--serif-cn, ui-serif, serif); font-size: 13px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
         }
-        .agcl-rank { font-family: var(--mono, ui-monospace); color: var(--mute, #999); font-size: 11px; }
+        .agcl-rank { font-family: var(--mono); color: var(--mute, #999); font-size: var(--fs-2xs); }
         .agcl-lbl  { color: var(--ink, #1a1714); }
         .agcl-bar  { display: block; height: 8px; border-radius: 4px;
                      background: rgba(168,73,42,0.08); position: relative; overflow: hidden; }
         .agcl-bar i { display: block; height: 100%; border-radius: 4px; transition: width .35s ease; }
-        .agcl-val  { font-family: var(--mono, ui-monospace); font-size: 11px; color: var(--mute, #999); white-space: nowrap; }
+        .agcl-val  { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #999); white-space: nowrap; }
 
         /* ---- 06 证据密度 + 议程对照 ---- */
         .evdensity-wrap { padding: 6px 0 4px; }
@@ -103,7 +103,7 @@
         .evd-row {
           display: grid; grid-template-columns: 80px 1fr 90px;
           align-items: center; gap: 10px;
-          font-family: var(--serif-cn, ui-serif, serif); font-size: 13px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
         }
         .evd-lbl { color: var(--ink, #1a1714); }
         .evd-track {
@@ -111,17 +111,17 @@
           background: rgba(168,73,42,0.08); overflow: hidden;
         }
         .evd-track i { display: block; height: 100%; border-radius: 5px; transition: width .35s ease; }
-        .evd-val { font-family: var(--mono, ui-monospace); font-size: 11px; text-align: right; }
+        .evd-val { font-family: var(--mono); font-size: var(--fs-2xs); text-align: right; }
         .evd-agendas { margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(168,73,42,0.18); }
         .evd-agendas-hd {
-          font-family: var(--mono, ui-monospace); font-size: 10px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute, #999); letter-spacing: 0.08em; margin-bottom: 6px;
         }
         .evd-agendas-row { display: flex; flex-wrap: wrap; gap: 8px; }
         .evd-agenda {
           display: inline-flex; align-items: center; gap: 5px;
-          padding: 3px 8px; border-radius: 12px; font-size: 12px;
-          font-family: var(--serif-cn, ui-serif, serif);
+          padding: 3px 8px; border-radius: 12px; font-size: var(--fs-2xs);
+          font-family: var(--serif-cn);
           background: #faf6ee; color: var(--ink, #1a1714);
           border: 1px solid rgba(168,73,42,0.15);
         }
@@ -132,7 +132,7 @@
         .evd-callout {
           margin-top: 12px; padding: 8px 10px;
           background: #faf6ee; border-left: 3px solid var(--amber-deep, #a8492a);
-          font-family: var(--serif-cn, ui-serif, serif); font-size: 12.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
           color: var(--ink, #1a1714);
         }
         .evd-callout b { color: var(--amber-deep, #a8492a); margin-right: 4px; }
@@ -143,20 +143,20 @@
           align-items: center; gap: 8px;
           padding: 7px 8px; border-radius: 6px;
           background: rgba(168,73,42,0.04);
-          font-family: var(--serif-cn, ui-serif, serif); font-size: 12.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
         }
         .chain-row .cr-lvl {
           display: inline-flex; align-items: center; justify-content: center;
           width: 28px; height: 22px; border-radius: 4px;
-          color: #fff; font-family: var(--mono, ui-monospace); font-size: 10px;
+          color: #fff; font-family: var(--mono); font-size: var(--fs-2xs);
           font-weight: 600;
         }
         .chain-row .cr-type {
-          font-family: var(--mono, ui-monospace); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--ink, #1a1714); letter-spacing: 0.04em;
         }
         .chain-row .cr-text { color: var(--ink, #1a1714); line-height: 1.4; }
-        .chain-row .cr-meta { display: flex; gap: 6px; align-items: center; font-family: var(--mono, ui-monospace); font-size: 10.5px; }
+        .chain-row .cr-meta { display: flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: var(--fs-2xs); }
         .chain-row .cr-diff { font-weight: 600; }
         .chain-row .cr-block { color: var(--amber-deep, #a8492a); font-weight: 500; }
         /* === M · station 11 S8 复盘视图 === */
@@ -166,7 +166,7 @@
         }
         .s8-view .ar-head {
           display: flex; justify-content: space-between; align-items: baseline;
-          font-family: var(--mono, ui-monospace); font-size: 10.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute, #999); letter-spacing: 0.06em;
           margin-bottom: 8px;
         }
@@ -176,12 +176,12 @@
           display: grid; grid-template-columns: 1fr auto auto; gap: 12px;
           align-items: center; padding: 5px 8px; border-radius: 5px;
           background: rgba(168,73,42,.04);
-          font-family: var(--serif-cn, ui-serif, serif); font-size: 12.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
         }
         .s8-view .ar-row .ar-text { color: var(--ink, #1a1714); }
         .s8-view .ar-row .ar-cells {
           display: inline-flex; gap: 3px;
-          font-family: var(--mono, ui-monospace); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
         }
         .s8-view .ar-row .ar-cell {
           width: 14px; text-align: center; display: inline-block;
@@ -189,82 +189,82 @@
         .s8-view .ar-row .ar-cell.ar-yes { color: var(--sage, #6a9a7b); font-weight: 600; }
         .s8-view .ar-row .ar-cell.ar-no { color: rgba(0,0,0,.18); }
         .s8-view .ar-row .ar-score {
-          font-family: var(--mono, ui-monospace); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--amber-deep, #a8492a); font-weight: 600;
           min-width: 28px; text-align: right;
         }
         .s8-view .ar-empty {
           padding: 14px; text-align: center;
-          color: var(--mute, #999); font-size: 12px;
+          color: var(--mute, #999); font-size: var(--fs-2xs);
           background: rgba(168,73,42,.03); border-radius: 6px;
         }
         .s8-view .pr-row {
           display: grid; grid-template-columns: 40px 38px 1fr; gap: 8px;
           align-items: center; padding: 5px 8px; border-radius: 5px;
           background: rgba(168,73,42,.04);
-          font-family: var(--serif-cn, ui-serif, serif); font-size: 12.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
           margin-bottom: 3px;
         }
         .s8-view .pr-row .pr-id {
-          font-family: var(--mono, ui-monospace); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--amber-deep, #a8492a); font-weight: 600;
         }
         .s8-view .pr-row .pr-t {
-          font-family: var(--mono, ui-monospace); font-size: 10.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute, #999);
         }
-        .s8-view .pr-row .pr-rule { color: var(--ink, #1a1714); font-size: 12px; }
+        .s8-view .pr-row .pr-rule { color: var(--ink, #1a1714); font-size: var(--fs-2xs); }
         .s8-view .pr-row .pr-empty { color: var(--mute, #999); font-style: italic; }
         /* === M · station 11 S9 资产视图 (extra) === */
         .s9-view .evd-source {
-          display: block; font-family: var(--mono, ui-monospace);
-          font-size: 10px; color: var(--mute, #999); margin-top: 1px;
+          display: block; font-family: var(--mono);
+          font-size: var(--fs-2xs); color: var(--mute, #999); margin-top: 1px;
           letter-spacing: 0.02em;
         }
 
         /* ====== O · DARK MODE 覆盖 · 数据驱动图表组件 ====== */
-        html[data-theme="dark"] .agcl-lbl { color: #faf6ee; }
-        html[data-theme="dark"] .agcl-val { color: #908a7a; }
+        html[data-theme="dark"] .agcl-lbl { color: var(--ivory); }
+        html[data-theme="dark"] .agcl-val { color: var(--mute-2); }
         html[data-theme="dark"] .agcl-bar { background: rgba(255,253,247,.06); }
-        html[data-theme="dark"] .agcl-rank { color: #908a7a; }
+        html[data-theme="dark"] .agcl-rank { color: var(--mute-2); }
 
-        html[data-theme="dark"] .evd-lbl { color: #faf6ee; }
+        html[data-theme="dark"] .evd-lbl { color: var(--ivory); }
         html[data-theme="dark"] .evd-track { background: rgba(255,253,247,.06); }
         html[data-theme="dark"] .evd-agendas { border-top-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .evd-agendas-hd { color: #908a7a; }
+        html[data-theme="dark"] .evd-agendas-hd { color: var(--mute-2); }
         html[data-theme="dark"] .evd-agenda {
-          background: rgba(255,253,247,.04); color: #d6cfbe;
+          background: rgba(255,253,247,.04); color: var(--on-dark);
           border-color: rgba(255,253,247,.10);
         }
         html[data-theme="dark"] .evd-agenda.is-miss {
           background: rgba(217,119,87,.12); color: var(--amber-soft); border-color: rgba(217,119,87,.35);
         }
         html[data-theme="dark"] .evd-callout {
-          background: rgba(217,119,87,.10); color: #d6cfbe; border-left-color: var(--amber);
+          background: rgba(217,119,87,.10); color: var(--on-dark); border-left-color: var(--amber);
         }
         html[data-theme="dark"] .evd-callout b { color: var(--amber-soft); }
 
         html[data-theme="dark"] .chain-row {
           background: rgba(255,253,247,.04);
         }
-        html[data-theme="dark"] .chain-row .cr-type { color: #c5bda9; }
-        html[data-theme="dark"] .chain-row .cr-text { color: #faf6ee; }
+        html[data-theme="dark"] .chain-row .cr-type { color: var(--on-dark-mute); }
+        html[data-theme="dark"] .chain-row .cr-text { color: var(--ivory); }
         html[data-theme="dark"] .chain-row .cr-block { color: var(--amber-soft); }
 
         html[data-theme="dark"] .s8-view .ar-row {
-          background: rgba(255,253,247,.04); color: #d6cfbe;
+          background: rgba(255,253,247,.04); color: var(--on-dark);
         }
-        html[data-theme="dark"] .s8-view .ar-row .ar-text { color: #faf6ee; }
+        html[data-theme="dark"] .s8-view .ar-row .ar-text { color: var(--ivory); }
         html[data-theme="dark"] .s8-view .ar-row .ar-cell.ar-no { color: rgba(255,253,247,.18); }
         html[data-theme="dark"] .s8-view .ar-row .ar-score { color: var(--amber-soft); }
         html[data-theme="dark"] .s8-view .ar-empty {
-          background: rgba(255,253,247,.04); color: #908a7a;
+          background: rgba(255,253,247,.04); color: var(--mute-2);
         }
         html[data-theme="dark"] .s8-view .pr-row {
           background: rgba(255,253,247,.04);
         }
-        html[data-theme="dark"] .s8-view .pr-row .pr-rule { color: #d6cfbe; }
-        html[data-theme="dark"] .s8-view .pr-row .pr-empty { color: #908a7a; }
+        html[data-theme="dark"] .s8-view .pr-row .pr-rule { color: var(--on-dark); }
+        html[data-theme="dark"] .s8-view .pr-row .pr-empty { color: var(--mute-2); }
       `;
       document.head.appendChild(st);
     })();
@@ -281,17 +281,17 @@
         .qchain.qchain-rich li.is-selected { background: var(--amber-wash, #f7e6d8); }
         .qchain.qchain-rich .qopt-head {
           display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
-          font-family: var(--serif-cn); font-size: 13.5px; color: var(--ink);
+          font-family: var(--serif-cn); font-size: var(--fs-sm); color: var(--ink);
           line-height: 1.5;
         }
         .qchain.qchain-rich .qopt-label { font-weight: 500; }
         .qchain.qchain-rich .qopt-score {
-          margin-left: auto; font-family: var(--mono); font-size: 10px;
+          margin-left: auto; font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.02em;
         }
         .qchain.qchain-rich .qopt-score b { color: var(--ink-2); font-weight: 600; }
         .qchain.qchain-rich .qopt-rationale {
-          margin-top: 5px; font-family: var(--serif-cn); font-size: 12.5px;
+          margin-top: 5px; font-family: var(--serif-cn); font-size: var(--fs-xs);
           line-height: 1.55; color: var(--ink-soft);
         }
         /* ann 三档变体（保留 .ann.fork 作为 .ann-rec 的别名） */
@@ -318,7 +318,7 @@
         }
         /* 产物区门禁：保存判断前置灰 */
         .ppl-artifact-zone.is-gated .ppl-artifact-gate {
-          font-family: var(--mono); font-size: 10.5px; color: var(--amber-deep);
+          font-family: var(--mono); font-size: var(--fs-2xs); color: var(--amber-deep);
           margin-bottom: 6px; letter-spacing: 0.04em;
         }
         .ppl-artifact-zone.is-gated button[data-artifact-id] {
@@ -328,10 +328,10 @@
         /* dark mode */
         html[data-theme="dark"] .qchain.qchain-rich li:hover { background: rgba(217,119,87,0.08); }
         html[data-theme="dark"] .qchain.qchain-rich li.is-selected { background: rgba(217,119,87,.18); }
-        html[data-theme="dark"] .qchain.qchain-rich .qopt-rationale { color: #c5bda9; }
-        html[data-theme="dark"] .qchain.qchain-rich .qopt-score b { color: #faf6ee; }
-        html[data-theme="dark"] .ann.ann-alt { background: rgba(255,253,247,.06); color: #d6cfbe; }
-        html[data-theme="dark"] .ann.ann-avoid { color: #908a7a; border-color: rgba(255,253,247,.18); }
+        html[data-theme="dark"] .qchain.qchain-rich .qopt-rationale { color: var(--on-dark-mute); }
+        html[data-theme="dark"] .qchain.qchain-rich .qopt-score b { color: var(--ivory); }
+        html[data-theme="dark"] .ann.ann-alt { background: rgba(255,253,247,.06); color: var(--on-dark); }
+        html[data-theme="dark"] .ann.ann-avoid { color: var(--mute-2); border-color: rgba(255,253,247,.18); }
         html[data-theme="dark"] .ann.ann-rec { background: rgba(217,119,87,.25); color: var(--amber-soft); border-color: var(--amber-soft); }
       `;
       document.head.appendChild(st);
@@ -348,7 +348,7 @@
           display: flex; align-items: center; gap: 4px;
           padding: 6px 0 12px; margin-bottom: 10px;
           border-bottom: 1px dashed var(--rule);
-          font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+          font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.06em;
         }
         .qchain-stepper .qstep {
           display: inline-flex; align-items: center; gap: 5px;
@@ -358,7 +358,7 @@
           transition: all .2s;
         }
         .qchain-stepper .qstep::before {
-          content: "○"; font-size: 12px; line-height: 1; color: var(--mute-2);
+          content: "○"; font-size: var(--fs-2xs); line-height: 1; color: var(--mute-2);
         }
         .qchain-stepper .qstep.is-done { color: var(--sage); }
         .qchain-stepper .qstep.is-done::before { content: "●"; color: var(--sage); }
@@ -376,7 +376,7 @@
            适老化字号：题面 15px / 选项 14.5px / hint 13.5px / line-height 1.7 */
         .chain-q { margin-bottom: 12px; }
         .chain-q-stem {
-          font-family: var(--serif-cn); font-size: 15px; color: var(--ink);
+          font-family: var(--serif-cn); font-size: var(--fs-md); color: var(--ink);
           line-height: 1.7; margin: 0 0 12px; padding: 12px 14px;
           background: var(--amber-wash); border-left: 3px solid var(--amber-deep);
           border-radius: 0 6px 6px 0;
@@ -386,7 +386,7 @@
           padding: 11px 14px; margin-bottom: 7px;
           border: 1px solid var(--rule); border-radius: 6px;
           background: var(--paper);
-          font-family: var(--serif-cn); font-size: 14.5px; color: var(--ink);
+          font-family: var(--serif-cn); font-size: var(--fs-sm); color: var(--ink);
           line-height: 1.65;
           cursor: pointer; transition: all .14s;
           display: flex; align-items: flex-start; gap: 8px;
@@ -414,7 +414,7 @@
           background: var(--paper-2);
           border: 1px dashed var(--rule);
           border-radius: 6px;
-          font-family: var(--serif-cn); font-size: 13.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-sm);
           color: var(--ink-soft); line-height: 1.7;
           display: none;
         }
@@ -428,7 +428,7 @@
         }
         .chain-hint-lvl {
           display: inline-block;
-          font-family: var(--mono); font-size: 9.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           letter-spacing: 0.06em; color: var(--amber-deep);
           background: var(--paper); padding: 1px 6px;
           border-radius: 3px; margin-right: 6px;
@@ -437,7 +437,7 @@
           margin-top: 8px; display: flex; gap: 8px; align-items: center;
         }
         .chain-hint-cta .btn-hint {
-          font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.04em;
+          font-family: var(--mono); font-size: var(--fs-xs); letter-spacing: 0.04em;
           padding: 5px 12px; background: var(--paper);
           border: 1px solid var(--amber-deep); color: var(--amber-deep);
           border-radius: 4px; cursor: pointer; transition: all .12s;
@@ -449,7 +449,7 @@
           opacity: 0.4; cursor: not-allowed;
         }
         .chain-hint-meta {
-          font-family: var(--mono); font-size: 11.5px; color: var(--mute);
+          font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
           letter-spacing: 0.04em;
         }
 
@@ -464,7 +464,7 @@
           background: rgba(168,73,42,0.08);
           border-left: 3px solid var(--amber-deep);
           border-radius: 0 6px 6px 0;
-          font-family: var(--serif-cn); font-size: 13.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-sm);
           color: var(--amber-deep);
           animation: chainWrongFadeIn .2s ease-out;
           display: flex; align-items: center; gap: 6px;
@@ -481,7 +481,7 @@
           border-top: 1px dashed var(--rule);
         }
         .chain-completed-cta .btn-next-stage {
-          font-family: var(--mono); font-size: 13px; padding: 8px 16px;
+          font-family: var(--mono); font-size: var(--fs-xs); padding: 8px 16px;
           background: var(--amber-deep); color: var(--ivory);
           border: 1px solid var(--amber-deep); border-radius: 4px;
           cursor: pointer; letter-spacing: 0.04em;
@@ -493,14 +493,14 @@
           border-color: var(--rule); cursor: not-allowed;
         }
         /* 5×4 矩阵 cell 数字字号升 14px(适老化补完) */
-        .figure-card.rich-01 .rm-cell .rm-num { font-size: 14px; }
+        .figure-card.rich-01 .rm-cell .rm-num { font-size: var(--fs-sm); }
         .figure-card.rich-01 .rm-cell { height: 28px; }
 
         /* v6.2: 重置题链按钮 */
         .qchain-stepper { position: relative; }
         .qstep-reset {
           margin-left: auto;
-          font-family: var(--mono); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           padding: 4px 10px; cursor: pointer;
           background: transparent; color: var(--mute);
           border: 1px solid var(--rule); border-radius: 4px;
@@ -519,7 +519,7 @@
           background: rgba(106,154,123,0.06);
           border-left: 3px solid var(--sage, #6a9a7b);
           border-radius: 0 6px 6px 0;
-          font-family: var(--serif-cn); font-size: 12.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
           color: var(--ink-soft); line-height: 1.6;
         }
 
@@ -543,31 +543,31 @@
           margin-bottom: 6px; flex-wrap: wrap;
         }
         .figure-card.rich-09 .rc-id {
-          font-family: var(--mono); font-size: 13px; font-weight: 700;
+          font-family: var(--mono); font-size: var(--fs-xs); font-weight: 700;
           color: var(--amber-deep);
           background: var(--amber-wash); padding: 2px 8px; border-radius: 3px;
         }
         .figure-card.rich-09 .rc-t {
-          font-family: var(--mono); font-size: 12px; color: var(--mute);
+          font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
         }
         .figure-card.rich-09 .rc-label {
-          font-family: var(--serif-cn); font-size: 13.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-sm);
           color: var(--ink); font-weight: 500;
         }
         .figure-card.rich-09 .rc-format {
-          font-size: 12px; color: var(--mute);
+          font-size: var(--fs-2xs); color: var(--mute);
           margin-bottom: 6px; line-height: 1.55;
         }
         .figure-card.rich-09 .rc-if,
         .figure-card.rich-09 .rc-then {
-          font-family: var(--serif-cn); font-size: 13.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-sm);
           color: var(--ink); line-height: 1.55;
           display: grid; grid-template-columns: 28px 1fr;
           gap: 8px; padding: 3px 0;
           align-items: baseline;
         }
         .figure-card.rich-09 .rc-kw {
-          font-family: var(--mono); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--amber-deep); font-weight: 600;
           background: var(--paper); padding: 2px 4px; border-radius: 3px;
           text-align: center;
@@ -586,11 +586,11 @@
         }
         .figure-card.rich-04 .bp-lvl {
           text-align: right;
-          font-family: var(--serif-cn); font-size: 13.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-sm);
           color: var(--ink); font-weight: 500;
         }
         .figure-card.rich-04 .bp-lvl small {
-          font-family: var(--mono); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); margin-right: 6px;
         }
         .figure-card.rich-04 .bp-bar-wrap {
@@ -602,7 +602,7 @@
           border-radius: 3px;
           display: flex; align-items: center; justify-content: flex-end;
           padding: 0 10px;
-          font-family: var(--mono); font-size: 12px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--ivory); font-weight: 700;
           letter-spacing: 0.02em;
           transition: width .3s ease;
@@ -629,7 +629,7 @@
         }
         .figure-card.rich-04 .bp-meta {
           margin: 12px 22px 4px;
-          font-family: var(--mono); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.04em;
           text-align: center;
         }
@@ -642,7 +642,7 @@
           border-top: 1px dashed rgba(168,73,42,0.18);
         }
         .figure-card.rich-04 .ge-pairs-h {
-          font-family: var(--mono); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.06em;
           margin-bottom: 10px;
         }
@@ -650,7 +650,7 @@
           display: grid; grid-template-columns: 1fr 28px 1fr;
           gap: 10px; align-items: center;
           padding: 7px 0;
-          font-family: var(--serif-cn); font-size: 12.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
           line-height: 1.55;
         }
         .figure-card.rich-04 .ge-pair + .ge-pair {
@@ -661,13 +661,13 @@
           font-weight: 500;
         }
         .figure-card.rich-04 .ge-arrow {
-          font-family: var(--mono); font-size: 14px;
+          font-family: var(--mono); font-size: var(--fs-sm);
           color: var(--amber-deep);
           text-align: center; font-weight: 600;
         }
         .figure-card.rich-04 .ge-evidence {
           color: var(--ink-soft);
-          font-size: 12.5px;
+          font-size: var(--fs-xs);
         }
 
         /* v6.4 S8 议程兑现 5×4 热力矩阵 */
@@ -679,12 +679,12 @@
         }
         .figure-card.rich-11 .fm-corner,
         .figure-card.rich-11 .fm-row-h {
-          font-family: var(--serif-cn); font-size: 12.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
           color: var(--ink); align-self: center;
           padding: 4px 0;
         }
         .figure-card.rich-11 .fm-col-h {
-          font-family: var(--mono); font-size: 11.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.06em;
           text-align: center;
           align-self: end; padding-bottom: 4px;
@@ -694,7 +694,7 @@
           height: 28px;
           border-radius: 4px;
           display: flex; align-items: center; justify-content: center;
-          font-family: var(--mono); font-size: 13px; font-weight: 700;
+          font-family: var(--mono); font-size: var(--fs-xs); font-weight: 700;
           transition: transform .14s, box-shadow .14s;
         }
         .figure-card.rich-11 .fm-cell.is-fulfilled {
@@ -711,7 +711,7 @@
         }
         .figure-card.rich-11 .fm-score {
           text-align: center; align-self: center;
-          font-family: var(--mono); font-size: 13px; font-weight: 700;
+          font-family: var(--mono); font-size: var(--fs-xs); font-weight: 700;
           color: var(--ink); padding: 0 4px;
         }
         .figure-card.rich-11 .fm-score.is-low   { color: var(--amber-deep); }
@@ -719,7 +719,7 @@
         .figure-card.rich-11 .fm-totals-h {
           padding: 8px 0 0; margin-top: 4px;
           border-top: 1px dashed var(--rule);
-          font-family: var(--mono); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.04em;
           align-self: center;
         }
@@ -727,7 +727,7 @@
           padding: 8px 0 4px; margin-top: 4px;
           border-top: 1px dashed var(--rule);
           text-align: center;
-          font-family: var(--mono); font-size: 13.5px; font-weight: 700;
+          font-family: var(--mono); font-size: var(--fs-sm); font-weight: 700;
           color: var(--amber-deep);
         }
         .figure-card.rich-11 .fm-corner-bot {
@@ -740,7 +740,7 @@
           border-top: 1px dashed rgba(168,73,42,0.18);
         }
         .figure-card.rich-11 .fm-unfulfill-h {
-          font-family: var(--mono); font-size: 10.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--amber-deep); letter-spacing: 0.06em;
           margin-bottom: 8px;
         }
@@ -768,7 +768,7 @@
         .figure-card.rich-02 .pq-axis-x,
         .figure-card.rich-02 .pq-axis-y {
           position: absolute;
-          font-family: var(--mono); font-size: 9.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.04em;
         }
         .figure-card.rich-02 .pq-axis-x.is-left  { bottom: -16px; left: 2px; }
@@ -785,25 +785,25 @@
         .figure-card.rich-02 .pq-bubble {
           width: 64px; height: 64px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-family: var(--mono); font-size: 16px; font-weight: 700;
+          font-family: var(--mono); font-size: var(--fs-md); font-weight: 700;
           color: var(--ivory); position: relative;
           transition: transform .2s;
         }
         .figure-card.rich-02 .pq-bubble:hover { transform: scale(1.08); }
         .figure-card.rich-02 .pq-label {
-          font-size: 11.5px; color: var(--ink); font-weight: 500;
+          font-size: var(--fs-2xs); color: var(--ink); font-weight: 500;
           text-align: center;
         }
         .figure-card.rich-02 .pq-meta {
           margin: 18px 22px 6px;
-          font-family: var(--mono); font-size: 10.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.04em;
         }
         .figure-card.rich-02 .pq-h {
           margin: 14px 22px 0;
           padding-top: 12px;
           border-top: 1px dashed rgba(168,73,42,0.18);
-          font-family: var(--mono); font-size: 10.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           letter-spacing: 0.08em; color: var(--mute);
         }
 
@@ -813,7 +813,7 @@
           border-top: 1px dashed rgba(168,73,42,0.18);
         }
         .figure-card.rich-08 .sankey-h {
-          font-family: var(--mono); font-size: 10.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.08em;
           margin-bottom: 8px;
         }
@@ -822,7 +822,7 @@
         }
         .figure-card.rich-08 .sk-agenda-label,
         .figure-card.rich-08 .sk-role-label {
-          font-family: var(--serif-cn); font-size: 13px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
           fill: var(--ink); font-weight: 500;
         }
         .figure-card.rich-08 .sk-agenda-node {
@@ -843,30 +843,30 @@
         }
 
         /* v6.5 Dark mode 系统补全 — v6+ 新加的组件统一覆盖 */
-        html[data-theme="dark"] .figure-card.rich-04 .bp-lvl { color: #faf6ee; }
-        html[data-theme="dark"] .figure-card.rich-04 .bp-lvl small { color: #908a7a; }
-        html[data-theme="dark"] .figure-card.rich-04 .bp-meta { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-04 .bp-lvl { color: var(--ivory); }
+        html[data-theme="dark"] .figure-card.rich-04 .bp-lvl small { color: var(--mute-2); }
+        html[data-theme="dark"] .figure-card.rich-04 .bp-meta { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-04 .bp-cov i.is-empty { border-color: rgba(255,253,247,.16); }
         html[data-theme="dark"] .figure-card.rich-04 .goal-evidence-pairs { border-top-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .figure-card.rich-04 .ge-pairs-h { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-04 .ge-pairs-h { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-04 .ge-pair + .ge-pair { border-top-color: rgba(255,253,247,.06); }
-        html[data-theme="dark"] .figure-card.rich-04 .ge-goal { color: #faf6ee; }
-        html[data-theme="dark"] .figure-card.rich-04 .ge-evidence { color: #c5bda9; }
+        html[data-theme="dark"] .figure-card.rich-04 .ge-goal { color: var(--ivory); }
+        html[data-theme="dark"] .figure-card.rich-04 .ge-evidence { color: var(--on-dark-mute); }
         html[data-theme="dark"] .figure-card.rich-04 .ge-arrow { color: var(--amber-soft); }
 
         /* S2 参与度象限 dark mode */
         html[data-theme="dark"] .figure-card.rich-02 .participation-quads { border-color: rgba(255,253,247,.10); }
         html[data-theme="dark"] .figure-card.rich-02 .participation-quads::before,
         html[data-theme="dark"] .figure-card.rich-02 .participation-quads::after { background: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .figure-card.rich-02 .pq-label { color: #faf6ee; }
+        html[data-theme="dark"] .figure-card.rich-02 .pq-label { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-02 .pq-axis-x,
-        html[data-theme="dark"] .figure-card.rich-02 .pq-axis-y { color: #908a7a; }
-        html[data-theme="dark"] .figure-card.rich-02 .pq-meta { color: #908a7a; }
-        html[data-theme="dark"] .figure-card.rich-02 .pq-h { color: #908a7a; border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-02 .pq-axis-y { color: var(--mute-2); }
+        html[data-theme="dark"] .figure-card.rich-02 .pq-meta { color: var(--mute-2); }
+        html[data-theme="dark"] .figure-card.rich-02 .pq-h { color: var(--mute-2); border-top-color: rgba(255,253,247,.10); }
 
         /* S5 Sankey dark mode */
         html[data-theme="dark"] .figure-card.rich-08 .sankey-wrap { border-top-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .figure-card.rich-08 .sankey-h { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-08 .sankey-h { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-08 .sk-agenda-label,
         html[data-theme="dark"] .figure-card.rich-08 .sk-role-label { fill: #faf6ee; }
 
@@ -875,25 +875,25 @@
         html[data-theme="dark"] .figure-card.rich-09 .rc-id {
           background: rgba(217,119,87,0.22); color: var(--amber-soft);
         }
-        html[data-theme="dark"] .figure-card.rich-09 .rc-t { color: #908a7a; }
-        html[data-theme="dark"] .figure-card.rich-09 .rc-label { color: #faf6ee; }
-        html[data-theme="dark"] .figure-card.rich-09 .rc-format { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-t { color: var(--mute-2); }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-label { color: var(--ivory); }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-format { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-09 .rc-if,
-        html[data-theme="dark"] .figure-card.rich-09 .rc-then { color: #d6cfbe; }
+        html[data-theme="dark"] .figure-card.rich-09 .rc-then { color: var(--on-dark); }
         html[data-theme="dark"] .figure-card.rich-09 .rc-kw {
           background: rgba(255,253,247,.06); color: var(--amber-soft);
         }
 
         /* S8 议程兑现矩阵 dark mode */
         html[data-theme="dark"] .figure-card.rich-11 .fm-corner,
-        html[data-theme="dark"] .figure-card.rich-11 .fm-row-h { color: #faf6ee; }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-row-h { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-11 .fm-col-h,
-        html[data-theme="dark"] .figure-card.rich-11 .fm-totals-h { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-totals-h { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-11 .fm-cell.is-empty {
           background: rgba(255,253,247,.04);
           border-color: rgba(255,253,247,.18);
         }
-        html[data-theme="dark"] .figure-card.rich-11 .fm-score { color: #faf6ee; }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-score { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-11 .fm-dim-total,
         html[data-theme="dark"] .figure-card.rich-11 .fm-col-total {
           border-top-color: rgba(255,253,247,.10);
@@ -903,17 +903,17 @@
         html[data-theme="dark"] .figure-card.rich-11 .fm-unfulfill-section { border-top-color: rgba(255,253,247,.10); }
 
         /* v6+ 题链 controls dark mode 补充 */
-        html[data-theme="dark"] .qstep-reset { color: #908a7a; border-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .qstep-reset { color: var(--mute-2); border-color: rgba(255,253,247,.10); }
         html[data-theme="dark"] .qstep-reset:hover { color: var(--amber-soft); background: rgba(217,119,87,.10); border-color: var(--amber-soft); }
         html[data-theme="dark"] .chain-completed-cta { border-top-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .chain-reflection-helper { color: #908a7a; }
+        html[data-theme="dark"] .chain-reflection-helper { color: var(--mute-2); }
         html[data-theme="dark"] .chain-wrong-toast {
           background: rgba(217,119,87,.12); color: var(--amber-soft);
         }
         html[data-theme="dark"] .chain-q-actions { border-top-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .chain-q-actions .chain-meta { color: #908a7a; }
+        html[data-theme="dark"] .chain-q-actions .chain-meta { color: var(--mute-2); }
         html[data-theme="dark"] .chain-transfer-saved-note {
-          background: rgba(106,154,123,.10); color: #d6cfbe;
+          background: rgba(106,154,123,.10); color: var(--on-dark);
         }
 
         /* v6.3: figure cell ↔ question 选项 hover 联动高亮 */
@@ -936,7 +936,7 @@
         /* 反思梯度 helper */
         .chain-reflection-helper {
           margin: 8px 0 0;
-          font-family: var(--mono); font-size: 11.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.02em;
         }
         .chain-reflection-helper b { color: var(--amber-deep); font-weight: 500; }
@@ -946,7 +946,7 @@
         .chain-q-transfer textarea {
           width: 100%; box-sizing: border-box;
           min-height: 96px; padding: 12px 14px;
-          font-family: var(--serif-cn); font-size: 14.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-sm);
           line-height: 1.7; color: var(--ink);
           background: var(--ivory);
           border: 1px solid var(--rule); border-radius: 6px;
@@ -965,11 +965,11 @@
         }
         .chain-q-actions .chain-meta {
           margin-right: auto;
-          font-family: var(--mono); font-size: 11.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--mute); letter-spacing: 0.04em;
         }
         .chain-q-actions .btn-s.chain-save {
-          font-family: var(--mono); font-size: 12.5px;
+          font-family: var(--mono); font-size: var(--fs-xs);
           padding: 6px 16px;
           background: var(--amber-deep); color: var(--ivory);
           border: 1px solid var(--amber-deep); border-radius: 4px;
@@ -987,19 +987,19 @@
           margin: 10px 0 12px; padding: 10px 14px;
           background: var(--paper-2); border-left: 2px solid var(--sage);
           border-radius: 0 4px 4px 0;
-          font-family: var(--serif-cn); font-size: 13px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
           color: var(--ink-soft); line-height: 1.7;
         }
         .chain-q-scaffold ul { margin: 0; padding-left: 18px; }
         .chain-q-scaffold li + li { margin-top: 4px; }
         html[data-theme="dark"] .chain-q-reflection textarea,
         html[data-theme="dark"] .chain-q-transfer textarea {
-          background: #211f1d; color: #faf6ee; border-color: rgba(255,253,247,.10);
+          background: #211f1d; color: var(--ivory); border-color: rgba(255,253,247,.10);
         }
 
         /* ── Inline decision dock (Q3 嵌进 question-card) ── */
         .chain-q-decision .chain-q-trans {
-          font-family: var(--mono); font-size: 11px; color: var(--mute);
+          font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
           letter-spacing: 0.04em; margin: 6px 0 10px;
         }
         .decision-dock.decision-dock-inline {
@@ -1012,7 +1012,7 @@
         }
         .decision-dock.decision-dock-inline .dd-actions .btn-s.dd-opt {
           text-align: left; padding: 12px 16px;
-          font-family: var(--serif-cn); font-size: 15px;
+          font-family: var(--serif-cn); font-size: var(--fs-md);
           line-height: 1.55;
           background: var(--paper); color: var(--ink);
           border: 1px solid var(--rule); border-radius: 6px;
@@ -1031,7 +1031,7 @@
           padding: 6px 14px;
         }
         html[data-theme="dark"] .decision-dock.decision-dock-inline .dd-actions .btn-s.dd-opt {
-          background: #2a2722; color: #d6cfbe; border-color: rgba(255,253,247,.10);
+          background: #2a2722; color: var(--on-dark); border-color: rgba(255,253,247,.10);
         }
         html[data-theme="dark"] .decision-dock.decision-dock-inline .dd-actions .btn-s.dd-opt:hover {
           background: rgba(217,119,87,0.08);
@@ -1049,11 +1049,11 @@
           padding: 10px 16px;
           background: var(--amber-wash);
           border-bottom: 1px dashed var(--amber-deep);
-          font-family: var(--mono); font-size: 11px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           letter-spacing: 0.04em; color: var(--amber-deep);
           display: flex; align-items: center; gap: 8px;
         }
-        .artifact-chain-lock::before { content: "🔒"; font-size: 12px; }
+        .artifact-chain-lock::before { content: "🔒"; font-size: var(--fs-2xs); }
         html[data-theme="dark"] .artifact-chain-lock {
           background: rgba(217,119,87,0.12);
         }
@@ -1068,13 +1068,38 @@
           position: absolute; top: 50%; left: 0; right: 0;
           transform: translateY(-50%);
           text-align: center;
-          font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+          font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.06em;
           color: var(--amber-deep);
           background: rgba(255,253,247,0.92);
           padding: 6px 0;
           pointer-events: none;
         }
         .decision-dock.is-chain-locked .dd-actions { pointer-events: none; }
+
+        /* ── 证据门禁：缺上游证据/前置未完成 → 可浏览，但不可拍板/生成产物 ── */
+        #stationDetail.is-evidence-locked .decision-dock { opacity: 0.5; position: relative; pointer-events: none; }
+        #stationDetail.is-evidence-locked .decision-dock::after {
+          content: "🔒 需先补齐上游证据，方可拍板并保存判断";
+          position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+          font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.05em;
+          color: var(--amber-deep); background: rgba(255,253,247,0.86); text-align: center; padding: 6px 10px; pointer-events: none;
+        }
+        #stationDetail.is-evidence-locked .artifact { opacity: 0.55; position: relative; }
+        #stationDetail.is-evidence-locked .artifact .artifact-body,
+        #stationDetail.is-evidence-locked .artifact button[data-artifact-id] { pointer-events: none; }
+        .evidence-gate { margin: 0 0 14px; padding: 12px 16px; border-radius: 12px; background: var(--amber-wash); border: 1px solid var(--amber-deep); color: var(--ink); font-size: var(--fs-sm); line-height: 1.55; }
+        .evidence-gate .eg-h { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--amber-deep); margin-bottom: 4px; }
+        .evidence-gate .eg-h::before { content: "⚠"; }
+        .evidence-gate .eg-note { color: var(--ink-soft); font-size: var(--fs-xs); margin-bottom: 8px; }
+        .evidence-gate .eg-list { display: flex; flex-direction: column; gap: 7px; }
+        .evidence-gate .eg-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+        .evidence-gate .eg-go { font: var(--fs-2xs)/1.1 var(--mono); padding: 4px 11px; border: 1px solid var(--amber-deep); border-radius: 999px; color: var(--amber-deep); background: transparent; cursor: pointer; }
+        .evidence-gate .eg-go:hover { background: var(--amber-deep); color: #fff; }
+        .evidence-gate .eg-prod { color: var(--mute-2); font: var(--fs-2xs) var(--mono); }
+        .evidence-gate.eg-sub { background: rgba(112,82,168,0.09); border-color: var(--violet); }
+        .evidence-gate.eg-sub .eg-h { color: var(--violet); }
+        .tile.is-locked { opacity: 0.62; }
+        .tile.is-locked .t-lock { margin-left: 3px; font-size: var(--fs-2xs); opacity: 0.85; }
 
         /* ── Chain extras (Q3 reflection + Q4 transfer) ── */
         .chain-extras { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
@@ -1084,21 +1109,21 @@
         }
         .chain-card-h {
           display: flex; justify-content: space-between; align-items: center;
-          font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+          font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.08em;
           text-transform: uppercase; color: var(--mute);
           padding-bottom: 8px; border-bottom: 1px solid var(--rule);
           margin-bottom: 10px;
         }
         .chain-card-h b { color: var(--ink); }
         .chain-card-stem {
-          font-family: var(--serif-cn); font-size: 14.5px; color: var(--ink);
+          font-family: var(--serif-cn); font-size: var(--fs-sm); color: var(--ink);
           line-height: 1.7; margin: 0 0 12px;
         }
         .chain-card-scaffold {
           margin: 10px 0 12px; padding: 10px 14px;
           background: var(--paper-2); border-left: 2px solid var(--sage);
           border-radius: 0 4px 4px 0;
-          font-family: var(--serif-cn); font-size: 13px; color: var(--ink-soft);
+          font-family: var(--serif-cn); font-size: var(--fs-xs); color: var(--ink-soft);
           line-height: 1.7;
         }
         .chain-card-scaffold ul { margin: 0; padding-left: 18px; }
@@ -1106,7 +1131,7 @@
         .chain-card textarea {
           width: 100%; box-sizing: border-box;
           min-height: 80px; padding: 12px 14px;
-          font-family: var(--serif-cn); font-size: 14.5px; color: var(--ink);
+          font-family: var(--serif-cn); font-size: var(--fs-sm); color: var(--ink);
           line-height: 1.65;
           background: var(--ivory); border: 1px solid var(--rule);
           border-radius: 6px; resize: vertical;
@@ -1117,10 +1142,10 @@
           justify-content: flex-end;
         }
         .chain-card-actions .chain-meta {
-          margin-right: auto; font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+          margin-right: auto; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
         }
         .chain-card .btn-s.chain-save {
-          font-family: var(--mono); font-size: 11px; padding: 5px 12px;
+          font-family: var(--mono); font-size: var(--fs-2xs); padding: 5px 12px;
           background: var(--amber-deep); color: var(--ivory);
           border: 1px solid var(--amber-deep); border-radius: 4px;
           cursor: pointer; letter-spacing: 0.04em;
@@ -1151,31 +1176,31 @@
           margin-bottom: 8px;
         }
         .consent-tag {
-          font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+          font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.08em;
           color: var(--amber-deep); font-weight: 600;
         }
         .consent-close {
-          background: none; border: none; font-size: 18px;
+          background: none; border: none; font-size: var(--fs-lg);
           color: var(--mute); cursor: pointer; line-height: 1;
           padding: 0 4px;
         }
         .consent-body .consent-lead {
-          font-family: var(--serif-cn); font-size: 14px; font-weight: 600;
+          font-family: var(--serif-cn); font-size: var(--fs-sm); font-weight: 600;
           color: var(--ink); margin: 0 0 6px;
         }
         .consent-body .consent-text {
-          font-size: 12.5px; color: var(--ink-soft); line-height: 1.55;
+          font-size: var(--fs-xs); color: var(--ink-soft); line-height: 1.55;
           margin: 0 0 6px;
         }
         .consent-body .consent-note {
-          font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+          font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
           letter-spacing: 0.04em; margin: 6px 0 0;
         }
         .consent-actions {
           margin-top: 10px; display: flex; gap: 8px; justify-content: flex-end;
         }
         .consent-actions .btn-s {
-          font-family: var(--mono); font-size: 11px; padding: 5px 12px;
+          font-family: var(--mono); font-size: var(--fs-2xs); padding: 5px 12px;
           border-radius: 4px; cursor: pointer; letter-spacing: 0.04em;
           border: 1px solid var(--rule); background: var(--paper); color: var(--ink);
         }
@@ -1185,18 +1210,18 @@
         }
 
         /* ── Dark mode 覆盖 ── */
-        html[data-theme="dark"] .chain-q-stem { background: rgba(217,119,87,0.10); color: #faf6ee; }
-        html[data-theme="dark"] .chain-q-opts li { background: #2a2722; border-color: rgba(255,253,247,.10); color: #d6cfbe; }
+        html[data-theme="dark"] .chain-q-stem { background: rgba(217,119,87,0.10); color: var(--ivory); }
+        html[data-theme="dark"] .chain-q-opts li { background: #2a2722; border-color: rgba(255,253,247,.10); color: var(--on-dark); }
         html[data-theme="dark"] .chain-q-opts li:hover { background: rgba(217,119,87,0.08); }
-        html[data-theme="dark"] .chain-q-opts li.is-correct { background: rgba(106,154,123,0.12); color: #faf6ee; }
-        html[data-theme="dark"] .chain-q-opts li.is-wrong { background: rgba(168,73,42,0.10); color: #908a7a; }
-        html[data-theme="dark"] .chain-hint-drawer { background: rgba(255,253,247,.04); color: #c5bda9; }
+        html[data-theme="dark"] .chain-q-opts li.is-correct { background: rgba(106,154,123,0.12); color: var(--ivory); }
+        html[data-theme="dark"] .chain-q-opts li.is-wrong { background: rgba(168,73,42,0.10); color: var(--mute-2); }
+        html[data-theme="dark"] .chain-hint-drawer { background: rgba(255,253,247,.04); color: var(--on-dark-mute); }
         html[data-theme="dark"] .chain-card { background: #2a2722; border-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .chain-card-stem { color: #faf6ee; }
-        html[data-theme="dark"] .chain-card textarea { background: #211f1d; color: #faf6ee; border-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .consent-card { background: #211f1d; border-color: rgba(255,253,247,.16); color: #faf6ee; }
-        html[data-theme="dark"] .consent-body .consent-lead { color: #faf6ee; }
-        html[data-theme="dark"] .consent-body .consent-text { color: #d6cfbe; }
+        html[data-theme="dark"] .chain-card-stem { color: var(--ivory); }
+        html[data-theme="dark"] .chain-card textarea { background: #211f1d; color: var(--ivory); border-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .consent-card { background: #211f1d; border-color: rgba(255,253,247,.16); color: var(--ivory); }
+        html[data-theme="dark"] .consent-body .consent-lead { color: var(--ivory); }
+        html[data-theme="dark"] .consent-body .consent-text { color: var(--on-dark); }
         html[data-theme="dark"] .decision-dock.is-chain-locked::after { background: rgba(33,31,29,0.92); color: var(--amber-soft); }
 
         /* ── S1 三角图气泡 + 4 类定位排序条形图 (A+B 优化) ── */
@@ -1213,15 +1238,15 @@
           stroke-dasharray: 2,2;
         }
         .figure-card.rich-01 .bubble .bubble-val {
-          fill: #fff; font-family: var(--mono, ui-monospace);
-          font-size: 11px; font-weight: 700;
+          fill: #fff; font-family: var(--mono);
+          font-size: var(--fs-2xs); font-weight: 700;
           pointer-events: none;
         }
         .figure-card.rich-01 .bubble.is-warn .bubble-val { fill: var(--ink, #1a1714); }
         .figure-card.rich-01 .bubble .bubble-name {
           fill: var(--ink, #1a1714);
-          font-family: var(--serif-cn, ui-serif, serif);
-          font-size: 9.5px;
+          font-family: var(--serif-cn);
+          font-size: var(--fs-2xs);
           font-weight: 500;
           pointer-events: none;
         }
@@ -1237,14 +1262,14 @@
           border-top: 1px dashed rgba(168,73,42,0.18);
         }
         .figure-card.rich-01 .loc-bars-h {
-          font-family: var(--mono, ui-monospace); font-size: 11.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           letter-spacing: 0.06em; color: var(--mute, #999);
           margin-bottom: 10px;
           display: flex; justify-content: space-between; align-items: center;
           gap: 12px; flex-wrap: wrap;
         }
         .figure-card.rich-01 .loc-expand-all {
-          font-family: var(--mono, ui-monospace); font-size: 11.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           padding: 5px 12px; cursor: pointer;
           background: var(--paper); color: var(--amber-deep, #a8492a);
           border: 1px solid var(--amber-deep, #a8492a); border-radius: 4px;
@@ -1259,10 +1284,10 @@
         .figure-card.rich-01 .loc-row {
           display: grid; grid-template-columns: 90px 1fr 32px 1.3fr 16px;
           gap: 10px; align-items: center; padding: 5px 0;
-          font-size: 13.5px;
+          font-size: var(--fs-sm);
         }
         .figure-card.rich-01 .loc-toggle {
-          font-family: var(--mono, ui-monospace); font-size: 14px;
+          font-family: var(--mono); font-size: var(--fs-sm);
           color: var(--mute, #999); text-align: center; line-height: 1;
           transition: transform .2s ease;
         }
@@ -1298,11 +1323,11 @@
         .figure-card.rich-01 .bd-row {
           display: grid; grid-template-columns: 110px 1fr 54px 1.4fr;
           gap: 10px; align-items: center; padding: 3px 8px;
-          font-size: 12.5px;
+          font-size: var(--fs-xs);
         }
         .figure-card.rich-01 .bd-dim {
-          font-family: var(--serif-cn, ui-serif, serif);
-          font-size: 13px;
+          font-family: var(--serif-cn);
+          font-size: var(--fs-xs);
           color: var(--ink-soft, #444);
         }
         .figure-card.rich-01 .bd-track {
@@ -1316,22 +1341,22 @@
         .figure-card.rich-01 .loc-breakdown.is-ok .bd-track i  { background: var(--sage, #6a9a7b); }
         .figure-card.rich-01 .loc-breakdown.is-warn .bd-track i { background: rgba(217,119,87,0.5); }
         .figure-card.rich-01 .bd-val {
-          font-family: var(--mono, ui-monospace); font-size: 12px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           text-align: right; color: var(--ink, #1a1714); font-weight: 600;
         }
         .figure-card.rich-01 .bd-note {
-          font-family: var(--serif-cn, ui-serif, serif);
-          color: var(--mute, #999); font-size: 12.5px;
+          font-family: var(--serif-cn);
+          color: var(--mute, #999); font-size: var(--fs-xs);
           line-height: 1.55;
         }
         html[data-theme="dark"] .figure-card.rich-01 .loc-detail[open] { background: rgba(255,253,247,0.04); }
         html[data-theme="dark"] .figure-card.rich-01 .loc-breakdown { border-left-color: rgba(255,253,247,0.18); }
-        html[data-theme="dark"] .figure-card.rich-01 .bd-dim { color: #c5bda9; }
-        html[data-theme="dark"] .figure-card.rich-01 .bd-val { color: #faf6ee; }
-        html[data-theme="dark"] .figure-card.rich-01 .bd-note { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-01 .bd-dim { color: var(--on-dark-mute); }
+        html[data-theme="dark"] .figure-card.rich-01 .bd-val { color: var(--ivory); }
+        html[data-theme="dark"] .figure-card.rich-01 .bd-note { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-01 .bd-track { background: rgba(255,253,247,0.06); }
         .figure-card.rich-01 .loc-name {
-          font-family: var(--serif-cn, ui-serif, serif);
+          font-family: var(--serif-cn);
           color: var(--ink, #1a1714); font-weight: 500;
         }
         .figure-card.rich-01 .loc-track {
@@ -1347,21 +1372,21 @@
         .figure-card.rich-01 .loc-row.is-ok .loc-fill  { background: var(--sage, #6a9a7b); }
         .figure-card.rich-01 .loc-row.is-warn .loc-fill { background: rgba(217,119,87,0.5); }
         .figure-card.rich-01 .loc-val {
-          font-family: var(--mono, ui-monospace); font-size: 13px;
+          font-family: var(--mono); font-size: var(--fs-xs);
           text-align: right; color: var(--ink, #1a1714); font-weight: 600;
         }
         .figure-card.rich-01 .loc-row.is-top .loc-val { color: var(--amber-deep, #a8492a); }
         .figure-card.rich-01 .loc-note {
-          font-family: var(--serif-cn, ui-serif, serif);
-          color: var(--mute, #999); font-size: 12.5px;
+          font-family: var(--serif-cn);
+          color: var(--mute, #999); font-size: var(--fs-xs);
           line-height: 1.55;
         }
         .figure-card.rich-01 .loc-row.is-top .loc-name {
           color: var(--amber-deep, #a8492a); font-weight: 600;
         }
-        html[data-theme="dark"] .figure-card.rich-01 .loc-name { color: #faf6ee; }
-        html[data-theme="dark"] .figure-card.rich-01 .loc-val { color: #faf6ee; }
-        html[data-theme="dark"] .figure-card.rich-01 .loc-note { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-01 .loc-name { color: var(--ivory); }
+        html[data-theme="dark"] .figure-card.rich-01 .loc-val { color: var(--ivory); }
+        html[data-theme="dark"] .figure-card.rich-01 .loc-note { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-01 .loc-bars { border-top-color: rgba(255,253,247,0.10); }
         html[data-theme="dark"] .figure-card.rich-01 .loc-track { background: rgba(255,253,247,0.06); }
         html[data-theme="dark"] .figure-card.rich-01 .bubble .bubble-name { fill: #faf6ee; }
@@ -1374,7 +1399,7 @@
           border-left: 3px solid var(--amber-deep);
           border-radius: 0 6px 6px 0;
           font-family: var(--serif-cn);
-          font-size: 13px;
+          font-size: var(--fs-xs);
           line-height: 1.7;
           color: var(--ink-soft);
         }
@@ -1388,7 +1413,7 @@
           padding: 6px 0 10px;
         }
         .figure-card.rich-01 .rm-corner {
-          font-family: var(--mono); font-size: 10.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           letter-spacing: 0.04em; color: var(--mute);
           align-self: end; padding-bottom: 6px;
         }
@@ -1399,7 +1424,7 @@
           background: var(--paper-2);
           cursor: pointer;
           font-family: var(--serif-cn);
-          font-size: 13.5px; font-weight: 500;
+          font-size: var(--fs-sm); font-weight: 500;
           color: var(--ink);
           text-align: center;
           transition: all .14s;
@@ -1419,7 +1444,7 @@
         }
         .figure-card.rich-01 .rm-dim {
           font-family: var(--serif-cn);
-          font-size: 12.5px;
+          font-size: var(--fs-xs);
           color: var(--ink-soft);
           align-self: center;
           line-height: 1.4;
@@ -1427,7 +1452,7 @@
         .figure-card.rich-01 .rm-dim-total,
         .figure-card.rich-01 .rm-dim-status {
           font-family: var(--mono);
-          font-size: 11px;
+          font-size: var(--fs-2xs);
           letter-spacing: 0.04em;
           color: var(--mute);
         }
@@ -1462,7 +1487,7 @@
         .figure-card.rich-01 .rm-cell.is-warn .rm-bar { background: rgba(217,119,87,0.22); }
         .figure-card.rich-01 .rm-cell .rm-num {
           position: relative; z-index: 1;
-          font-family: var(--mono); font-size: 14px; font-weight: 600;
+          font-family: var(--mono); font-size: var(--fs-sm); font-weight: 600;
           color: var(--ink);
         }
         .figure-card.rich-01 .rm-cell.is-top .rm-num {
@@ -1472,7 +1497,7 @@
           padding: 6px 4px;
           text-align: center;
           font-family: var(--mono);
-          font-size: 15px; font-weight: 700;
+          font-size: var(--fs-md); font-weight: 700;
           color: var(--ink);
           margin-top: 4px;
         }
@@ -1486,7 +1511,7 @@
           padding: 2px 4px;
           text-align: center;
           font-family: var(--mono);
-          font-size: 11.5px;
+          font-size: var(--fs-2xs);
           letter-spacing: 0.04em;
         }
         .figure-card.rich-01 .rm-status.is-top  { color: var(--amber-deep); font-weight: 600; }
@@ -1509,11 +1534,11 @@
           border-bottom: 1px solid var(--rule);
         }
         .figure-card.rich-01 .rm-detail-h span {
-          font-family: var(--serif-cn); font-size: 13.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-sm);
           color: var(--ink); font-weight: 600;
         }
         .figure-card.rich-01 .rm-detail-h small {
-          font-family: var(--serif-cn); font-size: 12.5px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
           font-style: italic; color: var(--amber-deep);
         }
         .figure-card.rich-01 .rm-detail-list {
@@ -1524,42 +1549,42 @@
           grid-template-columns: 110px 50px 1fr;
           gap: 10px;
           padding: 5px 0;
-          font-size: 12.5px;
+          font-size: var(--fs-xs);
           line-height: 1.55;
         }
         .figure-card.rich-01 .rm-detail-list li + li {
           border-top: 1px dotted rgba(168,73,42,0.12);
         }
         .figure-card.rich-01 .rm-dt-dim {
-          font-family: var(--serif-cn); font-size: 13px;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
           color: var(--ink-soft);
         }
         .figure-card.rich-01 .rm-dt-val {
-          font-family: var(--mono); font-size: 12px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           color: var(--amber-deep); font-weight: 600;
           text-align: right;
         }
         .figure-card.rich-01 .rm-dt-note {
           font-family: var(--serif-cn); color: var(--mute);
-          font-size: 12.5px; line-height: 1.6;
+          font-size: var(--fs-xs); line-height: 1.6;
         }
 
         /* dark mode */
         html[data-theme="dark"] .figure-card.rich-01 .alignment-note {
-          background: rgba(255,253,247,0.05); color: #c5bda9;
+          background: rgba(255,253,247,0.05); color: var(--on-dark-mute);
         }
         html[data-theme="dark"] .figure-card.rich-01 .rm-col-h {
-          background: rgba(255,253,247,0.05); color: #faf6ee;
+          background: rgba(255,253,247,0.05); color: var(--ivory);
         }
         html[data-theme="dark"] .figure-card.rich-01 .rm-col-h:hover {
           background: rgba(217,119,87,0.18);
         }
         html[data-theme="dark"] .figure-card.rich-01 .rm-cell { background: rgba(255,253,247,0.05); }
-        html[data-theme="dark"] .figure-card.rich-01 .rm-cell .rm-num { color: #faf6ee; }
-        html[data-theme="dark"] .figure-card.rich-01 .rm-total { color: #faf6ee; }
-        html[data-theme="dark"] .figure-card.rich-01 .rm-dim { color: #c5bda9; }
-        html[data-theme="dark"] .figure-card.rich-01 .rm-dt-dim { color: #c5bda9; }
-        html[data-theme="dark"] .figure-card.rich-01 .rm-dt-note { color: #908a7a; }
+        html[data-theme="dark"] .figure-card.rich-01 .rm-cell .rm-num { color: var(--ivory); }
+        html[data-theme="dark"] .figure-card.rich-01 .rm-total { color: var(--ivory); }
+        html[data-theme="dark"] .figure-card.rich-01 .rm-dim { color: var(--on-dark-mute); }
+        html[data-theme="dark"] .figure-card.rich-01 .rm-dt-dim { color: var(--on-dark-mute); }
+        html[data-theme="dark"] .figure-card.rich-01 .rm-dt-note { color: var(--mute-2); }
 
         /* 前后节承接 折叠抽屉(替代原 spiral-context 永远展开) */
         .figure-card.rich-01 .spiral-disclosure {
@@ -1570,7 +1595,7 @@
         .figure-card.rich-01 .spiral-summary {
           list-style: none; cursor: pointer;
           padding: 6px 0;
-          font-family: var(--mono, ui-monospace); font-size: 11.5px;
+          font-family: var(--mono); font-size: var(--fs-2xs);
           letter-spacing: 0.04em; color: var(--mute, #999);
           display: flex; align-items: center; gap: 6px;
         }
@@ -1612,7 +1637,7 @@
     const STATION_EXTERNAL_CTA = {
       2: {
         text: "进入泛雅，开始互动故事",
-        url: "https://mooc2-ans.chaoxing.com/mooc2-ans/ai-evaluate/v2/answer?courseid=251769346&clazzid=147582914&cpi=63184132&publishRelationUuid=71305079-81b6-4795-b17c-63e5fdafa92b",
+        url: "https://demo.fanya.chaoxing.com/portal",
       },
     };
 
@@ -1691,7 +1716,7 @@
         const key = chain.topCardFromKeys[i] || "产物";
         const live = liveJudgmentFor(sid);
         const liveTag = live
-          ? `<span class="ci-live" title="你在上游环节的实际判断" style="display:block;margin-top:2px;font-size:11px;color:var(--sage,#6a9a7b);">✓ ${esc(live.length > 22 ? live.slice(0, 22) + "…" : live)}</span>`
+          ? `<span class="ci-live" title="你在上游环节的实际判断" style="display:block;margin-top:2px;font-size: var(--fs-2xs);color:var(--sage,#6a9a7b);">✓ ${esc(live.length > 22 ? live.slice(0, 22) + "…" : live)}</span>`
           : "";
         return `<li><span class="ci-num">${padN(stageIdx(sid))}</span><span class="ci-cn">${esc(src.displayName)}</span><span class="ci-key">${esc(key)}</span>${liveTag}</li>`;
       }).filter(Boolean).join("");
@@ -1844,7 +1869,9 @@
       if (!el) return;
       const s = stationById[activeId];
       if (!s) return;
-      el.innerHTML = renderChainTopcard(s) + renderSubPassBanner() + renderStationBody(s) + renderMergedAppendix();
+      const gate = evidenceGateState();
+      el.classList.toggle("is-evidence-locked", gate.blocked);
+      el.innerHTML = renderEvidenceGate(gate) + renderChainTopcard(s) + renderSubPassBanner() + renderStationBody(s) + renderMergedAppendix();
     }
 
     // 子节点回写/合并 banner：在 stationBody 上方显式说明当前是 v1 修订 pass 或合并节点
@@ -2236,7 +2263,9 @@
         if (correctChosen) cls += " is-locked";
         const linkAttr = (LINK_COLS && LINK_COLS[o.key])
           ? ` data-link-col="${esc(LINK_COLS[o.key])}"` : "";
-        return `<li class="${cls.trim()}" data-opt-key="${esc(o.key)}" data-correct="${o.correct ? "1" : "0"}"${linkAttr}>
+        const locked = cls.includes("is-locked");
+        return `<li class="${cls.trim()}" data-opt-key="${esc(o.key)}" data-correct="${o.correct ? "1" : "0"}"${linkAttr}
+          role="radio" tabindex="${locked ? "-1" : "0"}" aria-checked="${correctChosen && o.correct === true ? "true" : "false"}"${locked ? ' aria-disabled="true"' : ""}>
           ${esc(o.label)}
         </li>`;
       }).join("");
@@ -2259,7 +2288,7 @@
         <div class="chain-q" data-station="${stationId}" data-step="${q.step}">
           <div class="qcard-lbl"><span>${esc(kindLabel)}</span><b>Q${q.step} / 4</b></div>
           <p class="chain-q-stem">${esc(q.stem)}</p>
-          <ul class="chain-q-opts">${optsHtml}</ul>
+          <ul class="chain-q-opts" role="radiogroup" aria-label="${esc(kindLabel)}">${optsHtml}</ul>
           <div class="chain-hint-drawer ${drawerCls}" data-drawer-step="${q.step}">${hintItems}</div>
           <div class="chain-hint-cta">
             <button class="btn-hint" data-hint-station="${stationId}" data-hint-step="${q.step}" ${nextHintDisabled ? "disabled" : ""}>
@@ -2592,8 +2621,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             <p class="scaffold-evidence">${esc(s.evidenceFigure)}</p>
           </div>
           <div class="figure-foot">
-            <span>来源 · 待接入</span>
-            <a href="#" data-demo-toast="本节点图示稿正在设计中">查看图示进度 →</a>
+            <span>来源 · 站内数据载荷</span>
           </div>
         </div>
       `;
@@ -2655,7 +2683,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         : null;
       return `
         <div class="figure-card rich-02">
-          <div class="fcard-lbl"><span>FIGURE · 学情分布</span><b>前测 4 题 · N=37</b></div>
+          <div class="fcard-lbl"><span>FIGURE · 学情分布</span><b>前测 4 题 · N=32</b></div>
           <div class="pre-legend">
             <span class="leg"><i class="seg-good"></i>掌握</span>
             <span class="leg"><i class="seg-part"></i>部分</span>
@@ -2697,7 +2725,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
               </div>
             `;
             return `
-              <div class="pq-h">参与度 2 维分群 · 主动性 × 知识水平 · N=37</div>
+              <div class="pq-h">参与度 2 维分群 · 主动性 × 知识水平 · N=32</div>
               <div class="participation-quads" aria-label="参与度二维象限">
                 ${renderBubble(topLeft)}
                 ${renderBubble(topRight)}
@@ -2838,15 +2866,15 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         const cells = (r.levels || []).map((lv, i) => {
           const lvl = i + 1;
           const isCur = lvl === r.cur;
-          return `<div class="r4r-cell${isCur ? " is-cur" : ""}" style="flex:1;min-width:0;padding:4px 5px;border:1px solid ${isCur ? "var(--amber-deep)" : "var(--rule,#e7e1d8)"};border-radius:4px;background:${isCur ? "rgba(217,119,87,.12)" : "transparent"};font-size:10.5px;line-height:1.3;color:${isCur ? "var(--amber-deep)" : "var(--mute,#8a8178)"};"><b style="display:block;font-size:9px;letter-spacing:.04em;opacity:.7;">L${lvl}</b>${esc(lv)}</div>`;
+          return `<div class="r4r-cell${isCur ? " is-cur" : ""}" style="flex:1;min-width:0;padding:4px 5px;border:1px solid ${isCur ? "var(--amber-deep)" : "var(--rule,#e7e1d8)"};border-radius:4px;background:${isCur ? "rgba(217,119,87,.12)" : "transparent"};font-size: var(--fs-2xs);line-height:1.3;color:${isCur ? "var(--amber-deep)" : "var(--mute,#8a8178)"};"><b style="display:block;font-size: var(--fs-2xs);letter-spacing:.04em;opacity:.7;">L${lvl}</b>${esc(lv)}</div>`;
         }).join("");
         const cov = Math.max(0, Math.min(3, Number(r.cov) || 0));
         const covBlocks = [0, 1, 2].map((j) => `<i style="display:inline-block;width:8px;height:8px;margin-left:2px;border-radius:1px;background:${j < cov ? "var(--amber-deep)" : "rgba(168,73,42,.15)"};"></i>`).join("");
         return `
           <div class="r4r-row" style="display:flex;align-items:stretch;gap:8px;margin:6px 0;">
             <div class="r4r-dim" style="width:84px;flex:none;">
-              <b style="display:block;font-size:12.5px;color:var(--ink);">${esc(r.dim)}</b>
-              <small style="font-size:9.5px;color:var(--mute,#8a8178);line-height:1.25;">${esc(r.full || "")}</small>
+              <b style="display:block;font-size: var(--fs-xs);color:var(--ink);">${esc(r.dim)}</b>
+              <small style="font-size: var(--fs-2xs);color:var(--mute,#8a8178);line-height:1.25;">${esc(r.full || "")}</small>
             </div>
             <div class="r4r-levels" style="flex:1;display:flex;gap:4px;">${cells}</div>
             <div class="r4r-cov" style="width:32px;flex:none;text-align:right;align-self:center;" title="证据覆盖 ${cov}/3">${covBlocks}</div>
@@ -2856,7 +2884,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       return `
         <div class="figure-card rich-04b">
           <div class="fcard-lbl"><span>FIGURE · 5 维量规矩阵</span><b>5 维 × 4 等级 · 证据覆盖热图</b></div>
-          <div style="display:flex;gap:10px;font-size:10px;color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">
+          <div style="display:flex;gap:10px;font-size: var(--fs-2xs);color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">
             <span><i style="display:inline-block;width:8px;height:8px;border:1px solid var(--amber-deep);border-radius:2px;background:rgba(217,119,87,.12);vertical-align:middle;"></i> 当前设计等级</span>
             <span style="margin-left:auto;"><i style="display:inline-block;width:8px;height:8px;background:var(--amber-deep);border-radius:1px;vertical-align:middle;"></i> 证据覆盖 /3</span>
           </div>
@@ -2870,7 +2898,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             <span>来源 · 量规设计稿 v0.2 · 5 维 × 4 等级</span>
             <details class="figure-drill"><summary>展开量规细则 →</summary>
               <ol class="drill-list">
-                ${rubric.map((r) => `<li><b>${esc(r.dim)} · ${esc(r.full || "")}</b><br/>${(r.levels || []).map((lv, i) => `<span style="display:block;padding-left:6px;font-size:11.5px;">· L${i + 1} ${esc(lv)}</span>`).join("")}</li>`).join("")}
+                ${rubric.map((r) => `<li><b>${esc(r.dim)} · ${esc(r.full || "")}</b><br/>${(r.levels || []).map((lv, i) => `<span style="display:block;padding-left:6px;font-size: var(--fs-2xs);">· L${i + 1} ${esc(lv)}</span>`).join("")}</li>`).join("")}
               </ol>
             </details>
           </div>
@@ -2902,7 +2930,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         <div class="figure-card rich-06">
           <div class="fcard-lbl"><span>FIGURE · 案例证据密度</span><b>${esc(subject)} · ${bars.length} 维证据</b></div>
           ${dataNotice ? `
-            <div class="evd-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber,#b8860b);font-size:12px;color:var(--amber-deep,#a8492a);line-height:1.45;border-radius:0 4px 4px 0;">
+            <div class="evd-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber,#b8860b);font-size: var(--fs-2xs);color:var(--amber-deep,#a8492a);line-height:1.45;border-radius:0 4px 4px 0;">
               ${esc(dataNotice.text || "⚠ 当前为示例数据")}
             </div>
           ` : ""}
@@ -3100,7 +3128,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
               <span class="rc-id">${esc(a.id)}</span>
               <span class="rc-t">${a.t}'</span>
               <span class="rc-label">${esc(a.label || r.microFormat || "")}</span>
-              ${a.id === activeAnchor ? '<span style="margin-left:auto;font-size:9px;font-weight:600;color:var(--amber-deep);letter-spacing:.06em;">▶ 当前</span>' : ""}
+              ${a.id === activeAnchor ? '<span style="margin-left:auto;font-size: var(--fs-2xs);font-weight:600;color:var(--amber-deep);letter-spacing:.06em;">▶ 当前</span>' : ""}
             </div>
             ${r.microFormat ? `<div class="rc-format">微评估: ${esc(r.microFormat)}</div>` : ""}
             <div class="rc-if">
@@ -3249,7 +3277,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         <div class="figure-card rich-10">
           <div class="fcard-lbl"><span>FIGURE · 量规雷达</span><b>${N} 维评价 · ${dataSourceLabel}</b></div>
           ${!hasUserScore ? `
-            <div class="rubric-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber,#b8860b);font-size:12px;color:var(--amber-deep,#a8492a);line-height:1.45;border-radius:0 4px 4px 0;">
+            <div class="rubric-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber,#b8860b);font-size: var(--fs-2xs);color:var(--amber-deep,#a8492a);line-height:1.45;border-radius:0 4px 4px 0;">
               ⚠ 当前为样例评分。在子节点 10-a 完成 5 维量规评分后，能力画像将基于实测数据重新生成。
             </div>
           ` : ""}
@@ -3291,7 +3319,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             ${(e10 && e10.rubric && e10.rubric.length) ? `
               <details class="figure-drill"><summary>展开量规细则 →</summary>
                 <ol class="drill-list">
-                  ${e10.rubric.map((r) => `<li><b>${esc(r.dim)}</b><br/>${(r.levels || []).map((lv) => `<span style="display:block;padding-left:6px;font-size:11.5px;">· ${esc(lv)}</span>`).join("")}</li>`).join("")}
+                  ${e10.rubric.map((r) => `<li><b>${esc(r.dim)}</b><br/>${(r.levels || []).map((lv) => `<span style="display:block;padding-left:6px;font-size: var(--fs-2xs);">· ${esc(lv)}</span>`).join("")}</li>`).join("")}
                 </ol>
               </details>
             ` : `<span class="figure-foot-note">量规细则（5 维已在雷达图展示）</span>`}
@@ -3318,9 +3346,9 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         const v = Math.max(0, Math.min(100, Number(b[1]) || 0));
         const st = (b[2] || {}).status;
         return `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
-          <span style="width:96px;flex:none;font-size:11px;color:var(--ink);">${esc(b[0])}</span>
+          <span style="width:96px;flex:none;font-size: var(--fs-2xs);color:var(--ink);">${esc(b[0])}</span>
           <div style="flex:1;height:12px;background:rgba(0,0,0,.05);border-radius:3px;overflow:hidden;"><i style="display:block;height:100%;width:${v}%;background:${col(st)};border-radius:3px;"></i></div>
-          <span style="width:28px;flex:none;text-align:right;font-size:11px;font-weight:600;color:${col(st)};">${v}</span>
+          <span style="width:28px;flex:none;text-align:right;font-size: var(--fs-2xs);font-weight:600;color:${col(st)};">${v}</span>
         </div>`;
       };
       const maxW = Math.max(...pareto.map((p) => p.weightInTotal || 0), 0.01);
@@ -3329,7 +3357,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const paretoRow = (p) => {
         cum += (p.weightInTotal || 0);
         const cumPct = Math.round((cum / totW) * 100);
-        return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:11px;">
+        return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size: var(--fs-2xs);">
           <span style="width:96px;flex:none;color:var(--amber-deep);font-weight:600;">${esc(p.dim)}</span>
           <span style="width:46px;flex:none;color:var(--mute,#8a8178);">均分 ${p.mean}</span>
           <div style="flex:1;height:8px;background:rgba(168,73,42,.10);border-radius:2px;overflow:hidden;"><i style="display:block;height:100%;width:${Math.round(((p.weightInTotal || 0) / maxW) * 100)}%;background:var(--amber-deep);"></i></div>
@@ -3340,9 +3368,9 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       return `
         <div class="figure-card rich-10a">
           <div class="fcard-lbl"><span>FIGURE · 评分采集</span><b>5 维原始评分 · 低分维度 Pareto</b></div>
-          <div style="font-size:10px;color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">5 组作品均分 · 只采集数据，不做定性、不写反馈</div>
+          <div style="font-size: var(--fs-2xs);color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">5 组作品均分 · 只采集数据，不做定性、不写反馈</div>
           ${bars.map(barRow).join("")}
-          <div style="margin-top:9px;font-size:10px;color:var(--mute,#8a8178);letter-spacing:.04em;">低分维度 Pareto · 排下一轮优先项</div>
+          <div style="margin-top:9px;font-size: var(--fs-2xs);color:var(--mute,#8a8178);letter-spacing:.04em;">低分维度 Pareto · 排下一轮优先项</div>
           ${pareto.map(paretoRow).join("")}
           <div class="bloom-gap" style="margin-top:8px;"><b>★ 怎么用</b> · 最该优先补的是「${esc(lowest.dim)}」（均分 ${lowest.mean}）— 本步只采集，反馈语在下一步「反馈与画像」写</div>
           <div class="figure-foot"><span>来源 · 课后作品 32 份 · 5 组</span></div>
@@ -3364,13 +3392,13 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       }));
       const row = (q) => `
         <div style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;padding:6px 8px;border:1px solid var(--rule,#e7e1d8);border-radius:5px;background:rgba(217,119,87,.04);">
-          <span style="flex:none;width:86px;font-size:11.5px;font-weight:600;color:var(--amber-deep);line-height:1.3;">${esc(q.dim)}<br/><small style="font-weight:400;color:var(--mute,#8a8178);">均分 ${q.mean}</small></span>
-          <span style="flex:1;font-size:11px;line-height:1.45;color:var(--ink);">${esc(q.fix)}</span>
+          <span style="flex:none;width:86px;font-size: var(--fs-2xs);font-weight:600;color:var(--amber-deep);line-height:1.3;">${esc(q.dim)}<br/><small style="font-weight:400;color:var(--mute,#8a8178);">均分 ${q.mean}</small></span>
+          <span style="flex:1;font-size: var(--fs-2xs);line-height:1.45;color:var(--ink);">${esc(q.fix)}</span>
         </div>`;
       return `
         <div class="figure-card rich-10c">
           <div class="fcard-lbl"><span>FIGURE · 量规反向修订</span><b>低分维 → 修订项 → 回写 S2</b></div>
-          <div style="font-size:10px;color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">把本轮量规暴露的问题反向修订到「环节 02 目标与量规」</div>
+          <div style="font-size: var(--fs-2xs);color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">把本轮量规暴露的问题反向修订到「环节 02 目标与量规」</div>
           ${proposals.map(row).join("")}
           <div class="bloom-gap" style="margin-top:6px;"><b>↩ 回写通道</b> · 确认后经 rubricRevision 通道送回 S2；S2 须显式确认或驳回后方可继续（教学评一体化闭环）</div>
           <div class="figure-foot"><span>来源 · 本轮 5 维评分 · ${proposals.length} 条修订建议</span></div>
@@ -3442,12 +3470,12 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
               const existingNote = unfulfillNotes[a.key] && unfulfillNotes[a.key].reason;
               return `
                 <details class="ar-note" style="margin: 6px 0;">
-                  <summary style="cursor:pointer;font-family:var(--mono);font-size:11px;color:var(--amber-deep);list-style:none;padding:4px 0;">
+                  <summary style="cursor:pointer;font-family:var(--mono);font-size: var(--fs-2xs);color:var(--amber-deep);list-style:none;padding:4px 0;">
                     <span>${existingNote ? "✏ " + esc(a.text) + " · 已记录" : "＋ " + esc(a.text)}</span>
                   </summary>
                   <div style="display:flex;gap:6px;margin-top:5px;">
-                    <textarea class="ar-note-input" data-agenda-key="${esc(a.key)}" placeholder="例：学生未在小组讨论中提及 / 证据材料不足 / 时间不够…" rows="2" style="flex:1;font-family:inherit;font-size:12px;padding:5px 7px;border:1px solid rgba(168,73,42,.25);border-radius:4px;resize:vertical;">${esc(existingNote || "")}</textarea>
-                    <button class="btn-s ar-note-save" data-agenda-key="${esc(a.key)}" style="white-space:nowrap;padding:5px 10px;font-size:11.5px;">保存</button>
+                    <textarea class="ar-note-input" data-agenda-key="${esc(a.key)}" placeholder="例：学生未在小组讨论中提及 / 证据材料不足 / 时间不够…" rows="2" style="flex:1;font-family:inherit;font-size: var(--fs-2xs);padding:5px 7px;border:1px solid rgba(168,73,42,.25);border-radius:4px;resize:vertical;">${esc(existingNote || "")}</textarea>
+                    <button class="btn-s ar-note-save" data-agenda-key="${esc(a.key)}" style="white-space:nowrap;padding:5px 10px;font-size: var(--fs-2xs);">保存</button>
                   </div>
                 </details>
               `;
@@ -3571,7 +3599,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const head = esc(parts[0] || cta.text);
       const tail = esc(parts[1] || "");
       return `
-        <a class="ext-cta" href="${esc(cta.url)}" target="_blank" rel="noopener noreferrer"
+        <a class="ext-cta" data-fanya data-fanya-url="${esc(cta.url)}" href="${esc(cta.url)}" target="_blank" rel="noopener noreferrer"
            aria-label="${esc(cta.text)} · 在新标签打开">
           <span class="ext-cta-rail" aria-hidden="true"></span>
           <span class="ext-cta-text">
@@ -3636,19 +3664,19 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           </div>
           ${misc.length ? `
             <details class="misc-disclosure" style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--rule);">
-              <summary style="cursor:pointer;font-family:var(--mono);font-size:11.5px;color:var(--mute);letter-spacing:0.04em;list-style:none;">
+              <summary style="cursor:pointer;font-family:var(--mono);font-size: var(--fs-2xs);color:var(--mute);letter-spacing:0.04em;list-style:none;">
                 <span style="color:var(--amber-deep);font-weight:600;">⌄</span> 关键误区清单 · ${misc.length} 类高频误区
               </summary>
               <ol class="qchain" style="margin-top:10px;">
                 ${misc.map((m) => {
                   const freqPct = Math.round((m.frequency || 0) * 100);
                   const sev = freqPct >= 60 ? "fork" : "";
-                  return `<li style="font-size:13px;">
+                  return `<li style="font-size: var(--fs-xs);">
                     ${esc(m.text)}
                     <span class="ann ${sev}">${freqPct}% · ${esc(m.stage || "")}</span>
                     ${m.intervention ? `
-                      <div style="margin-top:4px;padding:6px 9px;background:rgba(106,154,123,.08);border-left:2px solid var(--sage,#6a9a7b);font-size:12px;color:var(--ink-soft,#3a3a3a);line-height:1.5;">
-                        <span style="font-family:var(--mono);font-size:10.5px;color:var(--sage,#6a9a7b);letter-spacing:.04em;">教学对策 · </span>${esc(m.intervention)}
+                      <div style="margin-top:4px;padding:6px 9px;background:rgba(106,154,123,.08);border-left:2px solid var(--sage,#6a9a7b);font-size: var(--fs-2xs);color:var(--ink-soft,#3a3a3a);line-height:1.5;">
+                        <span style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--sage,#6a9a7b);letter-spacing:.04em;">教学对策 · </span>${esc(m.intervention)}
                       </div>
                     ` : ""}
                   </li>`;
@@ -4015,7 +4043,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       el.innerHTML = `
         <span>已自动保存 · <b>${activeId === 5 ? "2 分钟前" : "未开始"}</b> · ${esc(fn)}${activeId === 5 ? " v0.2" : ""}</span>
         <div class="save-actions">
-          <button class="btn-s" data-demo-download>⤓ 导出 plan.md</button>
+          <button class="btn-s" data-demo-download data-plan-name="${esc(fn)}">⤓ 导出 ${esc(fn)}</button>
           <button class="btn-s" data-writeback-map data-station="${activeId}">＋ 写回训练地图</button>
           <button class="btn-s fill"${clickHandler}>${esc(nextLabel)}</button>
         </div>
@@ -4036,6 +4064,9 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       });
       document.addEventListener("keydown", (e) => {
         if (e.key !== "Enter" && e.key !== " ") return;
+        // 键盘可达:题链选项 / 环节卡 / 理论 chip — 统一转发到既有 click 委托
+        const act = e.target.closest(".chain-q-opts li[data-opt-key], [data-stage][role='button'], .sc-theory[data-theory-stage]");
+        if (act) { e.preventDefault(); act.click(); return; }
         const t = e.target.closest("[data-st]");
         if (!t) return;
         e.preventDefault();
@@ -4191,11 +4222,86 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       return allDone ? "is-done" : "";
     }
 
+    // ===================================================================
+    // v4.3 · 教育因果链门禁：缺上游证据/前置未完成 → 可浏览，不可拍板/保存
+    //   依据 STAGE_CHAIN.inputsFrom（环节级）与 SUB_NODES.enterCondition（子节点级）
+    // ===================================================================
+    // 某环节是否已产出（至少一个子节点有已保存判断）
+    function stageProduced(stageId) {
+      const store = window.PharmacoPilotStore;
+      if (!store || !store.getJudgment) return true;   // 无 Store → 不阻断（兜底）
+      const g = stageById[stageId]; if (!g) return true;
+      return (g.subNodeIds || []).map(String).some((k) => {
+        const e = SUB_NODES[k] || {};
+        const stid = (typeof e.legacyStationId === "number") ? e.legacyStationId : Number(k);
+        return !!(store.getJudgment(k) || (Number.isFinite(stid) && store.getJudgment(stid)));
+      });
+    }
+    // 当前环节缺失的上游环节（连同它们应产出的产物名）
+    function missingUpstreamStages(stageId) {
+      const chain = STAGE_CHAIN[stageId];
+      if (!chain || !chain.inputsFrom || !chain.inputsFrom.length) return [];
+      return chain.inputsFrom.filter((up) => !stageProduced(up)).map((up) => {
+        const g = stageById[up] || {};
+        const uc = STAGE_CHAIN[up] || {};
+        const idx = STAGES.findIndex((x) => x.id === up) + 1;
+        return { id: up, idx, name: g.displayName || g.title || up, products: uc.topCardToKeys || [] };
+      });
+    }
+    // 子节点 enterCondition 是否未满足（回写/再修订节点的硬前置）
+    function subEnterUnmet(subKey) {
+      const sub = SUB_NODES[subKey];
+      if (!sub || !sub.enterCondition || !sub.enterCondition.requires) return null;
+      const store = window.PharmacoPilotStore;
+      if (!store || !store.getJudgment) return null;
+      const unmet = sub.enterCondition.requires.filter((r) => {
+        if (r.subKey) return !store.getJudgment(r.subKey);
+        if (r.stationId != null) return !store.getJudgment(r.stationId);
+        return false;
+      });
+      if (!unmet.length) return null;
+      return { unmet, reason: unmet.map((u) => u.reason).filter(Boolean) };
+    }
+    // 当前激活节点的综合门禁状态
+    function evidenceGateState() {
+      const stageId = currentStageId();
+      const subKey = (typeof effectiveSubKey === "function") ? effectiveSubKey() : null;
+      const missing = missingUpstreamStages(stageId);
+      const subUnmet = subKey ? subEnterUnmet(subKey) : null;
+      return { blocked: missing.length > 0 || !!subUnmet, missing, subUnmet };
+    }
+    // 缺失证据横幅（含"去完成上游"跳转 chip，复用 [data-stage] 点击）
+    function renderEvidenceGate(gate) {
+      if (!gate || !gate.blocked) return "";
+      let html = "";
+      if (gate.missing.length) {
+        const rows = gate.missing.map((m) => `
+          <div class="eg-row">
+            <button class="eg-go" type="button" data-stage="${esc(m.id)}">去完成 ${pad(m.idx)} ${esc(m.name)}</button>
+            <span class="eg-prod">缺：${esc((m.products || []).join(" / ") || "上游产物")}</span>
+          </div>`).join("");
+        html += `
+          <div class="evidence-gate">
+            <div class="eg-h">缺少上游证据 · 本环节可浏览，但暂不能拍板保存</div>
+            <div class="eg-note">没有这些上游产物，这里的判断会退化成"模板填写"。请先补齐：</div>
+            <div class="eg-list">${rows}</div>
+          </div>`;
+      }
+      if (gate.subUnmet) {
+        html += `
+          <div class="evidence-gate eg-sub">
+            <div class="eg-h">本步是「回写 / 再修订」节点 · 需先完成前置</div>
+            <div>${esc((gate.subUnmet.reason || []).join("；") || "请先完成前置子节点，再做回写")}</div>
+          </div>`;
+      }
+      return html;
+    }
+
     // 9 个教学环节 chip 栏
     function renderStageChips() {
       const el = document.getElementById("stageChips");
       if (!el) return;
-      if (!STAGES.length) { el.innerHTML = '<div class="stage-chip" style="grid-column:1/-1;text-align:center;color:#999">contract.NAV_STAGES 未加载</div>'; return; }
+      if (!STAGES.length) { el.innerHTML = '<div class="stage-chip" style="grid-column:1/-1;text-align:center;color:var(--mute-2)">contract.NAV_STAGES 未加载</div>'; return; }
       el.innerHTML = STAGES.map((g, idx) => {
         const next = STAGES[idx + 1];
         const isLast = !next;
@@ -4214,7 +4320,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           <span class="sc-num">${idxStr}</span>
           <span class="sc-cn">${esc(g.displayName || g.title)}</span>
           ${subCount > 1 ? `<span class="sc-sub-count">${subCount}</span>` : ""}
-          ${hasTheory ? `<span class="sc-theory" data-theory-stage="${esc(g.id)}" title="方法依据 · ${esc(g.theoryDrawer.length)} 条" tabindex="0">方</span>` : ""}
+          ${hasTheory ? `<span class="sc-theory" data-theory-stage="${esc(g.id)}" title="方法依据 · ${esc(g.theoryDrawer.length)} 条" role="button" tabindex="0" aria-label="查看方法依据">方</span>` : ""}
           ${isDoneNow ? `<span class="sc-done-mark" aria-label="已完成">✓</span>` : ""}
         </div>`;
       }).join("");
@@ -4341,11 +4447,14 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         const subSaved = store && typeof store.getJudgment === "function"
           ? !!(store.getJudgment(key) || (subKeys.length === 1 && store.getJudgment(stid)))
           : false;
-        const cls = ["tile", baseStatus, isActive ? "is-active" : "", subSaved ? "is-saved" : ""].filter(Boolean).join(" ");
+        const lockInfo = subEnterUnmet(key);
+        const locked = !subSaved && !!lockInfo;   // 已保存的就不再标锁
+        const lockTitle = locked ? ((lockInfo.reason && lockInfo.reason[0]) || "需先完成前置子节点") : "";
+        const cls = ["tile", baseStatus, isActive ? "is-active" : "", subSaved ? "is-saved" : "", locked ? "is-locked" : ""].filter(Boolean).join(" ");
         const letter = String.fromCharCode(97 + i); // 0->a, 1->b, 2->c
         const numText = multiSub ? `${stagePadIdx}·${letter}` : stagePadIdx;
-        const checkMark = subSaved ? `<span class="t-check" aria-label="已保存">✓</span>` : "";
-        return `<div class="${cls}" data-st="${stid}" data-subkey="${esc(key)}" data-stage-hint="${esc(stageId)}" role="button" tabindex="0">
+        const checkMark = subSaved ? `<span class="t-check" aria-label="已保存">✓</span>` : (locked ? `<span class="t-lock" aria-label="前置未完成">🔒</span>` : "");
+        return `<div class="${cls}" data-st="${stid}" data-subkey="${esc(key)}" data-stage-hint="${esc(stageId)}" role="button" tabindex="0"${lockTitle ? ` title="${esc(lockTitle)}"` : ""}>
           <span class="t-num">${numText}</span>
           <span class="t-cn">${esc(sub.subTitle || "")}</span>
           ${checkMark}
@@ -4394,6 +4503,10 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           // 解锁下一阶（最多到 3；Q3 通过 decision-dock 保存判断推进到 4）
           const next = Math.min(step + 1, 3);
           Store.setChainStep(station, next, { ["q" + step + "Done"]: true });
+          // 正向确认：答对了要明确告诉教师/学生（之前只是静默推进）
+          if (typeof window.showDemoToast === "function") {
+            window.showDemoToast(step >= 3 ? "✓ 答对了 · 本题链已完成" : "✓ 答对了 · 已解锁下一题");
+          }
         } else {
           // 错误：自动展开下一级 hint
           const drawer = chainQ.querySelector(".chain-hint-drawer");
@@ -4409,7 +4522,9 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             if (existing) existing.remove();
             const toast = document.createElement("div");
             toast.className = "chain-wrong-toast";
-            toast.innerHTML = `<span>✕</span> <span>不是这个 — 下方有新视角提示 ↓</span>`;
+            toast.setAttribute("role", "status");
+            toast.setAttribute("aria-live", "assertive");
+            toast.innerHTML = `<span>✕</span> <span>再想想 — 下方已展开一条新视角提示 ↓</span>`;
             drawerAfter.parentElement.insertBefore(toast, drawerAfter);
             // 2.5 秒后淡出移除
             setTimeout(() => {

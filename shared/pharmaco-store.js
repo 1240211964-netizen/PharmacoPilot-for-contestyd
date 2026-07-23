@@ -66,7 +66,12 @@
     const raw = global.localStorage && localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object") state = Object.assign(defaultState(), parsed);
+      // version 不符(未来 schema 变更)时丢弃旧数据用默认态,防止旧嵌套结构顶掉新字段产生诡异状态
+      if (parsed && typeof parsed === "object" && parsed.version === defaultState().version) {
+        state = Object.assign(defaultState(), parsed);
+      } else if (parsed) {
+        console.warn("[store] state version mismatch, discarding persisted state:", parsed.version);
+      }
     }
   } catch (e) { console.warn("[store] load failed, using default", e); }
 

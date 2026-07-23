@@ -168,7 +168,8 @@
   // 供需要"教师环节 → 学生节点"语义的视图使用（data-render.js 的 renderCouplingBridge
   // 默认走 framework.deriveBridges 的 √ 公式；本函数提供量规驱动的等价物，便于二者对照）。
   //
-  // @returns {Array<{envId, eventId, isPrimary, strength}>}
+  // @returns {Array<{envId, envIndex, eventId, isPrimary, strength}>}
+  // envIndex（0-8）供 data-render.js renderCouplingBridge 在 9 列坐标系里定位连线起点。
   function buildBridgeCoupling(mode) {
     const lane = buildCouplingLane(mode);
     const EF = window.PharmacoPilotEvaluationFramework;
@@ -180,8 +181,8 @@
       if (strength == null || strength <= 0) return;
       const link = EF.ENV_TO_EVENT[envId];
       if (!link) return;
-      if (link.primary)   out.push({ envId, eventId: link.primary,   isPrimary: true,  strength });
-      if (link.secondary) out.push({ envId, eventId: link.secondary, isPrimary: false, strength: +(strength * 0.5).toFixed(2) });
+      if (link.primary)   out.push({ envId, envIndex: i, eventId: link.primary,   isPrimary: true,  strength });
+      if (link.secondary) out.push({ envId, envIndex: i, eventId: link.secondary, isPrimary: false, strength: +(strength * 0.5).toFixed(2) });
     });
     return out;
   }

@@ -9,4 +9,11 @@
 *.docx
 申报书引用段落.md
 虚拟班32人数据.md
-design-review-2026-05-29.md
+design-review-*.md
+audit-baseline-*.md
+audit-report-*.md
+
+# 设计脚手架 / 草稿 / 本地工具（不属上线站点）
+*.jsx
+*-draft.html
+*.command

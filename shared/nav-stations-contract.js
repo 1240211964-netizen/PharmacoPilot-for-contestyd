@@ -384,7 +384,7 @@
   // ============================================================
   const NAV_STAGES = [
     {
-      id: "S1", phase: "pre", title: "学习者画像与课程情境诊断", displayName: "学情诊断",
+      id: "S1", phase: "pre", title: "课程定位 · 学情诊断 · 学习者议程协商", displayName: "定位·学情·议程",
       tag: "诊断", pillClass: "pill-amber",
       keyDecision: "本节最大冲突点是什么？",
       learnObjective: "识别学生真实的认知与经验起点",

@@ -19,7 +19,7 @@
   transform: translateX(-50%) translateY(20px);
   background: var(--ink, #1a1714); color: var(--ivory, #fffdf7);
   padding: 11px 20px 11px 16px; border-radius: 999px;
-  font-family: var(--serif-cn, ui-serif, serif); font-size: 14px;
+  font-family: var(--serif-cn); font-size: var(--fs-sm);
   line-height: 1.2;
   box-shadow: 0 8px 28px rgba(0,0,0,.18);
   opacity: 0; pointer-events: none;
@@ -63,6 +63,8 @@
 
   // ---- Sample plan.md download ----
   const SAMPLE_PLAN_MD = `# 节点 05 · 内容 · 问题链
+> （示例文件 · 用于展示导出格式；工作台内导出为当前节点实际内容）
+
 节点: 05 / 11  ·  阶段: 课前
 课程: 药事管理 · SWOT 分析
 时长: 45 分钟
@@ -91,17 +93,20 @@ session: #3417
 PharmacoPilot · plan.md 导出
 `;
 
-  function downloadPlan() {
+  function downloadPlan(name) {
+    // 文件名随当前环节产物（由按钮 data-plan-name 传入）；缺省回退到 plan.md
+    let filename = (name && String(name).trim()) || "plan.md";
+    if (!/\.md$/i.test(filename)) filename += ".md";
     const blob = new Blob([SAMPLE_PLAN_MD], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "plan-station-04.md";
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast("已下载 plan-station-04.md");
+    showToast("已下载 " + filename);
   }
   window.downloadDemoPlan = downloadPlan;
 
@@ -110,7 +115,7 @@ PharmacoPilot · plan.md 导出
     const dl = e.target.closest("[data-demo-download]");
     if (dl) {
       e.preventDefault();
-      downloadPlan();
+      downloadPlan(dl.getAttribute("data-plan-name"));
       return;
     }
     const t = e.target.closest("[data-demo-toast]");

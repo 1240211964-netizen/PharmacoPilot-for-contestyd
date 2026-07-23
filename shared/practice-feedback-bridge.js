@@ -19,7 +19,7 @@
   display: inline-flex; align-items: center; gap: 5px;
   padding: 3px 8px; border-radius: 999px;
   background: var(--amber-deep, #a8492a); color: var(--ivory, #fffdf7);
-  font-family: var(--mono, ui-monospace); font-size: 9.5px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   letter-spacing: 0.06em; text-transform: uppercase;
   box-shadow: 0 2px 8px rgba(168, 73, 42, .25);
   z-index: 5;
@@ -35,14 +35,14 @@
   background: var(--ink, #1b1916); color: var(--ivory, #fffdf7);
   border-radius: 10px; border: 1px solid rgba(255,255,255,.08);
   box-shadow: 0 12px 32px rgba(0,0,0,.25);
-  font-family: var(--serif-cn, ui-serif); font-size: 13px; line-height: 1.55;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.55;
   z-index: 9999;
   opacity: 0; transform: translateY(8px);
   transition: opacity .25s, transform .25s;
 }
 .pr-feedback-toast.show { opacity: 1; transform: translateY(0); }
 .pr-feedback-toast .lbl {
-  font-family: var(--mono, ui-monospace); font-size: 10px; letter-spacing: 0.1em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--amber, #d97757);
   margin-bottom: 4px; display: block;
 }

@@ -10,318 +10,28 @@
 (function () {
   "use strict";
 
-  /* ---------- 1 · 四组定义 ---------- */
-  const GROUPS = {
-    A: { label: "医保视角", tag: "医保", n: 8, tone: "a", base: "主动表态 · 证据驱动" },
-    B: { label: "慢病家属", tag: "慢病", n: 8, tone: "b", base: "主动表态 · 共情驱动" },
-    C: { label: "药企背景", tag: "药企", n: 8, tone: "c", base: "集体未发声 · 风险信号" },
-    D: { label: "沉默观望", tag: "观望", n: 8, tone: "d", base: "低密度参与" },
-  };
-
-  /* ---------- 2 · 32 人数据集 ---------- */
-  // state: live(正在发言) / active(已发声) / quiet(全程沉默) / silent(策略性沉默) / neutral(倾听)
-  const STUDENTS = [
-    // A · 医保视角
-    { id: "A1", g: "A", name: "沈语晴", str: 5, init: "active", note: "市医保局实习 · 首发核心论证" },
-    { id: "A2", g: "A", name: "赵子轩", str: 4, init: "active", note: "社区医院见习 · 量化补强" },
-    { id: "A3", g: "A", name: "林婉清", str: 4, init: "active", note: "县医保办 · 引用国办文件" },
-    { id: "A4", g: "A", name: "周诗涵", str: 3, init: "active", note: "商保实习 · DRG 视角" },
-    { id: "A5", g: "A", name: "陈思源", str: 3, init: "active", note: "援引一致性评价数据" },
-    { id: "A6", g: "A", name: "黄宇恒", str: 3, init: "active", note: "药店连锁 · 零售视角" },
-    { id: "A7", g: "A", name: "刘晓彤", str: 3, init: "active", note: "反思深度小结" },
-    { id: "A8", g: "A", name: "郑明宇", str: 2, init: "neutral", note: "全程倾听 · 被动同意" },
-    // B · 慢病家属
-    { id: "B1", g: "B", name: "叶清涵", str: 5, init: "active", note: "父亲糖尿病 10 年 · 引爆替代焦虑" },
-    { id: "B2", g: "B", name: "吴语桐", str: 4, init: "active", note: "外婆抗凝 · 窄治疗窗案例" },
-    { id: "B3", g: "B", name: "高梓铭", str: 4, init: "active", note: "母亲高血压 · 谷峰差异" },
-    { id: "B4", g: "B", name: "许若曦", str: 4, init: "active", note: "父亲支架术后 · 病友群证据" },
-    { id: "B5", g: "B", name: "曹一然", str: 3, init: "active", note: "爷爷帕金森 · 老年依从性" },
-    { id: "B6", g: "B", name: "邓嘉禾", str: 4, init: "active", note: "母亲乳腺癌 · 内分泌连续性" },
-    { id: "B7", g: "B", name: "姚梦琪", str: 3, init: "active", note: "外公肾病 · eGFR 监测" },
-    { id: "B8", g: "B", name: "魏景然", str: 2, init: "neutral", note: "奶奶多重慢病 · 仅小组内" },
-    // C · 药企背景 · 集体沉默
-    { id: "C1", g: "C", name: "蒋亦舟", str: 4, init: "silent", note: "父亲外资药代 · 怕被贴标签" },
-    { id: "C2", g: "C", name: "白雨桐", str: 4, init: "silent", note: "母亲恒瑞研究院 · 举手 2 次未被点" },
-    { id: "C3", g: "C", name: "夏梓晗", str: 3, init: "silent", note: "姨妈百济 · 小组内说全班退场" },
-    { id: "C4", g: "C", name: "罗予安", str: 4, init: "silent", note: "豪森实习 · 怕显得挺企业" },
-    { id: "C5", g: "C", name: "邱钰泽", str: 3, init: "silent", note: "父亲民营药企 · 5 次插话被抢" },
-    { id: "C6", g: "C", name: "段雨菲", str: 3, init: "silent", note: "药代实习 · 二元对立无切入点" },
-    { id: "C7", g: "C", name: "于子昂", str: 3, init: "silent", note: "家中原料药厂 · 策略性沉默" },
-    { id: "C8", g: "C", name: "汪嘉宁", str: 2, init: "silent", note: "母亲药监 · 角色混合困惑" },
-    // D · 沉默观望
-    { id: "D1", g: "D", name: "邹清歌", str: 1, init: "quiet", note: "内向 + 普通话不自信" },
-    { id: "D2", g: "D", name: "季文渊", str: 1, init: "quiet", note: "前置知识缺口" },
-    { id: "D3", g: "D", name: "温佳琪", str: 1, init: "quiet", note: "等待点名 · 反思单丰富" },
-    { id: "D4", g: "D", name: "裴沐辰", str: 1, init: "quiet", note: "今日身体不适 · 异常值" },
-    { id: "D5", g: "D", name: "傅妍希", str: 2, init: "neutral", note: "被推举后说 1 句" },
-    { id: "D6", g: "D", name: "侯子健", str: 2, init: "neutral", note: "代表小组念结论" },
-    { id: "D7", g: "D", name: "钱悦心", str: 2, init: "neutral", note: "提澄清类问题" },
-    { id: "D8", g: "D", name: "龚一鸣", str: 2, init: "neutral", note: "被点名说 1 句" },
-  ];
-  const byId = Object.fromEntries(STUDENTS.map((s) => [s.id, s]));
-
-  // 特质态(与时间无关):C 组策略性沉默 / D1-D4 全程观望 / 其余倾听者
-  function traitOf(s) {
-    if (s.g === "C") return "silent";
-    if (["D1", "D2", "D3", "D4"].includes(s.id)) return "quiet";
-    return "neutral";
+  /* ---------- 0 · 唯一真相来源：window.MVCore ----------
+   *  STUDENTS / STANCE_BAKED / SCRIPT / TEACHER_BEATS 及整套规则引擎
+   *  (advanceSim / genOneBeat / scoreDesire / nudgeStances / tickRT …)
+   *  统一来自 shared/mv-classroom-core.js。本文件只是 WebGL/Three.js
+   *  不可用时的 2.5D 等距回退渲染器——消费 MVCore、不再自带任何副本，
+   *  使全站仿真核心只此一份（改学生名/立场/剧本只需动 core 一处）。 */
+  const MV = window.MVCore;
+  if (!MV) {
+    console.error("[MV2D] 缺少 window.MVCore（请在本脚本前加载 shared/mv-classroom-core.js）——2.5D 回退教室无法启动。");
+    window.MV2D = window.MV2D || { mount: function () {} };
+    return;
   }
-  // 45 min 端态投影:已表态 14 人(A1-A7 + B1-B7),用于未回放时的静态展示
-  const PROJECTION_SPOKEN = STUDENTS
-    .filter((s) => (s.g === "A" || s.g === "B") && s.id !== "A8" && s.id !== "B8")
-    .map((s) => s.id);
-
-  /* ---------- 3 · 剧本时间轴(driven by 集采替代议题) ---------- */
-  // kind: marker(问题链分隔) / line(发言) / note(Agent 提示) / silence(沉默信号)
-  // role: T 教师 / A Agent / S 学生
-  const SCRIPT = [
-    { t: 0,   kind: "marker", text: "问题链 · 第 1 题 — 三选一锚点" },
-    { t: 18,  kind: "line", role: "A", text: "已附数据源：国办发〔2019〕2 号 · 集采公告 · 3 份院方匿名替代记录。" },
-    { t: 35,  kind: "line", role: "T", text: "看到这张图，你最先注意到——药价、厂家，还是患者反应？" },
-    { t: 48,  kind: "line", role: "S", who: "A1", text: "先看到价格——原研降到这个价位真的有点意外。", bubble: "先看到价格…" },
-    { t: 54,  kind: "line", role: "S", who: "A2", text: "对，这个降幅是政策推动的，不是市场自然降的。", bubble: "政策推动的降幅" },
-    { t: 60,  kind: "line", role: "S", who: "B1", text: "我注意的是患者——降价之后会不会被要求换药？", bubble: "会不会被换药？" },
-    { t: 66,  kind: "line", role: "S", who: "A3", text: "国办发〔2019〕2 号写的是「量价挂钩」。", bubble: "量价挂钩" },
-    { t: 84,  kind: "marker", text: "问题链 · 第 3 题 — 分歧锚点" },
-    { t: 98,  kind: "line", role: "T", text: "如果你是医院药事委员会，会优先采购原研还是仿制？依据什么？" },
-    { t: 98,  kind: "line", role: "S", who: "A1", text: "仿制——通过一致性评价就等同临床。", bubble: "一致性评价 = 等同临床" },
-    { t: 108, kind: "line", role: "S", who: "B1", text: "但已用原研 2 年的患者怎么办？替代焦虑是真问题。", bubble: "替代焦虑是真问题" },
-    { t: 115, kind: "line", role: "S", who: "A2", text: "医保已经为这个降价付了对应的预算，再开口子就乱了。", bubble: "预算已对应" },
-    { t: 118, kind: "line", role: "S", who: "B2", text: "华法林 INR 窗口很窄，不同厂家颗粒分布会影响吸收。", bubble: "INR 窗口很窄" },
-    { t: 120, kind: "silence", group: "C", text: "C 组 8 人均有表达意图,但集体未发声——教师未点名 + 议题二元对立 + 自我审查。" },
-    { t: 125, kind: "note", role: "A", text: "⚠ 检测到 A1 / B1 立场结构性对立——建议引入「医保支付方 vs 长期患者」分组讨论。", km: "KM-01" },
-    { t: 132, kind: "line", role: "T", text: "好——A 组扮演医保局视角，B 组扮演慢病患者，5 分钟后回来。" },
-  ];
-  const T_CAP = 2700; // 45 min
-
-  /* ============================================================
-   *  3.5 · Agent 引擎（移植自 practice-runtime.js）
-   *  t≤132 用手写 SCRIPT;t>132 由 32-agent 决策动态生成。
-   *  数据源:./shared/virtual-class-agents.json
-   * ============================================================ */
-  let AGENTS = null;        // 完整 agent JSON
-  const RT = {};            // id → 运行时可变状态
-  let SCHED = [];           // 脚本化状态事件
-  let DYN = [];             // t>132 动态生成的 beats
-  let genCursor = 132;      // 已生成到的 sim 时间
-  let lastTickT = 132;      // 上次 tick 的 sim 时间
-  const TEACHER_BEATS = [
-    { t: 285,  text: "我注意到 B 组提到了长期依从性——这是 plan 里没设的维度。" },
-    { t: 475,  text: "很好。下一题——谁来从临床安全角度补充？", openQ: true },
-    { t: 900,  text: "问题链 · 交叉质疑", marker: true },
-    { t: 1500, text: "现在我想听听 C 组的视角——有谁愿意从药企角度来说？", callC: true },
-    { t: 1920, text: "我们快结束了——有没有被低估的视角？", openQ: true, reflect: true },
-    { t: 2520, text: "反思单分发", marker: true },
-  ];
-
-  function loadAgents() {
-    return fetch("./shared/virtual-class-agents.json", { cache: "no-cache" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { AGENTS = d; return d; })
-      .catch(() => null);
-  }
-  function agentOf(id) { return (AGENTS && AGENTS.agents) ? AGENTS.agents.find((a) => a.id === id) : null; }
-
-  function initRT() {
-    Object.keys(RT).forEach((k) => delete RT[k]);
-    STUDENTS.forEach((s) => {
-      const a = agentOf(s.id);
-      const si = (a && a.state_init) || {};
-      RT[s.id] = {
-        attention: si.attention != null ? si.attention : (s.init === "quiet" ? 0.45 : s.init === "silent" ? 0.78 : 0.7),
-        speak_motivation: si.speak_motivation != null ? si.speak_motivation : (s.init === "active" ? 0.7 : 0.3),
-        fatigue: si.fatigue || 0,
-        social_safety: si.social_safety != null ? si.social_safety : (s.init === "silent" ? 0.38 : 0.6),
-        stance_position: si.stance_position || 0,
-        spoke_count: 0, last_spoke_t: null, _events: [], _recentRaw: []
-      };
-    });
-    buildSched();
-    genCursor = 132; lastTickT = 132; DYN = [];
-    state._callCUntil = 0; state._callSilentUntil = 0; state._openQUntil = 0; state._callResponders = null;
-  }
-
-  function buildSched() {
-    SCHED = [
-      { t: 150,  agent: "C2", fx: { speak_motivation: -0.18, attention: -0.12, social_safety: -0.08 }, why: "举手 5s 未被点·第 1 次" },
-      { t: 1000, agent: "C2", fx: { speak_motivation: -0.22, attention: -0.18, social_safety: -0.12 }, why: "举手 5s 未被点·第 2 次" },
-      { t: 1500, agent: "C2", fx: { speak_motivation: -0.10, attention: -0.10 }, why: "放弃·默写未说论点" },
-      { t: 120,  agent: "C1", fx: { social_safety: -0.04 }, why: "摇头·不同意二元对立" },
-      { t: 720,  agent: "C1", fx: { social_safety: -0.03 }, why: "笔记累积·想说的反驳" },
-      { t: 1180, agent: "C1", fx: { social_safety: -0.05 }, why: "手抬到桌面但放弃" },
-      { t: 1560, agent: "C1", fx: { social_safety: 0.06, attention: -0.03 }, why: "与同桌 D5 低声 30s" },
-      { t: 1560, agent: "D5", fx: { attention: 0.08, social_safety: 0.08, speak_motivation: 0.05 }, why: "C1 低声向她解释" },
-      { t: 480,  agent: "C3", fx: { social_safety: 0.05, speak_motivation: 0.05 }, why: "小组内讲 BD 视角" },
-      { t: 930,  agent: "C3", fx: { social_safety: -0.08, speak_motivation: -0.10 }, why: "全班发言机会让给 A2·退缩" },
-      { t: 1800, agent: "C4", fx: { social_safety: -0.10 }, why: "GMP 段被砍·自我审查强化" },
-      { t: 1920, agent: "A7", fx: { speak_motivation: 0.20, attention: 0.10 }, why: "反思阶段·被激活" },
-      { t: 1920, agent: "A1", fx: { stance_position: -0.05 }, why: "立场松动·吸收依从性" },
-    ];
-    [90, 140, 840, 1320, 2100].forEach((t, i) =>
-      SCHED.push({ t, agent: "C5", fx: { speak_motivation: -0.07, attention: -0.06, social_safety: -0.04 }, why: `插话被抢 ${i + 1}/5` }));
-    SCHED.sort((a, b) => a.t - b.t);
-  }
-
-  function applyAgentFx(id, fx, t, why) {
-    const rt = RT[id]; if (!rt) return;
-    Object.entries(fx).forEach(([k, d]) => {
-      const lo = k === "stance_position" ? -1 : 0;
-      rt[k] = Math.max(lo, Math.min(1, (rt[k] || 0) + d));
-    });
-    rt._events.push({ t, fx, why });
-  }
-
-  function cleanBeatText(t) {
-    return String(t || "")
-      .replace(/（注[：:][^）]*）/g, "").replace(/\(注[：:][^)]*\)/g, "")
-      .replace(/（[^）]*专家[^）]*）/g, "").replace(/（v0\.\d[^）]*）/g, "")
-      .replace(/\s{2,}/g, " ").trim();
-  }
-  function toBubble(text) {
-    const t = cleanBeatText(text).replace(/^["“]+|["”]+$/g, "");
-    const seg = t.split(/[——，。？！、,?!]/)[0] || t;
-    return seg.length > 15 ? seg.slice(0, 14) + "…" : seg;
-  }
-  function getTopic(t) {
-    if (t < 440)  return ["分组讨论", "医保", "慢病", "依从性", "证据", "成本", "替代焦虑"];
-    if (t < 900)  return ["小组汇报", "证据", "依从性", "政策"];
-    if (t < 1500) return ["交叉质疑", "BE", "INR", "临床细节", "政策"];
-    if (t < 1920) return ["药企", "创新", "C视角", "研发"];
-    if (t < 2520) return ["反思", "被低估", "立场迁移", "依从性"];
-    return ["反思单", "收束", "立场"];
-  }
-  function rulesMatch(rules, ctx) {
-    if (!Array.isArray(rules)) return false;
-    return rules.some((r) => {
-      if (typeof r !== "string") return false;
-      if (r.includes("话题:")) {
-        const m = r.match(/\[(.*?)\]/); if (!m) return false;
-        const kws = m[1].split(",").map((s) => s.trim().replace(/['"]/g, ""));
-        return kws.some((k) => ctx.topic.some((tp) => tp.includes(k) || k.includes(tp)));
-      }
-      if (r === "教师开放问题") return !!ctx.openQ;
-      if (r.includes("纯情绪") || r.includes("情绪化")) return !!ctx.deadlock;
-      if (r.includes("家庭隐私")) return ctx.topic.some((tp) => tp.includes("家庭"));
-      if (r.includes("临床细节")) return ctx.topic.some((tp) => /临床|BE|INR/.test(tp));
-      if (r.includes("几乎从不") || r === "所有公开发言" || r === "所有" || r.includes("从未成功")) return true;
-      if (r.includes("仅小组内") || r.includes("仅在小组内")) return true;
-      return false;
-    });
-  }
-  function scoreDesire(a, rt, ctx) {
-    if (!rt) return -Infinity;
-    if (rulesMatch(a.rules && a.rules.silent_on, ctx)) return -Infinity;
-    let s = rt.speak_motivation * 1.0 + rt.attention * 0.35 + rt.social_safety * 0.45 - rt.fatigue * 0.25;
-    if (rulesMatch(a.rules && a.rules.speak_on, ctx)) s += 0.35;
-    const rids = (ctx.recent || []).map((w) => w.split("·")[0]);
-    if (a.graph && a.graph.allies && a.graph.allies.some((id) => rids.includes(id))) s += 0.15;
-    if (a.graph && a.graph.rivals && a.graph.rivals.some((id) => rids.includes(id))) s += 0.25;
-    if (rt.last_spoke_t != null && ctx.t - rt.last_spoke_t < 90)
-      s -= 0.4 * (1 - (ctx.t - rt.last_spoke_t) / 90);
-    s += ((a.persona && a.persona.stance_strength) || 0) * 0.05;
-    s -= (rt.spoke_count || 0) * 0.11;
-    if ((rt.spoke_count || 0) === 0 && /^[AB]/.test(a.id)) s += 0.18;
-    if (a.id[0] === "C") s -= 0.5;
-    if (a.id[0] === "D") s -= 0.65;
-    const responded = state._callResponders && state._callResponders.has(a.id);
-    if (!responded) {
-      if (ctx.callSilent && /^[CD]/.test(a.id)) s += 0.8;
-      if (ctx.callC && a.id[0] === "C") s += 0.9;
-    } else if (ctx.callC || ctx.callSilent) s -= 0.5;
-    s += (Math.random() - 0.5) * 0.18;
-    return s;
-  }
-  function pickRespKey(a, ctx) {
-    const r = a.responses || {}; const keys = Object.keys(r); if (!keys.length) return null;
-    if (ctx.called) { for (const k of ["if_called_by_teacher", "if_called", "if_nudged", "if_finally_called"]) if (r[k]) return k; }
-    if (ctx.openQ) { for (const k of ["to_open_question", "to_teacher", "clarifying_question"]) if (r[k]) return k; }
-    if (ctx.lastRival) { for (const k of ["technical_rebuttal", "to_rival", "rebuttal"]) if (r[k]) return k; if (Math.random() < 0.3 && r.concession) return "concession"; }
-    if (ctx.lastAlly) { for (const k of ["case_support", "rallying", "evidence_supply", "situational"]) if (r[k]) return k; }
-    if (ctx.phase === "reflection") { for (const k of ["late_reflection", "concession", "proposal"]) if (r[k]) return k; }
-    const pub = keys.filter((k) => !/private|internal|intended|post_class|small_group|report_text|if_anonymous|if_regulatory|reflection_sheet/.test(k));
-    return pub.length ? pub[Math.floor(Math.random() * pub.length)] : null;
-  }
-
-  function tickRT(toSec) {
-    SCHED.forEach((ev) => { if (ev.t > lastTickT && ev.t <= toSec) applyAgentFx(ev.agent, ev.fx, ev.t, ev.why); });
-    const dt = Math.max(0, toSec - lastTickT);
-    Object.keys(RT).forEach((id) => {
-      const rt = RT[id];
-      rt.attention = Math.max(0, rt.attention - 0.0002 * (1 + rt.fatigue * 1.5) * dt);
-      rt.fatigue = Math.min(1, rt.fatigue + 0.00008 * dt);
-      if (id[0] === "D" && id !== "D4") rt.fatigue = Math.min(1, rt.fatigue + 0.00015 * dt);
-      if (id === "D4") { rt.fatigue = Math.min(1, rt.fatigue + 0.0008 * dt); rt.attention = Math.max(0.05, rt.attention - 0.0006 * dt); }
-    });
-    lastTickT = toSec;
-  }
-
-  function genOneBeat(t) {
-    if (!AGENTS) return;
-    const recent = DYN.filter((b) => b.role === "S" && b.t >= t - 90 && b.t < t).map((b) => b.who || "");
-    const lastS = [...DYN].reverse().find((b) => b.role === "S");
-    const lastSid = ((lastS && lastS.who) || "").split("·")[0];
-    const base = {
-      t, topic: getTopic(t), recent,
-      openQ: t <= (state._openQUntil || 0),
-      callC: t <= (state._callCUntil || 0),
-      callSilent: t <= (state._callSilentUntil || 0),
-      deadlock: recent.length >= 3,
-      phase: t < 440 ? "small_group" : t < 900 ? "report" : t < 1500 ? "rebuttal" : t < 1920 ? "C_call" : t < 2520 ? "reflection" : "closing",
-    };
-    const scored = STUDENTS.map((s) => {
-      const a = agentOf(s.id); if (!a) return null;
-      const ctx = { ...base,
-        lastRival: !!(lastSid && a.graph && a.graph.rivals && a.graph.rivals.includes(lastSid)),
-        lastAlly: !!(lastSid && a.graph && a.graph.allies && a.graph.allies.includes(lastSid)),
-        called: !!(base.callC || base.callSilent) };
-      return { a, s, ctx, score: scoreDesire(a, RT[s.id], ctx) };
-    }).filter((x) => x && isFinite(x.score)).sort((x, y) => y.score - x.score);
-    if (!scored.length) return;
-    const top = scored[0];
-    if (top.score < 0.55) return;
-    const key = pickRespKey(top.a, top.ctx);
-    const arr = key && top.a.responses && top.a.responses[key];
-    if (!arr) return;
-    const texts = Array.isArray(arr) ? arr : [arr];
-    const rt = RT[top.s.id];
-    const fresh = texts.filter((x) => !(rt._recentRaw || []).includes(x));
-    const raw = (fresh.length ? fresh : texts)[Math.floor(Math.random() * (fresh.length ? fresh.length : texts.length))];
-    rt._recentRaw = [...(rt._recentRaw || []), raw].slice(-6);
-    const text = cleanBeatText(raw); if (!text) return;
-    DYN.push({ t, kind: "line", role: "S", who: top.s.id, text, bubble: toBubble(raw), respKey: key });
-    applyAgentFx(top.s.id, { speak_motivation: -0.15, attention: 0.05 }, t, `发言「${key}」`);
-    rt.last_spoke_t = t; rt.spoke_count = (rt.spoke_count || 0) + 1;
-    ((top.a.graph && top.a.graph.allies) || []).forEach((id) => applyAgentFx(id, { social_safety: 0.03 }, t, `盟友 ${top.s.id} 发言`));
-    ((top.a.graph && top.a.graph.rivals) || []).forEach((id) => applyAgentFx(id, { speak_motivation: 0.06 }, t, `对手 ${top.s.id} 发言·激起反驳`));
-    if (base.callC || base.callSilent) { if (!state._callResponders) state._callResponders = new Set(); state._callResponders.add(top.s.id); }
-  }
-
-  function advanceSim(toSec) {
-    if (!AGENTS) return;
-    if (toSec <= genCursor) { if (toSec > lastTickT) tickRT(toSec); return; }
-    const stride = 22;
-    let st = Math.ceil((genCursor + 1) / stride) * stride;
-    let guard = 0;
-    while (genCursor < toSec && guard++ < 3000) {
-      const nxt = Math.min(toSec, st);
-      tickRT(nxt);
-      TEACHER_BEATS.forEach((tb) => {
-        if (tb.t > genCursor && tb.t <= nxt && !DYN.some((d) => d.t === tb.t && d._teacher)) {
-          if (tb.callC) { state._callCUntil = tb.t + 80; state._callResponders = new Set(); }
-          if (tb.openQ) state._openQUntil = tb.t + 44;
-          DYN.push({ t: tb.t, kind: tb.marker ? "marker" : "line", role: "T", text: tb.text, _teacher: true });
-        }
-      });
-      if (nxt > 132) genOneBeat(nxt);
-      genCursor = nxt;
-      st += stride;
-      if (st > toSec && genCursor < toSec) st = toSec;
-    }
-  }
+  // 数据与纯函数：引用稳定，安全解构（与 MVCore 同一份对象/函数）
+  const { STUDENTS, byId, STANCE_BAKED, SCRIPT, T_CAP, TEACHER_BEATS, PROJECTION_SPOKEN, traitOf, cleanBeatText, agentOf } = MV;
+  // 运行时状态表：MVCore.reset() 原地清空+重填同一对象，故本引用始终有效（DYN 是 getter，须用 MV.DYN 实时取）
+  const RT = MV.allRT();
+  // 引擎推进：本回退渲染器走"烘焙→回放"，不需要 onBeat 回调
+  const advanceSim = (toSec) => MV.advanceSim(toSec);
 
   // 把 RT 注意力投影到座位透明度
   function reflectSeatsRT() {
-    if (!AGENTS) return;
+    if (!MV.agentsReady()) return;
     Object.keys(RT).forEach((id) => {
       const seat = seatEls[id]; if (!seat) return;
       const rt = RT[id];
@@ -350,6 +60,7 @@
   function buildScene() {
     mount.innerHTML = "";
     mount.classList.add("mv-root");
+    mount.dataset.view = "room"; // 教室视图：触发隐藏舞台 .mv-podium（房间已自带 #mv-podium-iso，避免双讲台）
 
     // 头部:标题 + LIVE + 控件
     const head = el("div", "mv-head");
@@ -363,13 +74,12 @@
       </div>`;
     mount.appendChild(head);
 
-    // 控件条
+    // 控件条（录播播放器：播放/暂停 + 回到开头 + 图例）
     const ctrl = el("div", "mv-controls");
     ctrl.innerHTML = `
       <div class="mv-ctrl-l">
-        <button type="button" class="mv-btn mv-btn-run" id="mv-run">▶ 运行模拟</button>
-        <button type="button" class="mv-btn mv-btn-ghost" id="mv-step">▷ 步进 +30s</button>
-        <button type="button" class="mv-btn mv-btn-ghost" id="mv-reset">⟲ 重置</button>
+        <button type="button" class="mv-btn mv-btn-run" id="mv-run">▶ 播放录播</button>
+        <button type="button" class="mv-btn mv-btn-ghost" id="mv-reset">⟲ 回到开头</button>
       </div>
       <div class="mv-ctrl-r">
         <span class="mv-legend"><i class="lg-live"></i>发言中</span>
@@ -378,6 +88,18 @@
         <span class="mv-legend"><i class="lg-quiet"></i>观望</span>
       </div>`;
     mount.appendChild(ctrl);
+
+    // 录播进度条（可点/拖任意一帧；关键时刻刻度）
+    const scrub = el("div", "mv-scrub");
+    scrub.innerHTML = `
+      <span class="mv-scrub-time"><b id="mv-cur">00:00</b> / ${fmt(T_CAP)}</span>
+      <div class="mv-scrub-track" id="mv-scrub-track" role="slider" tabindex="0" aria-label="录播进度，拖动到任意时刻" aria-valuemin="0" aria-valuemax="${T_CAP}" aria-valuenow="0" aria-valuetext="00:00">
+        <div class="mv-scrub-fill" id="mv-scrub-fill"></div>
+        <div class="mv-scrub-ticks" id="mv-scrub-ticks"></div>
+        <div class="mv-scrub-head" id="mv-scrub-head"></div>
+        <div class="mv-scrub-tip" id="mv-scrub-tip"></div>
+      </div>`;
+    mount.appendChild(scrub);
 
     // 舞台:讲台 + 四组圆桌
     const stage = el("div", "mv-stage");
@@ -393,14 +115,18 @@
       <div class="mv-podium-fig mv-fig-agent" title="AI Agent">AI</div>`;
     stage.appendChild(podium);
 
-    // 立场光谱 + 教师分组（替代原 4 圆桌:立场是连续光谱、分组是教师独立操作）
+    // 教室顶视图 / 立场光谱（可切换）+ 教师分组
     const floor = el("div", "mv-floor");
-    floor.appendChild(buildSpectrum());
-    floor.appendChild(buildGrouping());
+    floor.id = "mv-floor-host";
+    paintFloor(floor);
     stage.appendChild(floor);
 
-    // 底部字幕条
+    // 底部字幕条（a11y：发言字幕对屏幕阅读器朗读）
     const sub = el("div", "mv-subtitle");
+    sub.setAttribute("role", "status");
+    sub.setAttribute("aria-live", "polite");
+    sub.setAttribute("aria-atomic", "true");
+    sub.setAttribute("aria-label", "当前发言字幕");
     sub.innerHTML = `<span class="mv-sub-ts">02:12</span>
       <span class="mv-sub-role role-T">教师</span>
       <span class="mv-sub-text">点击「▶ 运行模拟」,从 00:00 重演这堂集采替代讨论课。</span>`;
@@ -416,136 +142,380 @@
     timerEls = Array.from(mount.querySelectorAll(".mv-timer"));
     runBtn = mount.querySelector("#mv-run");
     runBtn.addEventListener("click", toggleRun);
-    mount.querySelector("#mv-step").addEventListener("click", () => stepTo(state.tSec + 30));
     mount.querySelector("#mv-reset").addEventListener("click", reset);
+    bindScrub();
   }
 
-  /* ---------- 5.5 · 立场光谱 + 教师分组 ---------- */
-  let curGroups = [], curGroupMode = "hetero", curGroupN = 6;
+  /* ---------- 控件 7.1 · 录播进度条：点/拖任意一帧 + 关键时刻刻度 ---------- */
+  // 关键时刻（问题链 / Agent 提示 / 集体沉默 / 点名 / 反思），用于进度条刻度与 hover 提示
+  function keyMoments() {
+    const ms = [];
+    SCRIPT.forEach((b) => {
+      if (b.kind === "marker") ms.push({ t: b.t, label: b.text, type: "q" });
+      else if (b.kind === "silence") ms.push({ t: b.t, label: "集体沉默 · " + (b.group || "") + " 组", type: "silence" });
+      else if (b.kind === "note") ms.push({ t: b.t, label: (b.km ? b.km + " · " : "") + "Agent 提示", type: "km" });
+    });
+    TEACHER_BEATS.forEach((tb) => {
+      if (tb.marker) ms.push({ t: tb.t, label: tb.text, type: "q" });
+      else ms.push({ t: tb.t, label: "教师 · " + tb.text, type: tb.callC ? "call" : (tb.reflect ? "reflect" : "teacher") });
+    });
+    return ms.sort((a, b) => a.t - b.t);
+  }
+  let scrubEls = null, scrubbing = false;
+  function bindScrub() {
+    const track = mount.querySelector("#mv-scrub-track"); if (!track) return;
+    scrubEls = {
+      track, fill: mount.querySelector("#mv-scrub-fill"), head: mount.querySelector("#mv-scrub-head"),
+      cur: mount.querySelector("#mv-cur"), tip: mount.querySelector("#mv-scrub-tip"), ticksHost: mount.querySelector("#mv-scrub-ticks"),
+    };
+    // 刻度
+    keyMoments().forEach((m) => {
+      const tk = el("span", "mv-scrub-tick t-" + m.type);
+      tk.style.left = (m.t / T_CAP * 100).toFixed(2) + "%";
+      tk.title = fmt(m.t) + " · " + m.label;
+      scrubEls.ticksHost.appendChild(tk);
+    });
+    const tFromEvt = (clientX) => {
+      const r = track.getBoundingClientRect();
+      const f = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+      return Math.round(f * T_CAP);
+    };
+    // 同步 seek（applyState 很轻；不走 rAF，避免后台/隐藏页 rAF 被节流时拖不动）
+    const queueSeek = (tSec) => stepTo(tSec);
+    const showTip = (clientX) => {
+      if (!scrubEls.tip) return;
+      const t = tFromEvt(clientX), r = track.getBoundingClientRect();
+      const near = keyMoments().filter((m) => Math.abs(m.t - t) <= 28).sort((a, b) => Math.abs(a.t - t) - Math.abs(b.t - t))[0];
+      scrubEls.tip.textContent = fmt(t) + (near ? "  ·  " + near.label : "");
+      scrubEls.tip.style.left = (Math.max(0, Math.min(1, (clientX - r.left) / r.width)) * 100).toFixed(1) + "%";
+    };
+    track.addEventListener("pointerdown", (e) => {
+      scrubbing = true; track.classList.add("is-scrubbing"); track.setPointerCapture && track.setPointerCapture(e.pointerId);
+      if (state.playing) pause();
+      queueSeek(tFromEvt(e.clientX)); showTip(e.clientX); e.preventDefault();
+    });
+    track.addEventListener("pointermove", (e) => { showTip(e.clientX); if (scrubbing) queueSeek(tFromEvt(e.clientX)); });
+    const endScrub = () => { scrubbing = false; track.classList.remove("is-scrubbing"); };
+    track.addEventListener("pointerup", endScrub);
+    track.addEventListener("pointercancel", endScrub);
+    track.addEventListener("keydown", (e) => {
+      const k = e.key; let d = 0;
+      if (k === "ArrowLeft") d = -30; else if (k === "ArrowRight") d = 30;
+      else if (k === "Home") { stepTo(0); e.preventDefault(); return; }
+      else if (k === "End") { stepTo(T_CAP); e.preventDefault(); return; }
+      if (d) { if (state.playing) pause(); stepTo(state.tSec + d); e.preventDefault(); }
+    });
+  }
+  var mvTimeCbs = [], mvLastNotifyT = -999;
+  function updateScrub(tSec) {
+    if (scrubEls) {
+      const pct = Math.max(0, Math.min(100, tSec / T_CAP * 100));
+      if (scrubEls.fill) scrubEls.fill.style.width = pct + "%";
+      if (scrubEls.head) scrubEls.head.style.left = pct + "%";
+      if (scrubEls.cur) scrubEls.cur.textContent = fmt(tSec);
+      if (scrubEls.track) { scrubEls.track.setAttribute("aria-valuenow", String(Math.round(tSec))); scrubEls.track.setAttribute("aria-valuetext", fmt(tSec)); }
+    }
+    // 录播时间广播：供外部"证据流"等联动（getT/onTime/seek/keyMoments 见 window.PharmacoPilotMV）
+    if (tSec !== mvLastNotifyT) { mvLastNotifyT = tSec; for (var i = 0; i < mvTimeCbs.length; i++) { try { mvTimeCbs[i](tSec); } catch (e) {} } }
+  }
 
-  // 立场值:优先用 agent 的连续 stance_position;未加载时按 组别+强度 兜底
+  /* ---------- 5.1 · 视图切换：教室顶视图 ⇄ 立场光谱 ---------- */
+  // floor 内只保留一个视图 + 教师分组面板；切换时重建并重新绑定，再按当前 tSec 复原状态。
+  function paintFloor(floorEl) {
+    floorEl.innerHTML = "";
+    seatEls = {};                 // 引擎只认 seatEls
+    floorEl.appendChild(buildStanceRoom());
+  }
+
+  /* ---------- 5.2 · 立场教室（2.5D 等距 diorama：横轴=立场，纵深=参与度） ---------- */
+  // 透视投影：世界坐标 gx∈[0,1] 立场（0 反对/1 支持）、gy∈[0,1] 纵深（0 远/后排、1 近/前排）→ 屏幕
+  const ISO = { topY: 100, botY: 394, spanFar: 0.44, spanNear: 0.98, sFar: 0.58, sNear: 1.12 };
+  function isoXpct(gx, gy) { const span = ISO.spanFar + (ISO.spanNear - ISO.spanFar) * gy; return 50 + (gx - 0.5) * span * 100; }
+  function isoYpx(gy) { return ISO.topY + (ISO.botY - ISO.topY) * gy; }
+  function isoScale(gy) { return ISO.sFar + (ISO.sNear - ISO.sFar) * gy; }
+  function placeIso(ch, gx, gy) {
+    ch.style.left = isoXpct(gx, gy).toFixed(2) + "%";
+    ch.style.top = isoYpx(gy).toFixed(1) + "px";
+    ch.style.transform = "translate(-50%,-100%) scale(" + isoScale(gy).toFixed(3) + ")";
+    ch.style.zIndex = String(200 + Math.round(gy * 300));
+  }
+
+  function buildStanceRoom() {
+    const room = el("div", "mv-groom");
+    const VBW = 1000, X = (gx, gy) => (isoXpct(gx, gy) * VBW / 100).toFixed(1), Y = (gy) => isoYpx(gy).toFixed(1);
+    const WT = 32; // 后墙顶 y
+    const floor = `${X(0,1)},${Y(1)} ${X(1,1)},${Y(1)} ${X(1,0)},${Y(0)} ${X(0,0)},${Y(0)}`;
+    const zoneL = `${X(0,1)},${Y(1)} ${X(0.5,1)},${Y(1)} ${X(0.5,0)},${Y(0)} ${X(0,0)},${Y(0)}`;
+    const zoneR = `${X(0.5,1)},${Y(1)} ${X(1,1)},${Y(1)} ${X(1,0)},${Y(0)} ${X(0.5,0)},${Y(0)}`;
+    const backWall = `${X(0,0)},${Y(0)} ${X(1,0)},${Y(0)} ${X(1,0)},${WT} ${X(0,0)},${WT}`;
+    const leftWall = `${X(0,1)},${Y(1)} ${X(0,0)},${Y(0)} ${X(0,0)},${WT} ${X(0,1)},${(isoYpx(1) - 96).toFixed(1)}`;
+    const rightWall = `${X(1,1)},${Y(1)} ${X(1,0)},${Y(0)} ${X(1,0)},${WT} ${X(1,1)},${(isoYpx(1) - 96).toFixed(1)}`;
+    let grid = "";
+    for (let i = 1; i < 6; i++) { const gy = i / 6; grid += `<line x1="${X(0,gy)}" y1="${Y(gy)}" x2="${X(1,gy)}" y2="${Y(gy)}"/>`; }
+    for (let i = 1; i < 8; i++) { const gx = i / 8; grid += `<line x1="${X(gx,0)}" y1="${Y(0)}" x2="${X(gx,1)}" y2="${Y(1)}"/>`; }
+    room.innerHTML = `
+      <div class="mv-room-head">
+        <span class="mv-room-title">⌂ 立场教室 · 对「原研 → 仿制替代」的态度</span>
+        <span class="mv-room-scene">近=前排讨论(投入) · 远=后排走神 · 左右=立场 · 被说服就走过去</span>
+      </div>
+      <div class="mv-groom-floor" id="mv-sstage">
+        <svg class="mv-iso-bg" viewBox="0 0 ${VBW} 430" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <!-- 地板：近端深暖/远端浅暖，模拟木地板进深光感 -->
+            <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#e8d9b8"/>
+              <stop offset="100%" stop-color="#d0bb92"/>
+            </linearGradient>
+            <!-- 后墙：顶部偏冷/底部偏暖，模拟环境光 -->
+            <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#bfb4a0"/>
+              <stop offset="100%" stop-color="#cfc3a8"/>
+            </linearGradient>
+            <!-- 侧墙：比后墙暖一点，弱光面 -->
+            <linearGradient id="sideGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#cbbea8"/>
+              <stop offset="100%" stop-color="#d9ccb4"/>
+            </linearGradient>
+          </defs>
+          <polygon class="iso-backwall" points="${backWall}"/>
+          <polygon class="iso-sidewall" points="${leftWall}"/>
+          <polygon class="iso-sidewall" points="${rightWall}"/>
+          <!-- 白板/黑板 with subtle inner border -->
+          <rect class="iso-board" x="${X(0.33,0)}" y="${WT + 7}" width="${(X(0.67,0) - X(0.33,0)).toFixed(1)}" height="${(isoYpx(0) - WT - 16).toFixed(1)}" rx="4"/>
+          <rect x="${(+X(0.33,0)+2.5).toFixed(1)}" y="${WT + 9.5}" width="${(X(0.67,0) - X(0.33,0) - 5).toFixed(1)}" height="${(isoYpx(0) - WT - 21).toFixed(1)}" rx="2.5" fill="none" stroke="#d4c8a8" stroke-width=".8"/>
+          <polygon class="iso-floor" points="${floor}"/>
+          <polygon class="iso-zone-l" points="${zoneL}"/>
+          <polygon class="iso-zone-r" points="${zoneR}"/>
+          <g class="iso-grid">${grid}</g>
+        </svg>
+        <span class="mv-wall-lbl wl">◀ 反对替代</span>
+        <span class="mv-wall-lbl wr">支持替代 ▶</span>
+        <span class="mv-wall-lbl wc">骑墙 / 观望</span>
+        <div class="mv-podium-iso" id="mv-podium-iso"><span class="mv-pf mv-pf-t" title="教师">师</span><span class="mv-pf mv-pf-ai" title="AI Agent">AI</span></div>
+        <div class="mv-centroid" id="mv-centroid"><span class="mv-centroid-lbl">班级立场重心</span></div>
+        <div class="mv-datasrc-notice" id="mv-datasrc" hidden>⚠ 未连接虚拟班数据源 · 当前为脚本回放（立场按个体归宿展示，运行模拟不生成新发言）</div>
+      </div>`;
+    const stage = room.querySelector("#mv-sstage");
+    const pod = stage.querySelector("#mv-podium-iso");
+    placeIso(pod, 0.5, 0.04); pod.style.zIndex = "150";
+    STUDENTS.forEach((s) => {
+      const bk = STANCE_BAKED[s.id] || {};
+      const look = indivLook(s.id); // 每人一个独立外观（发色/衣色），不按组上色
+      const ch = el("div", `mv-char is-${s.init}`);
+      ch.dataset.id = s.id;
+      ch.style.setProperty("--shirt", look.shirt);
+      ch.style.setProperty("--hair", look.hair);
+      ch.style.setProperty("--skin", look.skin);
+      ch.innerHTML = `
+        <div class="mv-think"></div>
+        <div class="mv-bubble"></div>
+        <div class="mv-px"><svg class="fig" viewBox="0 0 40 54" aria-hidden="true">
+          <ellipse class="fig-shadow" cx="20" cy="53" rx="13" ry="2.4"/>
+          <path class="fig-body" d="M3 54 C3 39 10.5 31 20 31 C29.5 31 37 39 37 54 Z" fill="var(--shirt,#b8b2a6)"/>
+          <path class="fig-body-sh" d="M20 31 C29.5 31 37 39 37 54 L20 54 Z" fill="rgba(0,0,0,.08)"/>
+          <rect class="fig-neck" x="16.4" y="24" width="7.2" height="10" rx="3.6" fill="var(--skin,#eac08c)"/>
+          <circle class="fig-head" cx="20" cy="15" r="11.6" fill="var(--skin,#eac08c)"/>
+          <path class="fig-head-sh" d="M20 3.4 A11.6 11.6 0 0 1 20 26.6 Z" fill="rgba(0,0,0,.06)"/>
+          <path class="fig-hair" d="M8.3 15.5 C8.3 2.6 31.7 2.6 31.7 15.5 C31.7 8.8 27 5 20 5 C13 5 8.3 8.8 8.3 15.5 Z" fill="var(--hair,#3a2c20)"/>
+          <ellipse class="fig-eye" cx="15.7" cy="15.6" rx="1.5" ry="1.9" fill="#3a2e28"/>
+          <ellipse class="fig-eye" cx="24.3" cy="15.6" rx="1.5" ry="1.9" fill="#3a2e28"/>
+        </svg></div>
+        <span class="mv-char-name">${s.name}</span>
+        <div class="mv-tip">${s.id} · ${s.name} · 强度 ${s.str}/5 · 立场 <span class="mv-tip-st">—</span><br><span>${s.note || ""}</span>${bk.why ? `<br><span class="mv-tip-why">↳ 立场归宿：${bk.why}</span>` : ""}</div>`;
+      stage.appendChild(ch);
+      seatEls[s.id] = ch;
+    });
+    return room;
+  }
+
+  // 每个学生一个稳定但各异的外观（独立个体，不按组配色）
+  const INDIV_SHIRTS = ["#c96f52", "#6fa085", "#9a82c4", "#d99f5e", "#7ea0bd", "#bd7e7e", "#a89255", "#8a7da8", "#c2ad6e", "#7aa593", "#c0905f", "#8aa3b6"];
+  const INDIV_HAIRS = ["#2e221a", "#3f2f22", "#221c16", "#4a3724", "#16120e", "#564026", "#6b5238", "#1a1a1f"];
+  const INDIV_SKINS = ["#f0c6a0", "#e7b58a", "#d8a778", "#f2d2af", "#caa074", "#e9c19b"];
+  function indivLook(id) {
+    let h = 0; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+    return { shirt: INDIV_SHIRTS[h % INDIV_SHIRTS.length], hair: INDIV_HAIRS[(h >> 4) % INDIV_HAIRS.length], skin: INDIV_SKINS[(h >> 9) % INDIV_SKINS.length] };
+  }
+
+  // 等距房间布局：参与度→纵深(近前排/远后排)、立场→横向；近大远小、按纵深 z-order；走动由 CSS 过渡完成
+  /* ===== 持续环境仿真：力导向自组织（吸引/排斥/游走）→ 学生自己"走"出簇，无标签无指派 =====
+   * gx∈[0,1] 立场轴（0 反对替代 / 1 支持替代）、gy∈[0,1] 纵深（0 远·后排走神 / 1 近·前排投入）。
+   * 每帧合力 = 个人归位(立场x+参与度纵深) + 同伴吸引(立场相近/私交盟友) + 近邻排斥(避让) + 个体游走噪声。
+   * 全程确定性（噪声用时间正弦，非 Math.random），与"非 LLM 规则内核"卖点一致。 */
+  const POS = {}; // id -> {gx,gy,vx,vy} 连续位置 + 速度
+  const TGT = {}; // id -> {gx,gy} 个人归位目标
+  let ambientRAF = null, ambientLast = 0;
+  function hash01(str, salt) {
+    let h = (2166136261 ^ (salt || 0)) >>> 0;
+    for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619) >>> 0;
+    return (h % 100000) / 100000;
+  }
+  // 两人亲和：立场相近→吸引；私交盟友加成、私交对手转排斥（个体关系，非组）
+  function affinity(idA, idB) {
+    const sa = stanceOf(byId[idA]), sb = stanceOf(byId[idB]);
+    let aff = Math.max(0, 1 - Math.abs(sa - sb) / 0.55); // 立场差 <0.55 才互相靠拢
+    const gr = (agentOf(idA) || {}).graph || {};
+    if ((gr.allies || []).includes(idB)) aff += 0.55; // 私交盟友：额外靠拢
+    if ((gr.rivals || []).includes(idB)) aff -= 1.0;  // 私交对手：推开
+    return aff;
+  }
+  // 设定每个学生的归位目标：x=立场，纵深=参与度带（含稳定的个体偏好纵深→自然铺开不成行）
+  function updateTargets() {
+    Object.keys(seatEls).forEach((id) => {
+      const ch = seatEls[id], s = byId[id]; if (!ch || !s) return;
+      const rt = RT[id] || {};
+      const st = Math.max(-1, Math.min(1, stanceOf(s)));
+      const engagedCls = ch.classList.contains("is-live") || ch.classList.contains("is-active");
+      const disengaged = !engagedCls && (
+        ["is-quiet", "is-silent", "is-csilent", "is-fading"].some((c) => ch.classList.contains(c)) ||
+        (typeof rt.attention === "number" && rt.attention < 0.5)
+      );
+      const front = !disengaged;
+      const band = front ? [0.5, 1.0] : [0.06, 0.42];
+      const dep = band[0] + (band[1] - band[0]) * hash01(id, 7); // 个体偏好纵深
+      (TGT[id] || (TGT[id] = {})).gx = (st + 1) / 2;
+      TGT[id].gy = dep;
+      ch.classList.toggle("at-desk", !front); ch.classList.toggle("on-floor", front);
+      const tip = ch.querySelector(".mv-tip-st"); if (tip) tip.textContent = st.toFixed(2);
+    });
+  }
+  // 参数经离线力学仿真整定（screen-accurate）：无重叠(min≈38px)、铺满 ~890×279px、按立场自然成簇、稳态轻微游走(≈10px/0.6s 不抖动)
+  const SIMP = { kHome: 0.02, kRepel: 0.20, rRepel: 0.085, kAttract: 0.0018, rAttract: 0.13, damping: 0.60, JIT: 0.0009, MAXV: 0.012, WX: 1.0, WY: 0.14 };
+  // 单步力学积分（dt=帧步；t=时间秒，用于游走噪声；jitter=是否加游走）
+  function simStep(dt, t, jitter) {
+    const ids = Object.keys(seatEls); if (!ids.length) return;
+    const P = SIMP;
+    for (let a = 0; a < ids.length; a++) {
+      const id = ids[a], p = POS[id], tg = TGT[id]; if (!p || !tg) continue;
+      const isLive = seatEls[id].classList.contains("is-live");
+      const hp = isLive ? 0.05 : P.kHome; // 发言者强归位，站定不游走
+      let fx = hp * (tg.gx - p.gx), fy = hp * (tg.gy - p.gy);
+      for (let b = 0; b < ids.length; b++) {
+        if (b === a) continue;
+        const q = POS[ids[b]]; if (!q) continue;
+        const dgx = q.gx - p.gx, dgy = q.gy - p.gy;
+        const d2 = dgx * dgx * P.WX + dgy * dgy * P.WY + 1e-4, d = Math.sqrt(d2);
+        if (d < P.rRepel) { const rep = P.kRepel * (P.rRepel - d) / d; fx -= dgx * rep; fy -= dgy * rep; }
+        else if (d < P.rAttract) {
+          const aff = affinity(id, ids[b]);
+          if (aff > 0) { const at = P.kAttract * aff / d; fx += dgx * at; fy += dgy * at; }
+          else if (aff < 0) { const re = P.kRepel * (-aff) * 0.35 / d; fx -= dgx * re; fy -= dgy * re; }
+        }
+      }
+      if (jitter && !isLive) { // 持续游走（确定性平滑噪声）
+        const ph = hash01(id, 1) * 6.283, fr = 0.5 + hash01(id, 2) * 0.7;
+        fx += P.JIT * Math.sin(t * fr + ph);
+        fy += P.JIT * 0.5 * Math.cos(t * fr * 1.3 + ph);
+      }
+      p.vx = (p.vx + fx * dt) * P.damping; p.vy = (p.vy + fy * dt) * P.damping;
+      const sp = Math.hypot(p.vx, p.vy); if (sp > P.MAXV) { p.vx *= P.MAXV / sp; p.vy *= P.MAXV / sp; }
+      p.gx = Math.max(0.04, Math.min(0.96, p.gx + p.vx * dt));
+      p.gy = Math.max(0.05, Math.min(1.0, p.gy + p.vy * dt));
+    }
+  }
+  function placeAll() {
+    const ids = Object.keys(seatEls); let mx = 0, my = 0, n = 0;
+    for (let a = 0; a < ids.length; a++) {
+      const id = ids[a], p = POS[id]; if (!p) continue;
+      placeIso(seatEls[id], p.gx, p.gy); mx += p.gx; my += p.gy; n++;
+    }
+    const cen = document.getElementById("mv-centroid");
+    if (cen && n) {
+      const cgx = mx / n, cgy = my / n;
+      cen.style.left = isoXpct(cgx, cgy).toFixed(2) + "%";
+      cen.style.top = isoYpx(cgy).toFixed(1) + "px";
+      cen.style.transform = "translate(-50%,-100%)";
+      const lbl = cen.querySelector(".mv-centroid-lbl"); if (lbl) lbl.textContent = "班级立场重心 " + (cgx * 2 - 1).toFixed(2);
+    }
+  }
+  function ambientTick(now) {
+    ambientRAF = requestAnimationFrame(ambientTick);
+    if (!Object.keys(seatEls).length) return;
+    let dt = ambientLast ? (now - ambientLast) / 16.667 : 1; ambientLast = now;
+    dt = Math.max(0.4, Math.min(2.2, dt)); // 帧步限幅，避免卡顿后跳变
+    simStep(dt, now * 0.001, true);
+    placeAll();
+  }
+  function ambientStop() { if (ambientRAF != null) { cancelAnimationFrame(ambientRAF); ambientRAF = null; } if (chatTimer != null) { clearInterval(chatTimer); chatTimer = null; } }
+
+  /* ===== 交流：邻近且立场相近者两两交头接耳（非发言者、确定性轮换），让房间有"在讨论"的私语层 ===== */
+  let chatTimer = null, chatBucket = 0;
+  const WHISPERS = ["这点我同意", "你家也碰到过？", "嗯，有道理", "数据这么看…", "我也这么想", "回头细聊", "就怕万一呢", "确实是这样", "你怎么看", "我有点犹豫"];
+  function clearChats() {
+    document.querySelectorAll(".mv-char.is-chatting").forEach((c) => {
+      c.classList.remove("is-chatting", "chat-l", "chat-r");
+      const b = c.querySelector(".mv-bubble.is-whisper"); if (b) { b.classList.remove("is-on", "is-whisper"); b.textContent = ""; }
+    });
+  }
+  function chatTick() {
+    clearChats();
+    const floor = document.querySelector(".mv-groom-floor"); if (!floor) return;
+    const fw = floor.getBoundingClientRect().width || 1100;
+    // 候选：在场、非发言者、非走神/沉默者
+    const cand = Object.keys(seatEls).filter((id) => {
+      const ch = seatEls[id];
+      return ch && !ch.classList.contains("is-live") &&
+        !["is-quiet", "is-silent", "is-csilent", "is-fading"].some((c) => ch.classList.contains(c));
+    });
+    const sc = (id) => ({ x: (parseFloat(seatEls[id].style.left) || 50) / 100 * fw, y: parseFloat(seatEls[id].style.top) || 0 });
+    const used = new Set(), pairs = [];
+    const order = cand.slice().sort((a, b) => hash01(a, chatBucket + 11) - hash01(b, chatBucket + 11)); // 确定性轮换次序
+    for (const id of order) {
+      if (used.has(id)) continue;
+      const pa = sc(id), sa = stanceOf(byId[id]); let best = null, bestD = 78;
+      for (const j of cand) {
+        if (j === id || used.has(j)) continue;
+        const pb = sc(j), d = Math.hypot(pa.x - pb.x, pa.y - pb.y);
+        if (d < bestD && Math.abs(sa - stanceOf(byId[j])) < 0.35) { bestD = d; best = j; } // 近邻 + 立场相近
+      }
+      if (best) { used.add(id); used.add(best); pairs.push([id, best]); if (pairs.length >= 3) break; }
+    }
+    pairs.forEach(([a, b]) => {
+      const A = seatEls[a], B = seatEls[b], pa = sc(a), pb = sc(b), aLeft = pa.x <= pb.x;
+      [A, B].forEach((el) => el.classList.remove("is-attending", "attend-l", "attend-r")); // 交流期间脱离对发言者的侧头
+      A.classList.add("is-chatting", aLeft ? "chat-r" : "chat-l"); // 面向对方
+      B.classList.add("is-chatting", aLeft ? "chat-l" : "chat-r");
+      const sp = hash01(a + b, chatBucket) < 0.5 ? a : b; // 其一开口轻语
+      const bub = seatEls[sp].querySelector(".mv-bubble");
+      if (bub) { bub.textContent = WHISPERS[Math.floor(hash01(a + b, chatBucket + 5) * WHISPERS.length)]; bub.classList.add("is-on", "is-whisper"); }
+    });
+    chatBucket++;
+  }
+
+  let ambientSettled = false;
+  function ambientStart() {
+    updateTargets();
+    const cl = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    let fresh = false;
+    Object.keys(seatEls).forEach((id) => {
+      if (!POS[id]) { // 初始按个体偏移散开，避免同立场全堆在一条竖线上
+        const t = TGT[id] || { gx: 0.5, gy: 0.5 };
+        POS[id] = { gx: cl(t.gx + (hash01(id, 3) - 0.5) * 0.18, 0.04, 0.96), gy: cl(t.gy + (hash01(id, 4) - 0.5) * 0.16, 0.05, 1.0), vx: 0, vy: 0 };
+        fresh = true;
+      }
+    });
+    // 同步预收敛：即使后台/隐藏页 rAF 被节流，落位也已是无重叠成簇态；每次 applyState 再补几步，让立场变化后的"走位重组"在无 rAF 时也可见（rAF 只在可见时添持续活气）
+    const settleN = (fresh || !ambientSettled) ? 110 : 22;
+    for (let k = 0; k < settleN; k++) simStep(1, 0, false);
+    ambientSettled = true;
+    placeAll();
+    if (chatTimer == null) chatTimer = setInterval(chatTick, 2600);
+    if (ambientRAF != null) return;
+    ambientLast = 0; ambientRAF = requestAnimationFrame(ambientTick);
+  }
+  // applyState 末尾仍调用本函数：刷新归位目标并确保环境循环在跑（落位交给 rAF）
+  function layoutStanceRoom() { if (!Object.keys(seatEls).length) return; ambientStart(); }
+
+  // 立场值:优先用运行时 RT.stance_position(会随模拟漂移);再回退 state_init;最后启发式
   function stanceOf(s) {
+    const rt = RT[s.id];
+    if (rt && typeof rt.stance_position === "number") return rt.stance_position;
     const a = agentOf(s.id);
     if (a && a.state_init && a.state_init.stance_position != null) return a.state_init.stance_position;
-    const base = { A: 0.6, B: -0.6, C: 0.3, D: 0 }[s.g];
-    const mag = (s.str - 3) * 0.12;
-    if (s.g === "A") return Math.min(1, base + mag);
-    if (s.g === "B") return Math.max(-1, base - mag);
-    if (s.g === "C") return base + mag * 0.4;
-    return ((s.id.charCodeAt(1) % 3) - 1) * 0.15; // D 在中段小散布
+    const bk = STANCE_BAKED[s.id];
+    return bk && typeof bk.t === "number" ? bk.t : 0; // 兜底用个体烘焙归宿，无则居中(不按组)
   }
 
-  function buildSpectrum() {
-    const wrap = el("div", "mv-spectrum");
-    wrap.innerHTML = `
-      <div class="mv-spec-head">
-        <span class="mv-spec-title">立场光谱 · 对「原研 → 仿制替代」的态度</span>
-        <span class="mv-spec-note">位置 = 立场（连续）· 颜色 = 背景画像 · 背景 ≠ 立场</span>
-      </div>
-      <div class="mv-spec-band" id="mv-spec-band">
-        <div class="mv-spec-axis"></div>
-        <span class="mv-spec-lbl l">← 反对替代 · 患者连续性</span>
-        <span class="mv-spec-lbl c">骑墙 / 观望</span>
-        <span class="mv-spec-lbl r">支持替代 · 成本 / 医保 →</span>
-        <div class="mv-csilence" id="mv-csilence" hidden>⚠ C 组（药企背景）散布在中段，但集体未发声</div>
-      </div>`;
-    const band = wrap.querySelector("#mv-spec-band");
-    // beeswarm:按 stance 排序,贪心分配纵向 lane 避免重叠
-    const LANES = 6;
-    const laneLastX = new Array(LANES).fill(-Infinity);
-    [...STUDENTS].sort((a, b) => stanceOf(a) - stanceOf(b)).forEach((s) => {
-      const x = (stanceOf(s) + 1) / 2; // 0..1
-      let lane = 0, bestGap = -Infinity, bestLane = 0;
-      for (let l = 0; l < LANES; l++) {
-        const gap = x - laneLastX[l];
-        if (gap > bestGap) { bestGap = gap; bestLane = l; }
-        if (gap > 0.055) { lane = l; bestLane = l; break; }
-        lane = bestLane;
-      }
-      laneLastX[lane] = x;
-      const grp = GROUPS[s.g];
-      const seat = el("div", `mv-seat tone-${grp.tone} is-${s.init}`);
-      seat.dataset.id = s.id;
-      seat.style.left = (x * 100).toFixed(1) + "%";
-      seat.style.top = (16 + lane * 13.5) + "%"; // 从 16% 起,避开顶部 C-沉默横幅
-      seat.innerHTML = `
-        <div class="mv-ava"><span class="mv-ava-id">${s.id}</span></div>
-        <span class="mv-ava-name">${s.name}</span>
-        <div class="mv-bubble"></div>
-        <div class="mv-gbadge"></div>
-        <div class="mv-tip">${s.name} · ${grp.tag}${s.str}/5 · 立场 ${stanceOf(s).toFixed(2)}<br><span>${s.note}</span></div>`;
-      band.appendChild(seat);
-      seatEls[s.id] = seat;
-    });
-    return wrap;
-  }
-
-  function buildGrouping() {
-    const wrap = el("div", "mv-grouping");
-    wrap.innerHTML = `
-      <div class="mv-grp-ctrl">
-        <span class="mv-grp-lbl">教师分组<small>独立于立场的操作</small></span>
-        <div class="mv-grp-modes">
-          <button class="mv-gbtn is-on" data-mode="hetero">异质 · 混立场</button>
-          <button class="mv-gbtn" data-mode="homo">同质 · 近立场</button>
-          <button class="mv-gbtn" data-mode="random">随机</button>
-          <button class="mv-gbtn" data-mode="seat">按座位</button>
-        </div>
-        <span class="mv-grp-n">分 <b id="mv-grp-ncount">6</b> 组</span>
-      </div>
-      <div class="mv-grp-result" id="mv-grp-result"></div>
-      <div class="mv-grp-hint" id="mv-grp-hint"></div>`;
-    wrap.querySelectorAll(".mv-gbtn").forEach((b) =>
-      b.addEventListener("click", () => {
-        wrap.querySelectorAll(".mv-gbtn").forEach((x) => x.classList.toggle("is-on", x === b));
-        formGroups(b.dataset.mode, curGroupN);
-      }));
-    return wrap;
-  }
-
-  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-
-  function formGroups(mode, n) {
-    curGroupMode = mode; curGroupN = n;
-    let order;
-    if (mode === "seat") order = STUDENTS.map((s) => s.id);
-    else if (mode === "random") order = shuffle(STUDENTS.map((s) => s.id));
-    else order = [...STUDENTS].sort((a, b) => stanceOf(a) - stanceOf(b)).map((s) => s.id); // hetero/homo 先按立场排
-    const groups = Array.from({ length: n }, () => []);
-    if (mode === "homo") {
-      const per = Math.ceil(order.length / n);
-      order.forEach((id, i) => groups[Math.min(n - 1, Math.floor(i / per))].push(id)); // 连续切块=立场相近
-    } else if (mode === "hetero") {
-      order.forEach((id, i) => { const r = Math.floor(i / n); const g = r % 2 === 0 ? i % n : n - 1 - (i % n); groups[g].push(id); }); // 蛇形=每组跨光谱
-    } else {
-      order.forEach((id, i) => groups[i % n].push(id)); // 轮流
-    }
-    curGroups = groups;
-    const g2 = {}; groups.forEach((g, gi) => g.forEach((id) => (g2[id] = gi + 1)));
-    Object.entries(seatEls).forEach(([id, seat]) => {
-      const b = seat.querySelector(".mv-gbadge"); if (b) b.textContent = g2[id] || "";
-    });
-    renderGroupResult(groups);
-  }
-
-  function renderGroupResult(groups) {
-    const box = document.getElementById("mv-grp-result"); if (!box) return;
-    box.innerHTML = groups.map((g, gi) => {
-      const dots = g.map((id) => { const s = byId[id]; return `<i class="tone-${s ? GROUPS[s.g].tone : "d"}" title="${s ? s.name : id} · 立场${stanceOf(byId[id]).toFixed(2)}"></i>`; }).join("");
-      const st = g.map((id) => stanceOf(byId[id]));
-      const spread = st.length ? Math.max(...st) - Math.min(...st) : 0;
-      return `<div class="mv-grp-chip"><span class="gk">桌${gi + 1}</span><div class="gd">${dots}</div><span class="gs ${spread > 1 ? "wide" : ""}">跨度 ${spread.toFixed(1)}</span></div>`;
-    }).join("");
-    const hint = document.getElementById("mv-grp-hint");
-    if (hint) {
-      const avg = groups.reduce((s, g) => { const st = g.map((id) => stanceOf(byId[id])); return s + (st.length ? Math.max(...st) - Math.min(...st) : 0); }, 0) / (groups.length || 1);
-      hint.innerHTML = curGroupMode === "hetero"
-        ? `<b>异质分组</b>:每桌平均立场跨度 <b class="hi">${avg.toFixed(1)}</b>（越大越混）—— 组内自带分歧,这才是讨论的动力。真实课堂这样分。`
-        : curGroupMode === "homo"
-        ? `<b>同质分组</b>:每桌平均跨度 <b class="hi">${avg.toFixed(1)}</b>（越小越同质）—— 共识快但缺碰撞;且会复刻"同立场抱团"的假象。`
-        : `每桌平均立场跨度 <b class="hi">${avg.toFixed(1)}</b>;分组与立场无关,组内立场随机。`;
-    }
-  }
 
   function buildAnalysis() {
     const row = el("div", "mv-analysis");
@@ -557,7 +527,7 @@
       <div class="mv-stat-row">
         <div class="mv-stat"><b class="mv-stat-spoke">14</b><span>已表态 / 32</span></div>
         <div class="mv-stat"><b class="mv-stat-active">4</b><span>主动发声</span></div>
-        <div class="mv-stat"><b class="mv-stat-csilent" style="color:var(--amber-deep)">8</b><span>C 组未发声</span></div>
+        <div class="mv-stat"><b class="mv-stat-csilent" style="color:var(--amber-deep)">8</b><span>策略性沉默</span></div>
         <div class="mv-stat"><b class="mv-stat-quiet">4</b><span>全程沉默</span></div>
       </div>`;
     statEls.spoke = p1.querySelector(".mv-stat-spoke");
@@ -571,9 +541,9 @@
     const p2 = el("div", "mv-panel");
     p2.innerHTML = `
       <h5><b>教学风险信号</b><span class="ct">3 项</span></h5>
-      <div class="mv-risk"><span class="sev lvl-h">高</span><div><b>立场失衡</b>——C 组 8 位「药企背景」未发声,可能放大集采替代倾向</div></div>
+      <div class="mv-risk"><span class="sev lvl-h">高</span><div><b>立场失衡</b>——8 位「药企背景」同学未发声,可能放大集采替代倾向</div></div>
       <div class="mv-risk"><span class="sev lvl-m">中</span><div><b>政策引用断点</b>——B 组讨论引用率仅 1/17,量规未刺激政策引用</div></div>
-      <div class="mv-risk"><span class="sev lvl-l">低</span><div><b>分组时长偏紧</b>——5 分钟分组对「等机会型」「推举型」画像不友好</div></div>`;
+      <div class="mv-risk"><span class="sev lvl-l">低</span><div><b>讨论时长偏紧</b>——5 分钟对「等机会型」「推举型」画像不友好</div></div>`;
     row.appendChild(p2);
 
     // (3) 量规歧义
@@ -606,8 +576,60 @@
     });
   }
 
+  /* ---------- 6.1 · 录播烘焙：把整堂课一次性跑成"固定录像" ----------
+   * agent 决策含 Math.random，故必须烘焙一次冻结：固定 beat 时间轴 + 每 20s 抓一帧立场/注意力关键帧，
+   * 之后点/拖进度条到任意一帧都能还原"当时真实发生了什么"（而非每次重放都不一样）。 */
+  let recKeys = null; // [{t, st:{id:stance}, at:{id:attention}}]
+  function bakeRecording() {
+    if (!MV.agentsReady()) return false;
+    MV.reset(); // 重置 + 清 DYN，从干净态烘焙
+    const keys = [];
+    for (let t = 0; t <= T_CAP; t += 20) {
+      advanceSim(t); // 生成 t>132 的 beats + 推进 RT（t≤132 早退，走 SCRIPT）
+      const v = {};
+      // 快照全部影响视觉/画像的 runtime 数值（不止立场/注意力）：
+      // 否则 bake 后 RT 停在 45:00 末态，回拖时 is-tired(fatigue)/内心戏(speak_motivation−social_safety)/inspector 会显示末态而非该时刻
+      STUDENTS.forEach((s) => {
+        const rt = RT[s.id] || {};
+        v[s.id] = {
+          sp: rt.stance_position != null ? rt.stance_position : stanceOf(s),
+          at: rt.attention != null ? rt.attention : 0.6,
+          fa: rt.fatigue || 0,
+          sm: rt.speak_motivation || 0,
+          ss: rt.social_safety || 0,
+        };
+      });
+      keys.push({ t, v });
+    }
+    recKeys = keys;
+    state.recorded = true;
+    return true;
+  }
+  // 把某时刻的全部 runtime 数值从关键帧线性插值还原到 RT（供摆位/画像/内心戏/疲劳用）
+  function applyRecordedState(tSec) {
+    if (!recKeys || !recKeys.length) return;
+    let lo = recKeys[0], hi = recKeys[recKeys.length - 1];
+    for (let i = 0; i < recKeys.length; i++) {
+      if (recKeys[i].t <= tSec) lo = recKeys[i];
+      if (recKeys[i].t >= tSec) { hi = recKeys[i]; break; }
+    }
+    const span = hi.t - lo.t, f = span > 0 ? (tSec - lo.t) / span : 0;
+    const lerp = (a, b) => (a != null && b != null) ? a + (b - a) * f : (a != null ? a : b);
+    STUDENTS.forEach((s) => {
+      const rt = RT[s.id]; if (!rt) return;
+      const A = lo.v[s.id], B = hi.v[s.id]; if (!A || !B) return;
+      rt.stance_position = lerp(A.sp, B.sp);
+      rt.attention = lerp(A.at, B.at);
+      rt.fatigue = lerp(A.fa, B.fa);
+      rt.speak_motivation = lerp(A.sm, B.sm);
+      rt.social_safety = lerp(A.ss, B.ss);
+    });
+  }
+
   // 应用到某时刻 tSec 之前(含)的所有 beats
   function applyState(tSec) {
+    // 0) 录播态：把立场/注意力还原到该时刻（回拖任意一帧也能看到当时的真实分营，而非最新态）
+    if (state.recorded) applyRecordedState(tSec);
     // 1) 特质态打底:C 沉默 / D1-D4 观望 / 其余倾听
     STUDENTS.forEach((s) => setSeatState(s.id, traitOf(s)));
     clearLive();
@@ -619,7 +641,7 @@
 
     if (state.replayMode) {
       // 回放:SCRIPT(t≤132 手写)+ DYN(t>132 agent 决策),按时间轴合并累计
-      const timeline = (AGENTS && DYN.length) ? [...SCRIPT, ...DYN].sort((a, b) => a.t - b.t) : SCRIPT;
+      const timeline = (MV.agentsReady() && MV.DYN.length) ? [...SCRIPT, ...MV.DYN].sort((a, b) => a.t - b.t) : SCRIPT;
       timeline.forEach((b) => {
         if (b.t > tSec) return;
         if (b.kind === "line") {
@@ -644,30 +666,81 @@
     spoke.forEach((id) => setSeatState(id, "active"));
 
     // 4) 当前正在发言者 = 最近一条 line(若为学生)
+    let liveId = null;
     if (state.replayMode && lastLine && lastLine.kind === "line" && lastLine.role === "S" && lastLine.who) {
-      setSeatState(lastLine.who, "live");
-      const seat = seatEls[lastLine.who];
+      liveId = lastLine.who;
+      setSeatState(liveId, "live");
+      const seat = seatEls[liveId];
       if (seat && lastLine.bubble) {
         const b = seat.querySelector(".mv-bubble");
         b.textContent = lastLine.bubble; b.classList.add("is-on");
       }
     }
 
-    // C 集体沉默 → 光谱上方横幅(替代原圆桌沉默幕)
-    const csBanner = document.getElementById("mv-csilence");
-    if (csBanner) csBanner.hidden = !cSilenced;
-    // C 组座位加"策略性沉默"标记(未发声时)
-    ["C1","C2","C3","C4","C5","C6","C7","C8"].forEach((id) => {
-      const seat = seatEls[id]; if (!seat) return;
-      seat.classList.toggle("is-csilent", cSilenced && !spoke.has(id));
+    // 策略性沉默：按"个体"标记（自我审查、未发声者）——不再按"组"
+    let silentCount = 0;
+    STUDENTS.forEach((st) => {
+      const seat = seatEls[st.id]; if (!seat) return;
+      const sil = traitOf(st) === "silent" && !spoke.has(st.id);
+      seat.classList.toggle("is-csilent", sil);
+      if (sil) silentCount++;
     });
 
     // 5) 回放态下把 agent 实时状态(注意力/疲劳)投影到座位透明度
-    if (state.replayMode && AGENTS) reflectSeatsRT();
+    if (state.replayMode && MV.agentsReady()) reflectSeatsRT();
 
     updateSubtitle(lastLine);
-    updateStats(spoke, cSilenced);
+    updateStats(spoke, silentCount);
     updateTimer(tSec);
+    updateScrub(tSec); // 进度条 playhead 跟随
+    layoutStanceRoom(); // 先按实时立场摆位（reflectThoughts 依赖最新屏幕位置做避让）
+    reflectAttending(liveId); // 立场相邻者向发言者侧头倾听
+    reflectThoughts();  // 沉默/纠结者头上飘内心戏（drama.tension），按当前位置错开
+  }
+
+  /* ---------- 6.4 · 侧头倾听：立场相邻者把头转向发言者 ---------- */
+  function reflectAttending(liveId) {
+    Object.values(seatEls).forEach((s) => s.classList.remove("is-attending", "attend-l", "attend-r"));
+    const sp = liveId ? byId[liveId] : null; if (!sp) return;
+    const spX = stanceOf(sp);
+    STUDENTS.forEach((s) => {
+      if (s.id === sp.id) return;
+      const seat = seatEls[s.id]; if (!seat) return;
+      if (["is-fading", "is-quiet", "is-csilent", "is-silent"].some((c) => seat.classList.contains(c))) return;
+      const d = stanceOf(s) - spX;
+      if (Math.abs(d) <= 0.3) { seat.classList.add("is-attending", d < 0 ? "attend-r" : "attend-l"); } // 立场更低(在左)→向右侧头
+    });
+  }
+
+  /* ---------- 6.5 · 内心独白浮层 ----------
+   * 把没在发言、但内心有张力的学生(speak_motivation − social_safety 最高)的 drama.tension 飘出来；
+   * 全场取前 4 名(策略性沉默者 / D4 加权)，错开避免重叠。 */
+  function reflectThoughts() {
+    Object.values(seatEls).forEach((s) => {
+      const th = s.querySelector(".mv-think");
+      if (th) { th.classList.remove("is-on"); th.textContent = ""; }
+    });
+    const cand = STUDENTS.map((s) => {
+      const seat = seatEls[s.id];
+      if (!seat || seat.classList.contains("is-live")) return null;
+      const a = agentOf(s.id) || {};
+      const cur = RT[s.id] || a.state_init || {};
+      const tension = (a.drama && a.drama.tension) || s.note;
+      if (!tension) return null;
+      let score = (+cur.speak_motivation || 0) - (+cur.social_safety || 0);
+      if (traitOf(s) === "silent") score += 0.15; // 策略性沉默者的内心更值得浮现(个体)
+      if (s.id === "D4") score += 0.6;
+      const x = parseFloat(seat.style.left) || 50, y = parseFloat(seat.style.top) || 0; // 当前屏幕位置
+      return { s, tension, score, x, y };
+    }).filter(Boolean).sort((a, b) => b.score - a.score);
+    // 贪心：按张力取前 3，但跳过与已选过近者 → 气泡彼此错开，不再糊成一团
+    const shown = [], MAX = 3, MIN_DX = 14, MIN_DY = 80;
+    for (const c of cand) {
+      if (shown.length >= MAX) break;
+      if (shown.some((p) => Math.abs(p.x - c.x) < MIN_DX && Math.abs(p.y - c.y) < MIN_DY)) continue;
+      const th = seatEls[c.s.id].querySelector(".mv-think");
+      if (th) { th.textContent = c.tension; th.classList.add("is-on"); shown.push(c); }
+    }
   }
 
   function updateSubtitle(b) {
@@ -685,9 +758,10 @@
     else if (b.kind === "note") { roleCls = "role-A"; roleLbl = "Agent"; }
     else if (b.role === "A") { roleCls = "role-A"; roleLbl = "Agent"; }
     else if (b.role === "S") {
-      const s = byId[b.who]; roleCls = "role-S role-S-" + (s ? s.g.toLowerCase() : "a");
+      roleCls = "role-S";
       roleLbl = "学生 " + (b.who || "");
-      who = s ? "·" + s.name : "";
+      const sp = byId[b.who];
+      who = sp ? "·" + sp.name : "";
     }
     role.className = "mv-sub-role " + roleCls;
     role.textContent = roleLbl + who;
@@ -696,14 +770,14 @@
     subtitleEl.classList.remove("is-flash"); void subtitleEl.offsetWidth; subtitleEl.classList.add("is-flash");
   }
 
-  function updateStats(spoke, cSilenced) {
+  function updateStats(spoke, silentCount) {
     if (!statEls.spoke) return;
     statEls.spoke.textContent = spoke.size;
     // 主动发声(强度≥4 且已表态)
     const proactive = [...spoke].filter((id) => byId[id] && byId[id].str >= 4).length;
     statEls.active.textContent = proactive;
-    statEls.csilent.textContent = cSilenced ? 8 : 0;
-    statEls.quiet.textContent = 4; // D1-D4 全程沉默
+    statEls.csilent.textContent = silentCount != null ? silentCount : 0;
+    statEls.quiet.textContent = STUDENTS.filter((s) => s.init === "quiet").length; // 全程观望(个体)
     statEls.time.textContent = state.replayMode ? fmt(state.tSec) : "02:12";
   }
 
@@ -722,8 +796,8 @@
   function toggleRun() {
     if (state.playing) { pause(); return; }
     state.replayMode = true;
-    // 若已到全程末尾(或处于静态端态),先从头开始(同时重置 agent runtime)
-    if (state.tSec >= T_CAP) { state.tSec = 0; if (AGENTS) initRT(); }
+    // 已到末尾 → 从头播（录播态保留烘焙好的录像，不重置 agent runtime）
+    if (state.tSec >= T_CAP) { state.tSec = 0; if (MV.agentsReady() && !state.recorded) MV.reset(); }
     play();
   }
 
@@ -746,16 +820,16 @@
     state.playing = false;
     if (state.timer) clearInterval(state.timer);
     state.timer = null;
-    runBtn.textContent = "▶ 继续";
+    runBtn.textContent = "▶ 继续播放";
     runBtn.classList.remove("is-playing");
   }
 
   function reset() {
     pause();
-    state.replayMode = true; // 重置到回放起点 00:00(空场)
+    state.replayMode = true; // 回到录播起点 00:00
     state.tSec = 0;
-    if (AGENTS) initRT(); // 清 DYN + 重置 agent runtime
-    runBtn.textContent = "▶ 运行模拟";
+    if (MV.agentsReady() && !state.recorded) MV.reset(); // 非录播态才重置 agent runtime（录播态保留烘焙录像）
+    runBtn.textContent = "▶ 播放录播";
     applyState(0);
   }
 
@@ -784,7 +858,6 @@
   function renderMvInspector(id) {
     const a = agentOf(id) || {};
     const s = byId[id] || {};
-    const g = GROUPS[s.g] || {};
     const p = a.persona || {}, k = a.knowledge || {}, si = a.state_init || {};
     const rt = RT[id], cur = rt || si;
     const r = a.responses || {}, gr = a.graph || {}, d = a.drama || {}, ri = a.rubric_init || {};
@@ -797,12 +870,12 @@
     const evs = rt && rt._events ? rt._events.slice(-5).reverse() : [];
     const resp = Object.entries(r).slice(0, 3);
     return `
-    <div class="mv-insp-card tone-${s.g ? s.g.toLowerCase() : "a"}">
+    <div class="mv-insp-card">
       <button class="mv-insp-close" aria-label="关闭">×</button>
       <div class="mv-insp-head">
         <div class="mv-insp-id">${mvEsc(id)}</div>
-        <div class="mv-insp-who"><div class="nm">${mvEsc(s.name || (a.identity && a.identity.alias) || "")}</div><div class="dm">${mvEsc((a.identity && a.identity.demo) || "")} · ${mvEsc(g.label || "")}</div></div>
-        <div class="mv-insp-stance">${mvEsc(p.stance || g.label || "")} <small>${mvEsc(String(p.stance_strength != null ? p.stance_strength : (s.str != null ? s.str : "")))}/5</small></div>
+        <div class="mv-insp-who"><div class="nm">${mvEsc(s.name || (a.identity && a.identity.alias) || "")}</div><div class="dm">${mvEsc((a.identity && a.identity.demo) || "")}${s.note ? " · " + mvEsc(s.note) : ""}</div></div>
+        <div class="mv-insp-stance">立场 ${mvEsc(stanceOf(s).toFixed(2))} <small>强度 ${mvEsc(String(p.stance_strength != null ? p.stance_strength : (s.str != null ? s.str : "")))}/5</small></div>
       </div>
       ${p.belief ? `<div class="mv-insp-row"><b>立场</b>${mvEsc(p.belief)}</div>` : ""}
       ${p.belief_with_caveat ? `<div class="mv-insp-row caveat"><b>但</b>${mvEsc(p.belief_with_caveat)}</div>` : ""}
@@ -841,7 +914,7 @@
         const fx = Object.entries(ev.fx).map(([kk, vv]) => `<span class="${vv > 0 ? "up" : "down"}">${kk} ${vv > 0 ? "+" : ""}${vv.toFixed(2)}</span>`).join(" ");
         return `<div class="mv-insp-ev"><span class="t">${fmt(ev.t)}</span><span class="w">${mvEsc(ev.why)}</span><span class="fx">${fx}</span></div>`;
       }).join("")}</div>` : ""}
-      <div class="mv-insp-foot"><span>group_role · ${mvEsc(si.group_role || g.base || "—")}</span><span>${mvEsc(id)} · 数据驱动 · t=${fmt(state.tSec)}</span></div>
+      <div class="mv-insp-foot"><span>group_role · ${mvEsc(si.group_role || "—")}</span><span>${mvEsc(id)} · 数据驱动 · t=${fmt(state.tSec)}</span></div>
     </div>`;
   }
 
@@ -850,43 +923,42 @@
     const css = `
 .mv-seat { transition: opacity .4s ease, transform .2s ease; }
 .mv-seat.is-fading { filter: grayscale(.35); }
-.mv-seat.is-tired .mv-ava::after { content:"z"; position:absolute; top:-2px; right:-2px; font:8px var(--mono,monospace); color:var(--mute,#807a6c); opacity:.7; }
+.mv-seat.is-tired .mv-ava::after { content:"z"; position:absolute; top:-2px; right:-2px; font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); opacity:.7; }
 .mv-insp-overlay { position:fixed; inset:0; background:rgba(20,18,16,.5); display:none; align-items:center; justify-content:center; z-index:10000; backdrop-filter:blur(2px); }
 .mv-insp-overlay.is-open { display:flex; }
 .mv-insp-card { width:min(720px,93vw); max-height:88vh; overflow-y:auto; background:var(--ivory,#fffdf7); color:var(--ink,#1a1a1a); border:1px solid var(--ink,#1a1a1a); border-radius:14px; box-shadow:8px 8px 0 var(--ink,#1a1a1a); padding:22px 26px; position:relative; font-family:var(--serif-cn); border-top:4px solid var(--mute,#9a958c); }
-.mv-insp-card.tone-a { border-top-color:#d97757; } .mv-insp-card.tone-b { border-top-color:#95bba4; } .mv-insp-card.tone-c { border-top-color:#a790d2; } .mv-insp-card.tone-d { border-top-color:#9a958c; }
-.mv-insp-close { position:absolute; top:12px; right:14px; width:28px; height:28px; border-radius:50%; background:var(--paper-2,#f3eedc); border:1px solid var(--rule,#d8d2bf); cursor:pointer; font-size:16px; }
+.mv-insp-card.tone-a { border-top-color:var(--amber); } .mv-insp-card.tone-b { border-top-color:#95bba4; } .mv-insp-card.tone-c { border-top-color:var(--violet-soft); } .mv-insp-card.tone-d { border-top-color:#9a958c; }
+.mv-insp-close { position:absolute; top:12px; right:14px; width:28px; height:28px; border-radius:50%; background:var(--paper-2,#f3eedc); border:1px solid var(--rule,#d8d2bf); cursor:pointer; font-size: var(--fs-md); }
 .mv-insp-head { display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center; padding-bottom:12px; border-bottom:1px dashed var(--rule,#d8d2bf); margin-bottom:12px; }
-.mv-insp-id { width:46px; height:46px; border-radius:10px; background:var(--ink,#1a1a1a); color:var(--ivory,#fffdf7); font:italic 600 22px var(--serif-en,Georgia); display:grid; place-items:center; }
-.mv-insp-who .nm { font-size:18px; font-weight:600; } .mv-insp-who .dm { font:10.5px var(--mono,monospace); color:var(--mute,#807a6c); margin-top:2px; }
-.mv-insp-stance { padding:6px 12px; border-radius:999px; font:10.5px var(--mono,monospace); background:var(--paper-2,#f3eedc); }
-.tone-a .mv-insp-stance { background:rgba(217,119,87,.18); color:#a8492a; } .tone-b .mv-insp-stance { background:rgba(77,98,87,.2); color:#4d6257; } .tone-c .mv-insp-stance { background:rgba(112,82,168,.16); color:#7052a8; } .tone-d .mv-insp-stance { background:rgba(100,100,100,.12); color:#555; }
-.mv-insp-row { font-size:13.5px; line-height:1.6; margin-bottom:7px; padding:8px 12px; background:var(--paper,#faf7f0); border-radius:6px; }
-.mv-insp-row b { display:inline-block; min-width:48px; margin-right:8px; font:600 10px var(--mono,monospace); letter-spacing:.06em; color:var(--amber-deep,#a8492a); vertical-align:middle; }
+.mv-insp-id { width:46px; height:46px; border-radius:10px; background:var(--ink,#1a1a1a); color:var(--ivory,#fffdf7); font:italic 600 var(--fs-xl) var(--serif-en); display:grid; place-items:center; }
+.mv-insp-who .nm { font-size: var(--fs-lg); font-weight:600; } .mv-insp-who .dm { font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); margin-top:2px; }
+.mv-insp-stance { padding:6px 12px; border-radius:999px; font:var(--fs-2xs) var(--mono); background:var(--paper-2,#f3eedc); }
+.mv-insp-row { font-size: var(--fs-sm); line-height:1.6; margin-bottom:7px; padding:8px 12px; background:var(--paper,#faf7f0); border-radius:6px; }
+.mv-insp-row b { display:inline-block; min-width:48px; margin-right:8px; font:600 var(--fs-2xs) var(--mono); letter-spacing:.06em; color:var(--amber-deep,#a8492a); vertical-align:middle; }
 .mv-insp-row.caveat { background:rgba(217,119,87,.06); border-left:2px solid var(--amber-deep,#a8492a); }
-.mv-insp-row small { display:block; margin-left:56px; margin-top:3px; font:10.5px var(--mono,monospace); color:var(--mute,#807a6c); }
+.mv-insp-row small { display:block; margin-left:56px; margin-top:3px; font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); }
 .mv-insp-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
 .mv-insp-grid > div { background:var(--paper-2,#f3eedc); border-radius:8px; padding:11px 13px; }
-.mv-insp-grid h6 { font:10px var(--mono,monospace); letter-spacing:.12em; text-transform:uppercase; color:var(--mute,#807a6c); margin:0 0 9px; padding-bottom:5px; border-bottom:1px dashed var(--rule,#d8d2bf); }
-.mv-insp-grid p { font-size:12.5px; line-height:1.55; margin:0 0 5px; color:var(--ink-2,#2a2a2a); }
-.mv-insp-grid p b { font:600 9.5px var(--mono,monospace); color:var(--amber-deep,#a8492a); margin-right:5px; }
-.mv-insp-meter { display:grid; grid-template-columns:74px 1fr 38px; align-items:center; gap:7px; margin-bottom:7px; font:10.5px var(--mono,monospace); }
+.mv-insp-grid h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute,#807a6c); margin:0 0 9px; padding-bottom:5px; border-bottom:1px dashed var(--rule,#d8d2bf); }
+.mv-insp-grid p { font-size: var(--fs-xs); line-height:1.55; margin:0 0 5px; color:var(--ink-2,#2a2a2a); }
+.mv-insp-grid p b { font:600 var(--fs-2xs) var(--mono); color:var(--amber-deep,#a8492a); margin-right:5px; }
+.mv-insp-meter { display:grid; grid-template-columns:74px 1fr 38px; align-items:center; gap:7px; margin-bottom:7px; font:var(--fs-2xs) var(--mono); }
 .mv-insp-meter span { color:var(--mute,#807a6c); } .mv-insp-meter > div { height:4px; background:rgba(0,0,0,.08); border-radius:2px; overflow:hidden; } .mv-insp-meter > div i { display:block; height:100%; background:var(--amber-deep,#a8492a); }
-.mv-insp-meter b { text-align:right; position:relative; } .mv-insp-meter b em { display:block; font:8px var(--mono,monospace); position:absolute; right:0; top:100%; } .mv-insp-meter b em.down { color:#a8492a; } .mv-insp-meter b em.up { color:#4d6257; }
+.mv-insp-meter b { text-align:right; position:relative; } .mv-insp-meter b em { display:block; font:var(--fs-2xs) var(--mono); position:absolute; right:0; top:100%; } .mv-insp-meter b em.down { color:var(--amber-deep); } .mv-insp-meter b em.up { color:var(--sage); }
 .mv-insp-resp { padding:6px 8px; margin-bottom:5px; background:var(--ivory,#fffdf7); border-left:2px solid var(--amber-deep,#a8492a); border-radius:4px; }
-.mv-insp-resp span { display:block; font:9.5px var(--mono,monospace); color:var(--mute,#807a6c); margin-bottom:2px; } .mv-insp-resp p { font:italic 12px var(--serif-cn,serif); margin:0; color:var(--ink-2,#2a2a2a); }
+.mv-insp-resp span { display:block; font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); margin-bottom:2px; } .mv-insp-resp p { font:italic var(--fs-2xs) var(--serif-cn); margin:0; color:var(--ink-2,#2a2a2a); }
 .mv-insp-drama { margin-top:12px; padding:13px 15px; background:var(--ink,#1a1a1a); color:var(--ivory,#fffdf7); border-radius:10px; }
-.mv-insp-drama h6 { font:10px var(--mono,monospace); letter-spacing:.14em; text-transform:uppercase; color:rgba(217,119,87,.85); margin:0 0 8px; }
-.mv-insp-drama p { font-size:12.5px; line-height:1.55; margin:0 0 5px; } .mv-insp-drama p b { font:500 9.5px var(--mono,monospace); color:rgba(217,119,87,.85); margin-right:5px; }
+.mv-insp-drama h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.14em; text-transform:uppercase; color:rgba(217,119,87,.85); margin:0 0 8px; }
+.mv-insp-drama p { font-size: var(--fs-xs); line-height:1.55; margin:0 0 5px; } .mv-insp-drama p b { font:500 var(--fs-2xs) var(--mono); color:rgba(217,119,87,.85); margin-right:5px; }
 .mv-insp-rubric { margin-top:12px; padding:11px 13px; background:var(--paper-2,#f3eedc); border-radius:8px; }
-.mv-insp-rubric h6 { font:10px var(--mono,monospace); letter-spacing:.12em; text-transform:uppercase; color:var(--mute,#807a6c); margin:0 0 8px; }
-.mv-insp-rubric .rr { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; font:10.5px var(--mono,monospace); } .mv-insp-rubric .rr span { padding:3px 6px; background:var(--ivory,#fffdf7); border-radius:3px; text-align:center; }
+.mv-insp-rubric h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute,#807a6c); margin:0 0 8px; }
+.mv-insp-rubric .rr { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; font:var(--fs-2xs) var(--mono); } .mv-insp-rubric .rr span { padding:3px 6px; background:var(--ivory,#fffdf7); border-radius:3px; text-align:center; }
 .mv-insp-evlog { margin-top:12px; padding:11px 13px; background:var(--paper,#faf7f0); border:1px dashed var(--rule,#d8d2bf); border-radius:8px; }
-.mv-insp-evlog h6 { font:10px var(--mono,monospace); letter-spacing:.12em; text-transform:uppercase; color:var(--mute,#807a6c); margin:0 0 7px; }
-.mv-insp-ev { display:grid; grid-template-columns:48px 1fr auto; gap:9px; align-items:center; padding:4px 0; border-bottom:1px dotted var(--rule,#d8d2bf); font-size:11px; }
-.mv-insp-ev:last-child { border-bottom:0; } .mv-insp-ev .t { font:600 10px var(--mono,monospace); color:var(--amber-deep,#a8492a); } .mv-insp-ev .w { font-family:var(--serif-cn,serif); color:var(--ink-2,#2a2a2a); }
-.mv-insp-ev .fx { display:flex; gap:5px; } .mv-insp-ev .fx span { font:9.5px var(--mono,monospace); padding:1px 5px; border-radius:3px; } .mv-insp-ev .fx span.down { background:rgba(217,119,87,.14); color:#a8492a; } .mv-insp-ev .fx span.up { background:rgba(77,98,87,.14); color:#4d6257; }
-.mv-insp-foot { margin-top:12px; padding-top:10px; border-top:1px dashed var(--rule,#d8d2bf); display:flex; justify-content:space-between; font:10px var(--mono,monospace); color:var(--mute,#807a6c); }
+.mv-insp-evlog h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute,#807a6c); margin:0 0 7px; }
+.mv-insp-ev { display:grid; grid-template-columns:48px 1fr auto; gap:9px; align-items:center; padding:4px 0; border-bottom:1px dotted var(--rule,#d8d2bf); font-size: var(--fs-2xs); }
+.mv-insp-ev:last-child { border-bottom:0; } .mv-insp-ev .t { font:600 var(--fs-2xs) var(--mono); color:var(--amber-deep,#a8492a); } .mv-insp-ev .w { font-family:var(--serif-cn); color:var(--ink-2,#2a2a2a); }
+.mv-insp-ev .fx { display:flex; gap:5px; } .mv-insp-ev .fx span { font:var(--fs-2xs) var(--mono); padding:1px 5px; border-radius:3px; } .mv-insp-ev .fx span.down { background:rgba(217,119,87,.14); color:var(--amber-deep); } .mv-insp-ev .fx span.up { background:rgba(77,98,87,.14); color:var(--sage); }
+.mv-insp-foot { margin-top:12px; padding-top:10px; border-top:1px dashed var(--rule,#d8d2bf); display:flex; justify-content:space-between; font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); }
 `;
     const e2 = document.createElement("style"); e2.id = "mv-insp-style"; e2.textContent = css; document.head.appendChild(e2);
   }
@@ -899,82 +971,152 @@
     // 无条件:注入样式 + 用 STUDENTS+默认值建 RT + 绑定座位点击
     // —— 即使 agent JSON 加载失败(如 file:// 或别的服务器),点击也能看基础画像
     ensureMvInspectorCSS();
-    ensureSpectrumCSS();
-    initRT();
+    ensureRoomCSS();
+    MV.reset();
     bindSeatInspector();
-    formGroups("hetero", 6); // 默认异质分组(真实课堂做法)
-    applyState(state.tSec); // 初始展示 02:12 端态(与页面其余 LIVE 一致)
+    applyState(state.tSec); // 初始展示端态(applyState 末尾会按立场摆位)
+    // 对外联动 hook：让页面的"证据流"随录播时间浮现/捕获，并可反向 seek
+    window.PharmacoPilotMV = {
+      getT: function () { return state.tSec; },
+      seek: function (t) { stepTo(t); },
+      keyMoments: function () { return keyMoments(); },
+      onTime: function (cb) { if (typeof cb === "function") { mvTimeCbs.push(cb); try { cb(state.tSec); } catch (e) {} } },
+    };
+    try { window.dispatchEvent(new CustomEvent("mv:ready")); } catch (e) {}  // 与 3D 一致:通知联动 hook 已就绪
     // 异步加载 32-agent 数据 → 用真实 stance_position/responses/graph/drama 重建,启用 t>132 动态决策
-    loadAgents().then((d) => {
-      if (!d) return;
-      initRT();
-      // agent 真实立场到位 → 重建光谱位置 + 重算分组
-      const band = document.getElementById("mv-spec-band");
-      if (band) {
-        band.querySelectorAll(".mv-seat").forEach((seat) => {
-          const s = byId[seat.dataset.id]; if (!s) return;
-          seat.style.left = (((stanceOf(s) + 1) / 2) * 100).toFixed(1) + "%";
-        });
-      }
-      formGroups(curGroupMode, curGroupN);
+    MV.loadAgents().then((d) => {
+      const notice = document.getElementById("mv-datasrc");
+      if (!d) { if (notice) notice.hidden = false; return; } // 数据源未连接 → 提示，避免静默退化
+      if (notice) notice.hidden = true;
+      bakeRecording();          // 烘焙整堂录像：固定 beat 时间轴 + 立场/注意力关键帧（供进度条任意定位）
+      state.tSec = 0;           // 录播就绪，停在 00:00 待播（不自动播）
       applyState(state.tSec);
+    });
+    // tab 隐藏时停掉环境仿真省电，回前台再续（位置/速度保留）
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) ambientStop();
+      else if (Object.keys(seatEls).length) ambientStart();
     });
   }
 
-  function ensureSpectrumCSS() {
-    if (document.getElementById("mv-spec-style")) return;
+  function ensureRoomCSS() {
+    if (document.getElementById("mv-room-style")) return;
     const css = `
-.mv-floor { display:block !important; }
-.mv-spectrum { background:var(--paper,#faf7f0); border:1px solid var(--rule,#d8d2bf); border-radius:12px; padding:14px 16px 8px; margin-bottom:12px; }
-.mv-spec-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; flex-wrap:wrap; gap:6px; }
-.mv-spec-title { font:600 13px var(--serif-cn,serif); color:var(--ink,#1a1a1a); }
-.mv-spec-note { font:10px var(--mono,monospace); color:var(--mute,#807a6c); letter-spacing:.02em; }
-.mv-spec-band { position:relative; height:196px; margin:22px 8px 30px; }
-.mv-spec-axis { position:absolute; left:0; right:0; bottom:-6px; height:2px; background:linear-gradient(90deg,#95bba4,#d8d2bf 50%,#d97757); border-radius:2px; }
-.mv-spec-lbl { position:absolute; bottom:-26px; font:10px var(--mono,monospace); color:var(--mute,#807a6c); }
-.mv-spec-lbl.l { left:0; color:#4d6257; } .mv-spec-lbl.c { left:50%; transform:translateX(-50%); } .mv-spec-lbl.r { right:0; color:#a8492a; }
-.mv-csilence { position:absolute; top:-14px; left:50%; transform:translateX(-50%); white-space:nowrap; font:10.5px var(--mono,monospace); color:#a8492a; background:rgba(217,119,87,.12); border:1px solid rgba(217,119,87,.3); border-radius:999px; padding:2px 10px; }
-/* 光谱里的座位:绝对定位覆盖原圆桌布局 */
-.mv-spectrum .mv-seat { position:absolute; transform:translate(-50%,0) !important; width:auto; height:auto; margin:0; display:flex; flex-direction:column; align-items:center; gap:1px; transition:left .5s cubic-bezier(.22,1,.36,1),opacity .4s; }
-.mv-spectrum .mv-seat .mv-ava { width:26px; height:26px; border-radius:50%; display:grid; place-items:center; border:1.5px solid; background:var(--ivory,#fffdf7); }
-.mv-spectrum .mv-seat .mv-ava-id { font:600 9px var(--mono,monospace); }
-.mv-spectrum .mv-seat.tone-a .mv-ava { border-color:#d97757; color:#a8492a; } .mv-spectrum .mv-seat.tone-b .mv-ava { border-color:#95bba4; color:#4d6257; }
-.mv-spectrum .mv-seat.tone-c .mv-ava { border-color:#a790d2; color:#7052a8; } .mv-spectrum .mv-seat.tone-d .mv-ava { border-color:#bdb8ad; color:#807a6c; }
-.mv-spectrum .mv-seat .mv-ava-name { display:none; } /* 默认隐藏人名(避免拥挤),hover/点击看详情 */
-.mv-spectrum .mv-seat:hover { z-index:20; } .mv-spectrum .mv-seat:hover .mv-ava-name { display:block; position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:1px; font:9px var(--serif-cn,serif); color:var(--ink,#1a1a1a); white-space:nowrap; background:var(--ivory,#fffdf7); padding:0 3px; border-radius:3px; }
-.mv-spectrum .mv-seat:hover .mv-ava { box-shadow:0 0 0 2px var(--amber-deep,#a8492a); }
-.mv-spectrum .mv-seat.is-live .mv-ava { background:#d97757; color:#fff; box-shadow:0 0 0 3px rgba(217,119,87,.35); animation:mvPulse 1.2s infinite; }
-.mv-spectrum .mv-seat.is-active .mv-ava { background:rgba(217,119,87,.14); }
-.mv-spectrum .mv-seat.is-csilent { opacity:.5; } .mv-spectrum .mv-seat.is-csilent .mv-ava { border-style:dashed; }
-.mv-spectrum .mv-seat .mv-gbadge:not(:empty) { position:absolute; top:-6px; right:-6px; width:14px; height:14px; border-radius:50%; background:var(--ink,#1a1a1a); color:#fff; font:600 8px var(--mono,monospace); display:grid; place-items:center; }
-.mv-spectrum .mv-seat .mv-bubble { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:4px; background:var(--ink,#1a1a1a); color:#fff; font:10px var(--serif-cn,serif); padding:3px 7px; border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .2s; z-index:5; }
-.mv-spectrum .mv-seat .mv-bubble.is-on { opacity:1; }
-.mv-spectrum .mv-seat .mv-tip { left:50%; bottom:auto; top:100%; transform:translateX(-50%); margin-top:4px; }
-@keyframes mvPulse { 0%,100%{box-shadow:0 0 0 3px rgba(217,119,87,.35);} 50%{box-shadow:0 0 0 6px rgba(217,119,87,.1);} }
-/* 分组区 */
-.mv-grouping { background:var(--ivory,#fffdf7); border:1px solid var(--rule,#d8d2bf); border-radius:12px; padding:12px 16px; }
-.mv-grp-ctrl { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:10px; }
-.mv-grp-lbl { font:600 12.5px var(--serif-cn,serif); color:var(--ink,#1a1a1a); } .mv-grp-lbl small { font:10px var(--mono,monospace); color:var(--mute,#807a6c); margin-left:6px; font-weight:400; }
-.mv-grp-modes { display:flex; gap:6px; flex-wrap:wrap; }
-.mv-gbtn { font:11px var(--serif-cn,serif); padding:5px 11px; border-radius:999px; border:1px solid var(--rule,#d8d2bf); background:var(--paper-2,#f3eedc); color:var(--ink-soft,#555); cursor:pointer; transition:all .15s; }
-.mv-gbtn:hover { border-color:var(--amber-deep,#a8492a); color:var(--amber-deep,#a8492a); }
-.mv-gbtn.is-on { background:var(--amber-deep,#a8492a); color:#fff; border-color:var(--amber-deep,#a8492a); }
-.mv-grp-n { font:10.5px var(--mono,monospace); color:var(--mute,#807a6c); margin-left:auto; } .mv-grp-n b { color:var(--ink,#1a1a1a); }
-.mv-grp-result { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.mv-grp-chip { display:flex; align-items:center; gap:8px; padding:7px 10px; background:var(--paper,#faf7f0); border:1px solid var(--rule,#d8d2bf); border-radius:8px; }
-.mv-grp-chip .gk { font:600 10.5px var(--mono,monospace); color:var(--ink,#1a1a1a); white-space:nowrap; }
-.mv-grp-chip .gd { display:flex; gap:3px; flex:1; flex-wrap:wrap; }
-.mv-grp-chip .gd i { width:11px; height:11px; border-radius:50%; display:inline-block; }
-.mv-grp-chip .gd i.tone-a { background:#d97757; } .mv-grp-chip .gd i.tone-b { background:#95bba4; } .mv-grp-chip .gd i.tone-c { background:#a790d2; } .mv-grp-chip .gd i.tone-d { background:#bdb8ad; }
-.mv-grp-chip .gs { font:9.5px var(--mono,monospace); color:var(--mute,#807a6c); white-space:nowrap; } .mv-grp-chip .gs.wide { color:#a8492a; font-weight:600; }
-.mv-grp-hint { margin-top:9px; font:11.5px var(--serif-cn,serif); color:var(--ink-soft,#555); line-height:1.5; } .mv-grp-hint b { color:var(--ink,#1a1a1a); } .mv-grp-hint b.hi { color:var(--amber-deep,#a8492a); }
+.mv-floor[data-view="room"] .mv-grouping { margin-top:12px; }
+.mv-root[data-view="room"] .mv-podium { display:none; } /* 教室视图用 room 自带讲台，隐藏舞台 podium */
+/* —— 录播进度条 —— */
+.mv-scrub { display:flex; align-items:center; gap:12px; margin:0 0 6px; }
+.mv-scrub-time { font:var(--fs-2xs,11px) var(--mono,monospace); color:var(--mute,#807a6c); white-space:nowrap; flex-shrink:0; letter-spacing:.02em; }
+.mv-scrub-time b { color:var(--ink,#1a1a1a); font-weight:600; }
+.mv-scrub-track { position:relative; flex:1; height:20px; cursor:pointer; display:flex; align-items:center; touch-action:none; outline:none; }
+.mv-scrub-track::before { content:""; position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); height:5px; border-radius:3px; background:var(--rule-2,rgba(27,25,22,.16)); }
+.mv-scrub-track:focus-visible::before { box-shadow:0 0 0 2px var(--amber-deep,#a8492a); }
+.mv-scrub-fill { position:absolute; left:0; top:50%; transform:translateY(-50%); height:5px; border-radius:3px; background:var(--amber-deep,#a8492a); width:0; pointer-events:none; }
+.mv-scrub-ticks { position:absolute; inset:0; pointer-events:none; }
+.mv-scrub-tick { position:absolute; top:50%; transform:translate(-50%,-50%); width:2px; height:10px; border-radius:1px; background:var(--mute,#807a6c); opacity:.5; }
+.mv-scrub-tick.t-q { background:var(--amber-deep,#a8492a); opacity:.85; height:13px; width:2.5px; }
+.mv-scrub-tick.t-km { background:#b5852a; opacity:.8; }
+.mv-scrub-tick.t-silence { background:var(--violet-soft,#8a78b8); opacity:.8; }
+.mv-scrub-tick.t-call { background:#7a9b6a; opacity:.75; }
+.mv-scrub-tick.t-reflect { background:#6a93a8; opacity:.75; }
+.mv-scrub-head { position:absolute; left:0; top:50%; transform:translate(-50%,-50%); width:13px; height:13px; border-radius:50%; background:var(--amber-deep,#a8492a); border:2px solid var(--paper,#faf7f0); box-shadow:0 1px 4px rgba(0,0,0,.32); pointer-events:none; z-index:2; }
+.mv-scrub-track:hover .mv-scrub-head, .mv-scrub-track.is-scrubbing .mv-scrub-head { transform:translate(-50%,-50%) scale(1.22); }
+.mv-scrub-tip { position:absolute; bottom:130%; left:0; transform:translateX(-50%); background:var(--ink,#1a1a1a); color:#fff; font:var(--fs-2xs,10px) var(--mono,monospace); padding:3px 7px; border-radius:5px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .12s; z-index:30; max-width:240px; overflow:hidden; text-overflow:ellipsis; }
+.mv-scrub-track:hover .mv-scrub-tip, .mv-scrub-track.is-scrubbing .mv-scrub-tip { opacity:1; }
+/* 立场教室是单个全宽 diorama：覆盖宿主页面把 .mv-floor 当 2×2 网格的旧样式，否则房间只占半幅、右侧留黑 */
+#mv-floor-host { display:block; grid-template-columns:none; gap:0; padding:0; }
+#mv-floor-host .mv-groom { width:100%; }
+.mv-room-head { display:flex; justify-content:space-between; align-items:baseline; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+.mv-room-title { font:600 var(--fs-xs) var(--serif-cn); color:var(--ink,#1a1a1a); }
+.mv-room-scene { font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); letter-spacing:.02em; }
+.mv-char-name { font:var(--fs-2xs) var(--serif-cn); color:var(--ink,#1a1a1a); white-space:nowrap; line-height:1.1; }
+.mv-char.is-quiet, .mv-char.is-neutral { opacity:.6; }
+.mv-char.is-silent, .mv-char.is-csilent { opacity:.5; }
+.mv-char.is-csilent::after { content:"🤐"; position:absolute; top:-3px; right:3px; font-size: var(--fs-2xs); z-index:6; }
+.mv-char.is-quiet::after { content:"💤"; position:absolute; top:-3px; right:3px; font-size: var(--fs-2xs); opacity:.7; z-index:6; }
+.mv-char.is-fading { animation:mvDrift 3.4s ease-in-out infinite; }
+@keyframes mvDrift { 0%,100% { opacity:.5; } 50% { opacity:.28; } }
+.mv-char .mv-bubble { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:3px; background:var(--ink,#1a1a1a); color:#fff; font:var(--fs-2xs) var(--serif-cn); padding:3px 7px; border-radius:7px 7px 7px 2px; white-space:nowrap; max-width:150px; overflow:hidden; text-overflow:ellipsis; opacity:0; pointer-events:none; transition:opacity .2s; z-index:20; }
+.mv-char .mv-bubble.is-on { opacity:1; }
+.mv-char .mv-think { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:5px; width:104px; z-index:25; background:rgba(247,244,237,.97); color:#8a8178; font:italic var(--fs-2xs) var(--serif-cn); line-height:1.4; padding:4px 8px; border:1px dashed #cfc8b8; border-radius:10px; text-align:center; opacity:0; pointer-events:none; transition:opacity .35s; }
+.mv-char .mv-think.is-on { opacity:.95; }
+.mv-char .mv-think::before { content:"💭 "; }
+/* —— 立场教室 · 2.5D 等距 diorama（横轴=立场，纵深=参与度；近大远小） —— */
+.mv-groom { background:var(--paper,#faf7f0); border:1px solid var(--rule,#d8d2bf); border-radius:16px; padding:14px 16px 10px; box-shadow:0 2px 12px rgba(120,90,40,.07); }
+.mv-groom-floor { position:relative; height:430px; margin:12px 0 2px; border-radius:12px; overflow:hidden; background:linear-gradient(180deg, #c8b89a 0%, #d4c4a0 28%, #e2d0a8 100%); }
+.mv-iso-bg { position:absolute; inset:0; width:100%; height:100%; z-index:0; }
+/* M2 · 研讨室空间感：暖木地板 + 立体墙面 + 极淡立场渐变（替换生硬色块） */
+.iso-floor { fill:url(#floorGrad); }
+.iso-zone-l { fill:rgba(100,145,185,.09); }   /* 左侧(反对)极淡冷蓝—温差暗示，非色块 */
+.iso-zone-r { fill:rgba(200,120,70,.08); }     /* 右侧(支持)极淡暖橙 */
+.iso-grid line { stroke:rgba(110,85,52,.10); stroke-width:.8; }
+.iso-backwall { fill:url(#wallGrad); }
+.iso-sidewall { fill:url(#sideGrad); }
+.iso-board { fill:#f8f4ea; stroke:#c4b08a; stroke-width:1.2; rx:4; }
+/* 地板木纹渐变 & 墙面渐变（SVG defs，由 buildStanceRoom 写入 SVG） */
+/* 讲台(投影到远端) */
+.mv-podium-iso { position:absolute; transform-origin:50% 100%; display:flex; gap:5px; z-index:150; }
+.mv-pf { width:24px; height:24px; border-radius:6px; display:grid; place-items:center; font:600 11px var(--serif-cn,serif); color:#fff; box-shadow:0 3px 0 rgba(0,0,0,.18); }
+.mv-pf-t { background:var(--amber-deep,#a8492a); } .mv-pf-ai { background:var(--ink,#1a1a1a); font-size:10px; }
+/* 墙上标语 */
+.mv-wall-lbl { position:absolute; font:9.5px var(--mono,monospace); color:var(--mute,#807a6c); z-index:1; white-space:nowrap; }
+.mv-wall-lbl.wl { top:78px; left:4%; color:var(--sage,#4d6257); }
+.mv-wall-lbl.wr { top:78px; right:4%; color:var(--amber-deep,#a8492a); }
+.mv-wall-lbl.wc { top:60px; left:50%; transform:translateX(-50%); }
+/* 班级立场重心：地板小旗 */
+.mv-centroid { position:absolute; transform-origin:50% 100%; z-index:140; transition:left .6s cubic-bezier(.22,1,.36,1), top .6s; }
+.mv-centroid::before { content:""; position:absolute; left:50%; bottom:0; width:0; height:24px; border-left:2px dashed var(--ink,#1a1a1a); transform:translateX(-50%); opacity:.5; }
+.mv-centroid-lbl { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); font:8.5px var(--mono,monospace); color:var(--ink,#1a1a1a); white-space:nowrap; background:rgba(247,240,225,.9); padding:1px 5px; border-radius:3px; }
+.mv-datasrc-notice { position:absolute; top:6px; left:50%; transform:translateX(-50%); z-index:60; font:var(--fs-2xs,10px) var(--mono,monospace); color:var(--amber-deep,#a8492a); background:rgba(217,119,87,.12); border:1px solid rgba(217,119,87,.4); border-radius:6px; padding:3px 10px; max-width:92%; text-align:center; }
+/* 角色：等距投影定位（left/top + scale 由 JS 内联），近大远小，纵深决定 z-order */
+/* 位置/缩放由 rAF 环境仿真每帧驱动（见 ambientTick），不再用 CSS 过渡（否则与逐帧位移叠加成橡皮筋滞后）；仅保留透明度过渡 */
+.mv-groom-floor .mv-char { position:absolute; width:40px; display:flex; flex-direction:column; align-items:center; gap:1px; transform-origin:50% 100%; transition:opacity .4s; cursor:pointer; will-change:left,top,transform; }
+.mv-groom-floor .mv-char-name { font:9px var(--mono,monospace); color:var(--ink,#1a1a1a); white-space:nowrap; line-height:1; text-shadow:0 1px 2px rgba(247,240,225,.9); }
+.mv-groom-floor .mv-char:hover { z-index:400 !important; }
+/* 像素小人 + 脚下投影 */
+/* M1 · 插画人物（SVG 头+发+躯干，个体肤/发/衣色；比像素更大更可读，体态承载状态） */
+.mv-px { position:relative; width:23px; height:31px; transform-origin:50% 100%; }
+.mv-px .fig { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+.fig .fig-shadow { fill:rgba(40,30,20,.20); }
+.fig .fig-head, .fig .fig-neck { stroke:rgba(60,40,28,.10); stroke-width:.6; }
+.fig .fig-body { stroke:rgba(0,0,0,.06); stroke-width:.5; }
+/* 在场踏步 idle / 坐回后排(远端)变灰 */
+.mv-char.on-floor .mv-px { animation:pxbob 2.6s ease-in-out infinite; }
+@keyframes pxbob { 50% { transform:translateY(-2px); } }
+.mv-char.at-desk { opacity:.66; }
+.mv-char.at-desk .mv-px { animation:none; }
+/* 发言高亮 */
+.mv-char.is-live .mv-px { animation:pxbob 0.9s ease-in-out infinite; }
+.mv-char.is-live .mv-px .fig { filter:drop-shadow(0 0 5px rgba(217,119,87,.7)); }
+.mv-char.is-live .mv-char-name { color:var(--amber-deep,#a8492a); font-weight:700; }
+.mv-char.is-fading { opacity:.4; }
+.mv-char .mv-tip-why { display:block; margin-top:3px; color:rgba(255,255,255,.62); font-size:8.5px; font-style:italic; line-height:1.4; }
+.mv-char .mv-tip { position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:5px; width:148px; background:var(--ink,#1a1a1a); color:#fff; font:var(--fs-2xs) var(--serif-cn); line-height:1.45; padding:6px 8px; border-radius:7px; opacity:0; pointer-events:none; transition:opacity .15s; z-index:40; }
+.mv-char .mv-tip span { color:rgba(255,255,255,.72); font-size: var(--fs-2xs); }
+.mv-char:hover .mv-tip { opacity:1; }
+/* ③ iso 像素小人：侧头倾听 / 走神低头（作用在 .mv-px，停 idle 踏步避免与 transform 冲突；置于 bob 规则之后才生效） */
+.mv-char.attend-r .mv-px { animation:none; transform:rotate(9deg); }
+.mv-char.attend-l .mv-px { animation:none; transform:rotate(-9deg); }
+.mv-char.is-quiet .mv-px, .mv-char.is-fading .mv-px { animation:none; transform:translateY(2px) rotate(-6deg) scale(.95); }
+/* 交流：两两交头接耳——面向对方轻转 + 轻语小气泡 */
+.mv-char.chat-r .mv-px { animation:none; transform:rotate(7deg); }
+.mv-char.chat-l .mv-px { animation:none; transform:rotate(-7deg); }
+.mv-char .mv-bubble.is-whisper { background:rgba(74,67,57,.92); color:#f3efe6; font-size:9px; padding:2px 6px; border-radius:6px 6px 6px 2px; opacity:.9; box-shadow:none; }
+.mv-char.is-csilent .fig .fig-head { fill-opacity:.8; }
 `;
-    const e3 = document.createElement("style"); e3.id = "mv-spec-style"; e3.textContent = css; document.head.appendChild(e3);
+    const e = document.createElement("style"); e.id = "mv-room-style"; e.textContent = css; document.head.appendChild(e);
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
+  // —— 启动协调：默认延迟，由 mv-bootstrap 决定挂载 3D 还是回退到本 2.5D 渲染器 ——
+  let _booted = false;
+  function bootMV2D() {
+    if (_booted) return;
+    _booted = true;
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
   }
+  // 暴露给引导脚本：Three.js / WebGL 不可用时显式回退调用
+  window.MV2D = { mount: bootMV2D };
+  // 仅当未声明"优先 3D"时自启动（保持旧页面行为不变）
+  if (!window.__MV_DEFER_2D) bootMV2D();
 })();

@@ -1,5 +1,7 @@
 /* PharmacoPilot v2 — shared design tokens (3 directions reference subsets of these) */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+/* 字体已移至各页 <head> 用 preconnect + 非阻塞 <link>(media=print onload)加载,
+   消除 @import 串行渲染阻塞(各页 FCP/LCP 曾被拖慢 0.5–6.4s)。改字重时各页 head 同步。
+   见 audit-report 跨页问题#1。 */
 
 :root {
   /* Surface palette — warm paper */
@@ -10,8 +12,8 @@
   --ink:          #1b1916;
   --ink-2:        #2c2925;
   --ink-soft:     #4a463f;
-  --mute:         #76716a;
-  --mute-2:       #98938b;
+  --mute:         #6a655e; /* a11y: 由 #76716a(4.52:1·踩线) 加深到 ~5.4:1 留余量；暗色模式见 bc-chrome.css 反向提亮 */
+  --mute-2:       #6f6a64; /* a11y: 原 #7a7470 实测仅 3.98:1(未达标),加深至 4.6:1 on --paper-2；仍略浅于 --mute 保留弱化层级；暗色模式见 bc-chrome.css:520 反向提亮 */
   --rule:         rgba(27, 25, 22, 0.10);
   --rule-2:       rgba(27, 25, 22, 0.18);
 
@@ -29,18 +31,53 @@
   --gold:         #b08440;
   --maroon:       #6f2f2a;
 
+  /* 状态色 / 类别色 / 暗底文字（语义色，替代原先散落的裸 hex） */
+  --ok:           #3a8a4e;   /* 成功 / 已采纳 / 已处理 */
+  --gold-deep:    #6a3a14;   /* 金棕强调（训练地图标签 · 资产沉淀） */
+  --violet:       #7052a8;   /* 类别 C（药企）— A=amber / B=sage / C=violet / D=灰 */
+  --violet-soft:  #a790d2;   /* 类别 C 浅色 */
+  --on-dark:      #d6cfbe;   /* 深色面板上的次级文字（stage-deck / 元宇宙等） */
+  --on-dark-mute: #c5bda9;   /* 深色面板上的三级 / 弱化文字 */
+
   /* Tokens */
   --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-xl: 22px; --r-pill: 999px;
   --shadow-1: 0 1px 0 rgba(27, 25, 22, .04), 0 1px 2px rgba(27, 25, 22, .04);
   --shadow-2: 0 1px 0 rgba(27, 25, 22, .04), 0 12px 28px -10px rgba(80, 50, 30, .12);
   --shadow-3: 0 24px 60px -28px rgba(60, 35, 20, .35);
 
-  /* Fonts */
-  --sans: "Geist", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
-  --serif-cn: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC", serif;
-  --serif-en: "Fraunces", "Noto Serif SC", Georgia, serif;
-  --mono: "Geist Mono", "Noto Serif SC", "Songti SC", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Fonts — 四种字族各有分工，新增内容按用途选用，勿混用 */
+  --sans:     "Geist", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;   /* UI / 正文默认（body 已设） */
+  --serif-cn: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC", serif;                  /* 中文标题 / 编辑式正文强调 / chip 名称 */
+  --serif-en: "Fraunces", "Noto Serif SC", Georgia, serif;                                            /* 西文 / 数字 / 斜体强调 */
+  --mono:     "Geist Mono", "Noto Serif SC", "Songti SC", ui-monospace, SFMono-Regular, Menlo, monospace; /* 技术标签 / eyebrow / 代码 / 图例 / 数据记号（拉丁走等宽，中文回退衬线，与 chip 同族） */
+
+  /* Type scale — 全站统一字号刻度；最小地板 12px（中文可读），不再出现 6–11px 的微字 */
+  --fs-2xs:     12px;  /* 最小：微标签 / eyebrow / 角标 */
+  --fs-xs:      13px;  /* 次要元信息 */
+  --fs-sm:      14px;  /* 正文 / 默认阅读尺寸 */
+  --fs-md:      16px;  /* 强调正文 / 小标题 */
+  --fs-lg:      18px;
+  --fs-xl:      22px;
+  --fs-2xl:     28px;
+  --fs-3xl:     36px;
+  --fs-4xl:     48px;
+  --fs-hero:    64px;  /* 编辑式大标题 */
+  --fs-hero-xl: 84px;  /* 巨号 hero */
 }
+
+/* ============================================================
+   排版约定（新增任何文字内容前先读这里，避免再出现"字体不对/太小"）
+   ------------------------------------------------------------
+   1. 字号：一律用 var(--fs-*)，禁止裸 px。最小是 --fs-2xs(12px)，
+      不要再写 9/10/11px（<small>/<sub> 等浏览器默认缩小已由本文件兜底）。
+   2. 字体：一律用 var(--sans/--serif-cn/--serif-en/--mono)，
+      禁止写裸字体栈或额外 fallback（token 里已含完整 fallback）。
+      用途见上方 Fonts 注释；技术标签/图例/eyebrow 用 --mono。
+   3. 颜色：文字色用 var(--ink/--ink-soft/--mute/--mute-2/--amber-deep…)，
+      禁止裸 hex（A/B/C/D 类别色例外，见各组件）。
+   4. 小组件：图例、eyebrow、折叠按钮等优先复用 bc-chrome.css 里的
+      .metric-legend / .u-eyebrow 等类，不要在 HTML 里手写内联 font 样式。
+   ============================================================ */
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
@@ -54,4 +91,20 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; }
+
+/* —— a11y：键盘焦点可见（仅键盘导航时显示，鼠标点击不显示） —— */
+:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 2px; border-radius: 2px; }
+:focus:not(:focus-visible) { outline: none; }
+
+/* —— a11y：尊重"减少动态效果"系统偏好 —— */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* <small> 永不低于地板 12px：大字父级里仍按比例缩小，但不会掉到不可读 */
+small { font-size: max(0.85em, var(--fs-2xs)); }
 ::selection { background: var(--amber-soft); color: var(--ink); }

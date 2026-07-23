@@ -1,0 +1,10 @@
+# Netlify 缓存策略 — 见 audit-report 跨页问题#2
+# shared/ 下 CSS/JS 均带 ?v=N 版本号,内容变更靠改版本号触发,可安全长缓存
+/shared/*
+  Cache-Control: public, max-age=31536000, immutable
+# 图片/字体等静态资源:稳定文件名,缓存 7 天(再导出请改名或加版本)
+/assets/*
+  Cache-Control: public, max-age=604800
+# HTML 入口:始终回源校验,保证发版即时可见
+/*.html
+  Cache-Control: public, no-cache

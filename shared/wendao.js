@@ -24,7 +24,7 @@
 
   // ---- Config ----
   const DEFAULTS = {
-    domain: window.WENDAO_DOMAIN || document.body?.dataset?.wendaoDomain || "cpu.libsp.net",
+    domain: window.WENDAO_DOMAIN || document.body?.dataset?.wendaoDomain || "demo.libsp.net",
     // 教学设计智能体
     agentId: "6ab7fb8c-1c28-11f1-a6d8-fa163f5838c7",
     // 教学设计智能体 默认模型
@@ -72,7 +72,18 @@
 
   function openWendao(opts) {
     const url = urlFor(opts);
-    window.open(url, "_blank", "noopener,noreferrer");
+    const note = (typeof window.showDemoToast === "function") ? window.showDemoToast : null;
+    // 演示占位域名(demo.*)未接入真实闻道服务:诚实提示,不打开死链。
+    // 部署方注入校内域名(window.WENDAO_DOMAIN 或 body[data-wendao-domain])后自动恢复外跳。
+    if (/^demo\./.test(opts?.domain || getDomain())) {
+      if (note) note("闻道学术检索 · 演示环境未接入院校平台（部署时注入校内域名即可启用）");
+      return;
+    }
+    // 带 noopener 时 window.open 按 HTML 规范返回 null（即使成功打开），不能据返回值判断是否被拦截；
+    // 用户手势触发的打开极少被拦 → 乐观提示，避免每次成功打开都误报"被拦截"
+    const win = window.open(url, "_blank", "noopener,noreferrer");
+    if (note) note("正在打开「闻道」学术检索平台（新页面）…");
+    if (!win) console.warn("[wendao] window.open 返回 null（noopener 下属正常，无法据此判断拦截）:", url);
   }
 
   // ---- DOM upgrade ----

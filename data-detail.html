@@ -2,9 +2,17 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>PharmacoPilot · 教学数据 · 双向能力图谱</title>
-<link rel="stylesheet" href="./shared/tokens.css" />
-<link rel="stylesheet" href="./shared/bc-chrome.css" />
+<meta name="description" content="PharmacoPilot 教学数据页:以教师 9 个教学环节与学生 7 个能力维度构建师生双向能力图谱,追踪三时段增量与师生耦合指数,把课堂证据转化为可写回教学环节的改进建议,支持接入真实课堂数据验证。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23a8492a'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' font-family='Georgia' font-style='italic' fill='%23fffdf7'%3EP%3C/text%3E%3C/svg%3E" />
+<!-- 字体:preconnect + 非阻塞加载(media=print onload),消除原 tokens.css @import 的渲染阻塞 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
+<link rel="stylesheet" href="./shared/tokens.css?v=4" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=4" />
 <style>
 /* ============ 教学数据 详情页 ============ */
 
@@ -12,26 +20,28 @@
 .summary-row {
   display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
   margin-top: 24px;
+  min-width: 0;
 }
 .s-cell {
   background: var(--ivory); border: 1px solid var(--rule); border-radius: 12px;
   padding: 18px 20px;
+  min-width: 0;
 }
 .s-cell .l {
-  font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.08em; text-transform: uppercase;
 }
 .s-cell .v {
-  font-family: var(--serif-en); font-size: 40px; font-weight: 500;
+  font-family: var(--serif-en); font-size: var(--fs-3xl); font-weight: 500;
   letter-spacing: -0.02em; margin: 4px 0 0;
   display: flex; align-items: baseline; gap: 6px;
 }
 .s-cell .v .it { font-style: italic; color: var(--amber-deep); }
 .s-cell.s .v .it { color: var(--sage); }
 .s-cell.x .v .it { color: var(--ink); }
-.s-cell .v small { font-size: 12px; color: var(--mute); font-family: var(--sans); font-weight: 400; }
-.s-cell .d { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-top: 4px; }
-.s-cell svg.spark { width: 100%; height: 36px; margin-top: 10px; display: block; }
+.s-cell .v small { font-size: var(--fs-2xs); color: var(--mute); font-family: var(--sans); font-weight: 400; }
+.s-cell .d { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); margin-top: 4px; }
+.s-cell svg.spark { width: 100%; height: 36px; margin-top: 10px; display: block; cursor: help; }
 
 /* per-card "评价依据" mini-row */
 .s-cell .basis {
@@ -39,7 +49,7 @@
   border-top: 1px dashed var(--rule);
 }
 .s-cell .basis-lab {
-  font-family: var(--mono); font-size: 9px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--mute); margin-bottom: 6px;
   display: flex; align-items: center; gap: 6px;
@@ -54,16 +64,18 @@
   display: flex; flex-wrap: wrap; gap: 5px;
 }
 .s-cell .basis-chip {
-  font-family: var(--serif-cn); font-size: 10.5px;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs);
   padding: 2px 7px; border-radius: 999px;
   background: var(--paper-2); border: 1px solid var(--rule);
-  color: var(--ink-soft); white-space: nowrap;
+  color: var(--ink-soft); white-space: normal;
   display: inline-flex; align-items: baseline; gap: 4px;
   cursor: default;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .s-cell .basis-chip small {
   font-family: var(--serif-en); font-style: italic;
-  font-size: 9px; color: var(--mute); font-weight: 400;
+  font-size: var(--fs-2xs); color: var(--mute); font-weight: 400;
 }
 .s-cell.s .basis-chip { border-color: color-mix(in oklab, var(--sage) 30%, var(--rule)); }
 .s-cell.x .basis-chip { border-color: color-mix(in oklab, var(--ink) 35%, var(--rule)); }
@@ -84,13 +96,14 @@
 /* NEXT 卡 chip → 按钮组：一主三次，复用 .q-btn 体系 */
 .s-cell .action-row {
   display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  min-width: 0;
 }
 .s-cell .action-row .q-btn {
-  font-size: 11.5px; padding: 5px 11px;
+  font-size: var(--fs-2xs); padding: 5px 11px;
   text-decoration: none;
 }
 .s-cell .action-row .q-btn.is-primary {
-  font-size: 12px; padding: 7px 14px;
+  font-size: var(--fs-2xs); padding: 7px 14px;
 }
 .s-cell .action-row .q-btn.is-ghost {
   padding: 5px 4px;
@@ -105,22 +118,22 @@
   margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--rule);
 }
 .data-section-h .num {
-  font-family: var(--serif-en); font-size: 64px; line-height: 0.85;
+  font-family: var(--serif-en); font-size: var(--fs-hero); line-height: 0.85;
   font-style: italic; font-weight: 500; color: var(--amber-deep);
   letter-spacing: -0.04em;
 }
 .data-section-h .num small {
-  font-family: var(--mono); font-size: 11px; font-style: normal;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-style: normal;
   letter-spacing: 0.15em; text-transform: uppercase; color: var(--mute);
   display: block; margin-top: 8px;
 }
 .data-section-h h3 {
-  font-family: var(--serif-cn); font-weight: 500; font-size: 32px;
+  font-family: var(--serif-cn); font-weight: 500; font-size: var(--fs-3xl);
   margin: 0 0 12px; line-height: 1.2;
 }
 .data-section-h h3 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-deep); }
 .data-section-h p {
-  font-size: 14px; line-height: 1.7; color: var(--ink-soft); max-width: 600px; margin: 0;
+  font-size: var(--fs-sm); line-height: 1.7; color: var(--ink-soft); max-width: 600px; margin: 0;
 }
 /* Dark variant — for the trajectory section on ink background */
 .data-section-h.is-dark { border-bottom-color: rgba(255,255,255,.15); margin-bottom: 36px; }
@@ -140,15 +153,15 @@
   border-bottom: 1px solid var(--rule);
 }
 .bi-atlas-head .title {
-  font-family: var(--serif-cn); font-size: 17px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-lg); font-weight: 500;
 }
 .bi-atlas-head .title small {
-  font-family: var(--mono); font-size: 11px; color: var(--mute); font-weight: 400;
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); font-weight: 400;
   display: block; margin-top: 2px; letter-spacing: 0.04em;
 }
 .bi-atlas-head .toggle-row { display: flex; gap: 4px; }
 .toggle-chip {
-  font-family: var(--mono); font-size: 11px; padding: 5px 10px; border-radius: 5px;
+  font-family: var(--mono); font-size: var(--fs-2xs); padding: 5px 10px; border-radius: 5px;
   background: var(--paper-2); color: var(--ink-soft); border: 1px solid var(--rule);
   cursor: pointer; letter-spacing: 0.04em;
   transition: background .15s, color .15s, border-color .15s;
@@ -163,7 +176,7 @@
 .toggle-chip.is-active { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
 .toggle-chip.is-active:hover { background: var(--ink); border-color: var(--ink); }
 .bi-atlas-head .stat {
-  font-family: var(--mono); font-size: 11px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
 }
 .bi-atlas-head .stat b { color: var(--ink); }
 .bi-atlas-head .stat .live {
@@ -185,7 +198,7 @@
 .station-header {
   display: grid; grid-template-columns: 96px repeat(9, 1fr); gap: 8px;
   margin-bottom: 8px;
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.06em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.06em;
   color: var(--mute); text-align: center;
 }
 .station-header .head-l { text-align: left; }
@@ -205,13 +218,13 @@
 .station-numbers {
   display: grid; grid-template-columns: 96px repeat(9, 1fr); gap: 8px;
   margin-bottom: 4px;
-  font-family: var(--mono); font-size: 10px; color: var(--ink); text-align: center;
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink); text-align: center;
 }
 .station-numbers .num-cell {
   padding: 4px 0; font-weight: 600;
 }
 .station-numbers .num-cell .cn {
-  font-family: var(--serif-cn); font-weight: 500; font-size: 12px;
+  font-family: var(--serif-cn); font-weight: 500; font-size: var(--fs-2xs);
   display: block; margin-top: 2px; color: var(--ink);
 }
 .station-numbers .num-cell.complete .cn { color: var(--sage); }
@@ -223,7 +236,7 @@
 .station-numbers .num-cell.is-hot .cn { color: var(--amber-deep); font-weight: 600; }
 .station-numbers .head-l {
   text-align: left; padding-left: 4px;
-  font-family: var(--mono); font-size: 10px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.06em; text-transform: uppercase;
 }
 
@@ -240,16 +253,16 @@
 .lane-id .av {
   width: 32px; height: 32px; border-radius: 50%;
   display: grid; place-items: center; font-family: var(--serif-cn);
-  font-size: 14px; font-weight: 500; flex-shrink: 0;
+  font-size: var(--fs-sm); font-weight: 500; flex-shrink: 0;
 }
 .lane-id .av.t { background: var(--amber-wash); color: var(--amber-deep); }
 .lane-id .av.s { background: var(--sage-soft); color: var(--sage); }
 .lane-id .ll {
-  font-family: var(--serif-cn); font-size: 12px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 500;
   line-height: 1.2; color: var(--ink);
 }
 .lane-id .ll small {
-  display: block; font-family: var(--mono); font-size: 9.5px; color: var(--mute);
+  display: block; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.04em; margin-top: 2px;
 }
 
@@ -272,7 +285,7 @@
 .gain.s .fill { background: linear-gradient(180deg, #b5cdba, var(--sage)); }
 .gain .delta {
   position: relative; z-index: 1;
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   color: var(--ink); align-self: center;
   background: rgba(255,253,247,.85); padding: 1px 5px; border-radius: 3px;
   letter-spacing: 0.04em;
@@ -301,10 +314,10 @@
   box-shadow: 0 0 0 4px rgba(217,119,87,.2);
 }
 .coupling-bridge .bridge-id .ll {
-  font-family: var(--serif-cn); font-size: 12px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 500;
 }
 .coupling-bridge .bridge-id .ll small {
-  display: block; font-family: var(--mono); font-size: 9.5px;
+  display: block; font-family: var(--mono); font-size: var(--fs-2xs);
   color: rgba(255,255,255,.55); margin-top: 1px; letter-spacing: 0.04em;
 }
 .coupling-bridge .bridge-track {
@@ -333,7 +346,7 @@
 .bridge-endpoint-t { fill: var(--amber); }
 .bridge-endpoint-s { fill: #9db5a9; }
 .bridge-label {
-  font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   fill: var(--amber); letter-spacing: 0.04em;
 }
 
@@ -354,14 +367,14 @@
   width: 32px; height: 32px; border-radius: 50%;
   background: var(--sage-soft); color: var(--sage);
   display: grid; place-items: center; font-family: var(--serif-cn);
-  font-size: 14px; font-weight: 500; flex-shrink: 0;
+  font-size: var(--fs-sm); font-weight: 500; flex-shrink: 0;
 }
 .student-events .events-id .ll {
-  font-family: var(--serif-cn); font-size: 12px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 500;
   line-height: 1.2; color: var(--ink);
 }
 .student-events .events-id .ll small {
-  display: block; font-family: var(--mono); font-size: 9.5px;
+  display: block; font-family: var(--mono); font-size: var(--fs-2xs);
   color: var(--mute); margin-top: 2px; letter-spacing: 0.04em;
 }
 
@@ -380,7 +393,7 @@
 }
 .ev-span-label {
   position: absolute; top: 50%; transform: translate(-50%, -50%);
-  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.08em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.08em;
   color: var(--mute); background: var(--ivory);
   padding: 1px 7px; border-radius: 3px; white-space: nowrap;
 }
@@ -401,15 +414,15 @@
 }
 .event-node:hover { transform: translateY(-1px); box-shadow: 0 1px 2px rgba(27,25,22,.06), 0 10px 22px -12px rgba(27,25,22,.3); }
 .event-node .node-num {
-  font-size: 10px; font-weight: 700; color: var(--sage);
+  font-size: var(--fs-2xs); font-weight: 700; color: var(--sage);
   letter-spacing: 0.06em;
 }
 .event-node .node-name {
-  font-family: var(--serif-cn); font-size: 11.5px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 500;
   color: var(--ink); margin-top: 1px;
 }
 .event-node .node-delta {
-  font-size: 13px; font-weight: 700; color: var(--sage);
+  font-size: var(--fs-xs); font-weight: 700; color: var(--sage);
   background: var(--sage-soft); border-radius: 3px;
   padding: 1px 6px; align-self: flex-start;
   letter-spacing: 0.02em;
@@ -417,15 +430,15 @@
 }
 .event-node.is-baseline .node-delta {
   background: rgba(255,253,247,.6); color: var(--mute);
-  font-size: 10px; font-weight: 600;
+  font-size: var(--fs-2xs); font-weight: 600;
 }
 /* 实测维度标签 — 让读者看到"每个节点测的是不同维度"，破除"伪轨迹"误读 */
 .event-node .node-dims {
-  font-size: 8.5px; color: var(--sage); font-weight: 600;
+  font-size: var(--fs-2xs); color: var(--sage); font-weight: 600;
   letter-spacing: 0.02em; margin-top: 3px; opacity: 0.85;
 }
 .event-node .node-when {
-  font-size: 9px; color: var(--mute); margin-top: auto;
+  font-size: var(--fs-2xs); color: var(--mute); margin-top: auto;
   letter-spacing: 0.04em;
 }
 /* C 级证据（如 E4 迁移，待真课接入）→ 预测/待验证：delta 不再实心高亮，改虚线淡色，
@@ -454,7 +467,7 @@
 /* 证据等级 chip */
 .event-node .node-evidence {
   position: absolute; top: 6px; right: 6px;
-  font-size: 8.5px; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   width: 14px; height: 14px;
   display: grid; place-items: center; border-radius: 2px;
   letter-spacing: 0;
@@ -478,14 +491,14 @@
   position: relative;
 }
 .ability-row .row-label {
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--mute);
   margin-right: 8px; align-self: center;
 }
 .ability-row .row-label.is-teacher { color: var(--amber-deep); }
 .ability-row .row-label.is-student { color: var(--sage); }
 .ab-chip {
-  font-family: var(--mono); font-size: 10.5px; padding: 3px 9px;
+  font-family: var(--mono); font-size: var(--fs-2xs); padding: 3px 9px;
   border-radius: 4px;
   background: transparent;
   border: 1px solid var(--rule);
@@ -532,13 +545,13 @@
   margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
 }
 .atlas-lede .lede-h .tag {
-  font-family: var(--mono); font-size: 10.5px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--amber-deep);
 }
 .atlas-lede .lede-h .tag::before { content: "★ "; }
 .atlas-lede .lede-h .hint {
-  font-family: var(--mono); font-size: 10px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.04em;
 }
 .atlas-lede .lede-row {
@@ -563,22 +576,22 @@
   flex-wrap: wrap; row-gap: 4px;
 }
 .lede-card .lc-h .num {
-  font-family: var(--mono); font-size: 10.5px; color: var(--ink);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink);
   letter-spacing: 0.06em; font-weight: 600;
   white-space: nowrap;
 }
 .lede-card .lc-h .num .cn {
-  font-family: var(--serif-cn); font-weight: 500; font-size: 12px;
+  font-family: var(--serif-cn); font-weight: 500; font-size: var(--fs-2xs);
   margin-left: 4px; color: var(--ink-soft);
 }
 .lede-card .lc-h .env {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   background: var(--ink); color: var(--ivory);
   padding: 2px 7px; border-radius: 3px; letter-spacing: 0.06em;
   white-space: nowrap; flex-shrink: 0;
 }
 .lede-card .lc-b {
-  font-family: var(--serif-cn); font-size: 12.5px;
+  font-family: var(--serif-cn); font-size: var(--fs-xs);
   line-height: 1.6; color: var(--ink-2);
 }
 /* 双色编码：教师高亮 amber，学生高亮 sage，呼应下方两条 lane */
@@ -595,7 +608,7 @@
   list-style: none; cursor: pointer;
   padding: 14px 24px;
   display: flex; align-items: center; gap: 14px;
-  font-family: var(--serif-cn); font-size: 13px;
+  font-family: var(--serif-cn); font-size: var(--fs-xs);
   color: var(--ink-soft);
   user-select: none;
   transition: background .15s;
@@ -607,18 +620,18 @@
   border-bottom: 1px solid var(--rule);
 }
 .fp-tag {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--amber-deep); font-weight: 600;
   white-space: nowrap;
 }
 .fp-preview {
   flex: 1; min-width: 0;
-  font-size: 12px; color: var(--mute);
+  font-size: var(--fs-2xs); color: var(--mute);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .fp-preview sub { font-size: 80%; }
 .fp-caret {
-  font-family: var(--mono); font-size: 14px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-sm); color: var(--mute);
   transition: transform .2s; flex-shrink: 0;
 }
 .framework-panel[open] .fp-caret { transform: rotate(180deg); }
@@ -629,7 +642,7 @@
 }
 .fp-loading {
   grid-column: 1 / -1;
-  font-family: var(--mono); font-size: 11px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   text-align: center; margin: 0;
 }
 .fp-section {
@@ -639,22 +652,22 @@
 .fp-section.is-full { grid-column: 1 / -1; }
 .fp-section h5 {
   margin: 0 0 8px;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--amber-deep); font-weight: 600;
 }
 .fp-section h5 small {
   display: inline-block; margin-left: 6px;
-  font-family: var(--serif-cn); font-size: 12px;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs);
   letter-spacing: 0; text-transform: none; color: var(--ink);
   font-weight: 500;
 }
 .fp-section p {
   margin: 0 0 6px;
-  font-family: var(--serif-cn); font-size: 12.5px; line-height: 1.6; color: var(--ink-2);
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.6; color: var(--ink-2);
 }
 .fp-section p b { color: var(--amber-deep); font-weight: 500; }
 .fp-section p code, .fp-section .fp-formula {
-  font-family: var(--mono); font-size: 11.5px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   background: var(--paper-2); padding: 1px 5px; border-radius: 3px;
   color: var(--ink); letter-spacing: 0.02em;
 }
@@ -663,16 +676,16 @@
   display: flex; flex-direction: column; gap: 4px;
 }
 .fp-refs li {
-  font-family: var(--serif-cn); font-size: 12px; color: var(--ink-soft);
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); color: var(--ink-soft);
   line-height: 1.5;
   padding-left: 14px; position: relative;
 }
 .fp-refs li::before {
   content: "▸"; position: absolute; left: 0; top: 0;
-  color: var(--amber-deep); font-size: 9px;
+  color: var(--amber-deep); font-size: var(--fs-2xs);
 }
 .fp-refs li b {
-  font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   color: var(--ink); margin-right: 6px; letter-spacing: 0.02em;
 }
 /* Data sources tabular layout */
@@ -681,12 +694,12 @@
   display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px;
 }
 .fp-sources li {
-  font-family: var(--serif-cn); font-size: 12px; color: var(--ink-soft);
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); color: var(--ink-soft);
   line-height: 1.5; padding: 3px 0;
   border-bottom: 1px dashed var(--rule);
 }
 .fp-sources li b {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   color: var(--amber-deep); margin-right: 6px;
   display: inline-block; width: 24px;
 }
@@ -720,7 +733,7 @@
 }
 .dive-card .phase-chip {
   display: inline-block; align-self: flex-start;
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
   color: var(--ink-soft); background: var(--paper-2);
 }
@@ -728,23 +741,23 @@
 .dive-card .phase-chip.is-in   { color: var(--sage); background: var(--sage-soft); }
 .dive-card .phase-chip.is-post { color: var(--indigo); background: var(--indigo-soft); }
 .dive-card .env-tag {
-  font-family: var(--serif-cn); font-size: 17px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-lg); font-weight: 500;
   color: var(--ink); line-height: 1.2;
 }
 .dive-card .env-tag b {
   font-family: var(--serif-en); font-style: italic; color: var(--amber-deep);
-  font-size: 19px; font-weight: 500; margin-right: 6px;
+  font-size: var(--fs-lg); font-weight: 500; margin-right: 6px;
 }
 .dive-card .focus {
-  font-family: var(--mono); font-size: 10px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.04em;
 }
 .dive-card .pill {
-  white-space: nowrap; flex-shrink: 0; font-size: 10px;
+  white-space: nowrap; flex-shrink: 0; font-size: var(--fs-2xs);
 }
 
 .dive-card h4 {
-  font-family: var(--serif-cn); font-size: 17px; font-weight: 500; margin: 4px 0 12px;
+  font-family: var(--serif-cn); font-size: var(--fs-lg); font-weight: 500; margin: 4px 0 12px;
   line-height: 1.35;
 }
 .dive-card h4 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-deep); }
@@ -754,7 +767,7 @@
 .dive-card .ab-link {
   padding: 8px 0; border-top: 1px dashed var(--rule);
   display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
-  font-size: 12.5px; line-height: 1.5;
+  font-size: var(--fs-xs); line-height: 1.5;
 }
 .dive-card .ab-link .lab {
   font-family: var(--serif-cn); color: var(--ink-soft);
@@ -762,7 +775,7 @@
 }
 .dive-card .ab-link .lab b { color: var(--ink); font-weight: 500; }
 .dive-card .dim-tag {
-  font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   padding: 2px 6px; border-radius: 3px; letter-spacing: 0.04em;
   flex-shrink: 0;
 }
@@ -770,24 +783,24 @@
 .dive-card .dim-tag.is-s { color: var(--sage); background: color-mix(in oklab, var(--sage) 14%, transparent); }
 .dive-card .ab-link .val {
   font-family: var(--serif-en); font-style: italic; font-weight: 500;
-  font-size: 16px; color: var(--amber-deep);
+  font-size: var(--fs-md); color: var(--amber-deep);
 }
 .dive-card .ab-link .val.s { color: var(--sage); }
 
 /* ---- Academic block system (replaces single .mech) ---- */
 .dc-block {
   margin-top: 10px; padding: 9px 11px; border-radius: 4px;
-  font-family: var(--serif-cn); font-size: 12px; line-height: 1.65; color: var(--ink-2);
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); line-height: 1.65; color: var(--ink-2);
   display: grid; grid-template-columns: 56px 1fr; gap: 8px;
 }
 .dc-lbl {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase;
   color: var(--mute); padding-top: 2px; line-height: 1.4;
   white-space: nowrap;
 }
 .dc-body { color: var(--ink-2); }
 .dc-body b { color: var(--ink); font-weight: 500; }
-.dc-body cite { font-style: italic; color: var(--mute); font-size: 11px; }
+.dc-body cite { font-style: italic; color: var(--mute); font-size: var(--fs-2xs); }
 
 .dc-obs  { background: var(--paper-2); border-left: 2px solid var(--mute); }
 .dc-hypo { background: color-mix(in oklab, var(--amber-deep) 6%, var(--ivory));
@@ -800,7 +813,7 @@
 /* Action link — 验证出口（链到 practice-detail stage iii） */
 .dive-card .dive-action {
   margin-top: auto; padding-top: 12px;
-  font-family: var(--serif-cn); font-size: 12.5px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); font-weight: 500;
   color: var(--amber-deep); text-decoration: none;
   border-top: 1px solid var(--rule);
   display: block; margin-top: 14px;
@@ -815,6 +828,26 @@
 /* .queue-section-h now uses shared .data-section-h class (see top of stylesheet) */
 
 .queue-list { display: flex; flex-direction: column; gap: 14px; }
+.queue-empty {
+  background: var(--ivory);
+  border: 1px dashed color-mix(in oklab, var(--sage) 40%, var(--rule));
+  border-radius: 10px;
+  padding: 20px 22px;
+}
+.queue-empty .qe-tag {
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sage);
+  margin-bottom: 6px;
+}
+.queue-empty .qe-body {
+  font-family: var(--serif-cn);
+  font-size: var(--fs-xs);
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
 .queue-item {
   background: var(--ivory); border: 1px solid var(--rule); border-radius: 12px;
   padding: 20px 22px;
@@ -839,7 +872,7 @@
 .queue-prio {
   position: absolute; top: 0; right: 22px;
   transform: translateY(-50%);
-  font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   letter-spacing: 0.12em; padding: 3px 8px; border-radius: 4px;
   z-index: 1;
 }
@@ -854,23 +887,23 @@
 /* write-back small sync note (replaces 4× inline style="...") */
 .queue-writeback-sync {
   display: block; margin-top: 4px;
-  font-family: var(--mono); font-size: 10px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.02em;
 }
 .queue-field {
   display: flex; flex-direction: column; gap: 6px;
 }
 .queue-field .lbl {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--mute);
 }
 .queue-field .v {
-  font-family: var(--serif-cn); font-size: 13.5px; line-height: 1.55; color: var(--ink);
+  font-family: var(--serif-cn); font-size: var(--fs-sm); line-height: 1.55; color: var(--ink);
 }
 .queue-field .v b { color: var(--amber-deep); font-weight: 500; }
 .queue-field .v .env {
   display: inline-flex; align-items: baseline; gap: 4px;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.04em;
   padding: 2px 7px; background: var(--ink); color: var(--ivory);
   border-radius: 4px;
 }
@@ -887,12 +920,12 @@
   display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
 }
 .queue-actions .src-tag {
-  font-family: var(--mono); font-size: 10px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   margin-right: auto; letter-spacing: 0.04em;
 }
 /* Button hierarchy: primary = bold amber, secondary = quiet outline, ghost = text-link */
 .q-btn {
-  font-family: var(--serif-cn); font-size: 12px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 500;
   padding: 6px 12px; border-radius: 6px;
   background: transparent; color: var(--ink-soft);
   border: 1px solid var(--rule); cursor: pointer;
@@ -903,7 +936,7 @@
   border-color: var(--ink-soft); transform: translateY(-1px);
 }
 .q-btn.is-primary {
-  font-size: 12.5px; padding: 8px 16px; font-weight: 600;
+  font-size: var(--fs-xs); padding: 8px 16px; font-weight: 600;
   background: var(--amber-deep); color: var(--ivory); border-color: var(--amber-deep);
 }
 .q-btn.is-primary:hover {
@@ -931,15 +964,15 @@
 .traj-head-row {
   display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;
 }
-.traj-head-row h5 { font-family: var(--serif-cn); font-size: 18px; font-weight: 500; margin: 0; }
+.traj-head-row h5 { font-family: var(--serif-cn); font-size: var(--fs-lg); font-weight: 500; margin: 0; }
 .traj-head-row h5 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-soft); }
-.traj-head-row .meta { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.55); }
+.traj-head-row .meta { font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.55); }
 .traj-head-row .meta b { color: var(--amber-soft); }
 
 .traj-chart { height: 200px; position: relative; }
 .traj-chart svg { width: 100%; height: 100%; display: block; }
 .traj-legend {
-  display: flex; gap: 24px; margin-top: 14px; font-family: var(--mono); font-size: 11px;
+  display: flex; gap: 24px; margin-top: 14px; font-family: var(--mono); font-size: var(--fs-2xs);
   color: rgba(255,255,255,.6);
 }
 .traj-legend i { display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 6px; }
@@ -954,12 +987,12 @@
   background: var(--sage-soft);
   border-left: 3px solid var(--sage);
   border-radius: 6px;
-  font-family: var(--serif-cn); font-size: 13px;
+  font-family: var(--serif-cn); font-size: var(--fs-xs);
   color: var(--ink);
   transition: opacity .2s;
 }
 .rerun-notice .rn-tag {
-  font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   color: var(--sage); letter-spacing: 0.08em;
   white-space: nowrap;
 }
@@ -967,10 +1000,33 @@
 .rerun-notice .rn-text b { color: var(--ink); font-weight: 500; }
 .rerun-notice .rn-dismiss {
   background: transparent; border: 0; cursor: pointer;
-  font-size: 18px; color: var(--mute); line-height: 1;
+  font-size: var(--fs-lg); color: var(--mute); line-height: 1;
   padding: 0 4px;
 }
 .rerun-notice .rn-dismiss:hover { color: var(--ink); }
+
+.data-action-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translate(-50%, 12px);
+  z-index: 9300;
+  opacity: 0;
+  pointer-events: none;
+  background: var(--ink);
+  color: var(--ivory);
+  border: 1px solid rgba(255,253,247,.18);
+  border-radius: 999px;
+  padding: 9px 14px;
+  font-family: var(--serif-cn);
+  font-size: var(--fs-xs);
+  box-shadow: 0 12px 30px -16px rgba(27,25,22,.5);
+  transition: opacity .2s, transform .2s;
+}
+.data-action-toast.is-show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
 
 /* ============ 数据源与证据等级 区块 ============
    Hero 下方一行 4 张数据源卡 + 一句话证据等级声明
@@ -983,18 +1039,18 @@
   margin-bottom: 14px; gap: 16px; flex-wrap: wrap;
 }
 .evidence-strip-head .tag {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--amber-deep); font-weight: 600;
 }
 .evidence-strip-head .lvl {
-  font-family: var(--serif-cn); font-size: 13px; color: var(--ink-soft);
+  font-family: var(--serif-cn); font-size: var(--fs-xs); color: var(--ink-soft);
 }
 .evidence-strip-head .lvl b { color: var(--ink); font-weight: 500; }
 .evidence-strip-head .lvl .ev-badge {
   display: inline-flex; align-items: center; justify-content: center;
   width: 18px; height: 18px; border-radius: 4px;
   background: var(--amber-deep); color: var(--ivory);
-  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 700;
   margin-right: 4px; vertical-align: -2px;
 }
 .evidence-grid {
@@ -1006,11 +1062,11 @@
   display: flex; flex-direction: column; gap: 4px;
 }
 .ev-card .ev-lab {
-  font-family: var(--serif-cn); font-size: 13px; font-weight: 500; color: var(--ink);
+  font-family: var(--serif-cn); font-size: var(--fs-xs); font-weight: 500; color: var(--ink);
   display: flex; justify-content: space-between; align-items: baseline;
 }
 .ev-card .ev-status {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.04em;
   display: flex; align-items: center; gap: 4px;
 }
 .ev-card .ev-status::before {
@@ -1023,12 +1079,12 @@
   background: var(--mute); animation: pulse 1.8s infinite ease-in-out;
 }
 .ev-card .ev-sample {
-  font-family: var(--mono); font-size: 11px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.02em;
 }
 .ev-card .ev-lvl {
   margin-top: 4px;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.08em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.08em;
   align-self: flex-start;
   display: inline-flex; align-items: center; gap: 4px;
   padding: 2px 7px; border-radius: 3px;
@@ -1056,7 +1112,7 @@
 }
 .ev-card.is-cta .ev-cta-mark {
   font-family: var(--serif-en); font-style: normal;
-  font-size: 22px; font-weight: 500; line-height: 1;
+  font-size: var(--fs-xl); font-weight: 500; line-height: 1;
   color: var(--amber-deep);
   width: 28px; height: 28px; border-radius: 50%;
   border: 1px solid color-mix(in oklab, var(--amber-deep) 35%, var(--rule));
@@ -1067,11 +1123,11 @@
   background: var(--amber-wash);
 }
 .ev-card.is-cta .ev-cta-lab {
-  font-family: var(--serif-cn); font-size: 13px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); font-weight: 500;
   color: var(--ink);
 }
 .ev-card.is-cta .ev-cta-hint {
-  font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.02em;
 }
 
@@ -1112,7 +1168,7 @@
 }
 .ed-phase {
   display: inline-block;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
   color: var(--ink-soft); background: var(--ivory);
   margin-bottom: 8px;
@@ -1122,16 +1178,16 @@
 .ed-phase.is-post { color: var(--indigo);     background: var(--indigo-soft); }
 .ed-title {
   margin: 0;
-  font-family: var(--serif-cn); font-size: 19px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-lg); font-weight: 500;
   line-height: 1.3; color: var(--ink);
 }
 .ed-title .num {
   font-family: var(--serif-en); font-style: italic; color: var(--amber-deep);
-  font-size: 22px; font-weight: 500; margin-right: 6px;
+  font-size: var(--fs-xl); font-weight: 500; margin-right: 6px;
 }
 .ed-coupling {
   display: inline-block; margin-top: 8px;
-  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   background: var(--ink); color: var(--ivory);
   padding: 3px 8px; border-radius: 3px; letter-spacing: 0.06em;
 }
@@ -1140,7 +1196,7 @@
   flex-shrink: 0;
 }
 .ed-pos {
-  font-family: var(--mono); font-size: 10.5px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   color: var(--mute); letter-spacing: 0.06em;
   padding: 0 4px; min-width: 32px; text-align: center;
   white-space: nowrap;
@@ -1148,7 +1204,7 @@
 .ed-nav-btn {
   background: transparent; border: 1px solid var(--rule); cursor: pointer;
   width: 24px; height: 24px; border-radius: 4px;
-  font-size: 16px; color: var(--ink-soft); line-height: 1;
+  font-size: var(--fs-md); color: var(--ink-soft); line-height: 1;
   padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
   transition: background .15s, color .15s, border-color .15s;
@@ -1164,7 +1220,7 @@
 }
 .ed-close {
   background: transparent; border: 0; cursor: pointer;
-  font-size: 24px; color: var(--mute); line-height: 1;
+  font-size: var(--fs-xl); color: var(--mute); line-height: 1;
   padding: 0 4px; margin-left: 4px;
   transition: color .15s;
 }
@@ -1178,7 +1234,7 @@
 .ed-section:last-child { margin-bottom: 0; }
 .ed-section h4 {
   margin: 0 0 8px;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   text-transform: uppercase; font-weight: 600;
   color: var(--amber-deep);
 }
@@ -1191,7 +1247,7 @@
   display: flex; flex-direction: column; gap: 6px;
 }
 .ed-section li {
-  font-family: var(--serif-cn); font-size: 13px; line-height: 1.6; color: var(--ink-2);
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.6; color: var(--ink-2);
   padding-left: 16px; position: relative;
 }
 .ed-section li::before {
@@ -1203,7 +1259,7 @@
 .ed-section.is-coupling li::before { background: color-mix(in oklab, var(--indigo) 50%, var(--rule)); }
 .ed-section li b { color: var(--ink); font-weight: 500; }
 .ed-section .ed-coupling-text {
-  font-family: var(--serif-cn); font-size: 13px; line-height: 1.65;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.65;
   color: var(--ink-2); padding: 10px 12px;
   background: color-mix(in oklab, var(--indigo) 6%, transparent);
   border-left: 2px solid var(--indigo);
@@ -1219,7 +1275,7 @@
   border-radius: 6px;
 }
 .ed-x-head {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--ink-soft); font-weight: 600;
   margin-bottom: 8px;
 }
@@ -1232,14 +1288,14 @@
   grid-template-columns: 26px 1fr 80px 42px;
   gap: 8px; align-items: center;
   padding: 3px 0;
-  font-family: var(--mono); font-size: 10.5px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   color: var(--ink-soft); letter-spacing: 0.02em;
 }
 .ed-x-row .ed-x-id {
   font-weight: 700; color: var(--indigo);
 }
 .ed-x-row .ed-x-name {
-  font-family: var(--serif-cn); font-size: 12px; color: var(--ink-2);
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); color: var(--ink-2);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .ed-x-row .ed-x-bar {
@@ -1277,22 +1333,22 @@
   padding: 8px 12px;
   background: var(--paper-2);
   border-radius: 6px;
-  font-family: var(--serif-cn); font-size: 12.5px; color: var(--ink-soft);
+  font-family: var(--serif-cn); font-size: var(--fs-xs); color: var(--ink-soft);
   transition: background .15s;
 }
 .ed-academic-summary::-webkit-details-marker { display: none; }
 .ed-academic-summary:hover { background: var(--paper-3); }
 .ed-academic-tag {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--indigo); font-weight: 600;
   white-space: nowrap;
 }
 .ed-academic-preview {
-  flex: 1; font-size: 11.5px; color: var(--mute);
+  flex: 1; font-size: var(--fs-2xs); color: var(--mute);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .ed-academic-caret {
-  font-family: var(--mono); font-size: 14px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-sm); color: var(--mute);
   transition: transform .2s;
 }
 .ed-academic[open] .ed-academic-caret { transform: rotate(180deg); }
@@ -1304,7 +1360,7 @@
 .ed-academic-block { padding: 0 4px; }
 .ed-academic-block h5 {
   margin: 0 0 6px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.12em;
   text-transform: uppercase; font-weight: 600;
 }
 .ed-academic-block.is-obs h5   { color: var(--ink); }
@@ -1312,23 +1368,23 @@
 .ed-academic-block.is-rival h5 { color: var(--sage); }
 .ed-academic-block p {
   margin: 0;
-  font-family: var(--serif-cn); font-size: 12.5px; line-height: 1.7;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.7;
   color: var(--ink-2);
 }
 .ed-academic-block p b { color: var(--ink); font-weight: 500; }
 .ed-academic-block p cite {
-  font-family: var(--serif-en); font-style: italic; font-size: 11.5px;
+  font-family: var(--serif-en); font-style: italic; font-size: var(--fs-2xs);
   color: var(--mute); font-weight: 400;
 }
 
 .ed-writeback-item {
   display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: baseline;
   padding: 8px 0; border-bottom: 1px dashed var(--rule);
-  font-family: var(--serif-cn); font-size: 12.5px; line-height: 1.55;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.55;
 }
 .ed-writeback-item:last-child { border-bottom: 0; }
 .ed-writeback-item .wb-tag {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.04em;
   padding: 2px 7px; border-radius: 3px;
   background: var(--ink); color: var(--ivory);
   white-space: nowrap; align-self: start;
@@ -1341,7 +1397,7 @@
 }
 .ed-action {
   display: block; text-align: center;
-  font-family: var(--serif-cn); font-size: 13px; font-weight: 500;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); font-weight: 500;
   color: var(--ivory); background: var(--amber-deep);
   padding: 10px 16px; border-radius: 6px;
   text-decoration: none;
@@ -1356,6 +1412,9 @@
   .env-drawer { width: 100vw; }
 }
 
+/* hero 单栏：移除右侧状态栏后，slogan 占满整行（覆盖共享的 1.15fr 0.85fr 两栏） */
+.page-hero-grid.is-solo { grid-template-columns: 1fr; }
+
 /* ============ Responsive breakpoints ============
    设计目标：保持页面在 ≥ 1100px 桌面下的最佳呈现；在
    <960px 平板 / <640px 手机下，把多列网格折叠成单列或更窄列。
@@ -1366,7 +1425,7 @@
   .data-section-h {
     grid-template-columns: 1fr; gap: 16px;
   }
-  .data-section-h .num { font-size: 48px; }
+  .data-section-h .num { font-size: var(--fs-4xl); }
 
   /* Page hero — meta panel goes full width */
   .page-hero-grid { grid-template-columns: 1fr; gap: 20px; }
@@ -1393,12 +1452,12 @@
 
   /* 窄屏（~760px 时每列约 68px）收紧学生节点，避免维度标签/时机文字挤裁 */
   .event-node { padding: 6px 5px 5px; min-height: 80px; }
-  .event-node .node-name { font-size: 10.5px; }
-  .event-node .node-delta { font-size: 12px; padding: 1px 4px; }
-  .event-node .node-dims { font-size: 8px; letter-spacing: 0; }
-  .event-node .node-when { font-size: 8px; }
-  .event-node .node-evidence { width: 12px; height: 12px; font-size: 8px; top: 4px; right: 4px; }
-  .ev-span-label { font-size: 8px; padding: 1px 5px; }
+  .event-node .node-name { font-size: var(--fs-2xs); }
+  .event-node .node-delta { font-size: var(--fs-2xs); padding: 1px 4px; }
+  .event-node .node-dims { font-size: var(--fs-2xs); letter-spacing: 0; }
+  .event-node .node-when { font-size: var(--fs-2xs); }
+  .event-node .node-evidence { width: 12px; height: 12px; font-size: var(--fs-2xs); top: 4px; right: 4px; }
+  .ev-span-label { font-size: var(--fs-2xs); padding: 1px 5px; }
 
   /* Lede strip already uses auto-fit, but tighten min for tablet */
   .atlas-lede .lede-row { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
@@ -1409,8 +1468,11 @@
 
 @media (max-width: 640px) {
   /* Summary cards: 2 cols → 1 col */
-  .summary-row { grid-template-columns: 1fr; gap: 10px; }
-  .summary-row .s-cell.x { grid-column: auto; }
+	  .summary-row { grid-template-columns: 1fr; gap: 10px; }
+	  .summary-row .s-cell.x { grid-column: auto; }
+	  .s-cell { padding: 16px; }
+	  .s-cell .d { overflow-wrap: anywhere; }
+	  .s-cell .basis-list { min-width: 0; }
 
   /* Queue items: 2x2 → all 4 fields stacked */
   .queue-item {
@@ -1425,8 +1487,8 @@
   .atlas-lede .lede-row { grid-template-columns: 1fr; }
 
   /* Section header num gets smaller */
-  .data-section-h .num { font-size: 40px; }
-  .data-section-h h3 { font-size: 26px; }
+  .data-section-h .num { font-size: var(--fs-3xl); }
+  .data-section-h h3 { font-size: var(--fs-2xl); }
 }
 
 /* ============ co / solo 视觉分组 · 教师 9 环节轴 ============
@@ -1443,7 +1505,7 @@
 }
 .station-numbers .num-cell.is-env-co::after {
   content: "师生"; position: absolute; left: 0; right: 0; top: -16px;
-  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em;
   color: var(--amber-deep); font-weight: 600;
 }
 .station-numbers .num-cell.is-env-solo {
@@ -1451,7 +1513,7 @@
 }
 .station-numbers .num-cell.is-env-solo::after {
   content: "教师"; position: absolute; left: 0; right: 0; top: -16px;
-  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em;
   color: var(--mute);
 }
 .station-numbers { margin-top: 22px; } /* 留出顶上"师生/教师"小标的空间 */
@@ -1480,7 +1542,7 @@
 /* ============ Data Source Badge + Drawer ============ */
 .ds-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.06em;
   background: rgba(255,253,247,.08); color: var(--ivory);
   border: 1px solid rgba(255,253,247,.18); border-radius: 999px;
   padding: 3px 10px; cursor: pointer;
@@ -1493,7 +1555,7 @@
 }
 .ds-badge.is-live .ds-dot { background: #6bce8a; box-shadow: 0 0 0 3px rgba(107,206,138,.18); }
 .ds-badge.is-live { border-color: rgba(107,206,138,.5); }
-.ds-badge .ds-meta { color: rgba(255,253,247,.55); font-size: 10px; }
+.ds-badge .ds-meta { color: rgba(255,253,247,.55); font-size: var(--fs-2xs); }
 
 .ds-drawer {
   position: fixed; right: 24px; top: 96px;
@@ -1509,36 +1571,36 @@
   display: flex; align-items: baseline; justify-content: space-between;
   margin-bottom: 8px;
 }
-.ds-drawer-h h4 {
-  font-family: var(--serif-cn); font-size: 16px; font-weight: 600;
+.ds-drawer-h h2 {
+  font-family: var(--serif-cn); font-size: var(--fs-md); font-weight: 600;
   margin: 0; letter-spacing: 0.02em;
 }
 .ds-close {
   background: transparent; border: 0; cursor: pointer;
-  color: var(--mute); font-size: 22px; line-height: 1; padding: 0 4px;
+  color: var(--mute); font-size: var(--fs-xl); line-height: 1; padding: 0 4px;
 }
 .ds-close:hover { color: var(--ink); }
 .ds-hint {
-  font-family: var(--serif-cn); font-size: 12.5px; line-height: 1.7;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.7;
   color: var(--ink-soft); margin: 0 0 12px;
 }
 .ds-json-lab {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--mute); display: block; margin-bottom: 4px;
 }
 .ds-drawer textarea {
   width: 100%; box-sizing: border-box;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11.5px; line-height: 1.55;
+  font-family: var(--mono);
+  font-size: var(--fs-2xs); line-height: 1.55;
   padding: 10px 12px; border: 1px solid var(--rule); border-radius: 8px;
   background: var(--paper-2); color: var(--ink); resize: vertical;
 }
 .ds-drawer textarea:focus { outline: 2px solid var(--amber-deep); outline-offset: 1px; border-color: var(--amber-deep); }
 .ds-msg {
   min-height: 18px; margin: 8px 2px 0;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.04em;
 }
-.ds-msg.is-error { color: #a8492a; }
+.ds-msg.is-error { color: var(--amber-deep); }
 .ds-msg.is-ok    { color: #2f6a44; }
 .ds-actions {
   display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
@@ -1547,17 +1609,17 @@
 </style>
 </head>
 <body>
-<script src="./shared/wendao.js" defer></script>
-<script src="./shared/fanya.js" defer></script>
-<script src="./shared/live-stats.js" defer></script>
-<script src="./shared/faq.js" defer></script>
+<script src="./shared/wendao.js?v=1" defer></script>
+<script src="./shared/fanya.js?v=1" defer></script>
+<script src="./shared/live-stats.js?v=1" defer></script>
+<script src="./shared/faq.js?v=1" defer></script>
 <!-- evaluation-framework MUST load before data-render — it provides the dataset & formulas -->
-<script src="./shared/evaluation-framework.js?v=6" defer></script>
+<script src="./shared/evaluation-framework.js?v=8" defer></script>
 <!-- evaluation-contract: X1-global-coefficient + v2 桥接耦合映射 -->
-<script src="./shared/evaluation-contract.js?v=3" defer></script>
-<script src="./shared/data-render.js?v=10" defer></script>
-<script src="./shared/theory-chips.js" defer></script>
-<script src="./shared/rerun-bridge.js" defer></script>
+<script src="./shared/evaluation-contract.js?v=4" defer></script>
+<script src="./shared/data-render.js?v=12" defer></script>
+<script src="./shared/theory-chips.js?v=31" defer></script>
+<script src="./shared/rerun-bridge.js?v=1" defer></script>
 <script>
 /* ============ Data source drawer wiring ============
  * 真实课堂数据接入：粘贴 JSON → 校验 → 写入 localStorage → 自动重渲染
@@ -1676,7 +1738,7 @@
   <span class="sep">—</span>
   <span>课程设计</span>
   <span class="sep">—</span>
-  <span><span class="pulse"></span><span data-live="teachers" data-baseline="17">17</span> 教师 LIVE</span>
+  <span><span class="pulse"></span><span>17</span> 教师样本</span>
   <button type="button" class="ds-badge" id="dsBadge" aria-haspopup="dialog" aria-controls="dsDrawer">
     <span class="ds-dot" aria-hidden="true"></span>
     <span class="ds-text">样本数据</span>
@@ -1689,7 +1751,7 @@
 <aside class="ds-drawer" id="dsDrawer" hidden role="dialog" aria-label="接入真实课堂数据">
   <div class="ds-drawer-inner">
     <header class="ds-drawer-h">
-      <h4>接入真实课堂数据</h4>
+      <h2>接入真实课堂数据</h2>
       <button type="button" class="ds-close" id="dsClose" aria-label="关闭">×</button>
     </header>
     <p class="ds-hint">
@@ -1731,18 +1793,14 @@
 <!-- ===== Page hero ===== -->
 <main class="wrap">
   <section class="page-hero">
-    <div class="page-hero-grid">
+    <!-- v2: 移除右侧 hero 状态栏（追踪周期/教师+35.8%/班级+27.0%/耦合+9.5/关注环节）。
+         这些核心数字在下方"成长轨迹"区已完整呈现（COUPLING INDEX +9.5 · +35.8%…+27.0%），hero 不必重复。
+         收为单栏让 slogan 舒展，与教学导航 / 教学实践两页 hero 统一。无 JS 依赖。 -->
+    <div class="page-hero-grid is-solo">
       <div>
-        <div class="eyebrow">FEATURE 03 · 教学数据 · 教学改进工作台</div>
-        <h1>把课堂信号，<br/>写回 <span class="it">9 个教学环节</span></h1>
+        <div class="eyebrow">FEATURE 03 · 教学数据</div>
+        <h1>把课堂信号，<br/>写回 <span class="it">9 个教学环节</span>。</h1>
       </div>
-      <dl class="page-hero-meta">
-        <div class="row"><dt>追踪周期</dt><dd>7 周 · 17 次模拟课堂</dd></div>
-        <div class="row"><dt>教师</dt><dd>本节教师 · 工龄 1 年 · 教学能力提升 <span class="it">+35.8%</span></dd></div>
-        <div class="row"><dt>班级</dt><dd>2026 级药事管理本科 · 32 人 · 决策能力提升 <span class="it">+27.0%</span></dd></div>
-        <div class="row"><dt>师生能力耦合</dt><dd><span class="it">+9.2</span> 指数</dd></div>
-        <div class="row"><dt>关注环节</dt><dd>05 任务链设计 · 06 课中调控 · 07 评价与画像</dd></div>
-      </dl>
     </div>
 
     <!-- 评价依据：横向铺满 hero 宽度，与上方左右两栏视觉对齐 -->
@@ -1757,7 +1815,7 @@
       <span class="theory-chip">可见的学习 <small>Hattie 2009</small></span>
       <span class="theory-chip">ICAP 学习参与 <small>Chi &amp; Wylie 2014</small></span>
       <span class="theory-chip">自我调节学习 <small>Zimmerman 2002</small></span>
-      <span class="theory-chip">药事管理教育 <small>邵蓉 · 中国药大</small></span>
+      <span class="theory-chip">药事管理教育 <small>全国规划教材</small></span>
       <span class="theory-chip">药学服务评价 <small>史录文 · 北大</small></span>
       <span class="theory-chip">药事法规与监管科学 <small>杨悦 · 沈药</small></span>
       <span class="theory-chip">CAPE 教育成果 <small>AACP 2013</small></span>
@@ -1769,19 +1827,29 @@
           <span style="opacity:.55">把找到的标题与出处粘到下方，加入本节评价依据。</span>
         </div>
         <form class="row" id="theoryAddForm">
-          <input type="text" name="title"  placeholder="名称 — 例如「同伴评价」/「评价三角」/「Stiggins 课堂评价」" required />
-          <input type="text" name="source" placeholder="出处 / 作者 — 例如 Stiggins 2005" />
+          <input type="text" name="title"  aria-label="名称" placeholder="名称 — 例如「同伴评价」/「评价三角」/「Stiggins 课堂评价」" required />
+          <input type="text" name="source" aria-label="出处" placeholder="出处 / 作者 — 例如 Stiggins 2005" />
           <button type="submit" class="submit" disabled>加入</button>
           <button type="button" class="cancel" id="theoryAddCancel">取消</button>
         </form>
       </div>
     </div>
 
+    <!-- 指标图例：解释 T# / S# / COUPLING / ↑n 记号（样式见 bc-chrome.css .metric-legend） -->
+    <div class="metric-legend" role="note" aria-label="指标读法图例">
+      <span class="lead">指标怎么读 ·</span>
+      <span><b>T#</b> 教师 · 教学环节指标</span>
+      <span><b>S#</b> 学生 · 能力维度</span>
+      <span><b>COUPLING</b> 师生能力耦合 — 同一改动在教师端 / 学生端的共变强度</span>
+      <span class="dim"><b>↑n</b> 演练增益（设计预演读数 · <b>非</b>真实成效）· 仅作提示，需真实课堂验证</span>
+    </div>
+
     <div class="summary-row" data-summary-row>
       <div class="s-cell s" data-summary-role="keep">
         <div class="l">最值得保留 · KEEP</div>
-        <div class="v"><span class="it" data-slot="num">05</span><small data-slot="name">任务链设计</small></div>
-        <div class="d" data-slot="desc">分歧锚点问题链 · 教师 T4 ↑5.7 · 学生 S6 ↑4.2 同向上扬</div>
+        <!-- 静态默认对齐契约单一信源（KEEP = co 池中 COUPLING 最强 = 06 课中调控）；data-render.js 会按 LIVE 数据重渲 -->
+        <div class="v"><span class="it" data-slot="num">06</span><small data-slot="name">课中调控</small></div>
+        <div class="d" data-slot="desc">教师 T6 互动调控 ↑6.8 · 学生 S3 利益相关者 ↑5.5 · COUPLING 2.3 师生共在</div>
         <svg class="spark" viewBox="0 0 200 36" preserveAspectRatio="none"
              role="img" aria-label="7 周趋势：本环节维度持续上扬" data-slot="spark">
           <title data-slot="spark-title">7 周趋势：本环节维度持续上扬</title>
@@ -1792,9 +1860,9 @@
         <div class="basis">
           <div class="basis-lab">解释 · INTERPRET</div>
           <div class="basis-list" data-slot="chips">
-            <span class="basis-chip">问题链设计能力 <small>教师维度</small></span>
-            <span class="basis-chip">协作论证表达 <small>学生维度</small></span>
-            <span class="basis-chip">分歧锚点可能贡献 <small>Hattie 2009</small></span>
+            <span class="basis-chip">互动调控 <small>T6 教师维度</small></span>
+            <span class="basis-chip">利益相关者 <small>S3 学生维度</small></span>
+            <span class="basis-chip">即时反馈可能贡献 <small>ICAP 2014</small></span>
           </div>
         </div>
       </div>
@@ -1821,20 +1889,21 @@
       </div>
       <div class="s-cell x is-emphasized" data-summary-role="next">
         <div class="l">下一轮优先动作 · NEXT</div>
-        <div class="v"><span class="it" data-slot="count">3</span><small>条建议待写回</small></div>
-        <div class="d" data-slot="desc">写回 05 任务链设计 · 06 课中调控 · 07 评价与画像</div>
-        <!-- 3 dots = 3 queued actions. First (filled amber, larger) = 立即；others = 本周 / 暂缓 -->
+        <div class="v"><span class="it" data-slot="count">4</span><small>条建议待写回</small></div>
+        <div class="d" data-slot="desc">写回 07 评价与画像 · 08 复盘与决策 · 06 课中调控 · 03 知识与误区</div>
+        <!-- 4 dots = 4 queued actions. First (filled amber, larger) = 立即；others = 本周 / 暂缓 / 后续（静态默认与 data-render.js renderNextSpark 运行时输出一致） -->
         <svg class="spark" viewBox="0 0 200 36"
-             role="img" aria-label="3 条建议待写回：立即 · 本周 · 暂缓">
-          <title>3 条建议待写回：立即 · 本周 · 暂缓</title>
-          <line x1="20" y1="14" x2="180" y2="14" stroke="#1b1916" stroke-width="1" stroke-dasharray="2 3" opacity="0.25"/>
-          <circle cx="40"  cy="14" r="7" fill="#a8492a"/>
-          <circle cx="40"  cy="14" r="10" fill="none" stroke="#a8492a" stroke-width="1" opacity="0.35"/>
-          <circle cx="100" cy="14" r="5" fill="none" stroke="#1b1916" stroke-width="1.5" opacity="0.7"/>
-          <circle cx="160" cy="14" r="5" fill="none" stroke="#1b1916" stroke-width="1.2" opacity="0.4"/>
-          <text x="40"  y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" text-anchor="middle" fill="#a8492a" font-weight="600" letter-spacing="0.06em">立即</text>
-          <text x="100" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" text-anchor="middle" fill="#1b1916" opacity="0.65" letter-spacing="0.06em">本周</text>
-          <text x="160" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" text-anchor="middle" fill="#1b1916" opacity="0.4" letter-spacing="0.06em">暂缓</text>
+             role="img" aria-label="4 条建议待写回">
+          <title>4 条建议待写回</title>
+          <line x1="20" y1="14" x2="180" y2="14" stroke="#1b1916" stroke-width="1" stroke-dasharray="2 3" opacity="0.2"/>
+          <circle cx="40"  cy="14" r="7" fill="#a8492a" stroke="#a8492a" stroke-width="1.4" opacity="1"/>
+          <text x="40"  y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" text-anchor="middle" fill="#a8492a" opacity="1">立即</text>
+          <circle cx="80"  cy="14" r="5" fill="none" stroke="#1b1916" stroke-width="1.4" opacity="0.55"/>
+          <text x="80"  y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" text-anchor="middle" fill="#1b1916" opacity="0.55">本周</text>
+          <circle cx="120" cy="14" r="5" fill="none" stroke="#1b1916" stroke-width="1.4" opacity="0.55"/>
+          <text x="120" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" text-anchor="middle" fill="#1b1916" opacity="0.55">暂缓</text>
+          <circle cx="160" cy="14" r="5" fill="none" stroke="#1b1916" stroke-width="1.4" opacity="0.55"/>
+          <text x="160" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" text-anchor="middle" fill="#1b1916" opacity="0.55">后续</text>
         </svg>
         <div class="basis">
           <div class="basis-lab">操作 · ACTION</div>
@@ -1852,7 +1921,7 @@
     <div class="evidence-strip" id="evidenceStrip">
       <div class="evidence-strip-head">
         <span class="tag">数据源与证据等级 · DATA SOURCE</span>
-        <span class="lvl">本页所有数字默认按 <b><span class="ev-badge">B</span>中强证据</b>呈现 · 真实课堂数据接入后升级为 A · <a href="#evaluationFramework" style="color:var(--amber-deep);text-decoration:underline dashed;text-underline-offset:3px;">查看完整评价框架 →</a></span>
+        <span class="lvl">本页数字<b>源自 <span class="ev-badge">B</span> 级证据</b>（虚拟演练，非真实课堂）· COUPLING 按证据等级作置信折扣(×0.8)，能力增量按面值呈现 · 接入真实课堂升级 A · <a href="#evaluationFramework" style="color:var(--amber-deep);text-decoration:underline dashed;text-underline-offset:3px;">查看完整评价框架 →</a></span>
       </div>
       <div class="evidence-grid" id="evidenceGrid">
         <!-- 4 cards rendered by renderDataSources() -->
@@ -1866,7 +1935,8 @@
       <div class="num">i<small>SECTION · 9 个教学环节 × 双向</small></div>
       <div>
         <h3>把教师 9 环节 × 学生 5 节点摊开来，看 COUPLING 怎么连。</h3>
-        <p><b>双时间轴</b>：教师轴按 <b>9 个教学环节</b>展开（过程性 — 描述教师在做什么）；学生轴按 <b>5 个产出节点</b>展开（结果性 — 描述学生何时产生可观测证据）。两轴<b>节奏不同、不强行同列对齐</b>。中央 COUPLING 是 N 条连线（教师环节 → 学生节点），线粗 = 耦合强度，虚线 = 次要连线。所有数字 <b>仅作"提示"与"关联"</b>——改动建议先到教学实践重跑验证。完整评价框架见下方面板。</p>
+        <p><b>先说这是什么</b>：本页是<b>教学设计的"预演"</b>——把一节课放进 <b>32 人虚拟班跑 17 轮</b>，看这套设计<b>预期</b>会触发什么师生变化，用来在真上课前打磨设计；它<b>不是</b>对真实学习成效的测量（真实评估待泛雅接入）。所以下面的数字读作"<b>设计在演练里的表现</b>"，而非"学生真的提升了多少"。</p>
+        <p style="margin-top:8px;"><b>双时间轴</b>：教师轴按 <b>9 个教学环节</b>展开（过程性 — 描述教师在做什么）；学生轴按 <b>5 个产出节点</b>展开（结果性 — 描述学生何时产生可观测证据）。两轴<b>节奏不同、不强行同列对齐</b>。中央 COUPLING 是 N 条连线（教师环节 → 学生节点），线粗 = 耦合强度，虚线 = 次要连线。所有数字 <b>仅作"提示"与"关联"</b>——改动建议先到教学实践重跑验证。完整评价框架见下方面板。</p>
       </div>
     </div>
 
@@ -1884,35 +1954,42 @@
       <!-- LEDE: three key findings (was atlas-foot, moved up to read first) -->
       <div class="atlas-lede">
         <div class="lede-h">
-          <span class="tag">本周 · 三条值得关注的 COUPLING 连线</span>
+          <span class="tag">7 周累计 · 三条值得关注的 COUPLING 连线</span>
           <span class="hint">下方图谱：教师 9 环节 → COUPLING → 学生 5 节点 · 建议先看这三条 ↓</span>
         </div>
         <div class="lede-row">
-          <div class="lede-card">
-            <div class="lc-h">
-              <span class="num">05<span class="cn">任务链设计</span></span>
-              <span class="env">→ E1 · 1.8</span>
-            </div>
-            <div class="lc-b">
-              教师课前在 <span class="t-em">T4 问题链 ↑5.7</span> 设计的分歧锚点，<b>兑现于</b>学生 <span class="s-em">E1 课中表现 · S6 协作论证 ↑4.2</span>——这条 COUPLING 连线是本周最值得保留的改动，<b>建议验证</b>。
-            </div>
-          </div>
+          <!-- 静态默认与 data-render.js renderLedeCards(cumulative) 运行时输出一致：按 COUPLING 强度排序 06 / 07 / 03 -->
           <div class="lede-card">
             <div class="lc-h">
               <span class="num">06<span class="cn">课中调控</span></span>
-              <span class="env">↔ E1 · 2.2</span>
+              <span class="env">→ E1 · 2.3</span>
             </div>
             <div class="lc-b">
-              <span class="t-em">教师 · T6 互动调控 ↑6.8</span> 与 <span class="s-em">学生 E1 课中表现 · S6 协作论证 ↑4.2</span> <b>实时双向</b>共变——即时反馈处理沉默/偏题<b>可能贡献</b>了课堂参与公平度，<b>建议验证</b>。
+              <span class="t-em">教师 课中调控 +6.1</span>
+              与 <span class="s-em">学生 课中表现 +2.2</span>
+              形成 主关联，COUPLING 2.3。建议优先验证。
             </div>
           </div>
           <div class="lede-card">
             <div class="lc-h">
               <span class="num">07<span class="cn">评价与画像</span></span>
-              <span class="env">→ E2 · 2.7</span>
+              <span class="env">→ E2 · 2.3</span>
             </div>
             <div class="lc-b">
-              <span class="t-em">教师 · T7 证据反馈 ↑6.4</span> → <span class="s-em">学生 E2 评价画像 · S2 政策识读 ↑5.6</span> 本轮耦合最强——但量规歧义<b>可能遮蔽</b>真实增幅，<b>建议优先修正</b>。
+              <span class="t-em">教师 评价与画像 +3.6</span>
+              与 <span class="s-em">学生 评价画像 +1.6</span>
+              形成 主关联，COUPLING 2.3。建议优先验证。
+            </div>
+          </div>
+          <div class="lede-card">
+            <div class="lc-h">
+              <span class="num">03<span class="cn">知识与误区</span></span>
+              <span class="env">→ E1 · 1.9</span>
+            </div>
+            <div class="lc-b">
+              <span class="t-em">教师 知识与误区 +4.7</span>
+              与 <span class="s-em">学生 课中表现 +2.2</span>
+              形成 主关联，COUPLING 1.9。建议优先验证。
             </div>
           </div>
         </div>
@@ -2156,8 +2233,8 @@
     <div class="data-section-h">
       <div class="num">ii<small>SECTION · 下一轮改进队列</small></div>
       <div>
-        <h3>这里不是大屏，<br/>是<span class="it">教学改进工作台</span>。</h3>
-        <p>每一条建议都包含问题来源、证据、建议动作与写回位置——只有点击"更新本课实践包"、"进入教学实践重跑"或"写入资产库"，这一轮的诊断才真正闭环。教学导航的方法论框架是上游设计工具，不接收单节课反馈。</p>
+        <h3>这里不是大屏、也不是成效测量，<br/>是<span class="it">教学设计预演工作台</span>。</h3>
+        <p><b>把一节课的设计放进虚拟班反复演练，再把"值得保留 / 该修 / 下一步"写回 9 环节</b>——这是设计的<b>预演与复盘</b>，不是给真实教学打分；真实学习成效以泛雅接入的真实课堂为准。每一条建议都含问题来源、证据、建议动作与写回位置——只有点击"更新本课实践包"、"进入教学实践重跑"或"写入资产库"，这一轮才真正闭环。教学导航的方法论框架是上游设计工具，不接收单节课反馈。</p>
       </div>
     </div>
 
@@ -2300,20 +2377,20 @@
     <div class="num">iii<small>SECTION · 7 周轨迹</small></div>
     <div>
       <h3>放在<span class="it">时间线</span>上看，<br/>三条曲线<span class="it">在第 5 周</span>开始合拍。</h3>
-      <p>第 5 周引入<b>05 任务链设计 · 问题链</b>新工作流后，三条线开始同步上扬——师生能力耦合曲线（白色实线）的斜率在那之后是之前的 2.4 倍。这一关联<b>建议</b>在下一轮教学实践重跑时验证。</p>
+      <p><b>这是 17 轮演练叠出的预期轨迹（非真实课堂）。</b>第 5 周引入<b>05 任务链设计 · 问题链</b>新工作流后，三条线开始同步上扬——师生能力耦合曲线（白色实线）的斜率在那之后是之前的 2.4 倍。这一关联<b>建议</b>到真实课堂（泛雅）验证。</p>
     </div>
   </div>
 
   <div class="trajectory">
     <div class="traj-head-row">
       <h5>师生双向能力 <span class="it">指数</span> · 7 周</h5>
-      <div class="meta">COUPLING INDEX <b>+9.2</b> · 17 次模拟课堂 · 3 个关注环节</div>
+      <div class="meta">COUPLING INDEX <b>+9.5</b> · 第 1 周入学测 vs 第 7 周末综合测 · 5 个关注环节</div>
     </div>
     <div class="traj-chart">
       <svg viewBox="0 0 1180 200" preserveAspectRatio="none"
-           role="img" aria-label="7 周师生双向能力轨迹：新教师 +35.8%、学生决策 +27.0%、师生耦合 +9.2，三条曲线第 5 周开始合拍">
-        <title>7 周师生双向能力轨迹</title>
-        <desc>新教师教学能力 +35.8%、学生药事管理决策能力 +27.0%、师生能力耦合 +9.2。三条曲线在第 5 周引入"05 任务链设计 · 问题链"工作流后开始合拍。</desc>
+           role="img" aria-label="设计预演的预期轨迹（17 轮演练，非真实课堂）：教师 +35.8%、学生决策 +27.0%、师生耦合 +9.5，三条曲线第 5 周开始合拍">
+        <title>师生双向能力 · 预演预期轨迹</title>
+        <desc>设计预演的预期轨迹（17 轮虚拟班演练，非真实课堂测量）：教师教学设计能力 +35.8%、学生药事管理决策能力 +27.0%、师生能力耦合 +9.5。三条曲线在第 5 周引入"05 任务链设计 · 问题链"工作流后开始合拍。</desc>
         <defs>
           <linearGradient id="data-traj-grad" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0" stop-color="#d97757" stop-opacity="0.32"/>
@@ -2338,7 +2415,7 @@
         <polyline points="0,170 100,162 200,148 300,134 400,114 500,90 600,72 700,58 800,46 900,34 1000,26 1100,18 1180,12"
                   fill="none" stroke="#fffdf7" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
         <!-- week labels -->
-        <g fill="rgba(255,253,247,0.4)" font-family="ui-monospace" font-size="10">
+        <g fill="rgba(255,253,247,0.4)" font-family="ui-monospace" font-size="12">
           <text x="0" y="193">w1</text>
           <text x="180" y="193">w2</text>
           <text x="360" y="193">w3</text>
@@ -2351,7 +2428,7 @@
         <g>
           <line x1="720" y1="0" x2="720" y2="200" stroke="rgba(217,119,87,0.3)" stroke-dasharray="3,4"/>
           <rect x="730" y="2" width="220" height="22" fill="rgba(217,119,87,0.15)" rx="3"/>
-          <text x="738" y="17" font-family="ui-monospace" font-size="10.5" fill="#f1cdb9" letter-spacing="0.05em">
+          <text x="738" y="17" font-family="ui-monospace" font-size="12" fill="#f1cdb9" letter-spacing="0.05em">
             ▲ W5 · 引入 05 任务链设计工作流
           </text>
         </g>
@@ -2363,7 +2440,7 @@
     <div class="traj-legend">
       <span class="l-t"><i></i>新教师教学能力 +35.8%</span>
       <span class="l-s"><i></i>药事管理决策能力 +27.0%</span>
-      <span class="l-x"><i></i>师生能力耦合 COUPLING +9.2</span>
+      <span class="l-x"><i></i>师生能力耦合 COUPLING +9.5</span>
     </div>
   </div>
   </div>

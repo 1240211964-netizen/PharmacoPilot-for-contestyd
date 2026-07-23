@@ -15,7 +15,7 @@ body {
 /* ===== Issue strip ===== */
 .issue-strip {
   background: var(--ink); color: var(--ivory);
-  padding: 7px 48px; font-family: var(--mono); font-size: 11px;
+  padding: 7px 48px; font-family: var(--mono); font-size: var(--fs-2xs);
   letter-spacing: 0.06em; display: flex; gap: 20px; align-items: center;
   white-space: nowrap; overflow: hidden;
 }
@@ -48,12 +48,12 @@ body {
 }
 .mast-brand { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; text-decoration: none; color: inherit; }
 .mast-brand .logo {
-  font-family: var(--serif-en); font-size: 26px; font-weight: 600;
+  font-family: var(--serif-en); font-size: var(--fs-2xl); font-weight: 600;
   letter-spacing: -0.025em; line-height: 1;
 }
 .mast-brand .logo .it { font-style: italic; color: var(--amber-deep); }
 .mast-brand .ed {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--mute); padding-left: 12px;
   border-left: 1px solid var(--rule-2); white-space: nowrap;
 }
@@ -64,14 +64,14 @@ body {
   white-space: nowrap;
 }
 .app-tabs a {
-  padding: 6px 12px; font-size: 12.5px; color: var(--mute); border-radius: 6px;
+  padding: 6px 12px; font-size: var(--fs-xs); color: var(--mute); border-radius: 6px;
   display: inline-flex; align-items: center; gap: 6px; font-family: var(--serif-cn);
   white-space: nowrap; text-decoration: none;
 }
 .app-tabs a:hover { color: var(--ink); }
 .app-tabs a.is-active { background: var(--ivory); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
 .app-tabs a kbd {
-  font-family: var(--mono); font-size: 10px; padding: 0 4px;
+  font-family: var(--mono); font-size: var(--fs-2xs); padding: 0 4px;
   background: var(--paper-3); border-radius: 3px; color: var(--mute);
 }
 
@@ -81,7 +81,7 @@ body {
   border: 1px solid var(--rule);
   border-radius: 999px;
   background: var(--paper-2);
-  font-size: 12.5px; color: var(--mute); cursor: text;
+  font-size: var(--fs-xs); color: var(--mute); cursor: text;
   white-space: nowrap; min-width: 0;
   transition: border-color .18s, background .18s, box-shadow .18s;
 }
@@ -96,7 +96,7 @@ body {
 }
 .cmdbar kbd {
   margin-left: 0;
-  font-family: var(--mono); font-size: 10px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   background: var(--paper-2); color: var(--mute);
   padding: 2px 7px;
   border: 1px solid var(--rule); border-radius: 999px;
@@ -113,8 +113,8 @@ body {
 }
 .cmdbar-brand {
   display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--serif-cn, var(--serif-en, serif));
-  font-size: 12.5px;
+  font-family: var(--serif-cn);
+  font-size: var(--fs-xs);
   color: color-mix(in oklab, var(--amber-deep) 70%, var(--ink));
   letter-spacing: 0.01em;
   flex-shrink: 0;
@@ -147,7 +147,7 @@ body {
 
 /* ===== Buttons ===== */
 .pill-cap {
-  font-size: 13px; padding: 8px 16px; border-radius: 999px;
+  font-size: var(--fs-xs); padding: 8px 16px; border-radius: 999px;
   display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
   transition: all .2s; white-space: nowrap; font-family: inherit;
   text-decoration: none;
@@ -158,7 +158,7 @@ body {
 .pill-cap.fill:hover { background: var(--maroon); border-color: var(--maroon); }
 
 .btn-s {
-  font-size: 12.5px; padding: 6px 12px; border-radius: 6px;
+  font-size: var(--fs-xs); padding: 6px 12px; border-radius: 6px;
   display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
   background: transparent; border: 1px solid var(--rule-2); color: var(--ink);
   font-family: inherit;
@@ -179,7 +179,7 @@ body {
 
 /* ===== Pills ===== */
 .pill {
-  font-family: var(--mono); font-size: 10.5px; padding: 2px 8px;
+  font-family: var(--mono); font-size: var(--fs-2xs); padding: 2px 8px;
   border-radius: 4px; letter-spacing: 0.04em;
   display: inline-flex; align-items: center; gap: 5px;
 }
@@ -197,7 +197,7 @@ body {
 /* ===== Eyebrow ===== */
 .eyebrow {
   display: inline-flex; align-items: center; gap: 12px;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--amber-deep); font-weight: 600;
   margin-bottom: 18px;
 }
@@ -216,25 +216,25 @@ body {
 }
 .section.dark .sec-h { border-bottom-color: rgba(255,255,255,.15); }
 .sec-h .num {
-  font-family: var(--serif-en); font-size: 72px; line-height: 0.85;
+  font-family: var(--serif-en); font-size: var(--fs-hero); line-height: 0.85;
   font-style: italic; font-weight: 500; color: var(--amber-deep);
   letter-spacing: -0.04em;
 }
 .section.dark .sec-h .num { color: var(--amber-soft); }
 .sec-h .num small {
-  font-family: var(--mono); font-size: 11px; font-style: normal;
+  font-family: var(--mono); font-size: var(--fs-2xs); font-style: normal;
   letter-spacing: 0.15em; text-transform: uppercase; color: var(--mute);
   display: block; margin-top: 10px;
 }
 .section.dark .sec-h .num small { color: rgba(255,255,255,.5); }
 .sec-h h2 {
-  font-family: var(--serif-cn); font-weight: 500; font-size: 36px;
+  font-family: var(--serif-cn); font-weight: 500; font-size: var(--fs-3xl);
   margin: 0 0 12px; line-height: 1.18; letter-spacing: -0.01em;
 }
 .sec-h h2 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-deep); }
 .section.dark .sec-h h2 .it { color: var(--amber-soft); }
 .sec-h .lede {
-  font-size: 14.5px; line-height: 1.75; color: var(--ink-soft); max-width: 600px; margin: 0;
+  font-size: var(--fs-sm); line-height: 1.75; color: var(--ink-soft); max-width: 600px; margin: 0;
 }
 .section.dark .sec-h .lede { color: rgba(255,255,255,.7); }
 
@@ -245,14 +245,14 @@ body {
 }
 .section.dark .theory-row { border-top-color: rgba(255,255,255,.15); }
 .theory-h {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--mute); margin-right: 6px;
   display: inline-flex; align-items: center; gap: 8px;
 }
 .section.dark .theory-h { color: rgba(255,255,255,.5); }
 .theory-h::before { content: ""; width: 14px; height: 1px; background: var(--mute); }
 .theory-chip {
-  font-family: var(--serif-cn); font-size: 12.5px;
+  font-family: var(--serif-cn); font-size: var(--fs-xs);
   padding: 4px 12px; border-radius: 999px;
   background: var(--paper-2);
   border: 1px solid var(--rule);
@@ -265,7 +265,7 @@ body {
   position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
   width: 14px; height: 14px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 13px; line-height: 1; color: var(--mute);
+  font-size: var(--fs-xs); line-height: 1; color: var(--mute);
   background: transparent; border: 0; cursor: pointer; padding: 0;
   opacity: 0; transition: opacity .15s, color .15s, background .15s;
   pointer-events: none;
@@ -284,7 +284,7 @@ body {
   cursor: default;
 }
 .theory-chip small {
-  font-family: var(--serif-en); font-style: italic; font-size: 10.5px;
+  font-family: var(--serif-en); font-style: italic; font-size: var(--fs-2xs);
   color: var(--mute); font-weight: 400;
 }
 .section.dark .theory-chip { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.12); color: var(--ivory); }
@@ -304,7 +304,7 @@ body {
 
 /* Add-literature button + inline panel */
 .theory-add {
-  font-family: var(--mono); font-size: 11px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   padding: 4px 11px 4px 9px; border-radius: 999px;
   border: 1px dashed var(--rule-2, var(--rule));
   background: transparent; color: var(--mute);
@@ -313,7 +313,7 @@ body {
   transition: border-color .18s, color .18s, background .18s;
 }
 .theory-add::before {
-  content: "+"; font-size: 14px; font-weight: 400; line-height: 0;
+  content: "+"; font-size: var(--fs-sm); font-weight: 400; line-height: 0;
   position: relative; top: 1px;
 }
 .theory-add:hover {
@@ -343,13 +343,13 @@ body {
 }
 .theory-add-panel.is-open { display: grid; grid-template-columns: 1fr; gap: 10px; }
 .theory-add-panel .hint {
-  font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.04em; line-height: 1.6;
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
 .theory-add-panel .hint b { color: var(--amber-deep); font-weight: 500; }
 .theory-add-panel .go-wenda {
-  font-family: var(--mono); font-size: 11px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   padding: 4px 10px; border-radius: 999px;
   background: var(--ink); color: var(--ivory); border: 0;
   cursor: pointer; letter-spacing: 0.04em;
@@ -361,7 +361,7 @@ body {
   align-items: center;
 }
 .theory-add-panel input {
-  font: inherit; font-size: 12.5px;
+  font: inherit; font-size: var(--fs-xs);
   font-family: var(--serif-cn);
   padding: 7px 11px; border-radius: 6px;
   border: 1px solid var(--rule);
@@ -371,7 +371,7 @@ body {
 .theory-add-panel input:focus { border-color: var(--amber-deep); }
 .theory-add-panel input::placeholder { color: var(--mute); font-family: var(--serif-cn); }
 .theory-add-panel .submit {
-  font-family: var(--mono); font-size: 11px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   padding: 7px 14px; border-radius: 6px;
   background: var(--amber-deep); color: var(--ivory); border: 0;
   cursor: pointer; letter-spacing: 0.04em;
@@ -379,7 +379,7 @@ body {
 .theory-add-panel .submit:hover { background: var(--ink); }
 .theory-add-panel .submit:disabled { opacity: .45; cursor: not-allowed; }
 .theory-add-panel .cancel {
-  font-family: var(--mono); font-size: 11px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   padding: 7px 10px; border-radius: 6px;
   background: transparent; color: var(--mute); border: 1px solid var(--rule);
   cursor: pointer; letter-spacing: 0.04em;
@@ -394,7 +394,7 @@ body {
 .page-hero { padding: 96px 0 56px; min-height: 540px; }
 .page-hero h1 {
   font-family: var(--serif-cn); font-weight: 500;
-  font-size: 60px; line-height: 1.06; letter-spacing: -0.02em;
+  font-size: var(--fs-hero); line-height: 1.06; letter-spacing: -0.02em;
   margin: 0; color: var(--ink);
 }
 .page-hero h1 .it {
@@ -402,7 +402,7 @@ body {
   color: var(--amber-deep);
 }
 .page-hero .tiny {
-  font-family: var(--sans); font-size: 16px; color: var(--mute);
+  font-family: var(--sans); font-size: var(--fs-md); color: var(--mute);
   margin-top: 22px; line-height: 1.65; max-width: 640px;
 }
 .page-hero-grid {
@@ -415,12 +415,12 @@ body {
 .page-hero-meta .row {
   display: grid; grid-template-columns: 110px 1fr;
   padding: 12px 18px; border-bottom: 1px solid var(--rule);
-  font-size: 13px; line-height: 1.5;
+  font-size: var(--fs-xs); line-height: 1.5;
   font-family: var(--serif-cn);
 }
 .page-hero-meta .row:last-child { border-bottom: 0; }
 .page-hero-meta .row dt {
-  font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.08em; text-transform: uppercase; margin: 0; padding-top: 2px;
 }
 .page-hero-meta .row dd { margin: 0; color: var(--ink); }
@@ -430,26 +430,26 @@ body {
 /* ===== Colophon footer ===== */
 .colophon { background: var(--ink); color: var(--ivory); padding: 50px 48px 36px; }
 .colo-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; }
-.colo-brand .logo { font-family: var(--serif-en); font-size: 32px; font-weight: 600; letter-spacing: -0.02em; }
+.colo-brand .logo { font-family: var(--serif-en); font-size: var(--fs-3xl); font-weight: 600; letter-spacing: -0.02em; }
 .colo-brand .logo .it { font-style: italic; color: var(--amber); }
-.colo-brand p { color: rgba(255,255,255,.55); font-size: 13px; line-height: 1.7; margin: 10px 0 0; }
+.colo-brand p { color: rgba(255,255,255,.55); font-size: var(--fs-xs); line-height: 1.7; margin: 10px 0 0; }
 .colo-brand p.brand-demo-note {
-  color: rgba(255,255,255,.35); font-size: 11.5px; font-family: var(--mono);
+  color: rgba(255,255,255,.55); font-size: var(--fs-2xs); font-family: var(--mono); /* a11y: .35→.55 on --ink ≈5.8:1 */
   letter-spacing: 0.02em; margin-top: 8px;
 }
 .colo h5 {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em;
-  text-transform: uppercase; color: rgba(255,255,255,.4); margin: 0 0 14px;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.16em;
+  text-transform: uppercase; color: rgba(255,255,255,.6); margin: 0 0 14px; /* a11y: .4→.6 on --ink ≈6.8:1 */
 }
 .colo a {
-  display: block; font-family: var(--serif-cn); font-size: 14px;
+  display: block; font-family: var(--serif-cn); font-size: var(--fs-sm);
   color: rgba(255,255,255,.85); padding: 4px 0; text-decoration: none;
 }
 .colo a:hover { color: var(--amber-soft); }
 .colo-foot {
   margin-top: 36px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.1);
-  display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px;
-  color: rgba(255,255,255,.4);
+  display: flex; justify-content: space-between; font-family: var(--mono); font-size: var(--fs-2xs);
+  color: rgba(255,255,255,.6); /* a11y: .4→.6 on --ink ≈6.8:1 */
 }
 
 /* Helper visibility */
@@ -494,14 +494,14 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   .app-tabs a kbd { display: none; }
-  .issue-strip { font-size: 10px; }
+  .issue-strip { font-size: var(--fs-2xs); }
 }
 
 /* page-hero(概览/导航/实践/数据 各页通用):双栏 → 单栏 */
 @media (max-width: 760px) {
   .wrap { padding: 0 16px; }
   .page-hero { padding: 40px 0 32px; min-height: 0; }
-  .page-hero h1 { font-size: 34px; }
+  .page-hero h1 { font-size: var(--fs-3xl); }
   .page-hero-grid { grid-template-columns: 1fr; gap: 24px; }
   .page-hero-meta .row { grid-template-columns: 84px 1fr; padding: 10px 14px; }
   .colo-grid { grid-template-columns: 1fr 1fr; }   /* footer 4 列 → 2 列 */
@@ -515,7 +515,10 @@ body {
  *  P · DARK MODE — html[data-theme="dark"] 覆盖
  *  保留 amber/sage 品牌色；反转 paper/ink/ivory 系
  * ============================================================ */
-html[data-theme="dark"] body { background: #18171a; color: #faf6ee; }
+html[data-theme="dark"] body { background: #18171a; color: var(--ivory); }
+/* a11y: 浅底 --mute 已加深到 #6a655e；暗底需反向提亮，否则灰字落到 ~3.7:1。#98938b 在 #18171a 上 ~5.9:1 */
+/* --mute-2 暗底同理:亮模式值(#6f6a64)用在暗底仅 ~3.6:1,反向提亮到 #8a857c(~5.3:1),仍略暗于 --mute 保留层级 */
+html[data-theme="dark"] { --mute: #98938b; --mute-2: #8a857c; }
 
 /* Issue strip — 本来就是 dark on ink，主题切换后微调 */
 html[data-theme="dark"] .issue-strip {
@@ -528,10 +531,10 @@ html[data-theme="dark"] .masthead {
   background: #211f1d;
   border-bottom-color: rgba(255,253,247,.12);
 }
-html[data-theme="dark"] .mast-brand .logo { color: #faf6ee; }
+html[data-theme="dark"] .mast-brand .logo { color: var(--ivory); }
 html[data-theme="dark"] .mast-brand .logo .it { color: var(--amber-soft); }
 html[data-theme="dark"] .mast-brand .ed {
-  color: #908a7a;
+  color: var(--mute-2);
   border-left-color: rgba(255,253,247,.16);
 }
 
@@ -540,21 +543,21 @@ html[data-theme="dark"] .app-tabs {
   background: rgba(255,253,247,.05);
   border-color: rgba(255,253,247,.10);
 }
-html[data-theme="dark"] .app-tabs a { color: #908a7a; }
-html[data-theme="dark"] .app-tabs a:hover { color: #faf6ee; }
+html[data-theme="dark"] .app-tabs a { color: var(--mute-2); }
+html[data-theme="dark"] .app-tabs a:hover { color: var(--ivory); }
 html[data-theme="dark"] .app-tabs a.is-active {
-  background: #2a2722; color: #faf6ee;
+  background: #2a2722; color: var(--ivory);
   box-shadow: 0 1px 2px rgba(0,0,0,.4);
 }
 html[data-theme="dark"] .app-tabs a kbd {
-  background: rgba(255,253,247,.08); color: #908a7a;
+  background: rgba(255,253,247,.08); color: var(--mute-2);
 }
 
 /* Cmdbar */
 html[data-theme="dark"] .cmdbar {
   background: rgba(255,253,247,.05);
   border-color: rgba(255,253,247,.12);
-  color: #908a7a;
+  color: var(--mute-2);
 }
 html[data-theme="dark"] .cmdbar:hover {
   border-color: rgba(217,119,87,.5);
@@ -566,29 +569,29 @@ html[data-theme="dark"] .cmdbar:focus-within {
   box-shadow: 0 0 0 3px rgba(217,119,87,.18);
 }
 html[data-theme="dark"] .cmdbar kbd {
-  background: rgba(255,253,247,.08); color: #c5bda9;
+  background: rgba(255,253,247,.08); color: var(--on-dark-mute);
   border-color: rgba(255,253,247,.14);
 }
-html[data-theme="dark"] .cmdbar-input { color: #faf6ee; }
-html[data-theme="dark"] .cmdbar-input::placeholder { color: #908a7a; }
+html[data-theme="dark"] .cmdbar-input { color: var(--ivory); }
+html[data-theme="dark"] .cmdbar-input::placeholder { color: var(--mute-2); }
 
 /* Buttons */
 html[data-theme="dark"] .pill-cap.ghost {
-  border-color: rgba(255,253,247,.4); color: #faf6ee;
+  border-color: rgba(255,253,247,.4); color: var(--ivory);
 }
 html[data-theme="dark"] .pill-cap.ghost:hover {
-  background: rgba(255,253,247,.10); color: #faf6ee;
+  background: rgba(255,253,247,.10); color: var(--ivory);
 }
 /* .pill-cap.fill (amber) 颜色对比度仍可，保持 */
 
 html[data-theme="dark"] .btn-s {
-  border-color: rgba(255,253,247,.16); color: #faf6ee;
+  border-color: rgba(255,253,247,.16); color: var(--ivory);
 }
 html[data-theme="dark"] .btn-s:hover {
   background: rgba(255,253,247,.06);
 }
 html[data-theme="dark"] .btn-s.fill {
-  background: rgba(255,253,247,.10); color: #faf6ee;
+  background: rgba(255,253,247,.10); color: var(--ivory);
   border-color: rgba(255,253,247,.16);
 }
 html[data-theme="dark"] .btn-s.fill:hover {
@@ -600,7 +603,7 @@ html[data-theme="dark"] .pill-amber {
   background: rgba(217,119,87,.18); color: var(--amber-soft);
 }
 html[data-theme="dark"] .pill-ink {
-  background: rgba(255,253,247,.10); color: #faf6ee;
+  background: rgba(255,253,247,.10); color: var(--ivory);
 }
 html[data-theme="dark"] .pill-sage {
   background: rgba(77,98,87,.22); color: #a9bfb4;
@@ -609,14 +612,14 @@ html[data-theme="dark"] .pill-indigo {
   background: rgba(58,75,107,.30); color: #b8c4dc;
 }
 html[data-theme="dark"] .pill-mute {
-  background: rgba(255,253,247,.06); color: #908a7a;
+  background: rgba(255,253,247,.06); color: var(--mute-2);
 }
 
 /* Section heads */
 html[data-theme="dark"] .sec-h { border-bottom-color: rgba(255,253,247,.10); }
 html[data-theme="dark"] .sec-h .num { color: var(--amber-soft); }
-html[data-theme="dark"] .sec-h h3 { color: #faf6ee; }
-html[data-theme="dark"] .sec-h p { color: #c5bda9; }
+html[data-theme="dark"] .sec-h h3 { color: var(--ivory); }
+html[data-theme="dark"] .sec-h p { color: var(--on-dark-mute); }
 html[data-theme="dark"] .eyebrow { color: var(--amber-soft); }
 html[data-theme="dark"] .eyebrow::before { background: var(--amber-soft); }
 
@@ -631,9 +634,9 @@ html[data-theme="dark"] .page-hero-meta {
 html[data-theme="dark"] .page-hero-meta .row {
   border-bottom-color: rgba(255,253,247,.08);
 }
-html[data-theme="dark"] .page-hero-meta .row dt { color: #908a7a; }
-html[data-theme="dark"] .page-hero-meta .row dd { color: #faf6ee; }
-html[data-theme="dark"] .page-hero-meta .row dd b { color: #faf6ee; }
+html[data-theme="dark"] .page-hero-meta .row dt { color: var(--mute-2); }
+html[data-theme="dark"] .page-hero-meta .row dd { color: var(--ivory); }
+html[data-theme="dark"] .page-hero-meta .row dd b { color: var(--ivory); }
 html[data-theme="dark"] .page-hero-meta .row dd .it { color: var(--amber-soft); }
 
 /* 平滑过渡 (避免主题切换时闪烁) */
@@ -644,3 +647,33 @@ html[data-theme="dark"] .cmdbar,
 html[data-theme="dark"] .page-hero-meta {
   transition: background-color .25s ease, border-color .25s ease, color .25s ease;
 }
+
+/* ============================================================
+   可复用排版小组件（规范见 tokens.css "排版约定"）
+   新增图例 / eyebrow / 折叠标签请直接用这些类，勿手写内联 font 样式。
+   ============================================================ */
+
+/* eyebrow：mono 大写小标签（如 FEATURE 0X / INFORMED BY） */
+.u-eyebrow {
+  font-family: var(--mono);
+  font-size: var(--fs-2xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber-deep);
+}
+
+/* metric-legend：技术图例行（拉丁记号 mono、中文回退衬线、与 chip 同族） */
+.metric-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 18px;
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--mute);
+}
+.metric-legend .lead { font-weight: 600; letter-spacing: 0.04em; color: var(--ink); }
+.metric-legend b     { font-weight: 700; color: var(--ink); }
+.metric-legend .dim  { color: var(--mute); } /* a11y: 原 opacity:.85 把基色冲淡到 3.92:1;改用实色 --mute(~5:1) */

@@ -163,6 +163,49 @@
 
     applyHidden();
     renderAll();
+    setupCollapse(row, btn);   // 默认折叠过长的理论引用，降低新教师"认知超载"
+  }
+
+  /* ---------- Collapse long theory rows (默认折叠，避免一墙文献吓退新教师) ---------- */
+  const COLLAPSE_LIMIT = 6;
+  function ensureCollapseCSS() {
+    if (document.getElementById('theory-collapse-css')) return;
+    const s = document.createElement('style');
+    s.id = 'theory-collapse-css';
+    s.textContent =
+      '.theory-row.is-collapsed .theory-chip.thy-overflow{display:none;}' +
+      '.theory-toggle{font-family:var(--mono);font-weight:500;letter-spacing:0.04em;' +
+      'cursor:pointer;border:1px dashed var(--line,#d8d2c4);' +
+      'background:transparent;color:var(--mute,#8a8478);border-radius:999px;' +
+      'padding:3px 10px;font-size: var(--fs-2xs);line-height:1.4;white-space:nowrap;}' +
+      '.theory-toggle:hover{color:var(--ink,#1a1714);border-color:var(--ink,#1a1714);}';
+    document.head.appendChild(s);
+  }
+  function setupCollapse(row, addBtn) {
+    if (row.dataset.theoryCollapseBound === '1') return;
+    const builtins = [...row.querySelectorAll('.theory-chip:not(.is-custom)')];
+    // 每行可用 data-theory-limit 覆盖默认显示条数；导航页设 0 = 整条理论收进抽屉
+    // （契约硬约束：前台不铺陈教育理论标签，理论收进每环节「方法依据」抽屉）
+    const limit = (row.dataset.theoryLimit != null && row.dataset.theoryLimit !== '')
+      ? Math.max(0, parseInt(row.dataset.theoryLimit, 10) || 0) : COLLAPSE_LIMIT;
+    if (builtins.length <= limit) return;
+    row.dataset.theoryCollapseBound = '1';
+    ensureCollapseCSS();
+    builtins.slice(limit).forEach((c) => c.classList.add('thy-overflow'));
+    row.classList.add('is-collapsed');
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'theory-toggle';
+    const sync = () => {
+      const collapsed = row.classList.contains('is-collapsed');
+      toggle.textContent = collapsed
+        ? `+${builtins.length - limit} 更多理论依据 ▾`
+        : '收起理论依据 ▴';
+      toggle.setAttribute('aria-expanded', String(!collapsed));
+    };
+    toggle.addEventListener('click', () => { row.classList.toggle('is-collapsed'); sync(); });
+    row.insertBefore(toggle, addBtn || null);
+    sync();
   }
 
   function bootstrap() {

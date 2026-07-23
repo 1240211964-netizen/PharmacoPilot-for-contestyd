@@ -265,7 +265,7 @@
 .persona-cell.is-tired::before {
   content: "z";
   position: absolute; top: 1px; right: 2px;
-  font-family: var(--mono); font-size: 8px; color: var(--mute, #807a6c);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #807a6c);
   opacity: 0.6;
 }
 .persona-cell.is-state-pulse {
@@ -311,7 +311,7 @@
   background: transparent; border: 0;
   border-bottom: 1px dashed var(--rule);
   border-radius: 0;
-  font-family: var(--mono); font-size: 10.5px; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.04em;
 }
 .pr-statusbar .ind { display: inline-flex; align-items: center; gap: 6px; }
@@ -323,7 +323,7 @@
 .pr-statusbar .sep { color: var(--mute-2); }
 .pr-statusbar .r { margin-left: auto; display: flex; gap: 6px; }
 .pr-btn {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.04em;
   padding: 5px 11px; border-radius: 999px;
   border: 1px solid var(--ink); color: var(--ink); background: var(--ivory);
   cursor: pointer; transition: all .15s;
@@ -332,7 +332,7 @@
 .pr-btn.is-primary { background: var(--amber-deep); color: var(--ivory); border-color: var(--amber-deep); }
 .pr-btn.is-primary:hover { background: var(--ink); border-color: var(--ink); }
 .pr-btn[disabled] { opacity: .35; cursor: not-allowed; }
-.pr-btn.pr-btn-tiny { padding: 4px 10px; font-size: 11px; }
+.pr-btn.pr-btn-tiny { padding: 4px 10px; font-size: var(--fs-2xs); }
 .btn-run.is-running { background: #8e3d22; }
 .expert-card.is-done { opacity: 0.7; }
 .expert-card .ec-acts button.is-adopt { background: var(--amber-deep); color: var(--ivory); border-color: var(--amber-deep); }
@@ -350,14 +350,14 @@
 .mig-card.is-shipped { opacity: 1; border-color: var(--sage); }
 .mig-card.is-shipped::after {
   content: "✓ 已写回"; position: absolute; top: -10px; right: 12px;
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   background: var(--sage); color: var(--ivory); padding: 2px 6px; border-radius: 3px;
 }
 .pr-wb-tag {
   display: inline-block; padding: 2px 7px; margin-left: 6px;
   background: var(--ink); color: var(--ivory);
   border-radius: 999px;
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.06em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.06em;
 }
 `;
     const styleEl = document.createElement("style");
@@ -1249,7 +1249,7 @@
               <span class="kind">${a.target.kind}</span>
             </div>
             <div class="title">环节 ${sid} · ${station?.title?.split("·")[1]?.trim() || station?.title || "—"}<br/>
-              <small style="font-family:var(--mono); color:var(--mute); font-size:11px;">slot · ${a.slotId}</small>
+              <small style="font-family:var(--mono); color:var(--mute); font-size: var(--fs-2xs);">slot · ${a.slotId}</small>
             </div>
             <div class="meta">
               <span>${sourceLabel}</span>
@@ -1320,7 +1320,7 @@
     kms.forEach((km) => {
       const row = document.createElement("div");
       row.className = "cl-row";
-      row.innerHTML = `<span class="src" style="background:#e6f0e8;color:#3a8a4e;">虚拟班</span><span class="desc">${km.cn}</span><span class="stat">✓ 试错已验证</span>`;
+      row.innerHTML = `<span class="src" style="background:#e6f0e8;color:var(--ok);">虚拟班</span><span class="desc">${km.cn}</span><span class="stat">✓ 试错已验证</span>`;
       cl.appendChild(row);
     });
 
@@ -1411,6 +1411,10 @@
     // 更新 hero meta "待写回"计数
     const moments = $('[data-field="moments"]');
     if (moments) moments.innerHTML = `${state.keyMoments.length} 处 · 已写回 ${state.writebackLog.length}`;
+    // 刷新页眉"上次写入"——让"确认写回"所见即所得
+    if (shipped > 0 && typeof window.ppPracticeTouchUpdated === "function") {
+      window.ppPracticeTouchUpdated();
+    }
   }
   function writeBackOne(a) {
     try {
@@ -1619,21 +1623,33 @@
     loadWizSelection();
 
     function chipsOf(group) { return wiz.querySelector(`.wiz-group[data-wiz="${group}"] .wiz-chips`); }
+    // 选项 chip 既是视觉态也是可达控件：同步 is-active 与 aria-pressed
+    function setChipActive(el, active) {
+      el.classList.toggle("is-active", active);
+      el.setAttribute("aria-pressed", String(active));
+    }
     function renderChips(group, items, opts = {}) {
       const root = chipsOf(group);
       if (!root) return;
       root.innerHTML = "";
       if (!items.length) {
-        root.innerHTML = `<span class="wiz-chip is-disabled">（请先选课程）</span>`;
+        root.innerHTML = `<span class="wiz-chip is-disabled" aria-disabled="true">（请先选课程）</span>`;
         return;
       }
       items.forEach((it) => {
         const chip = document.createElement("span");
-        chip.className = "wiz-chip" + (wizSelection[group] === it.id ? " is-active" : "");
+        const active = wizSelection[group] === it.id;
+        chip.className = "wiz-chip" + (active ? " is-active" : "");
         chip.dataset.val = it.id;
+        chip.setAttribute("role", "button");
+        chip.tabIndex = 0;
+        chip.setAttribute("aria-pressed", String(active));
         const meta = opts.metaOf ? opts.metaOf(it) : "";
         chip.innerHTML = it.title + (meta ? ` <small>${meta}</small>` : "");
         chip.addEventListener("click", () => onPick(group, it.id));
+        chip.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); onPick(group, it.id); }
+        });
         root.appendChild(chip);
       });
     }
@@ -1661,7 +1677,7 @@
         ["class", "chapter"].forEach((g) => {
           const r = chipsOf(g);
           if (r) r.querySelectorAll(".wiz-chip").forEach((el) => {
-            el.classList.toggle("is-active", el.dataset.val === wizSelection[g]);
+            setChipActive(el, el.dataset.val === wizSelection[g]);
           });
         });
       }
@@ -1669,7 +1685,7 @@
       // 重绘当前组高亮
       const root = chipsOf(group);
       if (root) root.querySelectorAll(".wiz-chip").forEach((el) => {
-        el.classList.toggle("is-active", el.dataset.val === id);
+        setChipActive(el, el.dataset.val === id);
       });
       syncToHeroAndPreview();
     }
@@ -2273,7 +2289,7 @@
   position: absolute; top: 12px; right: 14px;
   width: 28px; height: 28px; border-radius: 50%;
   background: var(--paper-2, #f3eedc); border: 1px solid var(--rule, #d8d2bf);
-  cursor: pointer; font-size: 16px; line-height: 1;
+  cursor: pointer; font-size: var(--fs-md); line-height: 1;
   display: grid; place-items: center;
 }
 .pp-ai-close:hover { background: var(--amber-deep, #a8492a); color: var(--ivory, #fffdf7); }
@@ -2285,33 +2301,33 @@
 .pp-ai-id {
   width: 48px; height: 48px; border-radius: 10px;
   background: var(--ink, #1a1a1a); color: var(--ivory, #fffdf7);
-  font-family: var(--serif-en); font-style: italic; font-size: 24px; font-weight: 500;
+  font-family: var(--serif-en); font-style: italic; font-size: var(--fs-xl); font-weight: 500;
   display: grid; place-items: center;
 }
-.pp-ai-who .pp-ai-alias { font-size: 18px; font-weight: 600; }
-.pp-ai-who .pp-ai-demo { font-family: var(--mono); font-size: 10.5px; color: var(--mute, #807a6c); margin-top: 2px; letter-spacing: .04em; }
+.pp-ai-who .pp-ai-alias { font-size: var(--fs-lg); font-weight: 600; }
+.pp-ai-who .pp-ai-demo { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #807a6c); margin-top: 2px; letter-spacing: .04em; }
 .pp-ai-stance {
   padding: 6px 12px; border-radius: 999px;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .04em;
   background: var(--paper-2, #f3eedc); color: var(--ink, #1a1a1a);
   display: flex; align-items: center; gap: 6px;
 }
-.pp-ai-stance small { font-size: 9px; opacity: .6; }
-.pp-ai-stance.s-a { background: rgba(217,119,87,.18); color: #a8492a; }
-.pp-ai-stance.s-b { background: rgba(77,98,87,.2); color: #4d6257; }
-.pp-ai-stance.s-c { background: rgba(112,82,168,.16); color: #7052a8; }
+.pp-ai-stance small { font-size: var(--fs-2xs); opacity: .6; }
+.pp-ai-stance.s-a { background: rgba(217,119,87,.18); color: var(--amber-deep); }
+.pp-ai-stance.s-b { background: rgba(77,98,87,.2); color: var(--sage); }
+.pp-ai-stance.s-c { background: rgba(112,82,168,.16); color: var(--violet); }
 .pp-ai-stance.s-d { background: rgba(100,100,100,.12); color: #555; }
 .pp-ai-row {
-  font-size: 13.5px; line-height: 1.65; margin-bottom: 8px;
+  font-size: var(--fs-sm); line-height: 1.65; margin-bottom: 8px;
   padding: 8px 12px; background: var(--paper, #faf7f0); border-radius: 6px;
 }
 .pp-ai-row b {
   display: inline-block; min-width: 56px; margin-right: 8px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .08em; text-transform: uppercase;
   color: var(--amber-deep, #a8492a); font-weight: 600; vertical-align: middle;
 }
 .pp-ai-row.is-caveat { background: rgba(217,119,87,.06); border-left: 2px solid var(--amber-deep, #a8492a); }
-.pp-ai-row small { display: block; margin-left: 64px; margin-top: 4px; font-family: var(--mono); font-size: 10.5px; color: var(--mute, #807a6c); }
+.pp-ai-row small { display: block; margin-left: 64px; margin-top: 4px; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #807a6c); }
 .pp-ai-grid2 {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
   margin-top: 14px;
@@ -2320,20 +2336,20 @@
   background: var(--paper-2, #f3eedc); border-radius: 8px; padding: 12px 14px;
 }
 .pp-ai-grid2 h5 {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .12em;
   text-transform: uppercase; color: var(--mute, #807a6c);
   margin: 0 0 10px; padding-bottom: 6px;
   border-bottom: 1px dashed var(--rule, #d8d2bf);
 }
-.pp-ai-grid2 > div > div { font-size: 12.5px; line-height: 1.6; margin-bottom: 6px; color: var(--ink-2, #2a2a2a); }
+.pp-ai-grid2 > div > div { font-size: var(--fs-xs); line-height: 1.6; margin-bottom: 6px; color: var(--ink-2, #2a2a2a); }
 .pp-ai-grid2 > div > div b {
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .06em; text-transform: uppercase;
   color: var(--amber-deep, #a8492a); margin-right: 6px; font-weight: 600;
 }
 .pp-ai-meter {
   display: grid; grid-template-columns: 78px 1fr 36px; align-items: center;
   gap: 8px; margin-bottom: 6px;
-  font-family: var(--mono); font-size: 10.5px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
 }
 .pp-ai-meter span { color: var(--mute, #807a6c); }
 .pp-ai-meter > div {
@@ -2345,49 +2361,49 @@
 }
 .pp-ai-meter b { text-align: right; color: var(--ink, #1a1a1a); position: relative; }
 .pp-ai-meter b em {
-  display: block; font-style: normal; font-size: 8px;
+  display: block; font-style: normal; font-size: var(--fs-2xs);
   font-family: var(--mono); letter-spacing: .04em;
   position: absolute; right: 0; top: 100%; margin-top: 1px;
   white-space: nowrap;
 }
 .pp-ai-meter b em.is-down { color: var(--amber-deep, #a8492a); }
-.pp-ai-meter b em.is-up { color: #4d6257; }
+.pp-ai-meter b em.is-up { color: var(--sage); }
 .pp-ai-eventlog {
   margin-top: 14px; padding: 12px 14px;
   background: var(--paper, #faf7f0); border: 1px dashed var(--rule, #d8d2bf); border-radius: 8px;
 }
 .pp-ai-eventlog h5 {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .12em;
   text-transform: uppercase; color: var(--mute, #807a6c); margin: 0 0 8px;
 }
 .pp-ai-ev {
   display: grid; grid-template-columns: 50px 1fr auto; gap: 10px;
   padding: 5px 0; border-bottom: 1px dotted var(--rule, #d8d2bf);
-  font-size: 11.5px; align-items: center;
+  font-size: var(--fs-2xs); align-items: center;
 }
 .pp-ai-ev:last-child { border-bottom: 0; }
 .pp-ai-ev-t {
   font-family: var(--mono); color: var(--amber-deep, #a8492a);
-  font-weight: 600; font-size: 10.5px;
+  font-weight: 600; font-size: var(--fs-2xs);
 }
 .pp-ai-ev-why { color: var(--ink-2, #2a2a2a); font-family: var(--serif-cn); }
 .pp-ai-ev-fx { display: flex; gap: 6px; }
 .pp-ai-ev-fx span {
-  font-family: var(--mono); font-size: 9.5px;
+  font-family: var(--mono); font-size: var(--fs-2xs);
   padding: 1px 5px; border-radius: 3px;
 }
 .pp-ai-ev-fx span.is-down { background: rgba(217,119,87,.14); color: var(--amber-deep, #a8492a); }
-.pp-ai-ev-fx span.is-up { background: rgba(77,98,87,.14); color: #4d6257; }
+.pp-ai-ev-fx span.is-up { background: rgba(77,98,87,.14); color: var(--sage); }
 .pp-ai-resp {
   padding: 6px 8px; margin-bottom: 5px; background: var(--ivory, #fffdf7);
   border-left: 2px solid var(--amber-deep, #a8492a); border-radius: 4px;
 }
 .pp-ai-rkey {
-  display: block; font-family: var(--mono); font-size: 9.5px;
+  display: block; font-family: var(--mono); font-size: var(--fs-2xs);
   color: var(--mute, #807a6c); letter-spacing: .06em; margin-bottom: 3px;
 }
 .pp-ai-resp > div {
-  font-family: var(--serif-cn); font-size: 12px; line-height: 1.55; color: var(--ink-2, #2a2a2a);
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); line-height: 1.55; color: var(--ink-2, #2a2a2a);
   font-style: italic;
 }
 .pp-ai-drama {
@@ -2395,16 +2411,16 @@
   background: var(--ink, #1a1a1a); color: var(--ivory, #fffdf7); border-radius: 10px;
 }
 .pp-ai-drama h5 {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .14em;
   text-transform: uppercase; color: rgba(217,119,87,.85);
   margin: 0 0 10px;
 }
 .pp-ai-drama > div {
-  font-size: 13px; line-height: 1.6; margin-bottom: 6px;
+  font-size: var(--fs-xs); line-height: 1.6; margin-bottom: 6px;
   font-family: var(--serif-cn);
 }
 .pp-ai-drama > div b {
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .08em; text-transform: uppercase;
   color: rgba(217,119,87,.85); margin-right: 6px; font-weight: 500;
 }
 .pp-ai-rubric {
@@ -2412,13 +2428,13 @@
   background: var(--paper-2, #f3eedc); border-radius: 8px;
 }
 .pp-ai-rubric h5 {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .12em;
   text-transform: uppercase; color: var(--mute, #807a6c);
   margin: 0 0 8px;
 }
 .pp-ai-rubric-row {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
-  font-family: var(--mono); font-size: 10.5px; color: var(--ink-2, #2a2a2a);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink-2, #2a2a2a);
 }
 .pp-ai-rubric-row span {
   padding: 3px 6px; background: var(--ivory, #fffdf7); border-radius: 3px;
@@ -2426,7 +2442,7 @@
 }
 .pp-ai-foot {
   margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--rule, #d8d2bf);
-  font-family: var(--mono); font-size: 10px; color: var(--mute, #807a6c);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #807a6c);
   letter-spacing: .04em; display: flex; justify-content: space-between;
 }
 `;
@@ -2479,7 +2495,7 @@
             <div class="pp-ai-alias">${escapeHtml(a.identity?.alias || "")}</div>
             <div class="pp-ai-demo">${escapeHtml(a.identity?.demo || "")} · ${escapeHtml(a.identity?.sid || "")} · ${escapeHtml(a.identity?.seat || "")}</div>
           </div>
-          <div class="pp-ai-stance ${stanceClassFor(p.stance)}">${escapeHtml(p.stance || "—")} <small>${escapeHtml(String(p.stance_strength ?? ""))}/5</small></div>
+          <div class="pp-ai-stance">立场 ${s_init.stance_position != null ? (+s_init.stance_position).toFixed(2) : "—"} <small>强度 ${escapeHtml(String(p.stance_strength ?? ""))}/5</small></div>
         </div>
 
         <div class="pp-ai-row"><b>立场</b>${escapeHtml(p.belief || "—")}</div>
@@ -2654,11 +2670,10 @@
         if (agent) {
           const alias = agent.identity?.alias || id;
           const demo = agent.identity?.demo || "";
-          const stance = agent.persona?.stance || "";
           const strength = agent.persona?.stance_strength ?? "";
-          const role = agent.state_init?.group_role || "";
+          const pos = agent.state_init?.stance_position;
           const tension = (agent.drama?.tension || "").slice(0, 60);
-          cell.title = `${alias} · ${demo}\n立场：${stance} ${strength}/5\n角色：${role}${tension ? `\n张力：${tension}` : ""}\n（点击查看完整画像）`;
+          cell.title = `${alias} · ${demo}\n立场：${pos != null ? (+pos).toFixed(2) : "—"} · 强度 ${strength}/5${tension ? `\n张力：${tension}` : ""}\n（点击查看完整画像）`;
           cell.style.cursor = "pointer";
         }
 
@@ -3021,6 +3036,15 @@
     if (bar) {
       const left = bar.querySelector("span:first-child");
       if (left) left.innerHTML = `采纳率 · <span class="pct">${adopted} / ${total}</span> · 待回应 ${pending} · 修改 ${edit} · 忽略 ${ignored}`;
+    }
+    // 同步页眉摘要卡"专家采纳率"——让采纳/撤销操作所见即所得
+    const summary = document.querySelector('#practiceMeta [data-field="adoption"]')
+                  || document.querySelector('[data-field="adoption"]');
+    if (summary) {
+      let txt = `${total} 条意见 · 已采纳 ${adopted} · 待回应 ${pending}`;
+      if (edit) txt += ` · 修改 ${edit}`;
+      if (ignored) txt += ` · 忽略 ${ignored}`;
+      summary.textContent = txt;
     }
   }
 

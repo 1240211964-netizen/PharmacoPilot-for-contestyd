@@ -44,7 +44,9 @@
     C: { label: '弱证据',     coefficient: 0.5, badge: 'C', desc: '单一日志或单一作品证据' },
     D: { label: '暂不采信',   coefficient: 0.2, badge: 'D', desc: '仅自评、主观描述或展示性数据' },
   };
-  // 当前原型阶段：所有展示数字默认按 B 级证据呈现
+  // 当前原型阶段：展示数字**源自** B 级证据（虚拟演练），这是**溯源标签**，不是对数值的折扣。
+  // 证据系数(B=0.8)只作用于 COUPLING 的**置信度**（见 evaluation-contract.computeStationCoupling），
+  // **不打折**教师/学生能力 Δ 与 headline %——能力增量是仿真里的实测增益，按面值呈现。
   const CURRENT_EVIDENCE_LEVEL = 'B';
 
   // ============ § 1C · 数据源状态（hero 下方"数据源与证据等级"区块用） ============
@@ -233,16 +235,19 @@
     E09: { T8: 1.0 },                             // 资产沉淀 → T8 主
   };
 
+  // 重平衡（2026-05）：原矩阵里 S1 工具迁移 / S4 风险合规 / S5 方案可行性 从不是任何环节的主驱动(1.0)，
+  // 而 S2/S6/S7 各占 2 个主环节 → 7 维里 3 维结构性低估。现让 S1-S7 各恰有一个主驱动环节
+  // （7 个有学生评估的环节 E03-E09 一一对应 7 维），并与 5 节点模型的维度覆盖对齐（EV2 测 S4/S5 不再悬空）。
   const STUDENT_MATRIX = {
     E01: { },                                     // 学情诊断阶段学生不直接评估
-    E02: { S1: 0.4 },                             // 目标证据 → S1 基线
-    E03: { S6: 1.0, S1: 0.4 },                    // 知识与误区 → S6 协作论证主
+    E02: { S1: 0.4 },                             // 目标与量规 → S1 基线（课前，仅次要）
+    E03: { S6: 1.0, S2: 0.4 },                    // 知识与误区 → S6 协作论证主（分歧锚点辩论）
     E04: { S2: 1.0, S3: 0.4, S4: 0.4 },           // 案例与证据 → S2 政策识读主
-    E05: { S3: 1.0, S5: 0.4, S6: 0.4 },           // 任务链设计 → S3 利益相关者主
-    E06: { S6: 1.0, S3: 0.4, S7: 0.4 },           // 课中调控 → S6 协作论证主
-    E07: { S2: 1.0, S4: 0.4 },                    // 评价与画像 → S2 政策识读主
+    E05: { S5: 1.0, S3: 0.4, S6: 0.4 },           // 任务链设计 → S5 方案可行性主（任务链导向可行决策）
+    E06: { S3: 1.0, S6: 0.4, S7: 0.4 },           // 课中调控 → S3 利益相关者主（五方角色任务）
+    E07: { S4: 1.0, S2: 0.4, S5: 0.4 },           // 评价与画像 → S4 风险合规主（表现性评价判风险）
     E08: { S7: 1.0, S1: 0.4 },                    // 复盘与决策 → S7 反思迁移主
-    E09: { S7: 1.0 },                             // 资产沉淀 → S7 反思迁移主
+    E09: { S1: 1.0, S7: 0.4 },                    // 资产沉淀 → S1 工具迁移主（资产复用＝迁移到下一情境）
   };
 
   const MATRIX_REFS = [
@@ -637,23 +642,24 @@
     if (!payload || typeof payload !== 'object') return '数据必须是 JSON 对象';
     const modes = ['cumulative', 'weekly', 'single'];
     if (!payload.teacher || !payload.student) return '缺少 teacher / student 字段';
-    let hasAnyMode = false;
+    if (payload.evidenceLevel != null && !EVIDENCE_LEVELS[payload.evidenceLevel]) {
+      return 'evidenceLevel 必须是 A / B / C / D';
+    }
     for (const m of modes) {
       const t = payload.teacher[m];
       const s = payload.student[m];
-      if (t == null && s == null) continue;
       if (!t || !s) return `${m} 模式：teacher 与 student 必须同时提供`;
       for (const d of TEACHER_DIMS) {
         if (typeof t[d.id] !== 'number' || isNaN(t[d.id])) return `${m}.teacher.${d.id} 必须是数字`;
         if (t[d.id] < 0) return `${m}.teacher.${d.id} 不能为负`;
+        if (t[d.id] > SCALE.perDimension.max) return `${m}.teacher.${d.id} 不能超过 ${SCALE.perDimension.max}`;
       }
       for (const d of STUDENT_DIMS) {
         if (typeof s[d.id] !== 'number' || isNaN(s[d.id])) return `${m}.student.${d.id} 必须是数字`;
         if (s[d.id] < 0) return `${m}.student.${d.id} 不能为负`;
+        if (s[d.id] > SCALE.perDimension.max) return `${m}.student.${d.id} 不能超过 ${SCALE.perDimension.max}`;
       }
-      hasAnyMode = true;
     }
-    if (!hasAnyMode) return '至少需要提供 cumulative / weekly / single 中的一档完整数据';
     // 可选 studentEvents 校验（双时间轴版数据）
     if (payload.studentEvents) {
       const evIds = STUDENT_EVENTS.map(e => e.id);
@@ -664,6 +670,15 @@
           if (node[d.id] != null && (typeof node[d.id] !== 'number' || isNaN(node[d.id]))) {
             return `studentEvents.${evId}.${d.id} 必须是数字`;
           }
+          if (node[d.id] != null && node[d.id] < SCALE.perDimension.min) {
+            return `studentEvents.${evId}.${d.id} 不能为负`;
+          }
+          if (node[d.id] != null && node[d.id] > SCALE.perDimension.max) {
+            return `studentEvents.${evId}.${d.id} 不能超过 ${SCALE.perDimension.max}`;
+          }
+        }
+        if (node.evidence != null && !EVIDENCE_LEVELS[node.evidence]) {
+          return `studentEvents.${evId}.evidence 必须是 A / B / C / D`;
         }
       }
     }

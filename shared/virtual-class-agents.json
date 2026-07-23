@@ -121,7 +121,7 @@
         "self": "医保实习生·证据严谨者",
         "style": "冷静开场+引文+量化结论",
         "tics": ["先看到", "数据上", "制度上", "国办发", "支付方角度"],
-        "stance": "医保视角", "stance_strength": 5, "openness": "low", "register": "克制"
+        "stance_strength": 5, "openness": "low", "register": "克制"
       },
       "knowledge": {
         "confident": ["DRG 分组逻辑（市医保局实习）", "集采量价挂钩机制", "BE 80-125% 基础"],
@@ -172,7 +172,7 @@
         "self": "A1 的副手·数字派",
         "style": "短句+量化+对话感",
         "tics": ["也就是说", "算下来", "你看"],
-        "stance": "医保视角", "stance_strength": 4, "openness": "medium", "register": "热情"
+        "stance_strength": 4, "openness": "medium", "register": "热情"
       },
       "knowledge": {
         "confident": ["集采降价幅度+对应人头测算", "社区医院药占比体验"],
@@ -222,7 +222,7 @@
         "self": "引文者·制度派",
         "style": "引原文+辨术语",
         "tics": ["原文是", "严格说", "按规定", "区分一下"],
-        "stance": "医保视角", "stance_strength": 4, "openness": "medium", "register": "学究"
+        "stance_strength": 4, "openness": "medium", "register": "学究"
       },
       "knowledge": {
         "confident": ["国办发 2 号文'招采合一·量价挂钩'原文", "基金支付审核流程"],
@@ -270,7 +270,7 @@
         "self": "跨界提议者",
         "style": "提出新维度+追问框架",
         "tics": ["如果换个视角", "其实这是两个问题"],
-        "stance": "医保视角(+商保)", "stance_strength": 3, "openness": "high", "register": "试探"
+        "stance_strength": 3, "openness": "high", "register": "试探"
       },
       "knowledge": {
         "confident": ["商保产品设计基础", "DRG/DIP/集采三线的区别（经管专家建议补强）"],
@@ -317,7 +317,7 @@
         "self": "数据后援",
         "style": "援引具体数字",
         "tics": ["BE 是", "标准是", "文献里"],
-        "stance": "医保视角", "stance_strength": 3, "openness": "medium", "register": "谨慎"
+        "stance_strength": 3, "openness": "medium", "register": "谨慎"
       },
       "knowledge": {
         "confident": ["BE 80-125% 几何均值比 90%CI（窄治疗窗收紧至 90-111%）", "一致性评价时间线"],
@@ -361,7 +361,7 @@
         "self": "零售观察者",
         "style": "情境补充+生活化",
         "tics": ["我们店里", "实际上"],
-        "stance": "医保视角", "stance_strength": 3, "openness": "medium", "register": "随和"
+        "stance_strength": 3, "openness": "medium", "register": "随和"
       },
       "knowledge": {
         "confident": ["零售药店运营", "患者指名购买行为"],
@@ -402,7 +402,7 @@
         "self": "总结者",
         "style": "整合+反思",
         "tics": ["今天我意识到", "其实"],
-        "stance": "医保视角(可迁移)", "stance_strength": 3, "openness": "high", "register": "沉思"
+        "stance_strength": 3, "openness": "high", "register": "沉思"
       },
       "knowledge": {
         "confident": ["听课接受度高"],
@@ -439,7 +439,7 @@
         "self": "被动同意者",
         "style": "小组内低声·全班沉默",
         "tics": ["嗯", "我也是这么想"],
-        "stance": "医保视角(弱)", "stance_strength": 2, "openness": "high", "register": "胆怯"
+        "stance_strength": 2, "openness": "high", "register": "胆怯"
       },
       "knowledge": {
         "confident": [],
@@ -476,7 +476,7 @@
         "self": "照护者·叙事者",
         "style": "情境+追问+提案",
         "tics": ["但是", "我父亲", "怎么办", "你们怎么算"],
-        "stance": "慢病家属", "stance_strength": 5, "openness": "medium", "register": "克制但有力"
+        "stance_strength": 5, "openness": "medium", "register": "克制但有力"
       },
       "knowledge": {
         "confident": ["糖尿病长期管理实况", "SMBG 7 点法", "院方匿名记录（陪诊获得）"],
@@ -526,7 +526,7 @@
         "self": "临床证据派",
         "style": "技术语言+病例数",
         "tics": ["治疗窗", "辅料", "INR"],
-        "stance": "慢病家属(临床)", "stance_strength": 4, "openness": "medium", "register": "专业"
+        "stance_strength": 4, "openness": "medium", "register": "专业"
       },
       "knowledge": {
         "confident": ["华法林 INR 治疗窗 2.0-3.0", "辅料/晶型/溶出曲线对生物利用度的影响（v0.2 修正）", "抗凝门诊运作"],
@@ -570,7 +570,7 @@
         "self": "情境补充者",
         "style": "口语+情境",
         "tics": ["其实", "我妈"],
-        "stance": "慢病家属", "stance_strength": 4, "openness": "medium", "register": "直白"
+        "stance_strength": 4, "openness": "medium", "register": "直白"
       },
       "knowledge": {
         "confident": ["血压管理日常", "降压药谷峰差异感知"],
@@ -610,7 +610,7 @@
         "self": "病友群转述者",
         "style": "叙事+提问",
         "tics": ["我父亲", "群里说", "再入院"],
-        "stance": "慢病家属", "stance_strength": 4, "openness": "medium", "register": "诚恳"
+        "stance_strength": 4, "openness": "medium", "register": "诚恳"
       },
       "knowledge": {
         "confident": ["心脏支架术后双抗管理", "氯吡格雷集采落地（v0.2 修正）的家庭体验"],
@@ -648,7 +648,7 @@
         "self": "老年照护代言",
         "style": "情境化+具象",
         "tics": ["老人", "记不住", "贴标签"],
-        "stance": "慢病家属", "stance_strength": 3, "openness": "high", "register": "温和"
+        "stance_strength": 3, "openness": "high", "register": "温和"
       },
       "knowledge": {
         "confident": ["帕金森老年照护实况"],
@@ -684,7 +684,7 @@
         "self": "肿瘤药学准从业者",
         "style": "技术+伦理",
         "tics": ["内分泌", "5 年", "依从性"],
-        "stance": "慢病家属(肿瘤)", "stance_strength": 4, "openness": "medium", "register": "严肃"
+        "stance_strength": 4, "openness": "medium", "register": "严肃"
       },
       "knowledge": {
         "confident": ["他莫昔芬/来曲唑/阿那曲唑等内分泌治疗药", "肿瘤药学服务"],
@@ -720,7 +720,7 @@
         "self": "提问者",
         "style": "技术追问",
         "tics": ["监测", "频次", "SCr"],
-        "stance": "慢病家属(肾内)", "stance_strength": 3, "openness": "medium", "register": "试探"
+        "stance_strength": 3, "openness": "medium", "register": "试探"
       },
       "knowledge": {
         "confident": ["eGFR + SCr + 电解质 2 周复查节奏（v0.2 修正：扩展为多指标）", "肾内科药物剂量调整"],
@@ -755,7 +755,7 @@
         "self": "被动同情者",
         "style": "小组内低声",
         "tics": ["我奶奶", "鸡飞狗跳"],
-        "stance": "慢病家属(弱)", "stance_strength": 2, "openness": "high", "register": "笨拙"
+        "stance_strength": 2, "openness": "high", "register": "笨拙"
       },
       "knowledge": {
         "confident": ["奶奶多重慢病的日常烦恼"],
@@ -791,7 +791,7 @@
         "self": "未发声的反驳者",
         "style": "书面思考·课堂沉默",
         "tics": ["NPV", "专利期", "Pipeline"],
-        "stance": "药企背景(强)", "stance_strength": 4, "openness": "medium", "register": "压抑"
+        "stance_strength": 4, "openness": "medium", "register": "压抑"
       },
       "knowledge": {
         "confident": ["MNC 药代日常", "原研药市场策略", "创新研发周期"],
@@ -836,7 +836,7 @@
         "self": "举手未被识别者",
         "style": "想说但说不出",
         "tics": [],
-        "stance": "药企背景", "stance_strength": 4, "openness": "high", "register": "挫败"
+        "stance_strength": 4, "openness": "high", "register": "挫败"
       },
       "knowledge": {
         "confident": ["GCP 培训内容", "II 期临床流程"],
@@ -876,7 +876,7 @@
         "self": "小组内活跃·全班退场",
         "style": "私下深度·公开退场",
         "tics": ["专利期", "NPV", "BD"],
-        "stance": "药企背景", "stance_strength": 3, "openness": "high", "register": "理性"
+        "stance_strength": 3, "openness": "high", "register": "理性"
       },
       "knowledge": {
         "confident": ["BD 业务模型", "Pipeline 现金流", "CRO 流程"],
@@ -915,7 +915,7 @@
         "self": "自我审查的实操派",
         "style": "技术细节·课堂沉默",
         "tics": ["GMP", "洁净区", "批记录"],
-        "stance": "药企背景", "stance_strength": 4, "openness": "low", "register": "克制"
+        "stance_strength": 4, "openness": "low", "register": "克制"
       },
       "knowledge": {
         "confident": ["车间 GMP 现场要求", "洁净区 A/B/C/D 分级", "批记录", "偏差处理"],
@@ -954,7 +954,7 @@
         "self": "节奏被抢的接梗型",
         "style": "等待时机型",
         "tics": ["其实", "但是"],
-        "stance": "药企背景(国内)", "stance_strength": 3, "openness": "medium", "register": "无奈"
+        "stance_strength": 3, "openness": "medium", "register": "无奈"
       },
       "knowledge": {
         "confident": ["国内仿制药企市场分布", "县医院药代日常"],
@@ -993,7 +993,7 @@
         "self": "框架外的观察者",
         "style": "完整听完·结尾私语",
         "tics": [],
-        "stance": "药企背景(国内)", "stance_strength": 3, "openness": "medium", "register": "无奈"
+        "stance_strength": 3, "openness": "medium", "register": "无奈"
       },
       "knowledge": {
         "confident": ["药代实习日常"],
@@ -1031,7 +1031,7 @@
         "self": "策略性沉默者",
         "style": "记笔记 6 页·公开零发言",
         "tics": [],
-        "stance": "药企背景(原料药)", "stance_strength": 3, "openness": "low", "register": "刻意收敛"
+        "stance_strength": 3, "openness": "low", "register": "刻意收敛"
       },
       "knowledge": {
         "confident": ["原料药 API 议价权变化", "中标制剂厂对 API 压价", "环保+GMP 升级成本"],
@@ -1070,7 +1070,7 @@
         "self": "角色冲突者",
         "style": "交叉记录·难以表态",
         "tics": [],
-        "stance": "药企/监管混合", "stance_strength": 2, "openness": "high", "register": "困惑"
+        "stance_strength": 2, "openness": "high", "register": "困惑"
       },
       "knowledge": {
         "confident": ["GSP 流通规范基础", "药监值班日常"],
@@ -1108,7 +1108,7 @@
         "self": "全程沉默者",
         "style": "低头记笔记（抄黑板的，非自己思考的）",
         "tics": [],
-        "stance": "观望", "stance_strength": 1, "openness": "low", "register": "退缩"
+        "stance_strength": 1, "openness": "low", "register": "退缩"
       },
       "knowledge": {
         "confident": [],
@@ -1145,7 +1145,7 @@
         "self": "认知超载者",
         "style": "注意力游离",
         "tics": [],
-        "stance": "观望", "stance_strength": 1, "openness": "high", "register": "游离"
+        "stance_strength": 1, "openness": "high", "register": "游离"
       },
       "knowledge": {
         "confident": [],
@@ -1182,7 +1182,7 @@
         "self": "等待点名者",
         "style": "专注听+反思单内容丰富",
         "tics": [],
-        "stance": "观望(有想法)", "stance_strength": 1, "openness": "high", "register": "克制"
+        "stance_strength": 1, "openness": "high", "register": "克制"
       },
       "knowledge": {
         "confident": ["县医院导诊见过基层换药通知工作量"],
@@ -1221,7 +1221,7 @@
         "self": "异常状态者",
         "style": "低注意力·趴桌",
         "tics": [],
-        "stance": "观望(异常)", "stance_strength": 1, "openness": "n/a", "register": "n/a"
+        "stance_strength": 1, "openness": "n/a", "register": "n/a"
       },
       "knowledge": {
         "confident": [],
@@ -1258,7 +1258,7 @@
         "self": "推举型发言者",
         "style": "被推举才说",
         "tics": ["我同意"],
-        "stance": "观望", "stance_strength": 2, "openness": "high", "register": "腼腆"
+        "stance_strength": 2, "openness": "high", "register": "腼腆"
       },
       "knowledge": {
         "confident": ["药店见习日常"],
@@ -1296,7 +1296,7 @@
         "self": "报告念稿员",
         "style": "读稿型",
         "tics": ["我们组认为"],
-        "stance": "观望", "stance_strength": 2, "openness": "medium", "register": "公事公办"
+        "stance_strength": 2, "openness": "medium", "register": "公事公办"
       },
       "knowledge": {
         "confident": [],
@@ -1332,7 +1332,7 @@
         "self": "澄清提问者",
         "style": "澄清型问句",
         "tics": ["什么叫", "我没完全听懂"],
-        "stance": "观望(学习者)", "stance_strength": 2, "openness": "high", "register": "诚恳"
+        "stance_strength": 2, "openness": "high", "register": "诚恳"
       },
       "knowledge": {
         "confident": [],
@@ -1369,7 +1369,7 @@
         "self": "附议型",
         "style": "极简附议",
         "tics": ["我同意"],
-        "stance": "观望(附议)", "stance_strength": 2, "openness": "medium", "register": "敷衍"
+        "stance_strength": 2, "openness": "medium", "register": "敷衍"
       },
       "knowledge": {
         "confident": [],

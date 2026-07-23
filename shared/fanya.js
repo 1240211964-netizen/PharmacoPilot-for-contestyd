@@ -7,7 +7,7 @@
    record flows back from here.
 
    Default URL is a placeholder. Override per-page with:
-     <body data-fanya-url="https://cpu.fanya.chaoxing.com/...">
+     <body data-fanya-url="https://<院校子域>.fanya.chaoxing.com/...">
    or globally before this script loads:
      window.FANYA_URL = "...";
 
@@ -21,8 +21,8 @@
 (function () {
   "use strict";
 
-  // 中国药科大学的泛雅入口（占位 — 等用户给到真实 URL 再替换）
-  const DEFAULT_URL = "https://cpu.fanya.chaoxing.com/portal";
+  // 泛雅入口（演示占位域名 — 部署方通过 data-fanya-url / WENDAO 同款方式注入真实 URL）
+  const DEFAULT_URL = "https://demo.fanya.chaoxing.com/portal";
 
   function getUrl(trigger) {
     return (
@@ -35,6 +35,14 @@
 
   function openFanya(trigger) {
     const url = getUrl(trigger);
+    // 演示占位域名(demo.*)未接入真实泛雅课程:诚实提示,不打开死链。
+    // 部署方注入院校 URL(window.FANYA_URL 或 body[data-fanya-url])后自动恢复外跳。
+    if (/^https:\/\/demo\./.test(url)) {
+      if (typeof window.showDemoToast === "function") {
+        window.showDemoToast("泛雅工作台 · 演示环境未接入院校平台（部署时注入课程 URL 即可启用）");
+      }
+      return;
+    }
     window.open(url, "_blank", "noopener,noreferrer");
   }
 

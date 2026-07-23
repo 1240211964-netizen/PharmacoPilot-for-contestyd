@@ -1,0 +1,1213 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PharmacoPilot · GSAP 动画样片</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23a8492a'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' font-family='Georgia' font-style='italic' fill='%23fffdf7'%3EP%3C/text%3E%3C/svg%3E" />
+<!-- 字体:preconnect + 非阻塞加载(media=print onload),消除原 tokens.css @import 的渲染阻塞 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
+<link rel="stylesheet" href="./shared/tokens.css?v=4" />
+<style>
+:root {
+  --demo-paper: #f4eee2;
+  --demo-ink: #1b1916;
+  --demo-ivory: #fffdf7;
+  --demo-amber: #a8492a;
+  --demo-amber-2: #d97757;
+  --demo-sage: #5f806c;
+  --demo-indigo: #5d6f95;
+  --demo-rule: #cdbfa8;
+  --demo-mute: #6f665a; /* a11y: 原 #766d60 在浅纸底仅 4.4:1,加深至 ~4.9:1 */
+  --demo-dark: #171411;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--demo-paper); color: var(--demo-ink); }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(90deg, rgba(27,25,22,.035) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(180deg, rgba(27,25,22,.024) 1px, transparent 1px) 0 0 / 36px 36px,
+    var(--demo-paper);
+  color: var(--demo-ink);
+  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  overflow-x: hidden;
+}
+
+button,
+input { font: inherit; }
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.demo-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 22px;
+  padding: 16px 42px;
+  border-bottom: 1px solid var(--demo-ink);
+  background: color-mix(in oklab, var(--demo-paper) 88%, white);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.brand b {
+  font-family: var(--serif-en, Georgia, serif);
+  font-size: clamp(25px, 2.3vw, 34px);
+  line-height: 1;
+}
+
+.brand i {
+  color: var(--demo-amber);
+  font-style: italic;
+}
+
+.brand span {
+  color: var(--demo-mute);
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 12px;
+}
+
+.demo-nav {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px;
+  border: 1px solid var(--demo-rule);
+  border-radius: 8px;
+  background: rgba(255,253,247,.52);
+}
+
+.demo-nav a,
+.demo-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 6px;
+  color: var(--demo-mute);
+  font-family: var(--serif-cn, Songti SC, serif);
+  font-size: 14px;
+}
+
+.demo-nav a.is-active {
+  background: var(--demo-ivory);
+  color: var(--demo-ink);
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+}
+
+.header-actions {
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.demo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--demo-ink);
+  background: transparent;
+  color: var(--demo-ink);
+  white-space: nowrap;
+}
+
+.demo-btn.fill {
+  border-color: var(--demo-amber);
+  background: var(--demo-amber);
+  color: var(--demo-ivory);
+}
+
+.demo-shell {
+  width: min(1440px, calc(100vw - 56px));
+  margin: 0 auto;
+  padding: 42px 0 54px;
+}
+
+.lab-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+.lab-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: var(--demo-amber);
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 12px;
+}
+
+.lab-kicker::before {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background: currentColor;
+}
+
+.lab-head h1 {
+  margin: 0;
+  max-width: 880px;
+  font-family: var(--serif-cn, Songti SC, serif);
+  font-size: clamp(38px, 5vw, 76px);
+  font-weight: 500;
+  line-height: 1.06;
+}
+
+.lab-head h1 i {
+  color: var(--demo-amber);
+  font-family: var(--serif-en, Georgia, serif);
+  font-style: italic;
+}
+
+.lab-status {
+  display: grid;
+  gap: 7px;
+  min-width: 238px;
+  padding: 12px 14px;
+  border: 1px solid var(--demo-rule);
+  border-radius: 8px;
+  background: rgba(255,253,247,.56);
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 12px;
+  color: var(--demo-mute);
+}
+
+.lab-status b { color: var(--demo-ink); font-weight: 500; }
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(370px, .75fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.side-stack {
+  display: grid;
+  gap: 18px;
+  grid-template-rows: auto 1fr;
+}
+
+.motion-panel {
+  position: relative;
+  border: 1px solid var(--demo-ink);
+  border-radius: 10px;
+  background: var(--demo-ivory);
+  box-shadow: 8px 8px 0 rgba(27,25,22,.18);
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 54px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--demo-rule);
+}
+
+.panel-head h2,
+.panel-head h3 {
+  margin: 0;
+  font-family: var(--serif-cn, Songti SC, serif);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.panel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 26px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--demo-rule);
+  color: var(--demo-mute);
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.panel-chip i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--demo-sage);
+}
+
+.cinema {
+  min-height: 700px;
+  background: var(--demo-dark);
+  color: var(--demo-ivory);
+}
+
+.cinema .panel-head {
+  border-color: rgba(255,253,247,.16);
+  background: rgba(255,253,247,.04);
+}
+
+.cinema .panel-chip {
+  border-color: rgba(255,253,247,.2);
+  color: rgba(255,253,247,.66);
+}
+
+.scene-stage {
+  position: relative;
+  min-height: 644px;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.scene-art-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  will-change: transform;
+}
+
+.scene-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: sepia(.18) saturate(.86) contrast(.94);
+  will-change: transform, opacity;
+}
+
+.scene-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(23,20,17,.88), rgba(23,20,17,.32) 39%, rgba(23,20,17,.05) 72%),
+    linear-gradient(180deg, rgba(23,20,17,.06), rgba(23,20,17,.62));
+  pointer-events: none;
+}
+
+.scene-copy {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  align-content: center;
+  max-width: 440px;
+  min-height: 644px;
+  padding: 54px;
+}
+
+.shot-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  color: var(--demo-amber-2);
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 12px;
+}
+
+.shot-label::before {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background: currentColor;
+}
+
+.scene-title {
+  margin: 0;
+  font-family: var(--serif-cn, Songti SC, serif);
+  font-size: clamp(46px, 5.5vw, 82px);
+  font-weight: 500;
+  line-height: 1.06;
+}
+
+.scene-meta {
+  width: fit-content;
+  margin: 20px 0 0;
+  padding: 8px 13px;
+  border: 1px solid rgba(255,253,247,.28);
+  border-radius: 999px;
+  color: rgba(255,253,247,.72);
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 12px;
+}
+
+.scene-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.scene-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 31px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(255,253,247,.9);
+  color: var(--demo-ink);
+  font-family: var(--serif-cn, Songti SC, serif);
+  font-size: 14px;
+  will-change: transform, opacity;
+}
+
+.scene-controls {
+  position: absolute;
+  left: 54px;
+  right: 54px;
+  bottom: 34px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.shot-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shot-dot {
+  width: 34px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255,253,247,.28);
+}
+
+.shot-dot.is-active { background: var(--demo-amber-2); }
+
+.ghost-light {
+  position: absolute;
+  inset: auto 46px 48px auto;
+  z-index: 2;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(217,119,87,.24), transparent 65%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.stage-map {
+  min-height: 320px;
+}
+
+.stage-body {
+  padding: 16px;
+  background: var(--demo-dark);
+  color: var(--demo-ivory);
+}
+
+.stage-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 7px;
+  padding-bottom: 36px;
+}
+
+.stage-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 15px;
+  height: 2px;
+  background: rgba(255,253,247,.16);
+}
+
+.stage-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(.111);
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--demo-amber-2), var(--demo-sage), var(--demo-indigo));
+  will-change: transform;
+}
+
+.stage-cursor {
+  position: absolute;
+  left: 0;
+  bottom: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--demo-ivory);
+  background: var(--demo-amber);
+  box-shadow: 0 0 0 6px rgba(217,119,87,.14);
+  will-change: transform;
+}
+
+.stage-chip {
+  position: relative;
+  display: grid;
+  align-content: space-between;
+  min-height: 76px;
+  min-width: 0;
+  padding: 9px 6px;
+  border: 1px solid rgba(255,253,247,.12);
+  border-radius: 8px;
+  background: rgba(255,253,247,.05);
+  color: rgba(255,253,247,.62);
+  text-align: left;
+  will-change: transform;
+}
+
+.stage-chip b {
+  color: rgba(255,253,247,.60); /* a11y: .44→.60 序号在暗 chip 底达 ~6:1 */
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.stage-chip span {
+  font-family: var(--serif-cn, Songti SC, serif);
+  font-size: 13px;
+  line-height: 1.25;
+  color: rgba(255,253,247,.92);
+}
+
+.stage-chip.is-done {
+  border-color: rgba(95,128,108,.5);
+  background: rgba(95,128,108,.16);
+}
+
+.stage-chip.is-active {
+  border-color: var(--demo-amber-2);
+  background: rgba(217,119,87,.2);
+  box-shadow: inset 0 0 0 1px rgba(217,119,87,.42);
+}
+
+.stage-readout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,253,247,.12);
+}
+
+.stage-num {
+  color: var(--demo-amber-2);
+  font-family: var(--serif-en, Georgia, serif);
+  font-size: 48px;
+  line-height: .9;
+}
+
+.stage-readout h3 {
+  margin: 0;
+  font-family: var(--serif-cn, Songti SC, serif);
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.stage-readout p {
+  margin: 8px 0 0;
+  color: rgba(255,253,247,.66);
+  line-height: 1.55;
+}
+
+.console {
+  min-height: 362px;
+  background: var(--demo-dark);
+  color: var(--demo-ivory);
+}
+
+.console .panel-head {
+  border-color: rgba(255,253,247,.16);
+  background: rgba(255,253,247,.04);
+}
+
+.console-stream {
+  height: 306px;
+  padding: 14px 16px 16px;
+  overflow: hidden;
+}
+
+.log-row {
+  display: grid;
+  grid-template-columns: 46px 44px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  min-height: 38px;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(255,253,247,.1);
+  color: rgba(255,253,247,.74);
+  font-size: 13px;
+  will-change: transform, opacity;
+}
+
+.log-row .ts,
+.log-row .kind {
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 11px;
+}
+
+.log-row .kind { color: var(--demo-amber-2); }
+.log-row b { color: var(--demo-ivory); font-weight: 500; }
+
+.workbench {
+  grid-column: 1 / -1;
+}
+
+.workbench-body {
+  display: grid;
+  grid-template-columns: 310px minmax(0, 1fr);
+  min-height: 380px;
+}
+
+.node-rail {
+  position: relative;
+  border-right: 1px solid var(--demo-rule);
+  background: color-mix(in oklab, var(--demo-paper) 76%, white);
+  padding: 16px;
+}
+
+.node-indicator {
+  position: absolute;
+  left: 0;
+  top: 16px;
+  width: 3px;
+  height: 44px;
+  background: var(--demo-amber);
+  will-change: transform;
+}
+
+.node-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: var(--demo-mute);
+  font-family: var(--serif-cn, Songti SC, serif);
+}
+
+.node-item b {
+  color: var(--demo-amber);
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.node-item.is-active {
+  background: rgba(168,73,42,.12);
+  color: var(--demo-ink);
+}
+
+.node-item.is-done b { color: var(--demo-sage); }
+
+.detail-pane {
+  padding: 24px;
+  overflow: hidden;
+}
+
+.detail-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, .7fr);
+  gap: 18px;
+  min-height: 300px;
+  will-change: transform, opacity;
+}
+
+.detail-main h3 {
+  margin: 0;
+  font-family: var(--serif-cn, Songti SC, serif);
+  font-size: clamp(28px, 3.2vw, 44px);
+  font-weight: 500;
+  line-height: 1.14;
+}
+
+.detail-main p {
+  margin: 14px 0 0;
+  max-width: 640px;
+  color: var(--demo-mute);
+  line-height: 1.65;
+}
+
+.decision-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.decision-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--demo-rule);
+  background: var(--demo-ivory);
+  color: var(--demo-ink);
+  font-size: 14px;
+  will-change: transform, opacity;
+}
+
+.artifact-preview {
+  border: 1px solid var(--demo-rule);
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--demo-paper) 78%, white);
+  overflow: hidden;
+}
+
+.artifact-preview header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--demo-rule);
+  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-size: 12px;
+  color: var(--demo-mute);
+}
+
+.artifact-lines {
+  display: grid;
+  gap: 9px;
+  padding: 15px;
+}
+
+.artifact-line {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(27,25,22,.14);
+  transform-origin: left center;
+  will-change: transform, opacity;
+}
+
+.artifact-line:nth-child(1) { width: 92%; }
+.artifact-line:nth-child(2) { width: 76%; }
+.artifact-line:nth-child(3) { width: 84%; }
+.artifact-line:nth-child(4) { width: 58%; }
+
+.no-gsap .lab-status::after {
+  content: "GSAP CDN 未加载，页面保留静态结构。";
+  color: var(--demo-amber);
+}
+
+@media (max-width: 1120px) {
+  .demo-header,
+  .lab-head,
+  .demo-grid,
+  .workbench-body,
+  .detail-inner {
+    grid-template-columns: 1fr;
+  }
+  .demo-nav,
+  .header-actions,
+  .lab-status { justify-self: start; }
+  .demo-header { position: static; padding: 16px 22px; }
+  .demo-shell { width: min(100% - 28px, 760px); padding-top: 28px; }
+  .cinema { min-height: 620px; }
+  .scene-stage,
+  .scene-copy { min-height: 562px; }
+  .stage-track { grid-template-columns: repeat(3, 1fr); }
+  .stage-cursor,
+  .stage-progress { display: none; }
+  .node-rail { border-right: 0; border-bottom: 1px solid var(--demo-rule); }
+}
+
+@media (max-width: 640px) {
+  .demo-header { gap: 14px; }
+  .demo-nav { overflow-x: auto; max-width: 100%; justify-self: stretch; }
+  .header-actions { flex-wrap: wrap; }
+  .brand { flex-wrap: wrap; }
+  .scene-copy { padding: 28px; }
+  .scene-controls { left: 28px; right: 28px; bottom: 24px; }
+  .panel-head { align-items: flex-start; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+  <header class="demo-header">
+    <a class="brand" href="./index.html">
+      <b>Pharmaco<i>Pilot</i></b>
+      <span>GSAP Motion Demo</span>
+    </a>
+    <nav class="demo-nav" aria-label="Demo links">
+      <a class="is-active" href="./gsap-demo.html">动画样片</a>
+      <a href="./opening-story.html">开场</a>
+      <a href="./nav-detail.html">教学导航</a>
+      <a href="./index.html">概览</a>
+    </nav>
+    <div class="header-actions">
+      <button class="demo-btn" type="button" id="pauseDemo">暂停</button>
+      <button class="demo-btn fill" type="button" id="playDemo">播放一轮</button>
+    </div>
+  </header>
+
+  <main class="demo-shell">
+    <section class="lab-head">
+      <div>
+        <div class="lab-kicker">MOTION LAB · GSAP</div>
+        <h1>把产品里的关键状态，做成可感知的<i>教学行进感</i>。</h1>
+      </div>
+      <aside class="lab-status">
+        <span><b>4</b> 个动效落点</span>
+        <span><b>timeline</b> + transform + autoAlpha</span>
+        <span><b>reduced motion</b> 已处理</span>
+      </aside>
+    </section>
+
+    <div class="demo-grid">
+      <section class="motion-panel cinema" aria-label="开场镜头动效">
+        <div class="panel-head">
+          <h2>开场镜头</h2>
+          <span class="panel-chip"><i></i><span id="sceneState">SHOT 01</span></span>
+        </div>
+        <div class="scene-stage" id="sceneStage">
+          <div class="scene-art-wrap"><img class="scene-art" id="sceneArt" src="./assets/opening-story/scene-1-prep-desk.webp" alt="" fetchpriority="high" decoding="async" /></div>
+          <div class="scene-shade"></div>
+          <div class="ghost-light"></div>
+          <div class="scene-copy">
+            <div class="shot-label" id="shotLabel">SHOT 01</div>
+            <h2 class="scene-title" id="sceneTitle">备课桌前。</h2>
+            <div class="scene-meta" id="sceneMeta">14 DAYS BEFORE FIRST CLASS</div>
+            <div class="scene-tags" id="sceneTags"></div>
+          </div>
+          <div class="scene-controls">
+            <button class="demo-btn fill" type="button" id="nextScene">切换镜头</button>
+            <div class="shot-dots" id="shotDots" role="group" aria-label="镜头选择"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="side-stack">
+        <section class="motion-panel stage-map" aria-label="9 环节地图动效">
+          <div class="panel-head">
+            <h3>9 环节行进</h3>
+            <button class="demo-btn" type="button" id="nextStage">下一环节</button>
+          </div>
+          <div class="stage-body">
+            <div class="stage-track" id="stageTrack">
+              <div class="stage-progress"><span id="stageProgress"></span></div>
+              <div class="stage-cursor" id="stageCursor"></div>
+            </div>
+            <div class="stage-readout" id="stageReadout">
+              <div class="stage-num" id="stageNum">01</div>
+              <div>
+                <h3 id="stageName">学情诊断</h3>
+                <p id="stageCopy">先把新教师真正需要判断的入口问题收束出来。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="motion-panel console" aria-label="运行实况动效">
+          <div class="panel-head">
+            <h3>运行实况</h3>
+            <span class="panel-chip"><i></i>LIVE</span>
+          </div>
+          <div class="console-stream" id="consoleStream"></div>
+        </section>
+      </div>
+
+      <section class="motion-panel workbench" aria-label="教学导航工作台动效">
+        <div class="panel-head">
+          <h2>判断工作台</h2>
+          <button class="demo-btn" type="button" id="nextWorkbench">切换节点</button>
+        </div>
+        <div class="workbench-body">
+          <div class="node-rail" id="nodeRail">
+            <div class="node-indicator" id="nodeIndicator"></div>
+          </div>
+          <div class="detail-pane">
+            <div class="detail-inner" id="detailInner">
+              <div class="detail-main">
+                <h3 id="detailTitle">学情诊断 · 课程入口</h3>
+                <p id="detailCopy">把旧教案、课程目标和学生经验收束成一个可执行的入口判断。</p>
+                <div class="decision-row" id="decisionRow"></div>
+              </div>
+              <div class="artifact-preview">
+                <header><span id="artifactName">diagnosis-note.md</span><span>可审校</span></header>
+                <div class="artifact-lines">
+                  <div class="artifact-line"></div>
+                  <div class="artifact-line"></div>
+                  <div class="artifact-line"></div>
+                  <div class="artifact-line"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script src="./shared/vendor/gsap/gsap.min.js?v=3.12.5"></script>
+<script>
+(function () {
+  const scenes = [
+    {
+      shot: "SHOT 01",
+      title: "备课桌前。",
+      meta: "14 DAYS BEFORE FIRST CLASS",
+      image: "./assets/opening-story/scene-1-prep-desk.webp",
+      tags: ["几十份 PPT", "旧教案", "政策原文", "课程书"]
+    },
+    {
+      shot: "SHOT 02",
+      title: "没有副驾。",
+      meta: "FIRST CLASS APPROACHING",
+      image: "./assets/opening-story/scene-2-fog-drive.webp",
+      tags: ["目标不清", "案例散落", "评价滞后", "课堂风险"]
+    },
+    {
+      shot: "SHOT 03",
+      title: "副驾上线。",
+      meta: "PHARMACOPILOT ONLINE",
+      image: "./assets/opening-story/scene-3-copilot-roadbook.webp",
+      tags: ["9 环节导航", "证据驱动", "产物落库", "复盘回写"]
+    }
+  ];
+
+  const stages = [
+    ["01", "学情诊断", "先把新教师真正需要判断的入口问题收束出来。"],
+    ["02", "目标与量规", "把课程目标、活动证据和评价标准对齐。"],
+    ["03", "知识与误区", "从知识点走到课堂问题链。"],
+    ["04", "案例与证据", "让政策案例成为可追溯材料。"],
+    ["05", "任务链设计", "把 45 分钟拆成可执行活动。"],
+    ["06", "课中调控", "在课堂中捕捉学情信号并调整。"],
+    ["07", "评价与画像", "把表现性评价写成可复用量规。"],
+    ["08", "复盘与决策", "把本节课的问题写回下一轮设计。"],
+    ["09", "资产沉淀", "沉淀可复用的课程资产包。"]
+  ];
+
+  const workbench = [
+    {
+      title: "学情诊断 · 课程入口",
+      copy: "把旧教案、课程目标和学生经验收束成一个可执行的入口判断。",
+      artifact: "diagnosis-note.md",
+      choices: ["课程定位", "学生经验入口", "课前诊断题"]
+    },
+    {
+      title: "知识与误区 · 问题链",
+      copy: "把医保谈判案例中的概念边界和常见误区转成递进式提问。",
+      artifact: "question-chain.md",
+      choices: ["核心概念边界", "误区追问", "证据链接"]
+    },
+    {
+      title: "课中调控 · 学情触发",
+      copy: "把课堂中的学生回答、协作密度和卡点转成调节规则。",
+      artifact: "trigger-rules.md",
+      choices: ["ZPD 锚点", "巡视提示", "反馈语模板"]
+    },
+    {
+      title: "复盘与决策 · 回写地图",
+      copy: "把课堂证据和教师判断写回 9 环节地图，形成下一轮优化入口。",
+      artifact: "review-report.md",
+      choices: ["议程兑现度", "资产沉淀", "下一轮修改"]
+    }
+  ];
+
+  const logs = [
+    ["00:01", "规划", "识别 <b>节点 03</b> · 知识与误区"],
+    ["00:03", "检索", "调用 <b>闻道·科学探索</b>"],
+    ["00:08", "查证", "收到 <b>7 份资料</b> · CMS-202407"],
+    ["00:11", "生成", "写入 <b>question-chain.md</b>"],
+    ["00:16", "校验", "引用一致性 <b>7 / 7</b>"],
+    ["00:21", "回写", "节点完成度更新到 <b>92%</b>"],
+    ["00:28", "移交", "等待教师审校判断"]
+  ];
+
+  if (!window.gsap) {
+    document.documentElement.classList.add("no-gsap");
+    return;
+  }
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const dur = reduceMotion ? 0 : 0.55;
+  const fast = reduceMotion ? 0 : 0.28;
+  let sceneIndex = 0;
+  let stageIndex = 0;
+  let workbenchIndex = 0;
+  let paused = false;
+  let autoTimer = null;
+  let logTimer = null;
+  let logIndex = 0;
+
+  gsap.defaults({ duration: dur, ease: "power3.out", overwrite: "auto" });
+
+  const sceneStage = document.getElementById("sceneStage");
+  const sceneArt = document.getElementById("sceneArt");
+  const sceneArtWrap = document.querySelector(".scene-art-wrap");
+  const sceneState = document.getElementById("sceneState");
+  const shotLabel = document.getElementById("shotLabel");
+  const sceneTitle = document.getElementById("sceneTitle");
+  const sceneMeta = document.getElementById("sceneMeta");
+  const sceneTags = document.getElementById("sceneTags");
+  const shotDots = document.getElementById("shotDots");
+  const stageTrack = document.getElementById("stageTrack");
+  const stageProgress = document.getElementById("stageProgress");
+  const stageCursor = document.getElementById("stageCursor");
+  const stageReadout = document.getElementById("stageReadout");
+  const stageNum = document.getElementById("stageNum");
+  const stageName = document.getElementById("stageName");
+  const stageCopy = document.getElementById("stageCopy");
+  const nodeRail = document.getElementById("nodeRail");
+  const nodeIndicator = document.getElementById("nodeIndicator");
+  const detailInner = document.getElementById("detailInner");
+  const detailTitle = document.getElementById("detailTitle");
+  const detailCopy = document.getElementById("detailCopy");
+  const decisionRow = document.getElementById("decisionRow");
+  const artifactName = document.getElementById("artifactName");
+  const consoleStream = document.getElementById("consoleStream");
+
+  function renderSceneTags(tags) {
+    sceneTags.innerHTML = tags.map((tag) => `<span>${tag}</span>`).join("");
+  }
+
+  function renderDots() {
+    shotDots.innerHTML = scenes.map((_, index) => {
+      return `<button class="shot-dot${index === sceneIndex ? " is-active" : ""}" type="button" data-scene="${index}" aria-label="镜头 ${index + 1}"></button>`;
+    }).join("");
+  }
+
+  function setScene(nextIndex) {
+    sceneIndex = (nextIndex + scenes.length) % scenes.length;
+    const scene = scenes[sceneIndex];
+    const outTargets = [shotLabel, sceneTitle, sceneMeta].concat(Array.from(sceneTags.children));
+    const tl = gsap.timeline();
+
+    tl.to(outTargets, { autoAlpha: 0, y: -12, duration: fast, stagger: reduceMotion ? 0 : 0.02 }, 0)
+      .to(sceneArt, { autoAlpha: 0, scale: 1.02, duration: fast }, 0)
+      .add(() => {
+        sceneArt.src = scene.image;
+        sceneState.textContent = scene.shot;
+        shotLabel.textContent = scene.shot;
+        sceneTitle.textContent = scene.title;
+        sceneMeta.textContent = scene.meta;
+        renderSceneTags(scene.tags);
+        renderDots();
+      })
+      .fromTo(sceneArt, { autoAlpha: 0, scale: 1.08 }, { autoAlpha: 1, scale: 1, duration: dur + .16 }, ">")
+      .fromTo([shotLabel, sceneTitle, sceneMeta], { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, stagger: reduceMotion ? 0 : 0.08 }, "<0.1")
+      .add(() => {
+        gsap.fromTo(Array.from(sceneTags.children), { autoAlpha: 0, y: 14, scale: .96 }, { autoAlpha: 1, y: 0, scale: 1, stagger: reduceMotion ? 0 : 0.05 });
+      }, "<0.18");
+  }
+
+  function buildStageTrack() {
+    const chips = stages.map((item, index) => {
+      return `<button class="stage-chip" type="button" data-stage="${index}"><b>${item[0]}</b><span>${item[1]}</span></button>`;
+    }).join("");
+    stageTrack.insertAdjacentHTML("afterbegin", chips);
+  }
+
+  function moveStageCursor(chip) {
+    if (!chip || window.innerWidth <= 1120) return;
+    const trackRect = stageTrack.getBoundingClientRect();
+    const chipRect = chip.getBoundingClientRect();
+    const x = chipRect.left - trackRect.left + (chipRect.width / 2) - 12;
+    gsap.to(stageCursor, { x, duration: dur, ease: "power3.inOut" });
+  }
+
+  function setStage(nextIndex) {
+    stageIndex = (nextIndex + stages.length) % stages.length;
+    const chips = Array.from(stageTrack.querySelectorAll(".stage-chip"));
+    chips.forEach((chip, index) => {
+      chip.classList.toggle("is-active", index === stageIndex);
+      chip.classList.toggle("is-done", index < stageIndex);
+    });
+    const item = stages[stageIndex];
+    const activeChip = chips[stageIndex];
+    stageNum.textContent = item[0];
+    stageName.textContent = item[1];
+    stageCopy.textContent = item[2];
+    gsap.to(stageProgress, { scaleX: (stageIndex + 1) / stages.length, duration: dur, ease: "power3.inOut" });
+    moveStageCursor(activeChip);
+    gsap.fromTo(activeChip, { scale: .96 }, { scale: 1, duration: fast + .12, ease: "back.out(1.7)" });
+    gsap.fromTo(Array.from(stageReadout.children), { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, stagger: reduceMotion ? 0 : 0.06 });
+  }
+
+  function buildNodeRail() {
+    nodeRail.insertAdjacentHTML("beforeend", stages.map((item, index) => {
+      return `<button class="node-item" type="button" data-workbench="${index}"><b>${item[0]}</b><span>${item[1]}</span></button>`;
+    }).join(""));
+  }
+
+  function setWorkbench(nextIndex) {
+    workbenchIndex = (nextIndex + workbench.length) % workbench.length;
+    const data = workbench[workbenchIndex];
+    const stageTarget = [0, 2, 5, 7][workbenchIndex];
+    const nodes = Array.from(nodeRail.querySelectorAll(".node-item"));
+    nodes.forEach((node, index) => {
+      node.classList.toggle("is-active", index === stageTarget);
+      node.classList.toggle("is-done", index < stageTarget);
+    });
+    const activeNode = nodes[stageTarget];
+    if (activeNode) {
+      gsap.to(nodeIndicator, { y: activeNode.offsetTop - 16, duration: dur, ease: "power3.inOut" });
+    }
+    gsap.timeline()
+      .to(detailInner, { autoAlpha: 0, y: -12, duration: fast })
+      .add(() => {
+        detailTitle.textContent = data.title;
+        detailCopy.textContent = data.copy;
+        artifactName.textContent = data.artifact;
+        decisionRow.innerHTML = data.choices.map((choice) => `<button class="decision-pill" type="button">${choice}</button>`).join("");
+      })
+      .fromTo(detailInner, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: dur })
+      .add(() => {
+        gsap.fromTo(Array.from(decisionRow.children), { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, stagger: reduceMotion ? 0 : 0.05 });
+        gsap.fromTo(Array.from(detailInner.querySelectorAll(".artifact-line")), { scaleX: .14, autoAlpha: .45 }, { scaleX: 1, autoAlpha: 1, stagger: reduceMotion ? 0 : 0.08 });
+      }, "<0.12");
+  }
+
+  function pushLog() {
+    const item = logs[logIndex % logs.length];
+    logIndex += 1;
+    const row = document.createElement("div");
+    row.className = "log-row";
+    row.innerHTML = `<span class="ts">${item[0]}</span><span class="kind">${item[1]}</span><span>${item[2]}</span>`;
+    consoleStream.appendChild(row);
+    gsap.fromTo(row, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: fast + .1 });
+    while (consoleStream.children.length > 6) {
+      const first = consoleStream.firstElementChild;
+      gsap.to(first, { autoAlpha: 0, y: -10, duration: fast, onComplete: () => first.remove() });
+      break;
+    }
+  }
+
+  function advanceAll() {
+    setScene(sceneIndex + 1);
+    setStage(stageIndex + 1);
+    setWorkbench(workbenchIndex + 1);
+  }
+
+  function startAuto() {
+    stopAuto();
+    if (paused) return;
+    autoTimer = window.setInterval(advanceAll, 6200);
+    logTimer = window.setInterval(pushLog, 1150);
+  }
+
+  function stopAuto() {
+    if (autoTimer) window.clearInterval(autoTimer);
+    if (logTimer) window.clearInterval(logTimer);
+    autoTimer = null;
+    logTimer = null;
+  }
+
+  function setPaused(next) {
+    paused = next;
+    document.getElementById("pauseDemo").textContent = paused ? "继续" : "暂停";
+    if (paused) stopAuto();
+    else startAuto();
+  }
+
+  function boot() {
+    renderSceneTags(scenes[0].tags);
+    renderDots();
+    buildStageTrack();
+    buildNodeRail();
+    setStage(0);
+    setWorkbench(0);
+    for (let i = 0; i < 4; i += 1) pushLog();
+
+    gsap.timeline()
+      .from(".demo-header", { autoAlpha: 0, y: -18, duration: dur })
+      .from(".lab-kicker, .lab-head h1, .lab-status", { autoAlpha: 0, y: 18, stagger: reduceMotion ? 0 : 0.08 }, "<0.1")
+      .from(".motion-panel", { autoAlpha: 0, y: 24, stagger: reduceMotion ? 0 : 0.08 }, "<0.12");
+
+    const wrapX = gsap.quickTo(sceneArtWrap, "x", { duration: .7, ease: "power3.out" });
+    const wrapY = gsap.quickTo(sceneArtWrap, "y", { duration: .7, ease: "power3.out" });
+    sceneStage.addEventListener("pointermove", (event) => {
+      if (reduceMotion) return;
+      const rect = sceneStage.getBoundingClientRect();
+      wrapX(((event.clientX - rect.left) / rect.width - .5) * 18);
+      wrapY(((event.clientY - rect.top) / rect.height - .5) * 10);
+    });
+    sceneStage.addEventListener("pointerleave", () => {
+      wrapX(0);
+      wrapY(0);
+    });
+
+    startAuto();
+  }
+
+  document.getElementById("nextScene").addEventListener("click", () => setScene(sceneIndex + 1));
+  document.getElementById("nextStage").addEventListener("click", () => setStage(stageIndex + 1));
+  document.getElementById("nextWorkbench").addEventListener("click", () => setWorkbench(workbenchIndex + 1));
+  document.getElementById("playDemo").addEventListener("click", advanceAll);
+  document.getElementById("pauseDemo").addEventListener("click", () => setPaused(!paused));
+  shotDots.addEventListener("click", (event) => {
+    const dot = event.target.closest("[data-scene]");
+    if (dot) setScene(Number(dot.dataset.scene));
+  });
+  stageTrack.addEventListener("click", (event) => {
+    const chip = event.target.closest("[data-stage]");
+    if (chip) setStage(Number(chip.dataset.stage));
+  });
+  nodeRail.addEventListener("click", (event) => {
+    const node = event.target.closest("[data-workbench]");
+    if (!node) return;
+    const stageTarget = Number(node.dataset.workbench);
+    const map = { 0: 0, 2: 1, 5: 2, 7: 3 };
+    setWorkbench(map[stageTarget] || 0);
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopAuto();
+    else startAuto();
+  });
+  window.addEventListener("resize", () => {
+    const active = stageTrack.querySelector(".stage-chip.is-active");
+    moveStageCursor(active);
+  });
+  window.addEventListener("beforeunload", stopAuto);
+
+  boot();
+})();
+</script>
+</body>
+</html>
