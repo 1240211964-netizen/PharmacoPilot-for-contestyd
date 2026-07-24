@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PharmacoPilot · 教学导航 · 3D 路书（实验）</title>
+<meta name="description" content="教学导航的 3D 路书模式：沿一条盘山公路行进 9 个教学环节，站点完成状态实时同步工作台进度，点击站牌即可进入对应环节。实验性游戏化导航层。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23a8492a'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' font-family='Georgia' font-style='italic' fill='%23fffdf7'%3EP%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="./shared/tokens.css?v=4" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=4" />
+<!-- Three.js 本地自托管(与 3D 教室同一份 vendor,零外部依赖) -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "./shared/vendor/three/build/three.module.min.js",
+    "three/addons/": "./shared/vendor/three/examples/jsm/"
+  }
+}
+</script>
+<style>
+  body { margin: 0; background: var(--paper, #faf7f0); color: var(--ink, #1f1b16); }
+  .n3-bar {
+    display: flex; align-items: center; gap: 14px; padding: 10px 18px;
+    border-bottom: 1px solid var(--rule, #d8d2bf); font-family: var(--mono, monospace);
+    font-size: var(--fs-xs, 13px); flex-wrap: wrap;
+  }
+  .n3-bar b { font-family: var(--serif-en, Georgia); font-size: 16px; }
+  .n3-bar .sp { flex: 1; }
+  .n3-bar a, .n3-bar button {
+    font: inherit; color: var(--ink-soft, #4a4339); background: none; cursor: pointer;
+    border: 1px solid var(--rule-2, #c9c1ab); border-radius: 999px; padding: 4px 12px;
+    text-decoration: none;
+  }
+  .n3-bar a:hover, .n3-bar button:hover { border-color: var(--amber-deep, #a8492a); color: var(--amber-deep, #a8492a); }
+  .n3-exp { color: var(--amber-deep, #a8492a); border: 1px dashed var(--amber-deep, #a8492a); border-radius: 999px; padding: 2px 10px; }
+
+  #nav3d-wrap { position: relative; height: calc(100vh - 53px); min-height: 480px; }
+  #nav3d-mount { position: absolute; inset: 0; overflow: hidden; }
+  #nav3d-mount canvas { display: block; }
+
+  #nav3d-hud {
+    position: absolute; left: 16px; top: 14px; z-index: 8; pointer-events: none;
+    display: flex; flex-direction: column; gap: 6px; font-family: var(--mono, monospace);
+  }
+  #nav3d-hud .n3-card {
+    pointer-events: auto; background: rgba(255, 253, 247, .92); border: 1px solid var(--rule-2, #c9c1ab);
+    border-radius: 10px; padding: 7px 12px; font-size: var(--fs-2xs, 12px); box-shadow: 0 2px 10px rgba(120,90,40,.10);
+  }
+  #n3-stage { font-weight: 600; }
+  #n3-hint { color: var(--amber-deep, #a8492a); font-weight: 600; }
+  .n3-keys { color: var(--mute, #8a8272); }
+
+  .n3-tag {
+    font: 600 12px var(--mono, monospace); color: var(--ink, #1f1b16);
+    background: rgba(255, 253, 247, .93); border: 1px solid var(--rule-2, #c9c1ab);
+    border-radius: 999px; padding: 3px 10px; cursor: pointer; white-space: nowrap;
+    display: inline-flex; gap: 6px; align-items: baseline; box-shadow: 0 2px 8px rgba(60,40,20,.14);
+  }
+  .n3-tag b { color: var(--amber-deep, #a8492a); }
+  .n3-tag[data-phase="in"] b { color: #3a8a4e; }
+  .n3-tag[data-phase="post"] b { color: #5a7090; }
+  .n3-tag.is-done { border-color: #3a8a4e; }
+  .n3-tag.is-done span { color: #3a8a4e; }
+
+  #n3-panel {
+    position: absolute; right: 16px; top: 14px; z-index: 9; width: min(330px, calc(100vw - 32px));
+    background: rgba(255, 253, 247, .97); border: 1px solid var(--rule-2, #c9c1ab); border-radius: 14px;
+    padding: 16px; box-shadow: 0 10px 30px rgba(60, 40, 20, .18);
+  }
+  #n3-panel h2 { margin: 6px 0 10px; font: 600 17px var(--serif-cn, serif); line-height: 1.35; }
+  #n3-panel .n3-x { position: absolute; top: 6px; right: 10px; border: none; background: none; font-size: 20px; cursor: pointer; color: var(--mute, #8a8272); }
+  .n3-phase { font: 600 11px var(--mono, monospace); color: #fff; background: #a8492a; border-radius: 999px; padding: 2px 9px; }
+  .n3-phase[data-phase="in"] { background: #3a8a4e; }
+  .n3-phase[data-phase="post"] { background: #5a7090; }
+  .n3-subs { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 14px; }
+  .n3-sub {
+    display: flex; gap: 8px; align-items: baseline; font: var(--fs-xs, 13px) var(--serif-cn, serif);
+    color: var(--ink-soft, #4a4339); text-decoration: none; border: 1px solid var(--rule, #d8d2bf);
+    border-radius: 9px; padding: 6px 10px;
+  }
+  .n3-sub:hover { border-color: var(--amber-deep, #a8492a); }
+  .n3-sub i { font-style: normal; font-family: var(--mono, monospace); font-size: 11px; color: var(--mute, #8a8272); }
+  .n3-sub.is-done i { color: #3a8a4e; }
+  .n3-go {
+    display: block; text-align: center; font: 600 var(--fs-sm, 14px) var(--mono, monospace);
+    color: #fffdf7; background: var(--amber-deep, #a8492a); border-radius: 999px; padding: 9px 14px; text-decoration: none;
+  }
+
+  #nav3d-fallback { max-width: 760px; margin: 40px auto; padding: 0 20px; }
+  #nav3d-fallback ol { display: flex; flex-direction: column; gap: 8px; padding-left: 22px; }
+  #nav3d-fallback a { color: var(--amber-deep, #a8492a); }
+  #n3-loading {
+    position: absolute; inset: 0; display: grid; place-items: center; z-index: 5;
+    font-family: var(--mono, monospace); color: var(--mute, #8a8272); pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <div class="n3-bar">
+    <b>Pharmaco<i style="color:var(--amber-deep,#a8492a)">Pilot</i></b>
+    <span>教学导航 · 3D 路书</span>
+    <span class="n3-exp">实验模式 · EXPERIMENTAL</span>
+    <span class="sp"></span>
+    <button type="button" id="n3-cam">俯瞰全图</button>
+    <a href="./nav-detail.html">返回 2D 工作台</a>
+    <a href="./index.html">概览</a>
+  </div>
+
+  <div id="nav3d-wrap">
+    <div id="nav3d-mount" aria-label="3D 路书:9 个教学环节沿公路排布,方向键行驶,点击站牌进入环节"></div>
+    <div id="n3-loading">正在铺设 9 环节公路…</div>
+    <div id="nav3d-hud">
+      <div class="n3-card" id="n3-stage">— / 9</div>
+      <div class="n3-card">完成 <b id="n3-done">0/9</b></div>
+      <div class="n3-card" id="n3-hint" hidden>⏎ Enter 进入本环节工作台</div>
+      <div class="n3-card n3-keys">← → / A D 行驶 · 点击站牌直达 · V 切换视角 · Esc 关面板</div>
+    </div>
+    <aside id="n3-panel" hidden aria-label="环节详情"></aside>
+
+    <!-- 无 WebGL / 契约缺失时的 2D 回退(也是键盘/读屏用户的完整替代路径) -->
+    <div id="nav3d-fallback" hidden>
+      <h1>教学导航 · 9 个教学环节</h1>
+      <p>当前环境无法渲染 3D 路书,以下清单等价可用:</p>
+      <ol>
+        <li><a href="./nav-detail.html#go=1.1">S1 · 课程定位 · 学情诊断 · 学习者议程协商</a></li>
+        <li><a href="./nav-detail.html#go=4.4-a">S2 · 学习目标—评价证据—量规对齐</a></li>
+        <li><a href="./nav-detail.html#go=5.5">S3 · 知识结构与关键误区定位</a></li>
+        <li><a href="./nav-detail.html#go=6.6">S4 · 真实药事管理案例与证据包</a></li>
+        <li><a href="./nav-detail.html#go=7.7">S5 · 课堂任务链与支架设计</a></li>
+        <li><a href="./nav-detail.html#go=9.9-z1">S6 · 课中学情捕捉与即时干预</a></li>
+        <li><a href="./nav-detail.html#go=10.10-a">S7 · 表现性评价与学生能力画像</a></li>
+        <li><a href="./nav-detail.html#go=11.11a">S8 · 教师教学复盘与改进决策</a></li>
+        <li><a href="./nav-detail.html#go=11.11b">S9 · 课例资产沉淀与知识库更新</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 契约 + Store(经典脚本,与工作台同源同序) -->
+  <script src="./shared/nav-stations-contract.js?v=1"></script>
+  <script src="./shared/pharmaco-store.js?v=1"></script>
+  <script type="module" src="./shared/nav-map-3d.js?v=5"></script>
+</body>
+</html>

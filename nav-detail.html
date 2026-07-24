@@ -1693,7 +1693,9 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
 <section class="station-deck stage-deck-v4">
   <div class="station-deck-head">
     <div>
-      <span class="eyebrow-d">STAGE DECK · 9 个教学环节</span>
+      <span class="eyebrow-d">STAGE DECK · 9 个教学环节
+        <a href="./nav-3d.html" style="margin-left:10px;font-weight:600;color:var(--amber-deep);border:1px dashed var(--amber-deep);border-radius:999px;padding:1px 9px;text-decoration:none;">🕹 3D 路书 · 实验</a>
+      </span>
       <h4>课前·设计 / 课中·调控 / <span class="it">课后·沉淀</span></h4>
     </div>
     <div class="stat" id="deckProgress">
@@ -1783,5 +1785,18 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
           letter-spacing="0.2em" fill="rgba(255,253,247,0.6)">导航</text>
   </svg>
 </template>
+<script>
+  // 3D 路书深链:#go=<stationId>[.<subKey>] → 等 bundle 暴露 __navSetStation 后切站
+  (function () {
+    var m = location.hash.match(/^#go=(\d+)(?:\.([\w%-]+))?/);
+    if (!m) return;
+    var tries = 0;
+    (function go() {
+      if (typeof window.__navSetStation === "function") {
+        window.__navSetStation(Number(m[1]), null, m[2] ? decodeURIComponent(m[2]) : undefined);
+      } else if (tries++ < 50) { setTimeout(go, 100); }
+    })();
+  })();
+</script>
 </body>
 </html>

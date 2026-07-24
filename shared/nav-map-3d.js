@@ -1,0 +1,515 @@
+/* ============================================================
+   PharmacoPilot · 教学导航 3D 路书 (nav-map-3d) — 实验性游戏化导航层
+   ------------------------------------------------------------
+   把 9 个教学环节(契约 NAV_STAGES)铺成一条穿过暖纸色地形的盘山路:
+   开车沿路行进,站点完成状态实时读 PharmacoPilotStore,靠近站点按
+   Enter(或点击站牌)进入 2D 工作台对应环节(nav-detail.html#go=…)。
+
+   设计铁律(与元宇宙教室同款):
+   · 纯前端离线运行,Three.js 走本地 vendor importmap,零外部请求;
+   · 不复制存储 — 进度只读 Store,判断仍在 2D 工作台里做;
+   · WebGL 不可用 → 自动显示 2D 站点清单回退(页内 #nav3d-fallback);
+   · 前台叙事恪守"9 个教学环节",station/子节点仅作跳转参数。
+   ============================================================ */
+
+const mount = document.getElementById("nav3d-mount");
+
+function hasWebGL() {
+  try {
+    const c = document.createElement("canvas");
+    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+  } catch (e) { return false; }
+}
+
+function showFallback(reason) {
+  const fb = document.getElementById("nav3d-fallback");
+  if (fb) fb.hidden = false;
+  if (mount) mount.style.display = "none";
+  const hud = document.getElementById("nav3d-hud");
+  if (hud) hud.hidden = true;
+  console.warn("[nav-map-3d] 回退 2D 清单:", reason);
+}
+
+// ---- 契约与进度 ----------------------------------------------------------
+const C = window.PharmacoPilotNavigationContract;
+const Store = window.PharmacoPilotStore;
+if (!C || !C.NAV_STAGES) {
+  showFallback("契约未加载");
+} else if (!hasWebGL()) {
+  showFallback("无 WebGL");
+} else {
+  boot().catch((e) => showFallback("3D 初始化失败: " + (e && e.message)));
+}
+
+function judged(k) {
+  if (!Store || !Store.getJudgment) return false;
+  return !!(Store.getJudgment(String(k)) || (Number.isFinite(Number(k)) && Store.getJudgment(Number(k))));
+}
+function stageDone(stage) {
+  const subs = (stage.subNodeIds || []).map(String);
+  return subs.length > 0 && subs.every(judged);
+}
+function goUrl(stage) {
+  const firstSub = String((stage.subNodeIds || [])[0] || "1");
+  const node = C.SUB_NODES[firstSub] || {};
+  const st = node.legacyStationId || parseInt(firstSub, 10) || 1;
+  return `./nav-detail.html#go=${st}.${encodeURIComponent(firstSub)}`;
+}
+function subUrl(subKey) {
+  const node = C.SUB_NODES[String(subKey)] || {};
+  const st = node.legacyStationId || parseInt(subKey, 10) || 1;
+  return `./nav-detail.html#go=${st}.${encodeURIComponent(String(subKey))}`;
+}
+
+const PHASE_COLOR = { pre: 0xa8492a, in: 0x3a8a4e, post: 0x5a7090 };
+const PHASE_CN = { pre: "课前 · 设计", in: "课中 · 调控", post: "课后 · 沉淀" };
+
+// ---- 3D 主体 -------------------------------------------------------------
+async function boot() {
+  const THREE = await import("three");
+  const { OrbitControls } = await import("three/addons/controls/OrbitControls.js");
+  const { RoomEnvironment } = await import("three/addons/environments/RoomEnvironment.js");
+  const { CSS2DRenderer, CSS2DObject } = await import("three/addons/renderers/CSS2DRenderer.js");
+
+  const stages = C.NAV_STAGES;
+  const W = () => mount.clientWidth, H = () => mount.clientHeight;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.setSize(W(), H());
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  mount.appendChild(renderer.domElement);
+
+  const labelRenderer = new CSS2DRenderer();
+  labelRenderer.setSize(W(), H());
+  labelRenderer.domElement.style.cssText = "position:absolute;inset:0;pointer-events:none;";
+  mount.appendChild(labelRenderer.domElement);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf6efe2);
+  scene.fog = new THREE.Fog(0xf6efe2, 60, 190);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.05).texture;
+
+  const camera = new THREE.PerspectiveCamera(52, W() / H(), 0.1, 400);
+  camera.position.set(0, 26, 42);
+
+  const sun = new THREE.DirectionalLight(0xfff2dd, 2.6);
+  sun.position.set(-38, 55, 28);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  const sc = sun.shadow.camera;
+  sc.left = -90; sc.right = 90; sc.top = 90; sc.bottom = -90; sc.far = 200;
+  scene.add(sun, new THREE.AmbientLight(0xfaf3e3, 0.55));
+
+  // ---- 地形:低多边形起伏(确定性正弦噪声,每次加载一致) ----
+  const terrGeo = new THREE.PlaneGeometry(320, 320, 96, 96);
+  terrGeo.rotateX(-Math.PI / 2);
+  const pos = terrGeo.attributes.position;
+  const bump = (x, z) =>
+    Math.sin(x * 0.055) * Math.cos(z * 0.047) * 3.4 +
+    Math.sin(x * 0.021 + 1.7) * Math.sin(z * 0.026 + 0.6) * 5.2 +
+    Math.sin((x + z) * 0.09) * 0.8;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i);
+    const edge = Math.max(Math.abs(x), Math.abs(z)) / 160;          // 边缘抬高成远山
+    pos.setY(i, bump(x, z) * (0.35 + edge * 1.5) - 1.2);
+  }
+  terrGeo.computeVertexNormals();
+  const terrain = new THREE.Mesh(terrGeo, new THREE.MeshStandardMaterial({
+    color: 0xe8dfc8, roughness: 1, metalness: 0, flatShading: true,
+  }));
+  terrain.receiveShadow = true;
+  scene.add(terrain);
+
+  // ---- 路线:9 站盘山路(CatmullRom 样条) ----
+  const ctrl = [
+    [-62, -58], [-40, -30], [-52, 2], [-24, 18], [-30, 48],
+    [4, 40], [22, 12], [48, 24], [40, 56], [66, 62],
+  ].map(([x, z]) => new THREE.Vector3(x, 0, z));
+  const curve = new THREE.CatmullRomCurve3(ctrl, false, "catmullrom", 0.35);
+  // 与地形顶点公式完全一致(含边缘抬升系数),否则路会被抬高的地形埋掉
+  const groundY = (x, z) => {
+    const edge = Math.max(Math.abs(x), Math.abs(z)) / 160;
+    return bump(x, z) * (0.35 + edge * 1.5) - 1.2;
+  };
+  const lift = 0.22;                                                  // 路面略高于地面防 z-fight
+  const roadAt = (t) => {
+    const p = curve.getPointAt(t);
+    p.y = groundY(p.x, p.z) + lift;
+    return p;
+  };
+
+  // 开路基:把路线两侧地形顶点羽化压平到路面解析高度。
+  // 不做这步的话,折面地形的插值误差(顶点间距 ~3.3)会把路面埋进去。
+  {
+    const samples = [];
+    for (let i = 0; i <= 400; i++) {
+      const p = curve.getPointAt(i / 400);
+      samples.push([p.x, p.z, groundY(p.x, p.z)]);
+    }
+    const INNER = 3.4, OUTER = 9.5;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), z = pos.getZ(i);
+      let best = Infinity, by = 0;
+      for (let j = 0; j < samples.length; j++) {
+        const dx = x - samples[j][0], dz = z - samples[j][1]; // samples 条目为 [x, z, y]
+        const d = dx * dx + dz * dz;
+        if (d < best) { best = d; by = samples[j][2]; }
+      }
+      const dist = Math.sqrt(best);
+      if (dist < OUTER) {
+        const k = Math.min(1, Math.max(0, (dist - INNER) / (OUTER - INNER)));
+        const s = k * k * (3 - 2 * k); // smoothstep 羽化
+        pos.setY(i, by * (1 - s) + pos.getY(i) * s);
+      }
+    }
+    terrGeo.computeVertexNormals();
+  }
+
+  // 路面:沿曲线取左右偏移点拼三角带
+  const SEG = 420, HALF_W = 2.6;
+  const verts = [], uvs = [], idx = [];
+  for (let i = 0; i <= SEG; i++) {
+    const t = i / SEG;
+    const p = roadAt(t);
+    const tan = curve.getTangentAt(t); tan.y = 0; tan.normalize();
+    const nrm = new THREE.Vector3(-tan.z, 0, tan.x);
+    const l = p.clone().addScaledVector(nrm, HALF_W);
+    const r = p.clone().addScaledVector(nrm, -HALF_W);
+    l.y = groundY(l.x, l.z) + lift; r.y = groundY(r.x, r.z) + lift;
+    verts.push(l.x, l.y, l.z, r.x, r.y, r.z);
+    uvs.push(0, t * 60, 1, t * 60);
+    if (i < SEG) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  }
+  const roadGeo = new THREE.BufferGeometry();
+  roadGeo.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
+  roadGeo.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  roadGeo.setIndex(idx);
+  roadGeo.computeVertexNormals();
+  const road = new THREE.Mesh(roadGeo, new THREE.MeshStandardMaterial({
+    color: 0x6f665a, roughness: 0.95, metalness: 0,
+    side: THREE.DoubleSide, // 三角带绕向随曲线方向变化,双面渲染兜底
+  }));
+  road.receiveShadow = true;
+  scene.add(road);
+
+  // 中线虚线:小白条沿路
+  const dashMat = new THREE.MeshStandardMaterial({ color: 0xfffdf7, roughness: 0.8 });
+  const dashGeo = new THREE.BoxGeometry(0.16, 0.05, 1.1);
+  for (let i = 0; i < 150; i++) {
+    const t = (i + 0.5) / 150;
+    const p = roadAt(t);
+    const tan = curve.getTangentAt(t);
+    const dash = new THREE.Mesh(dashGeo, dashMat);
+    dash.position.copy(p).y += 0.05;
+    dash.lookAt(p.clone().add(tan));
+    scene.add(dash);
+  }
+
+  // 路边点缀:低多边形小树(确定性摆放)
+  const treeMat = new THREE.MeshStandardMaterial({ color: 0x7f9469, roughness: 1, flatShading: true });
+  const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8a6b4f, roughness: 1 });
+  const coneGeo = new THREE.ConeGeometry(1.3, 3.2, 6);
+  const trunkGeo = new THREE.CylinderGeometry(0.22, 0.3, 1.1, 5);
+  for (let i = 0; i < 46; i++) {
+    const t = (i * 37 % 100) / 100;
+    const side = i % 2 ? 1 : -1;
+    const off = 6 + ((i * 53) % 17);
+    const p = roadAt(t);
+    const tan = curve.getTangentAt(t); tan.y = 0; tan.normalize();
+    const nrm = new THREE.Vector3(-tan.z, 0, tan.x);
+    const tp = p.clone().addScaledVector(nrm, side * off);
+    if (Math.max(Math.abs(tp.x), Math.abs(tp.z)) > 120) continue;
+    tp.y = groundY(tp.x, tp.z);
+    const tree = new THREE.Group();
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat); trunk.position.y = 0.55;
+    const crown = new THREE.Mesh(coneGeo, treeMat); crown.position.y = 2.5;
+    crown.castShadow = true;
+    tree.add(trunk, crown);
+    tree.position.copy(tp);
+    const s = 0.7 + ((i * 29) % 10) / 14;
+    tree.scale.setScalar(s);
+    scene.add(tree);
+  }
+
+  // ---- 9 个站点:路牌 + 状态旗 + CSS2D 标签 ----
+  const stations = [];
+  const poleGeo = new THREE.CylinderGeometry(0.09, 0.11, 3.1, 8);
+  const poleMat = new THREE.MeshStandardMaterial({ color: 0x4a4339, roughness: 0.8 });
+  const signGeo = new THREE.BoxGeometry(2.3, 1.5, 0.14);
+  const ringGeo = new THREE.TorusGeometry(1.7, 0.09, 10, 40);
+  const flagGeo = new THREE.BoxGeometry(0.9, 0.55, 0.05);
+
+  stages.forEach((g, i) => {
+    const t = 0.045 + (0.91 * i) / (stages.length - 1);
+    const p = roadAt(t);
+    const tan = curve.getTangentAt(t); tan.y = 0; tan.normalize();
+    const nrm = new THREE.Vector3(-tan.z, 0, tan.x);
+    const side = i % 2 ? -1 : 1;                                     // 左右交替立牌
+    const base = p.clone().addScaledVector(nrm, side * (HALF_W + 1.7));
+    base.y = groundY(base.x, base.z);
+
+    const grp = new THREE.Group();
+    grp.position.copy(base);
+    const color = PHASE_COLOR[g.phase] || 0xa8492a;
+
+    const pole = new THREE.Mesh(poleGeo, poleMat);
+    pole.position.y = 1.55; pole.castShadow = true;
+    const sign = new THREE.Mesh(signGeo, new THREE.MeshStandardMaterial({
+      color, roughness: 0.55, metalness: 0.05,
+    }));
+    sign.position.y = 3.15; sign.castShadow = true;
+    sign.userData.stageIdx = i;
+
+    const ring = new THREE.Mesh(ringGeo, new THREE.MeshStandardMaterial({
+      color, roughness: 0.5, emissive: color, emissiveIntensity: 0,
+    }));
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.copy(p).sub(base).setY(p.y - base.y + 0.05);
+
+    const flag = new THREE.Mesh(flagGeo, new THREE.MeshStandardMaterial({ color: 0x3a8a4e, roughness: 0.5 }));
+    flag.position.set(0.45, 4.35, 0);
+    flag.visible = false;
+
+    grp.add(pole, sign, ring, flag);
+
+    // CSS2D 标签(号码 + 短名 + 状态)
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "n3-tag";
+    el.dataset.phase = g.phase;
+    el.innerHTML = `<b>${String(i + 1).padStart(2, "0")}</b><span></span>`;
+    el.addEventListener("click", () => driveTo(i, { openPanel: true }));
+    el.style.pointerEvents = "auto";
+    const label = new CSS2DObject(el);
+    label.position.set(0, 4.9, 0);
+    grp.add(label);
+
+    scene.add(grp);
+    // 站牌面向路面(世界坐标 lookAt,需先刷新矩阵)
+    grp.updateMatrixWorld(true);
+    const face = p.clone(); face.y = base.y + 3.15;
+    sign.lookAt(face);
+    stations.push({ stage: g, t, grp, sign, ring, flag, el, done: false, roadPoint: p });
+  });
+
+  // ---- 小车(副驾座驾):低多边形拼装 ----
+  const car = new THREE.Group();
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xa8492a, roughness: 0.35, metalness: 0.15 });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.5, 2.3), bodyMat);
+  body.position.y = 0.55; body.castShadow = true;
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.42, 1.15),
+    new THREE.MeshStandardMaterial({ color: 0xfaf7f0, roughness: 0.2, metalness: 0.1 }));
+  cabin.position.set(0, 0.98, -0.1); cabin.castShadow = true;
+  const wheelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.22, 12);
+  wheelGeo.rotateZ(Math.PI / 2);
+  const wheelMat = new THREE.MeshStandardMaterial({ color: 0x2c2620, roughness: 0.9 });
+  [[-0.62, 0.75], [0.62, 0.75], [-0.62, -0.8], [0.62, -0.8]].forEach(([x, z]) => {
+    const w = new THREE.Mesh(wheelGeo, wheelMat);
+    w.position.set(x, 0.28, z);
+    car.add(w);
+  });
+  car.add(body, cabin);
+  scene.add(car);
+
+  // ---- 行驶状态机 ----
+  let tCar = 0.02, vel = 0, targetT = null;
+  let camMode = "chase"; // chase | orbit
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.maxPolarAngle = Math.PI * 0.46;
+  controls.enabled = false;
+
+  const keys = {};
+  addEventListener("keydown", (e) => {
+    if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
+    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(e.key)) e.preventDefault();
+    keys[e.key.toLowerCase()] = true;
+    if (e.key === "Enter") {
+      const near = nearestStation();
+      if (near && near.dist < 0.022) openPanel(near.idx);
+    }
+    if (e.key.toLowerCase() === "v") toggleCam();
+  });
+  addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
+
+  function nearestStation() {
+    let best = null;
+    stations.forEach((s, idx) => {
+      const d = Math.abs(s.t - tCar);
+      if (!best || d < best.dist) best = { idx, dist: d };
+    });
+    return best;
+  }
+  function driveTo(idx, opts) {
+    closePanel();
+    // 减弱动效偏好 / 后台标签(rAF 暂停) / 显式 instant → 瞬移,不做巡航动画
+    const instant = (opts && opts.instant) || document.hidden ||
+      (matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+    if (instant) {
+      tCar = stations[idx].t; vel = 0; targetT = null;
+      if (opts && opts.openPanel) openPanel(idx);
+      refreshProgress();
+      return;
+    }
+    targetT = stations[idx].t;
+    panelPendingIdx = opts && opts.openPanel ? idx : null;
+  }
+  function toggleCam() {
+    camMode = camMode === "chase" ? "orbit" : "chase";
+    controls.enabled = camMode === "orbit";
+    if (camMode === "orbit") {
+      camera.position.set(0, 95, 80);
+      controls.target.set(0, 0, 8);
+    }
+    const btn = document.getElementById("n3-cam");
+    if (btn) btn.textContent = camMode === "chase" ? "俯瞰全图" : "跟车视角";
+  }
+  document.getElementById("n3-cam")?.addEventListener("click", toggleCam);
+
+  // 点击站牌(3D mesh)也可直达
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+  renderer.domElement.addEventListener("click", (e) => {
+    const r = renderer.domElement.getBoundingClientRect();
+    ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ptr, camera);
+    const hit = ray.intersectObjects(stations.map((s) => s.sign), false)[0];
+    if (hit) driveTo(hit.object.userData.stageIdx, { openPanel: true });
+  });
+
+  // ---- 进度同步 ----
+  function refreshProgress() {
+    let done = 0;
+    const activeIdx = nearestStation()?.idx ?? 0;
+    stations.forEach((s, i) => {
+      s.done = stageDone(s.stage);
+      if (s.done) done++;
+      s.flag.visible = s.done;
+      s.ring.material.emissiveIntensity = s.done ? 0.55 : (i === activeIdx ? 0.3 : 0);
+      const stateCn = s.done ? "✓ 已完成" : "待完成";
+      s.el.querySelector("span").textContent = `${s.stage.id} ${stateCn}`;
+      s.el.classList.toggle("is-done", s.done);
+    });
+    const hudDone = document.getElementById("n3-done");
+    if (hudDone) hudDone.textContent = `${done}/9`;
+    return done;
+  }
+  refreshProgress();
+  if (Store && Store.on) {
+    ["judgment:saved", "judgment:cleared", "progress:changed"].forEach((ev) => {
+      try { Store.on(ev, refreshProgress); } catch (e) {}
+    });
+  }
+
+  // ---- 站点面板 ----
+  const panel = document.getElementById("n3-panel");
+  let panelPendingIdx = null;
+  function openPanel(idx) {
+    const s = stations[idx];
+    const g = s.stage;
+    const subs = (g.subNodeIds || []).map(String);
+    const subRows = subs.map((k) => {
+      const node = C.SUB_NODES[k] || {};
+      const ok = judged(k);
+      return `<a class="n3-sub ${ok ? "is-done" : ""}" href="${subUrl(k)}">
+        <i>${ok ? "✓" : "○"}</i>${node.subTitle || ("节点 " + k)}</a>`;
+    }).join("");
+    panel.innerHTML = `
+      <button class="n3-x" type="button" aria-label="关闭">×</button>
+      <span class="n3-phase" data-phase="${g.phase}">${PHASE_CN[g.phase] || g.phase}</span>
+      <h2>${String(idx + 1).padStart(2, "0")} · ${g.title}</h2>
+      <div class="n3-subs">${subRows}</div>
+      <a class="n3-go" href="${goUrl(g)}">进入该环节工作台 →</a>`;
+    panel.hidden = false;
+    panel.querySelector(".n3-x").addEventListener("click", closePanel);
+    panel.querySelector(".n3-go").focus();
+  }
+  function closePanel() { if (panel) { panel.hidden = true; panel.innerHTML = ""; } }
+  addEventListener("keydown", (e) => { if (e.key === "Escape") closePanel(); });
+
+  // ---- HUD ----
+  const hudStage = document.getElementById("n3-stage");
+  const hudHint = document.getElementById("n3-hint");
+
+  // ---- 主循环 ----
+  const clock = new THREE.Clock();
+  const camPos = new THREE.Vector3();
+  function tick() {
+    requestAnimationFrame(tick);
+    const dt = Math.min(clock.getDelta(), 0.05);
+
+    // 驾驶:手动油门 or 自动巡航到目标站
+    const MAX = 0.055;
+    let accel = 0;
+    if (keys["arrowright"] || keys["d"] || keys["arrowup"] || keys["w"]) accel = 1;
+    if (keys["arrowleft"] || keys["a"] || keys["arrowdown"] || keys["s"]) accel = -1;
+    if (accel !== 0) targetT = null;
+    if (targetT !== null) {
+      const diff = targetT - tCar;
+      if (Math.abs(diff) < 0.0015) {
+        vel = 0; tCar = targetT; targetT = null;
+        if (panelPendingIdx !== null) { openPanel(panelPendingIdx); panelPendingIdx = null; }
+      } else {
+        vel = THREE.MathUtils.clamp(diff * 1.6, -MAX, MAX);
+      }
+    } else {
+      vel = accel !== 0
+        ? THREE.MathUtils.clamp(vel + accel * dt * 0.09, -MAX, MAX)
+        : vel * Math.pow(0.02, dt); // 摩擦滑行
+    }
+    tCar = THREE.MathUtils.clamp(tCar + vel * dt, 0, 1);
+
+    // 车体位姿
+    const p = roadAt(tCar);
+    const ahead = roadAt(Math.min(tCar + 0.004, 1));
+    car.position.copy(p);
+    car.lookAt(ahead.x, p.y, ahead.z);
+
+    // 相机
+    if (camMode === "chase") {
+      const back = car.position.clone().sub(
+        new THREE.Vector3().subVectors(ahead, p).setY(0).normalize().multiplyScalar(11)
+      );
+      back.y = p.y + 6.5;
+      camPos.lerp(back, 1 - Math.pow(0.001, dt));
+      camera.position.copy(camPos);
+      camera.lookAt(car.position.x, car.position.y + 1.6, car.position.z);
+    } else {
+      controls.update();
+    }
+
+    // HUD:最近站 + 进站提示
+    const near = nearestStation();
+    if (near && hudStage) {
+      const s = stations[near.idx];
+      hudStage.textContent = `${String(near.idx + 1).padStart(2, "0")} / 9 · ${s.stage.title}`;
+      const inRange = near.dist < 0.022;
+      if (hudHint) hudHint.hidden = !inRange;
+      s.ring.material.emissiveIntensity = Math.max(
+        s.ring.material.emissiveIntensity,
+        inRange ? 0.55 + Math.sin(clock.elapsedTime * 5) * 0.25 : 0
+      );
+    }
+
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+  }
+  camPos.copy(camera.position);
+  tick();
+
+  addEventListener("resize", () => {
+    camera.aspect = W() / H();
+    camera.updateProjectionMatrix();
+    renderer.setSize(W(), H());
+    labelRenderer.setSize(W(), H());
+  });
+
+  // 暴露最小调试接口(与站点其它模块同风格)
+  window.PharmacoPilotNavMap = {
+    stations: () => stations.map((s) => ({ id: s.stage.id, t: s.t, done: s.done })),
+    driveTo, refreshProgress, mode: () => camMode,
+  };
+  document.getElementById("n3-loading")?.remove();
+}
