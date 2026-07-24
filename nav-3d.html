@@ -86,6 +86,36 @@
     color: #fffdf7; background: var(--amber-deep, #a8492a); border-radius: 999px; padding: 9px 14px; text-decoration: none;
   }
 
+  /* 产出展卡:车开近才浮现的路边叙事卡 */
+  .n3-story {
+    max-width: 210px; background: rgba(255, 253, 247, .95); border: 1px solid var(--rule-2, #c9c1ab);
+    border-left: 3px solid var(--amber-deep, #a8492a); border-radius: 10px; padding: 8px 11px;
+    box-shadow: 0 4px 14px rgba(60, 40, 20, .16); cursor: pointer;
+    opacity: 0; transform: translateY(6px); transition: opacity .35s, transform .35s;
+  }
+  .n3-story.is-show { opacity: 1; transform: none; }
+  .n3-story[data-phase="in"] { border-left-color: #3a8a4e; }
+  .n3-story[data-phase="post"] { border-left-color: #5a7090; }
+  .n3-story em { font: 600 10px var(--mono, monospace); font-style: normal; color: var(--mute, #8a8272); letter-spacing: .05em; }
+  .n3-story-outs { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0 6px; }
+  .n3-story-outs i {
+    font: 11px var(--serif-cn, serif); font-style: normal; color: var(--ink-soft, #4a4339);
+    border: 1px solid var(--rule, #d8d2bf); border-radius: 999px; padding: 1px 8px; background: #fff;
+  }
+  .n3-story-live { font: 600 10px var(--mono, monospace); color: var(--mute, #8a8272); }
+  .n3-story.is-done .n3-story-live { color: #3a8a4e; }
+
+  /* 巡游字幕条 */
+  #n3-caption {
+    position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 9;
+    width: min(680px, calc(100vw - 40px)); text-align: left;
+    background: linear-gradient(to top, rgba(22, 20, 17, .88), rgba(22, 20, 17, .72));
+    color: #f6f1e7; border-radius: 12px; padding: 12px 18px;
+    font: var(--fs-sm, 14px) var(--serif-cn, serif); line-height: 1.55;
+    box-shadow: 0 8px 26px rgba(20, 12, 4, .3);
+  }
+  #n3-caption b { font-family: var(--mono, monospace); color: #e8c9a0; margin-right: 8px; }
+
   #nav3d-fallback { max-width: 760px; margin: 40px auto; padding: 0 20px; }
   #nav3d-fallback ol { display: flex; flex-direction: column; gap: 8px; padding-left: 22px; }
   #nav3d-fallback a { color: var(--amber-deep, #a8492a); }
@@ -101,7 +131,8 @@
     <span>教学导航 · 3D 路书</span>
     <span class="n3-exp">实验模式 · EXPERIMENTAL</span>
     <span class="sp"></span>
-    <button type="button" id="n3-cam">俯瞰全图</button>
+    <button type="button" id="n3-tour">▶ 巡游整节课</button>
+    <button type="button" id="n3-cam">俯瞰全图 · 看产出链</button>
     <a href="./nav-detail.html">返回 2D 工作台</a>
     <a href="./index.html">概览</a>
   </div>
@@ -113,9 +144,10 @@
       <div class="n3-card" id="n3-stage">— / 9</div>
       <div class="n3-card">完成 <b id="n3-done">0/9</b></div>
       <div class="n3-card" id="n3-hint" hidden>⏎ Enter 进入本环节工作台</div>
-      <div class="n3-card n3-keys">← → / A D 行驶 · 点击站牌直达 · V 切换视角 · Esc 关面板</div>
+      <div class="n3-card n3-keys">← → / A D 行驶 · 点击站牌直达 · T 巡游 · V 俯瞰(产出链) · Esc 关面板</div>
     </div>
     <aside id="n3-panel" hidden aria-label="环节详情"></aside>
+    <div id="n3-caption" hidden role="status" aria-live="polite"></div>
 
     <!-- 无 WebGL / 契约缺失时的 2D 回退(也是键盘/读屏用户的完整替代路径) -->
     <div id="nav3d-fallback" hidden>
@@ -138,6 +170,6 @@
   <!-- 契约 + Store(经典脚本,与工作台同源同序) -->
   <script src="./shared/nav-stations-contract.js?v=1"></script>
   <script src="./shared/pharmaco-store.js?v=1"></script>
-  <script type="module" src="./shared/nav-map-3d.js?v=5"></script>
+  <script type="module" src="./shared/nav-map-3d.js?v=6"></script>
 </body>
 </html>

@@ -64,6 +64,20 @@ function subUrl(subKey) {
 const PHASE_COLOR = { pre: 0xa8492a, in: 0x3a8a4e, post: 0x5a7090 };
 const PHASE_CN = { pre: "课前 · 设计", in: "课中 · 调控", post: "课后 · 沉淀" };
 
+// 巡游叙事:每环节一句话(事实均出自契约/payload:32 人前测、45min、锚点 10'/28'/42'、
+// 华海·集采案例、38% 误区、5 维量规、S7→S2 反向修订等),开完一圈 = 一节课的全生命周期。
+const STAGE_STORY = {
+  S1: { time: "开课前 2 周", line: "先摸清起点:32 人前测与经验画像落定,定位卡从 v0 迭代到 v1,学习者议程被正式接进课程设计。" },
+  S2: { time: "开课前 10 天", line: "倒着设计:先定学习目标与可接受证据,再校准 5 维 SWOT 量规——这套量规课后还会被 S7 的证据反向修订。" },
+  S3: { time: "开课前 1 周", line: "把内容拆成概念边界与误区清单,预埋问题链——前测里 38% 学生的「S 与 T 互斥」误区,就等问题链定点澄清。" },
+  S4: { time: "开课前 5 天", line: "华海药业 · 集采常态化的真实案例进场,证据卡与学习者议程逐条对照,课堂有了可辩的真材料。" },
+  S5: { time: "开课前 3 天", line: "45 分钟时间线 v0→v1,三个 ZPD 锚点钉在 10' / 28' / 42',协作任务与角色支架就位。" },
+  S6: { time: "上课 · 45 分钟", line: "开课。Z1 条文测温、Z2 推演投票、Z3 知识封闭,每个锚点都有一条「如果 X 则 Y」的干预规则待命。" },
+  S7: { time: "课后 48 小时", line: "收表现性证据:5 维量规逐人评分汇成能力画像;量规本身的问题,沿虚线通道退回 S2 修订。" },
+  S8: { time: "课后 1 周", line: "对照学习者议程逐条兑现,课中触发的干预被复盘成下一轮的改进决策。" },
+  S9: { time: "归档 · 面向下一轮", line: "案例 v2、量规 v2、法规日志入库——下一位新教师,从这里出发。" },
+};
+
 // ---- 3D 主体 -------------------------------------------------------------
 async function boot() {
   const THREE = await import("three");
@@ -287,13 +301,66 @@ async function boot() {
     label.position.set(0, 4.9, 0);
     grp.add(label);
 
+    // 产出展卡:车开近才浮现 — 本环节产出物(契约 topCardToKeys)+ Store 沉淀数
+    const story = document.createElement("div");
+    story.className = "n3-story";
+    story.dataset.phase = g.phase;
+    const outs = ((C.STAGE_CHAIN[g.id] || {}).topCardToKeys || [])
+      .map((k) => `<i>${k}</i>`).join("");
+    story.innerHTML = `<em>${(STAGE_STORY[g.id] || {}).time || ""}</em>
+      <div class="n3-story-outs">${outs}</div><b class="n3-story-live"></b>`;
+    story.addEventListener("click", () => openPanel(i));
+    story.style.pointerEvents = "auto";
+    const storyObj = new CSS2DObject(story);
+    storyObj.position.set(0, 2.15, 0);
+    grp.add(storyObj);
+
     scene.add(grp);
     // 站牌面向路面(世界坐标 lookAt,需先刷新矩阵)
     grp.updateMatrixWorld(true);
     const face = p.clone(); face.y = base.y + 3.15;
     sign.lookAt(face);
-    stations.push({ stage: g, t, grp, sign, ring, flag, el, done: false, roadPoint: p });
+    stations.push({ stage: g, t, grp, sign, ring, flag, el, story, done: false, roadPoint: p });
   });
+
+  // ---- L3 产出链:站与站之间的光点弧线(契约 STAGE_CHAIN + 量规反修订通道) ----
+  // 只在俯瞰模式显示 — 跟车视角下会遮挡路面,而产出链本来就是"全局结构"信息。
+  const chainGroup = new THREE.Group();
+  scene.add(chainGroup);
+  const packets = [];
+  {
+    const idxOf = Object.fromEntries(stages.map((g, i) => [g.id, i]));
+    const edges = [];
+    stages.forEach((g, i) =>
+      ((C.STAGE_CHAIN[g.id] || {}).outputsTo || []).forEach((to) => edges.push([i, idxOf[to], false])));
+    if (C.RUBRIC_REVISION && idxOf[C.RUBRIC_REVISION.from] !== undefined) {
+      edges.push([idxOf[C.RUBRIC_REVISION.from], idxOf[C.RUBRIC_REVISION.to], true]); // S7→S2 反向修订
+    }
+    edges.forEach(([a, b, rev], ei) => {
+      if (b === undefined) return;
+      const A = stations[a].grp.position.clone().add(new THREE.Vector3(0, 4.6, 0));
+      const B = stations[b].grp.position.clone().add(new THREE.Vector3(0, 4.6, 0));
+      const mid = A.clone().lerp(B, 0.5);
+      mid.y += A.distanceTo(B) * 0.22 + 5;
+      const arc = new THREE.QuadraticBezierCurve3(A, mid, B);
+      const color = rev ? 0xa8492a : PHASE_COLOR[stations[a].stage.phase];
+      const line = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(arc.getPoints(48)),
+        new THREE.LineDashedMaterial({
+          color, transparent: true,
+          dashSize: rev ? 0.7 : 1.6, gapSize: rev ? 0.7 : 0.9, opacity: rev ? 0.9 : 0.45,
+        })
+      );
+      line.computeLineDistances();
+      const dot = new THREE.Mesh(
+        new THREE.SphereGeometry(rev ? 0.3 : 0.36, 10, 10),
+        new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.9, roughness: 0.4 })
+      );
+      chainGroup.add(line, dot);
+      packets.push({ arc, dot, speed: rev ? 0.1 : 0.06, off: (ei * 0.137) % 1, rev });
+    });
+  }
+  chainGroup.visible = false;
 
   // ---- 小车(副驾座驾):低多边形拼装 ----
   const car = new THREE.Group();
@@ -327,11 +394,14 @@ async function boot() {
     if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
     if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(e.key)) e.preventDefault();
     keys[e.key.toLowerCase()] = true;
+    // 手动接管方向盘 → 结束巡游
+    if (tour && ["arrowleft", "arrowright", "arrowup", "arrowdown", "a", "d", "w", "s"].includes(e.key.toLowerCase())) stopTour();
     if (e.key === "Enter") {
       const near = nearestStation();
       if (near && near.dist < 0.022) openPanel(near.idx);
     }
     if (e.key.toLowerCase() === "v") toggleCam();
+    if (e.key.toLowerCase() === "t") (tour ? stopTour() : startTour());
   });
   addEventListener("keyup", (e) => { keys[e.key.toLowerCase()] = false; });
 
@@ -360,12 +430,13 @@ async function boot() {
   function toggleCam() {
     camMode = camMode === "chase" ? "orbit" : "chase";
     controls.enabled = camMode === "orbit";
+    chainGroup.visible = camMode === "orbit"; // 产出链只在俯瞰显示
     if (camMode === "orbit") {
       camera.position.set(0, 95, 80);
       controls.target.set(0, 0, 8);
     }
     const btn = document.getElementById("n3-cam");
-    if (btn) btn.textContent = camMode === "chase" ? "俯瞰全图" : "跟车视角";
+    if (btn) btn.textContent = camMode === "chase" ? "俯瞰全图 · 看产出链" : "跟车视角";
   }
   document.getElementById("n3-cam")?.addEventListener("click", toggleCam);
 
@@ -391,6 +462,11 @@ async function boot() {
       const stateCn = s.done ? "✓ 已完成" : "待完成";
       s.el.querySelector("span").textContent = `${s.stage.id} ${stateCn}`;
       s.el.classList.toggle("is-done", s.done);
+      const subs = (s.stage.subNodeIds || []).map(String);
+      const n = subs.filter(judged).length;
+      const live = s.story.querySelector(".n3-story-live");
+      if (live) live.textContent = n ? `已沉淀 ${n}/${subs.length} 项判断` : `待沉淀 · ${subs.length} 个子节点`;
+      s.story.classList.toggle("is-done", s.done);
     });
     const hudDone = document.getElementById("n3-done");
     if (hudDone) hudDone.textContent = `${done}/9`;
@@ -433,12 +509,68 @@ async function boot() {
   const hudStage = document.getElementById("n3-stage");
   const hudHint = document.getElementById("n3-hint");
 
+  // ---- 巡游整节课:S1→S9 自动行进,每站停留讲一句本环节的故事 ----
+  const captionEl = document.getElementById("n3-caption");
+  let tour = null; // { idx, state: 'drive'|'dwell'|'finale', until, reduced }
+  function captionShow(html) {
+    if (!captionEl) return;
+    captionEl.innerHTML = html;
+    captionEl.hidden = false;
+  }
+  function captionHide() { if (captionEl) { captionEl.hidden = true; } }
+  function startTour() {
+    closePanel();
+    if (camMode === "orbit") toggleCam();
+    const reduced = document.hidden ||
+      (matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+    if (!reduced) tCar = 0;
+    vel = 0; targetT = null;
+    tour = { idx: 0, state: "drive", until: 0, reduced };
+    captionShow("<b>▶ 巡游开始</b> 一节药事管理课的全生命周期,沿 9 个教学环节行进。");
+    const btn = document.getElementById("n3-tour");
+    if (btn) btn.textContent = "■ 停止巡游";
+  }
+  function stopTour() {
+    tour = null;
+    captionHide();
+    const btn = document.getElementById("n3-tour");
+    if (btn) btn.textContent = "▶ 巡游整节课";
+  }
+  document.getElementById("n3-tour")?.addEventListener("click", () => (tour ? stopTour() : startTour()));
+
   // ---- 主循环 ----
   const clock = new THREE.Clock();
   const camPos = new THREE.Vector3();
   function tick() {
     requestAnimationFrame(tick);
     const dt = Math.min(clock.getDelta(), 0.05);
+
+    // 巡游状态机:drive(巡航到当前站) → dwell(停留讲故事) → 下一站 → … → finale
+    if (tour) {
+      const s = stations[tour.idx];
+      if (tour.state === "drive") {
+        if (tour.reduced) { tCar = s.t; vel = 0; targetT = null; }
+        else targetT = s.t;
+        if (Math.abs(tCar - s.t) < 0.002) {
+          tour.state = "dwell";
+          tour.until = clock.elapsedTime + 3.4;
+          const st = STAGE_STORY[s.stage.id] || {};
+          captionShow(`<b>${String(tour.idx + 1).padStart(2, "0")} ${s.stage.id} · ${st.time || ""}</b> ${st.line || s.stage.title}`);
+        }
+      } else if (tour.state === "dwell" && clock.elapsedTime > tour.until) {
+        if (tour.idx >= stations.length - 1) {
+          tour.state = "finale";
+          tour.until = clock.elapsedTime + 4.5;
+          captionShow("<b>✓ 全程走完</b> 9 个教学环节 · 一节课的全生命周期。俯瞰全图(V)可见环节间的产出链与 S7→S2 量规回流。");
+        } else {
+          tour.idx += 1;
+          tour.state = "drive";
+          captionHide();
+        }
+      } else if (tour.state === "finale" && clock.elapsedTime > tour.until) {
+        stopTour();
+      }
+    }
 
     // 驾驶:手动油门 or 自动巡航到目标站
     const MAX = 0.055;
@@ -491,6 +623,20 @@ async function boot() {
         s.ring.material.emissiveIntensity,
         inRange ? 0.55 + Math.sin(clock.elapsedTime * 5) * 0.25 : 0
       );
+    }
+
+    // 产出展卡:跟车视角下,只有临近的站浮现(俯瞰时全部收起防遮挡)
+    stations.forEach((s) => {
+      const showStory = camMode === "chase" && Math.abs(s.t - tCar) < 0.055;
+      s.story.classList.toggle("is-show", showStory);
+    });
+
+    // 产出链光点(仅俯瞰可见时驱动)
+    if (chainGroup.visible) {
+      packets.forEach((p) => {
+        const u = (clock.elapsedTime * p.speed + p.off) % 1;
+        p.dot.position.copy(p.arc.getPointAt(p.rev ? 1 - u : u));
+      });
     }
 
     renderer.render(scene, camera);
