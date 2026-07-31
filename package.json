@@ -1,0 +1,22 @@
+{
+  "name": "pharmaco-build",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "PharmacoPilot 本地优先网页、Node 后端与 MLX 模型网关。",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node --disable-warning=ExperimentalWarning server/index.mjs",
+    "dev": "node --disable-warning=ExperimentalWarning --watch server/index.mjs",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "node tools/verify-data-detail.mjs && node tools/verify-payloads.mjs",
+    "test:backend": "node --disable-warning=ExperimentalWarning --test server/*.test.mjs",
+    "check": "node build.mjs --check && npm test"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2"
+  }
+}
