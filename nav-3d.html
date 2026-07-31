@@ -152,7 +152,14 @@
     <!-- 无 WebGL / 契约缺失时的 2D 回退(也是键盘/读屏用户的完整替代路径) -->
     <div id="nav3d-fallback" hidden>
       <h1>教学导航 · 9 个教学环节</h1>
-      <p>当前环境无法渲染 3D 路书,以下清单等价可用:</p>
+      <div id="n3-file-tip" hidden>
+        <p><b>3D 路书需要通过本地服务器打开。</b>当前是直接双击文件打开(<code>file://</code>),
+        浏览器出于安全策略会拦截 3D 所需的 ES 模块,页面无法渲染。</p>
+        <p>正确打开方式:双击 <b>pharmaco网页/启动3D路书.command</b>(自动起服务并打开本页);
+        或在该目录下运行 <code>python3 -m http.server 8777</code> 后访问
+        <code>http://localhost:8777/nav-3d.html</code>。</p>
+      </div>
+      <p>以下 9 环节清单等价可用(可直接进入 2D 工作台):</p>
       <ol>
         <li><a href="./nav-detail.html#go=1.1">S1 · 课程定位 · 学情诊断 · 学习者议程协商</a></li>
         <li><a href="./nav-detail.html#go=4.4-a">S2 · 学习目标—评价证据—量规对齐</a></li>
@@ -166,6 +173,20 @@
       </ol>
     </div>
   </div>
+
+  <script>
+    // file:// 兜底:双击打开时浏览器拦截 ES module + importmap(CORS),下面的 3D 模块根本不会执行,
+    // 模块内的"无 WebGL 回退"也就无从触发 → 页面会永远卡在 loading。这里用经典脚本先接管。
+    if (location.protocol === "file:") {
+      document.addEventListener("DOMContentLoaded", function () {
+        var hide = function (id) { var e = document.getElementById(id); if (e) e.style.display = "none"; };
+        var show = function (id) { var e = document.getElementById(id); if (e) e.hidden = false; };
+        hide("nav3d-mount"); hide("nav3d-hud");
+        var l = document.getElementById("n3-loading"); if (l) l.remove();
+        show("n3-file-tip"); show("nav3d-fallback");
+      });
+    }
+  </script>
 
   <!-- 契约 + Store(经典脚本,与工作台同源同序) -->
   <script src="./shared/nav-stations-contract.js?v=1"></script>
