@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=4" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=4" />
+<link rel="stylesheet" href="./shared/tokens.css?v=6-readability-floor" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=9-neutral-color" />
 <!-- 虚拟教室 3D：Three.js 本地自托管（零外部依赖，内网/离线/受限网络均可显示）。
      若本地文件缺失或 WebGL 不可用 → 3D 模块自动回退到 2.5D 渲染器。 -->
 <script type="importmap">
@@ -49,7 +49,7 @@
 .loop-step:hover {
   border-color: var(--amber-deep);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px -10px rgba(168,73,42,.3);
+  box-shadow: 0 6px 16px -10px color-mix(in srgb, var(--amber-deep) 30%, transparent);
 }
 .loop-step.is-active {
   border-color: var(--amber-deep);
@@ -103,7 +103,7 @@
 }
 
 /* ---- Unified stage container & header (replaces .loop-head / .km-head / .wb-section-head) ---- */
-.stage { padding: 56px 0; scroll-margin-top: 24px; }
+.stage { padding: 56px 0; scroll-margin-top: 156px; }
 .stage + .stage { border-top: 1px solid var(--rule); }
 .stage-h {
   display: grid; grid-template-columns: 0.55fr 1.45fr; gap: 48px; align-items: end;
@@ -174,16 +174,16 @@
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase;
   padding: 3px 6px; border-radius: 4px; text-align: center; height: 22px;
 }
-.role-T { background: rgba(217,119,87,.2); color: var(--amber-soft); }
+.role-T { background: color-mix(in srgb, var(--amber) 20%, transparent); color: var(--amber-soft); }
 .role-S { background: rgba(77,98,87,.25); color: #b5cdba; }
 .role-A { background: rgba(255,255,255,.08); color: var(--ivory); }
 .beat-row .what {
-  color: rgba(255,253,247,.92); line-height: 1.7;
+  color: color-mix(in srgb, var(--ivory) 92%, transparent); line-height: 1.7;
   font-family: var(--serif-cn); font-size: var(--fs-sm);
 }
 .beat-row .what .em { color: var(--amber); font-style: italic; font-family: var(--serif-en); }
 .beat-row.note .what {
-  background: rgba(217,119,87,.1); padding: 9px 12px; border-radius: 6px;
+  background: color-mix(in srgb, var(--amber) 10%, transparent); padding: 9px 12px; border-radius: 6px;
   color: var(--amber-soft); font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.6;
 }
 .beat-row.note .what b { color: var(--ivory); font-weight: 500; }
@@ -204,7 +204,7 @@
 .gauges { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
 .gauges h5 {
   font-family: var(--serif-cn); font-size: var(--fs-xs); margin: 0 0 4px;
-  color: rgba(255,253,247,.85); font-weight: 500;
+  color: color-mix(in srgb, var(--ivory) 85%, transparent); font-weight: 500;
 }
 .gauges h5 small {
   display: block; font-family: var(--mono); font-size: var(--fs-2xs);
@@ -255,8 +255,8 @@
 /* LIVE 提示 — was inline-styled, now a proper component */
 .live-tip {
   margin-top: auto; padding: 14px 16px;
-  background: rgba(217,119,87,.1);
-  border: 1px solid rgba(217,119,87,.2);
+  background: color-mix(in srgb, var(--amber) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--amber) 20%, transparent);
   border-radius: 8px;
 }
 .live-tip .lbl {
@@ -265,7 +265,7 @@
 }
 .live-tip .body {
   font-family: var(--serif-cn); font-size: var(--fs-xs);
-  color: rgba(255,253,247,.92); line-height: 1.6;
+  color: color-mix(in srgb, var(--ivory) 92%, transparent); line-height: 1.6;
 }
 
 /* ---- Stage ii — Key moments ---- */
@@ -349,7 +349,7 @@
   background: var(--amber-deep); color: var(--ivory);
   display: grid; place-items: center;
   font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
-  cursor: pointer; box-shadow: 0 2px 8px rgba(168,73,42,.3);
+  cursor: pointer; box-shadow: 0 2px 8px color-mix(in srgb, var(--amber-deep) 30%, transparent);
 }
 .review-side h5 {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em;
@@ -582,6 +582,16 @@
 .wiz-chips {
   display: flex; flex-wrap: wrap; gap: 6px;
 }
+.wiz-group[data-wiz="session"] .wiz-chips {
+  max-height: 356px; overflow-y: auto; align-content: flex-start;
+  padding-right: 4px; scrollbar-width: thin; scrollbar-color: var(--rule-strong) transparent;
+}
+.wiz-group[data-wiz="session"] .wiz-chip {
+  width: 100%; justify-content: space-between;
+}
+.wiz-group[data-wiz="chapter"] .wiz-chip {
+  width: 100%; justify-content: space-between;
+}
 .wiz-chip {
   font-family: var(--serif-cn); font-size: var(--fs-xs); font-weight: 500;
   padding: 6px 11px; border-radius: 999px;
@@ -590,15 +600,21 @@
   transition: all .12s;
   display: inline-flex; align-items: baseline; gap: 4px;
 }
+.wiz-chip-main { min-width: 0; }
 .wiz-chip:hover { border-color: var(--amber-deep); color: var(--amber-deep); }
+.wiz-chip.is-locked {
+  opacity: .5; cursor: not-allowed; pointer-events: none;
+  background: transparent; border-style: dashed;
+}
+.wiz-chip.is-locked:hover { border-color: var(--rule); color: var(--ink-soft); }
 .wiz-chip.is-active {
   background: var(--amber-deep); color: var(--ivory); border-color: var(--amber-deep);
 }
 .wiz-chip small {
   font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute-2);
-  font-weight: 400;
+  font-weight: 400; white-space: nowrap; flex: none;
 }
-.wiz-chip.is-active small { color: rgba(255,253,247,.65); }
+.wiz-chip.is-active small { color: color-mix(in srgb, var(--ivory) 65%, transparent); }
 .wiz-chip.is-disabled {
   opacity: 0.4; cursor: not-allowed; pointer-events: none;
 }
@@ -640,10 +656,135 @@
   border-color: var(--amber-deep); background: var(--ivory); color: var(--amber-deep); font-weight: 500;
 }
 
-.pack-preview {
+.pack-result { display: grid; gap: 18px; }
+.pack-workspace {
+  position: relative; isolation: isolate;
+  view-transition-name: practice-pack-workspace;
+}
+.pack-workspace [data-pack-panel][hidden] { display: none !important; }
+.pack-workspace.is-switching { pointer-events: none; }
+.pack-workspace [data-pack-panel].is-entering {
+  animation: packPanelEnter .38s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes packPanelEnter {
+  from { opacity: 0; transform: translateY(14px) scale(.994); }
+  to { opacity: 1; transform: none; }
+}
+::view-transition-old(practice-pack-workspace) {
+  animation: packViewOut .24s cubic-bezier(.4, 0, 1, 1) both;
+}
+::view-transition-new(practice-pack-workspace) {
+  animation: packViewIn .38s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes packViewOut { to { opacity: 0; transform: translateY(-8px) scale(.995); } }
+@keyframes packViewIn { from { opacity: 0; transform: translateY(12px) scale(.995); } }
+.pack-preview,
+.design-summary {
   background: var(--paper-2); border: 1px solid var(--ink); border-radius: 14px;
   padding: 22px 24px; box-shadow: 4px 4px 0 var(--ink);
   display: flex; flex-direction: column;
+}
+.design-summary {
+  border-color: var(--rule-dark);
+  box-shadow: 3px 3px 0 color-mix(in oklab, var(--rule-dark) 42%, transparent);
+}
+.pack-generating {
+  min-height: 300px; padding: 34px 38px;
+  background: var(--ink); color: var(--ivory);
+  border: 1px solid var(--ink); border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--amber-deep);
+  display: grid; grid-template-columns: minmax(190px, .72fr) minmax(0, 1.5fr);
+  align-items: center; gap: 42px;
+}
+.pack-generation-map {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  padding: 18px; border: 1px solid var(--on-dark-veil); border-radius: 50%;
+  aspect-ratio: 1; transform: rotate(-4deg);
+}
+.pack-generation-map span {
+  display: grid; place-items: center; border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+  color: var(--on-dark-mid); font-family: var(--mono); font-size: var(--fs-2xs);
+  animation: packNodePulse 1.8s ease-in-out infinite;
+  animation-delay: calc(var(--pack-node) * .11s);
+}
+.pack-generation-map span:nth-child(5) {
+  background: var(--amber-deep); color: var(--ivory); border-color: var(--amber-deep);
+}
+@keyframes packNodePulse {
+  0%, 55%, 100% { opacity: .42; transform: scale(.92); }
+  18% { opacity: 1; transform: scale(1); }
+}
+.pack-generating-copy { min-width: 0; }
+.pack-generating-copy .eyebrow {
+  display: block; margin-bottom: 10px; color: var(--amber-soft);
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .12em;
+}
+.pack-generating-copy h4 {
+  margin: 0; color: var(--ivory); font-family: var(--serif-cn);
+  font-size: clamp(var(--fs-xl), 3vw, var(--fs-2xl)); font-weight: 500; line-height: 1.25;
+}
+.pack-generating-copy p {
+  max-width: 660px; margin: 12px 0 0; color: var(--on-dark);
+  font-family: var(--serif-cn); font-size: var(--fs-sm); line-height: 1.75;
+}
+.pack-generating-copy p small {
+  display: block; margin-top: 5px; color: var(--on-dark-mid);
+  font-family: var(--mono); font-size: var(--fs-2xs);
+}
+.pack-generation-line {
+  position: relative; height: 2px; margin: 26px 0 14px;
+  background: color-mix(in srgb, var(--ivory) 15%, transparent); overflow: hidden;
+}
+.pack-generation-line::after {
+  content: ""; position: absolute; inset: 0; width: 38%;
+  background: linear-gradient(90deg, transparent, var(--amber-soft), transparent);
+  transform: translateX(-120%); animation: packGenerationScan 1.45s ease-in-out infinite;
+}
+@keyframes packGenerationScan { to { transform: translateX(360%); } }
+.pack-generation-phases {
+  display: flex; flex-wrap: wrap; gap: 7px 18px;
+  color: var(--on-dark-mid); font-family: var(--mono); font-size: var(--fs-2xs);
+}
+.pack-generation-phases span::before { content: "·"; margin-right: 7px; color: var(--amber-soft); }
+.pack-input-recap {
+  width: 100%; margin: 0 0 14px; padding: 10px 12px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  border: 1px solid var(--rule); border-radius: 10px; background: var(--ivory);
+  color: var(--ink); text-align: left; cursor: pointer;
+  transition: border-color .18s, background .18s, transform .18s;
+}
+.pack-input-recap:hover {
+  border-color: var(--amber-deep); background: var(--amber-wash); transform: translateY(-1px);
+}
+.pack-input-recap .mark {
+  padding: 4px 7px; border-radius: 4px; background: var(--sage); color: var(--ivory);
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .08em;
+}
+.pack-input-recap b {
+  display: block; font-family: var(--serif-cn); font-size: var(--fs-xs); font-weight: 500;
+}
+.pack-input-recap small {
+  display: block; margin-top: 2px; color: var(--mute); font-family: var(--mono); font-size: var(--fs-2xs);
+}
+.pack-input-recap .arr { color: var(--amber-deep); font-family: var(--serif-en); font-style: italic; }
+.pack-cta-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+.pack-preview-h h4:focus,
+.pack-generating-copy h4:focus { outline: 2px solid var(--amber-deep); outline-offset: 5px; border-radius: 2px; }
+@media (max-width: 760px) {
+  .pack-generating { min-height: 0; padding: 24px 20px; grid-template-columns: 1fr; gap: 22px; }
+  .pack-generation-map { width: min(180px, 62vw); justify-self: center; padding: 14px; }
+  .pack-input-recap { grid-template-columns: auto minmax(0, 1fr); }
+  .pack-input-recap .arr { display: none; }
+  .pack-cta-actions { width: 100%; flex-direction: column-reverse; align-items: stretch; }
+  .pack-cta-actions .btn-primary,
+  .pack-cta-actions .btn-ghost { justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pack-workspace [data-pack-panel].is-entering,
+  .pack-generation-map span,
+  .pack-generation-line::after { animation: none; }
+  .pack-input-recap { transition: none; }
 }
 .pack-preview-h {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;
@@ -662,12 +803,31 @@
   background: var(--ink); color: var(--ivory); border-radius: 4px; letter-spacing: 0.04em;
   white-space: nowrap;
 }
+.pack-preview-h > div:first-child { min-width: 0; }
+.pack-preview-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.pack-export-btn,
+.pack-regenerate {
+  border: 1px solid var(--rule-dark); border-radius: 999px;
+  background: var(--ivory); color: var(--ink-soft); cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .03em;
+  padding: 6px 10px; transition: color .15s, border-color .15s, background .15s;
+}
+.pack-export-btn:hover,
+.pack-regenerate:hover { border-color: var(--amber-deep); color: var(--amber-deep); background: var(--amber-wash); }
+.pack-export-btn[disabled],
+.pack-regenerate[disabled] { opacity: .4; cursor: progress; }
+.pack-export-btn.is-bundle { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+.pack-export-status {
+  width: 100%; text-align: right; color: var(--mute);
+  font-family: var(--mono); font-size: var(--fs-2xs); min-height: 1.2em;
+}
 .pack-items {
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
   flex: 1;
 }
 /* 9-env override —— v5 整栏后每张卡宽度翻倍,放大字号与留白以承载生成内容 */
 .pack-items.env-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pack-preview .pack-items.env-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .pack-items.env-grid .pack-item { padding: 13px 15px; }
 .pack-items.env-grid .pack-item .hd { margin-bottom: 6px; }
 .pack-items.env-grid .pack-item .body { font-size: var(--fs-xs); line-height: 1.65; }
@@ -678,12 +838,6 @@
 .env-count {
   font-family: var(--mono); font-size: var(--fs-2xs); color: var(--amber-deep); font-weight: 500;
 }
-.fanya-lnk {
-  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.02em;
-  color: var(--amber-deep); text-decoration: none;
-  border: 1px solid currentColor; border-radius: 3px; padding: 1px 5px; line-height: 1;
-}
-.fanya-lnk:hover { background: var(--amber-wash); }
 .pack-item {
   background: var(--ivory); border: 1px solid var(--rule); border-radius: 10px;
   padding: 12px 14px;
@@ -697,6 +851,14 @@
 .pack-item .body {
   font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.6; color: var(--ink-soft);
 }
+.pack-preview .pack-item .body { white-space: pre-line; }
+.brief-tag {
+  display: inline-flex; align-items: center; margin-bottom: 8px;
+  color: var(--amber-deep); font-family: var(--mono); font-size: var(--fs-2xs);
+  letter-spacing: .06em;
+}
+.brief-tag::before { content: "PROMPT"; margin-right: 7px; color: var(--mute-2); }
+.pack-item .hd .pack-regenerate { margin-left: auto; text-transform: none; }
 .pack-item .body b { color: var(--ink); font-weight: 500; }
 .pack-item .body[contenteditable="true"] {
   outline: 0; border-radius: 4px;
@@ -765,7 +927,7 @@
   font-family: var(--serif-cn); font-size: var(--fs-xs); font-weight: 500;
   flex-shrink: 0;
 }
-.expert-card.is-pharm .ec-av { background: rgba(217,119,87,.18); color: var(--amber-deep); }
+.expert-card.is-pharm .ec-av { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber-deep); }
 .expert-card.is-design .ec-av { background: rgba(77,98,87,.22); color: var(--sage); }
 .expert-card.is-eval .ec-av { background: rgba(112,82,168,.16); color: var(--violet); }
 .expert-card.is-law .ec-av { background: rgba(170,140,40,.2); color: #88701f; }
@@ -805,7 +967,7 @@
 }
 .ec-live-review button:disabled { color: var(--mute); cursor: not-allowed; opacity: .56; }
 .ec-live-review[data-state="ready"] { border-color: rgba(77,98,87,.34); color: var(--sage); background: rgba(77,98,87,.06); }
-.ec-live-review[data-state="stale"] { border-color: rgba(168,73,42,.42); color: var(--amber-deep); background: var(--amber-wash); }
+.ec-live-review[data-state="stale"] { border-color: color-mix(in srgb, var(--amber-deep) 42%, transparent); color: var(--amber-deep); background: var(--amber-wash); }
 .ec-live-review[data-state="error"] { border-color: rgba(155,61,43,.35); color: #8b3c2f; background: rgba(155,61,43,.045); }
 .ec-live-review[data-state="loading"] .ec-live-status {
   color: var(--ink); animation: ecReviewPulse 1.15s ease-in-out infinite;
@@ -901,7 +1063,7 @@
 .ec-resolution-picker button[aria-pressed="true"] { background: var(--ink); color: var(--ivory); }
 .ec-resolution-picker button:disabled { cursor: not-allowed; color: var(--mute); opacity: .5; }
 .ec-resolution-summary {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px;
   min-height: 34px; padding: 7px 9px; border: 1px solid rgba(77,98,87,.35); border-radius: 7px;
   background: rgba(77,98,87,.08); color: var(--sage);
 }
@@ -918,6 +1080,8 @@
   background: transparent; color: inherit; cursor: pointer;
   font-family: var(--mono); font-size: var(--fs-2xs);
 }
+.ec-resolution-actions { display: flex; align-items: center; }
+.ec-resolution-actions button[hidden] { display: none !important; }
 .ec-resolution-summary button:active { transform: translateY(1px); }
 .ec-resolution-picker[hidden],
 .ec-resolution-summary[hidden],
@@ -937,6 +1101,7 @@
 }
 .ec-edit-panel textarea,
 .ec-reject-panel input,
+.ec-reject-panel select,
 .ec-decision-note {
   width: 100%; box-sizing: border-box; border: 1px solid var(--rule); border-radius: 5px;
   background: var(--ivory); color: var(--ink); padding: 8px 9px;
@@ -955,6 +1120,10 @@
 .ec-inline-error {
   display: block; margin-top: 6px; color: #9b3d2b;
   font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.45;
+}
+.ec-candidate-error {
+  max-width: 720px; padding: 8px 10px; border: 1px solid color-mix(in srgb, currentColor 32%, transparent);
+  border-radius: 6px; background: color-mix(in srgb, currentColor 6%, transparent);
 }
 
 .ec-target-picker {
@@ -1097,7 +1266,7 @@
 }
 .persona-cell .n { color: var(--ink); font-weight: 600; font-size: var(--fs-2xs); }
 .persona-cell .t { letter-spacing: 0.04em; line-height: 1.2; }
-.persona-cell.is-active { background: rgba(217,119,87,.14); border-color: var(--amber-deep); }
+.persona-cell.is-active { background: color-mix(in srgb, var(--amber) 14%, transparent); border-color: var(--amber-deep); }
 .persona-cell.is-active .n { color: var(--amber-deep); }
 .persona-cell.is-quiet { opacity: 0.5; }
 .persona-cell.is-live-active {
@@ -1108,8 +1277,8 @@
 .persona-cell.is-live-active .n,
 .persona-cell.is-live-active .t { color: var(--ivory) !important; }
 @keyframes persona-live-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(217,119,87, 0.6); }
-  100% { box-shadow: 0 0 0 8px rgba(217,119,87, 0); }
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--amber) 60%, transparent); }
+  100% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--amber) 0%, transparent); }
 }
 
 /* ---- Persona grid: type-based color differentiation ---- */
@@ -1122,12 +1291,12 @@
   padding: 3px 4px; border-radius: 3px; text-align: center; font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.ptt-a { background: rgba(217,119,87,.15); color: var(--amber-deep); }
+.ptt-a { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber-deep); }
 .ptt-b { background: rgba(77,98,87,.15); color: var(--sage); }
 .ptt-c { background: rgba(112,82,168,.12); color: var(--violet); }
 .ptt-d { background: rgba(100,100,100,.12); color: var(--mute); }
 
-.persona-cell.type-a { background: rgba(217,119,87,.07); border-color: rgba(217,119,87,.22); }
+.persona-cell.type-a { background: color-mix(in srgb, var(--amber) 7%, transparent); border-color: color-mix(in srgb, var(--amber) 22%, transparent); }
 .persona-cell.type-b { background: rgba(77,98,87,.07); border-color: rgba(77,98,87,.22); }
 .persona-cell.type-c { background: rgba(112,82,168,.05); border-color: rgba(112,82,168,.16); }
 .persona-cell.type-d { background: rgba(100,100,100,.05); }
@@ -1161,7 +1330,7 @@
   text-transform: uppercase; align-self: start; font-weight: 600;
   white-space: nowrap;
 }
-.risk-item .sev.lvl-h { background: rgba(217,119,87,.2); color: var(--amber-deep); }
+.risk-item .sev.lvl-h { background: color-mix(in srgb, var(--amber) 20%, transparent); color: var(--amber-deep); }
 .risk-item .sev.lvl-m { background: rgba(170,140,40,.2); color: #88701f; }
 .risk-item .sev.lvl-l { background: rgba(77,98,87,.2); color: var(--sage); }
 .risk-item b { color: var(--ink); font-weight: 500; }
@@ -1194,7 +1363,7 @@
   background: var(--paper-2); color: var(--ink); text-align: center;
   white-space: nowrap;
 }
-.cl-row .src.is-pharm { background: rgba(217,119,87,.15); color: var(--amber-deep); }
+.cl-row .src.is-pharm { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber-deep); }
 .cl-row .src.is-design { background: rgba(77,98,87,.18); color: var(--sage); }
 .cl-row .src.is-eval { background: rgba(112,82,168,.14); color: var(--violet); }
 .cl-row .src.is-law { background: rgba(170,140,40,.2); color: #88701f; }
@@ -1220,7 +1389,7 @@
   padding: 4px 8px; border-radius: 3px; background: var(--paper-2);
   font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink);
 }
-.decision-head .src.is-pharm { background: rgba(217,119,87,.15); color: var(--amber-deep); }
+.decision-head .src.is-pharm { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber-deep); }
 .decision-head .src.is-design { background: rgba(77,98,87,.18); color: var(--sage); }
 .decision-head .src.is-law { background: rgba(170,140,40,.2); color: #88701f; }
 .decision-head .src.is-eval { background: rgba(112,82,168,.14); color: var(--violet); }
@@ -1268,7 +1437,7 @@
   font-family: var(--serif-cn); font-size: var(--fs-lg); font-weight: 500; margin: 0 0 4px;
 }
 .publish-bar .pb-l p {
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,253,247,.55);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 55%, transparent);
   margin: 0; letter-spacing: 0.02em;
 }
 .publish-bar .pb-r {
@@ -1286,7 +1455,7 @@
   padding: 10px 18px; border-radius: 8px;
   background: transparent; color: var(--ivory);
   font-family: var(--serif-cn); font-size: var(--fs-xs); font-weight: 500;
-  border: 1px solid rgba(255,253,247,.3); cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--ivory) 30%, transparent); cursor: pointer;
 }
 .publish-bar .btn-secondary:hover { border-color: var(--amber-soft); color: var(--amber-soft); }
 
@@ -1429,9 +1598,9 @@
  *  元宇宙虚拟教室 · metaverse classroom  (2026-05-29)
  * ============================================================ */
 .mv-root {
-  --mv-a: #d97757;   /* A 医保 amber */
-  --mv-b: #95bba4;   /* B 慢病 sage  */
-  --mv-c: var(--violet-soft);   /* C 药企 purple*/
+  --mv-a: #d97757;   /* A 政策/市场 amber */
+  --mv-b: #95bba4;   /* B 门店/顾客 sage  */
+  --mv-c: var(--violet-soft);   /* C 产业/竞争 purple */
   --mv-d: #9a958c;   /* D 观望 mute  */
   display: flex; flex-direction: column; gap: 14px;
 }
@@ -1446,6 +1615,7 @@
   margin-top: 4px; font-weight: 400; letter-spacing: 0.04em;
 }
 .mv-head-r { display: flex; align-items: center; gap: 14px; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); }
+.mv-fallback-note { color: var(--amber-deep); font-weight: 600; }
 .mv-live { display: inline-flex; align-items: center; gap: 6px; color: var(--amber-deep); font-weight: 500; }
 .mv-live b { font-weight: 600; }
 .mv-live i { width: 8px; height: 8px; border-radius: 50%; background: var(--amber-deep); animation: pulse 1.4s infinite ease-in-out; }
@@ -1467,7 +1637,7 @@
 .mv-ctrl-r { display: flex; gap: 12px; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); flex-wrap: wrap; }
 .mv-legend { display: inline-flex; align-items: center; gap: 5px; }
 .mv-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-.mv-legend .lg-live   { background: var(--amber-deep); box-shadow: 0 0 0 2px rgba(168,73,42,.3); }
+.mv-legend .lg-live   { background: var(--amber-deep); box-shadow: 0 0 0 2px color-mix(in srgb, var(--amber-deep) 30%, transparent); }
 .mv-legend .lg-active { background: var(--mv-a); }
 .mv-legend .lg-silent { background: var(--mv-c); opacity: .55; }
 .mv-legend .lg-quiet  { background: var(--mv-d); opacity: .4; }
@@ -1475,7 +1645,7 @@
 /* —— 暗色舞台 —— */
 .mv-stage {
   background:
-    radial-gradient(120% 80% at 50% -10%, rgba(217,119,87,.10), transparent 60%),
+    radial-gradient(120% 80% at 50% -10%, color-mix(in srgb, var(--amber) 10%, transparent), transparent 60%),
     linear-gradient(180deg, #1d1b18 0%, #15140f 100%);
   border-radius: 18px; padding: 22px 24px 18px;
   position: relative; overflow: visible;
@@ -1494,7 +1664,7 @@
   display: flex; align-items: center; justify-content: center;
   font-family: var(--serif-cn); font-size: var(--fs-md); font-weight: 600;
 }
-.mv-fig-teacher { background: rgba(217,119,87,.22); color: var(--amber-soft); border: 1px solid rgba(217,119,87,.5); }
+.mv-fig-teacher { background: color-mix(in srgb, var(--amber) 22%, transparent); color: var(--amber-soft); border: 1px solid color-mix(in srgb, var(--amber) 50%, transparent); }
 .mv-fig-agent { background: rgba(255,255,255,.08); color: var(--ivory); border: 1px solid rgba(255,255,255,.18); font-family: var(--mono); font-size: var(--fs-2xs); }
 .mv-podium-txt { text-align: center; }
 .mv-podium-lbl {
@@ -1518,15 +1688,15 @@
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.08em; text-transform: uppercase;
   padding: 3px 8px; border-radius: 5px; flex-shrink: 0; white-space: nowrap;
 }
-.mv-sub-role.role-T { background: rgba(217,119,87,.2); color: var(--amber-soft); }
+.mv-sub-role.role-T { background: color-mix(in srgb, var(--amber) 20%, transparent); color: var(--amber-soft); }
 .mv-sub-role.role-A { background: rgba(255,255,255,.1); color: var(--ivory); }
 .mv-sub-role.role-M { background: rgba(255,255,255,.06); color: rgba(255,255,255,.5); }
 .mv-sub-role.role-S { background: rgba(149,187,164,.22); color: #c4dbcd; }
-.mv-sub-role.role-S-a { background: rgba(217,119,87,.24); color: #f0c1ac; }
+.mv-sub-role.role-S-a { background: color-mix(in srgb, var(--amber) 24%, transparent); color: #f0c1ac; }
 .mv-sub-role.role-S-b { background: rgba(149,187,164,.24); color: #c4dbcd; }
 .mv-sub-role.role-S-c { background: rgba(167,144,210,.24); color: #d5c4ec; }
 .mv-sub-role.role-S-d { background: rgba(180,180,180,.18); color: #ccc; }
-.mv-sub-text { font-family: var(--serif-cn); font-size: var(--fs-sm); line-height: 1.55; color: rgba(255,253,247,.94); }
+.mv-sub-text { font-family: var(--serif-cn); font-size: var(--fs-sm); line-height: 1.55; color: color-mix(in srgb, var(--ivory) 94%, transparent); }
 
 /* 分析面板 */
 .mv-analysis { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 12px; }
@@ -1547,7 +1717,7 @@
 .mv-risk .sev {
   font-family: var(--mono); font-size: var(--fs-2xs); padding: 2px 6px; border-radius: 4px; flex-shrink: 0; font-weight: 600;
 }
-.mv-risk .lvl-h { background: rgba(168,73,42,.14); color: var(--amber-deep); }
+.mv-risk .lvl-h { background: color-mix(in srgb, var(--amber-deep) 14%, transparent); color: var(--amber-deep); }
 .mv-risk .lvl-m { background: rgba(190,150,60,.16); color: #9a7820; }
 .mv-risk .lvl-l { background: rgba(100,100,100,.12); color: var(--mute); }
 .mv-risk b, .mv-flag b { color: var(--ink); font-weight: 600; }
@@ -1603,6 +1773,10 @@
   .wiz-flow { grid-template-columns: 1fr; gap: 6px; }
   .pack-items { grid-template-columns: 1fr; }
   .pack-items.env-grid { grid-template-columns: 1fr; }
+  .pack-preview .pack-items.env-grid { grid-template-columns: 1fr; }
+  .pack-preview-h { flex-direction: column; }
+  .pack-preview-actions { justify-content: flex-start; }
+  .pack-export-status { text-align: left; }
   .pack-cta { flex-direction: column; align-items: stretch; gap: 10px; }
   .pack-cta .btn-primary { justify-content: center; }
 
@@ -1685,7 +1859,7 @@ html.reveal-on [data-reveal]:not([data-reveal="fade"]).is-revealed{ transform: n
 .loop-close{
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
   margin-top: 20px; padding: 18px 22px; border-radius: 16px;
-  background: linear-gradient(100deg, rgba(217,119,87,.10), rgba(149,187,164,.08));
+  background: linear-gradient(100deg, color-mix(in srgb, var(--amber) 10%, transparent), rgba(149,187,164,.08));
   border: 1px solid var(--rule);
 }
 .lc-ring{ font-size: 26px; color: var(--amber-deep); line-height: 1; flex-shrink: 0; }
@@ -1704,18 +1878,671 @@ html.reveal-on [data-reveal]:not([data-reveal="fade"]).is-revealed{ transform: n
 .km-stream-h{ display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 18px 0 4px; }
 .ksh-lab{ font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .12em; text-transform: uppercase; color: var(--amber-deep); }
 .ksh-hint{ font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); }
-/* 用 filter（含 opacity() 函数）做"待捕获"暗态，避开 reveal 系统对 opacity 属性的占用；两态都用 filter-list（非 none）以便平滑过渡 */
-.km-grid.is-live-capture .km-card{ filter: saturate(.45) opacity(.52); transition: box-shadow .5s ease, transform .4s ease; }
-.km-grid.is-live-capture .km-card.is-captured{ filter: none; }
+/* 用 filter 做“待捕获”暗态，避开 reveal 系统对 opacity 属性的占用；
+   两态保持同构 filter-list，动态重绘后也能平滑恢复完整色彩。 */
+.km-grid.is-live-capture .km-card{ filter: saturate(.45) opacity(.52); transition: filter .28s ease, box-shadow .5s ease, transform .4s ease; }
+.km-grid.is-live-capture .km-card.is-captured{ filter: saturate(1) opacity(1); }
 .km-grid.is-live-capture .km-card.just-captured{ animation: kmPop .65s ease; }
-@keyframes kmPop{ 0%{ box-shadow: 0 0 0 0 rgba(217,119,87,.5); } 45%{ box-shadow: 0 0 0 6px rgba(217,119,87,0); transform: translateY(-3px); } 100%{ box-shadow: 0 0 0 0 rgba(217,119,87,0); transform: none; } }
-.km-status{ display: inline-block; margin-top: 10px; font-family: var(--mono); font-size: 9px; padding: 2px 8px; border-radius: 999px; letter-spacing: .04em; white-space: nowrap; }
+@keyframes kmPop{ 0%{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--amber) 50%, transparent); } 45%{ box-shadow: 0 0 0 6px color-mix(in srgb, var(--amber) 0%, transparent); transform: translateY(-3px); } 100%{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--amber) 0%, transparent); transform: none; } }
+.km-status{ display: inline-block; margin-top: 10px; font-family: var(--mono); font-size: var(--text-caption); padding: 3px 9px; border-radius: 999px; letter-spacing: .02em; white-space: nowrap; }
 .km-grid.is-live-capture .km-status{ background: rgba(154,149,140,.18); color: var(--mute); }
 .km-grid.is-live-capture .km-card.is-captured .km-status{ background: rgba(149,187,164,.22); color: var(--sage); }
-@media (prefers-reduced-motion: reduce){ .km-grid.is-live-capture .km-card{ transition: opacity .01ms; } .km-card.just-captured{ animation: none; } }
+@media (prefers-reduced-motion: reduce){ .km-grid.is-live-capture .km-card{ transition-duration: .01ms; } .km-card.just-captured{ animation: none; } }
+
+/* ============== Stage II · 教案审校卷宗（真实短稿） ============== */
+.review-viewbar{ display:flex; justify-content:space-between; align-items:center; gap:16px; margin:18px 0 8px; }
+.review-view-switch{ display:inline-flex; border-bottom:1px solid var(--ink); }
+.review-view-switch button{ border:0; padding:7px 11px; background:transparent; color:var(--mute); cursor:pointer; font-family:var(--mono); font-size:var(--fs-2xs); letter-spacing:.05em; }
+.review-view-switch button.is-active{ color:var(--amber-deep); box-shadow:inset 0 -3px var(--amber-deep); }
+.review-edit-pack{ border:0; padding:5px 0; background:transparent; color:var(--amber-deep); cursor:pointer; font-family:var(--mono); font-size:var(--fs-2xs); border-bottom:1px solid currentColor; }
+.review-edit-warning{ margin:-2px 0 10px auto; max-width:560px; text-align:right; color:var(--amber-deep); font-family:var(--mono); font-size:var(--fs-2xs); line-height:1.55; }
+.review-edit-warning[hidden]{ display:none!important; }
+.review-env-index{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin-bottom:12px; border:1px solid var(--rule); background:var(--ivory); }
+.review-env-index button{ position:relative; min-width:0; min-height:66px; border:0; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); padding:9px 8px 11px; background:transparent; color:var(--mute); cursor:pointer; }
+.review-env-index button:nth-child(3n){ border-right:0; }
+.review-env-index button:nth-last-child(-n+3){ border-bottom:0; }
+.review-env-index button b{ display:block; color:var(--ink); font-family:var(--mono); font-size:var(--fs-xs); }
+.review-env-index button span{ display:block; overflow:visible; white-space:normal; font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
+.review-env-index button.has-note::after{ content:""; position:absolute; left:50%; bottom:3px; width:4px; height:4px; border-radius:50%; background:var(--amber-deep); }
+.review-env-index button.is-active{ background:var(--amber-wash); color:var(--amber-deep); }
+.review-env-index[hidden]{ display:none!important; }
+.review-dossier{ border-top:1px solid var(--ink); }
+.review-env-sheet{ display:grid; grid-template-columns:minmax(300px,1.08fr) minmax(360px,.92fr); border-bottom:1px solid var(--rule); background:rgba(255,253,248,.54); }
+.review-manuscript{ padding:24px 26px 28px; border-right:1px solid var(--rule); }
+.review-manuscript>header{ display:grid; grid-template-columns:auto 1fr auto; align-items:baseline; gap:13px; margin-bottom:19px; }
+.review-manuscript h5{ margin:0; color:var(--ink); font-family:var(--serif-cn); font-size:var(--fs-lg); font-weight:500; }
+.review-manuscript header small{ color:var(--mute); font-family:var(--mono); font-size:var(--fs-2xs); }
+.review-env-no{ color:var(--amber-deep); font-family:var(--serif-cn); font-size:38px; font-style:italic; line-height:.9; }
+.review-segment{ position:relative; margin:0 0 7px; padding:8px 32px 8px 14px; border-left:3px solid var(--rule); color:var(--ink-2); font-family:var(--serif-cn); font-size:var(--fs-sm); line-height:1.65; }
+.review-segment.is-anchored{ border-left-color:var(--amber-deep); background:linear-gradient(90deg,color-mix(in srgb, var(--amber-deep) 8.5%, transparent),transparent); }
+.review-segment-marker{ position:relative; display:inline-grid; place-items:center; width:22px; height:22px; margin-left:7px; border:1px solid var(--amber-deep); border-radius:50%; color:var(--amber-deep); font-family:var(--mono); font-size:var(--text-micro); vertical-align:1px; }
+.review-margin{ padding:20px 22px 24px; background:rgba(239,234,223,.38); }
+.review-margin-head{ display:flex; justify-content:space-between; gap:12px; margin-bottom:8px; color:var(--mute); font-family:var(--mono); font-size:var(--fs-2xs); letter-spacing:.08em; }
+.review-env-empty{ display:grid; grid-template-columns:72px 1fr auto; align-items:center; min-height:62px; gap:8px; padding:0 18px; border-bottom:1px solid var(--rule); color:var(--mute); }
+.review-env-empty .review-env-no{ color:#a9a39a; font-size:27px; }
+.review-env-empty div{ min-width:0; }
+.review-env-empty b{ display:block; margin-bottom:2px; color:var(--ink); font-family:var(--serif-cn); font-size:var(--fs-xs); font-weight:500; }
+.review-env-empty div span{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:var(--fs-2xs); }
+.review-env-empty small{ font-family:var(--mono); font-size:var(--text-caption); letter-spacing:.02em; }
+.review-note.expert-card{ --review-accent:var(--amber-deep); margin:0; padding:14px 0 17px; border:0; border-top:2px solid var(--review-accent); border-radius:0; background:transparent; box-shadow:none; gap:8px; }
+.review-note.expert-card+.review-note{ margin-top:12px; }
+.review-note.is-pharm{ --review-accent:#4f7973; }.review-note.is-design{ --review-accent:var(--amber-deep); }.review-note.is-law{ --review-accent:#81752d; }.review-note.is-eval{ --review-accent:#647699; }.review-note.is-reflect{ --review-accent:#6d7180; }
+.review-note.expert-card.is-candidate{ --review-accent:var(--sage); border-color:var(--review-accent); box-shadow:none; opacity:.78; }
+.review-note.expert-card.is-rejected{ --review-accent:var(--mute); opacity:.64; }
+.review-note.expert-card .ec-head{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:start; gap:9px; padding:0; border:0; }
+.review-note-marker{ display:grid; place-items:center; width:23px; height:23px; border:1px solid var(--review-accent); border-radius:50%; color:var(--review-accent); font-family:var(--mono); font-size:var(--text-micro); font-weight:700; }
+.review-note-marker.is-seed{ border-radius:2px; }
+.review-note.expert-card .ec-who{ display:block; font-size:var(--fs-xs); }
+.review-note.expert-card .ec-who small{ margin-top:2px; }
+.review-anchor-kind{ color:var(--review-accent); font-family:var(--mono); font-size:var(--text-caption); white-space:nowrap; }
+.review-note.expert-card .ec-func{ padding:0 0 7px 30px; border:0; margin:0; }
+.review-note.expert-card .ec-live-review{ grid-template-columns:1fr auto; padding:6px 8px; background:rgba(255,253,248,.58); }
+.review-note.expert-card .ec-anchor{ background:transparent; padding:0 0 0 30px; color:var(--review-accent); }
+.review-note.expert-card .ec-body{ flex:none; padding-left:30px; font-size:var(--fs-xs); line-height:1.72; }
+.review-note.expert-card .ec-target-picker,.review-note.expert-card .ec-resolution,.review-note.expert-card .ec-edit-panel,.review-note.expert-card .ec-reject-panel,.review-note.expert-card .review-inject{ margin-left:30px; }
+.review-note.expert-card .review-inject{ display:block; padding:7px 9px; }
+.review-note.expert-card .review-inject summary{ cursor:pointer; list-style:none; }
+.review-note.expert-card .review-inject summary::-webkit-details-marker{ display:none; }
+.review-note.expert-card .review-inject .ec-inject-acts{ margin-top:7px; }
+.review-discipline-group{ display:grid; grid-template-columns:230px 1fr; border-bottom:1px solid var(--rule); background:rgba(255,253,248,.54); }
+.review-discipline-group>header{ display:flex; flex-direction:column; gap:7px; padding:22px 18px; border-right:1px solid var(--rule); }
+.review-discipline-group>header b{ font-family:var(--serif-cn); font-size:var(--fs-md); font-weight:500; }
+.review-discipline-group>header span{ color:var(--mute); font-family:var(--mono); font-size:var(--fs-2xs); line-height:1.6; }
+.review-discipline-note{ padding:14px 24px; }.review-discipline-note .review-note{ max-width:800px; }
+.review-unlocated{ margin:16px 0; padding:11px 14px; border:1px dashed var(--rule); border-radius:7px; background:rgba(255,253,248,.48); color:var(--mute); }
+.review-unlocated summary{ cursor:pointer; color:var(--ink); font-family:var(--mono); font-size:var(--fs-2xs); letter-spacing:.05em; }
+.review-unlocated [data-ec-role="unlocated-list"]{ display:grid; gap:10px; margin-top:10px; }
+.review-unlocated p{ margin:0; font-size:var(--fs-2xs); line-height:1.6; }
+.review-unlocated-item{ display:grid; gap:7px; padding:10px; border-top:1px solid var(--rule); }
+.review-unlocated-item h6{ margin:0; color:var(--ink); font-family:var(--serif-cn); font-size:var(--fs-xs); }.review-unlocated-item small{ font-family:var(--mono); }
+.review-unlocated-item button{ justify-self:start; border:0; border-bottom:1px solid currentColor; padding:2px 0; background:transparent; color:var(--amber-deep); cursor:pointer; font-family:var(--mono); font-size:var(--fs-2xs); }
+.review-verdict-band{ margin-top:22px; padding-top:17px; border-top:2px solid var(--ink); }
+.review-verdict-band>header{ display:flex; justify-content:space-between; gap:16px; align-items:baseline; }
+.review-verdict-band h5{ margin:0; font-family:var(--serif-cn); font-size:var(--fs-lg); font-weight:500; }.review-verdict-band header span{ color:var(--mute); font-family:var(--mono); font-size:var(--fs-2xs); }
+.review-verdict-empty{ color:var(--mute); font-family:var(--mono); font-size:var(--fs-2xs); }
+.review-verdict-row{ display:grid; grid-template-columns:210px minmax(0,1fr) 260px; gap:16px; align-items:start; padding:14px 0; border-top:1px solid var(--rule); }
+.review-verdict-row:first-child{ margin-top:10px; }.review-verdict-who b{ display:block; font-family:var(--serif-cn); font-size:var(--fs-xs); }.review-verdict-who small{ color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); }
+.review-verdict-row .ec-evidence,.review-verdict-row .ec-decision{ padding-top:0; border-top:0; }.review-verdict-row .ec-decision-note{ margin-top:6px; }
+@media(max-width:900px){
+  .review-env-index{ grid-template-columns:repeat(3,1fr); }.review-env-index button:nth-child(3n){ border-right:0; }.review-env-index button:nth-last-child(-n+3){ border-bottom:0; }
+  .review-env-sheet{ grid-template-columns:1fr; }.review-manuscript{ border-right:0; border-bottom:1px solid var(--rule); padding:21px 18px; }.review-margin{ padding:17px 18px; }
+  .review-discipline-group{ grid-template-columns:1fr; }.review-discipline-group>header{ border-right:0; border-bottom:1px solid var(--rule); }
+  .review-verdict-row{ grid-template-columns:1fr; }.review-viewbar{ align-items:flex-start; }.review-edit-warning{ text-align:left; margin-left:0; }
+}
+@media(max-width:560px){ .review-viewbar{ flex-direction:column; }.review-env-empty{ grid-template-columns:48px 1fr auto; padding:0 8px; }.review-manuscript>header{ grid-template-columns:auto 1fr; }.review-manuscript header small{ grid-column:2; }.review-note.expert-card .ec-head{ grid-template-columns:auto 1fr; }.review-anchor-kind{ grid-column:2; justify-self:start; }.review-note.expert-card .ec-func,.review-note.expert-card .ec-anchor,.review-note.expert-card .ec-body{ padding-left:0; }.review-note.expert-card .ec-target-picker,.review-note.expert-card .ec-resolution,.review-note.expert-card .ec-edit-panel,.review-note.expert-card .ec-reject-panel,.review-note.expert-card .review-inject{ margin-left:0; } }
+
+/* ============== Trial-first IA · 试教为主轴，审校为观察侧栏 ============== */
+.trial-first-layout{ display:grid; grid-template-columns:minmax(0,1fr) 292px; gap:20px; align-items:start; }
+.trial-classroom{ min-width:0; }
+.review-focus-summary{ position:sticky; top:96px; display:flex; flex-direction:column; gap:11px; padding:17px; border:1px solid var(--ink); border-radius:12px; background:var(--ivory); box-shadow:5px 5px 0 color-mix(in srgb, var(--ink) 8%, transparent); }
+.review-focus-head{ display:flex; flex-direction:column; align-items:flex-start; gap:7px; padding-bottom:9px; border-bottom:1px solid var(--rule); font-family:var(--mono); font-size:var(--fs-2xs); }
+.review-focus-head span{ color:var(--ink); font-weight:650; letter-spacing:.06em; }
+.review-focus-head b{ padding:3px 7px; border:1px solid var(--rule); border-radius:999px; color:var(--mute); font-size:var(--text-caption); font-weight:500; white-space:normal; }
+.review-focus-head b.is-anchored{ border-color:rgba(77,98,87,.45); background:rgba(77,98,87,.08); color:var(--sage); }
+.review-focus-summary h4{ margin:0; font-family:var(--serif-cn); font-size:var(--fs-lg); font-weight:500; }
+.review-focus-summary>p{ margin:0; color:var(--mute); font-size:var(--fs-2xs); line-height:1.6; }
+.review-focus-list{ display:grid; gap:8px; }
+.review-focus-list article{ display:grid; grid-template-columns:28px minmax(0,1fr); gap:3px 8px; padding:9px; border-left:3px solid var(--amber-deep); background:var(--paper-2); }
+.review-focus-list article>b{ grid-row:1/3; color:var(--amber-deep); font-family:var(--mono); font-size:var(--fs-sm); }
+.review-focus-list article>span{ color:var(--ink); font-family:var(--serif-cn); font-size:var(--fs-xs); line-height:1.45; }
+.review-focus-list article>small{ color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
+/* 跨学科关注热点：按环节聚类的可展开投影，只呈现原始意见 */
+.review-focus-list>details.review-focus-env{ grid-column:1/-1; border-left:3px solid var(--amber-deep); background:var(--paper-2); }
+.review-focus-env>summary{ display:grid; grid-template-columns:28px minmax(0,1fr); gap:3px 8px; padding:9px; cursor:pointer; list-style:none; }
+.review-focus-env>summary::-webkit-details-marker{ display:none; }
+.review-focus-env>summary>b{ grid-row:1/3; color:var(--amber-deep); font-family:var(--mono); font-size:var(--fs-sm); }
+.review-focus-env>summary>span{ color:var(--ink); font-family:var(--serif-cn); font-size:var(--fs-xs); line-height:1.45; }
+.review-focus-env>summary>small{ color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
+.review-focus-env>summary::after{ content:"展开"; justify-self:end; grid-column:2; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); }
+.review-focus-env[open]>summary::after{ content:"收起"; }
+.review-focus-env>ul{ margin:0; padding:0 9px 9px 37px; display:grid; gap:8px; list-style:none; }
+.review-focus-env>ul>li{ padding-top:7px; border-top:1px dashed var(--rule); }
+.review-focus-env li>b{ color:var(--ink); font-family:var(--mono); font-size:var(--text-caption); font-weight:650; }
+.review-focus-env li>p{ margin:3px 0; color:var(--ink); font-family:var(--serif-cn); font-size:var(--fs-2xs); line-height:1.55; }
+.review-focus-env li>p>i{ margin-right:6px; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); font-style:normal; }
+.review-focus-env li>p.review-focus-excerpt{ color:var(--mute); }
+.review-focus-env li>small{ color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
+.review-focus-pending{ grid-column:1/-1; margin:0; padding:8px 9px; border:1px dashed var(--rule); border-radius:7px; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
+.review-focus-open{ width:100%; padding:9px 10px; border:1px solid var(--ink); border-radius:7px; background:var(--ink); color:var(--ivory); cursor:pointer; font-family:var(--mono); font-size:var(--fs-2xs); }
+.review-focus-status{ color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
+.review-observation-only{ margin:8px 0 0 30px; padding:8px 10px; border-left:2px solid var(--sage); background:rgba(77,98,87,.06); color:var(--sage); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
+
+.review-drawer-scrim{ position:fixed; inset:0; z-index:210; background:color-mix(in srgb, var(--ink) 42%, transparent); backdrop-filter:blur(2px); }
+.review-drawer{ position:fixed; z-index:220; top:0; right:0; width:min(900px,84vw); height:100dvh; display:grid; grid-template-rows:auto minmax(0,1fr); background:var(--paper); box-shadow:-18px 0 54px color-mix(in srgb, var(--ink) 18%, transparent); transform:translateX(102%); transition:transform .28s cubic-bezier(.16,1,.3,1); }
+.review-drawer[aria-hidden="false"]{ transform:translateX(0); }
+.review-drawer-head{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:20px; padding:20px 24px 17px; border-bottom:1px solid var(--ink); background:var(--ivory); }
+.review-drawer-head span{ color:var(--amber-deep); font-family:var(--mono); font-size:var(--text-caption); letter-spacing:.08em; }
+.review-drawer-head h4{ margin:4px 0; font-family:var(--serif-cn); font-size:var(--fs-xl); font-weight:500; }
+.review-drawer-head p{ margin:0; color:var(--mute); font-size:var(--fs-xs); line-height:1.55; }
+.review-drawer-head button{ align-self:start; width:34px; height:34px; border:1px solid var(--ink); border-radius:50%; background:transparent; color:var(--ink); cursor:pointer; font-size:22px; line-height:1; }
+.review-drawer-body{ overflow:auto; overscroll-behavior:contain; padding:18px 24px 32px; }
+html.review-drawer-open,html.review-drawer-open body{ overflow:hidden; }
+
+/* ============== Review dossier v2 · 编辑部批注案卷 ============== */
+.review-drawer{
+  width:min(1120px,94vw);
+  background:var(--paper-2);
+  box-shadow:-28px 0 80px color-mix(in oklab,var(--ink) 28%,transparent);
+}
+.review-drawer-head{
+  position:relative;
+  grid-template-columns:minmax(0,1fr) auto;
+  padding:17px 28px 15px 32px;
+  border-bottom:0;
+  background:var(--ink);
+  color:var(--ivory);
+  overflow:hidden;
+}
+.review-drawer-head::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:7px;
+  background:var(--amber-deep);
+}
+.review-drawer-head>div>span{
+  color:var(--amber);
+  font-size:var(--fs-2xs);
+  letter-spacing:.16em;
+}
+.review-drawer-head h4{
+  margin:3px 0 3px;
+  color:var(--ivory);
+  font-size:clamp(25px,2.3vw,34px);
+  line-height:1.12;
+}
+.review-drawer-head p{
+  max-width:720px;
+  color:color-mix(in oklab,var(--ivory) 68%,transparent);
+  font-size:var(--fs-xs);
+}
+.review-drawer-head button{
+  width:40px;
+  height:40px;
+  border-color:color-mix(in oklab,var(--ivory) 60%,transparent);
+  color:var(--ivory);
+  transition:background .16s,color .16s,transform .16s;
+}
+.review-drawer-head button:hover{ background:var(--ivory); color:var(--ink); transform:rotate(5deg); }
+.review-drawer-stats{ display:flex; flex-wrap:wrap; gap:7px; margin-top:9px; }
+.review-drawer-stats b{
+  padding:4px 8px;
+  border:1px solid color-mix(in oklab,var(--ivory) 22%,transparent);
+  border-radius:999px;
+  color:color-mix(in oklab,var(--ivory) 82%,transparent);
+  font-family:var(--mono);
+  font-size:var(--text-caption);
+  font-weight:500;
+  letter-spacing:.02em;
+}
+.review-drawer-body{
+  padding:20px 26px 34px;
+  background:var(--paper-2);
+}
+.review-drawer .ec-batch-bar{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:12px 16px;
+  margin:0 0 12px;
+  padding:11px 13px;
+  border:1px solid color-mix(in oklab,var(--ink) 14%,transparent);
+  border-radius:10px;
+  background:color-mix(in oklab,var(--ivory) 78%,transparent);
+  box-shadow:0 7px 24px color-mix(in oklab,var(--ink) 4%,transparent);
+}
+.review-drawer .ec-batch-run{ background:var(--ink); border-color:var(--ink); color:var(--ivory); }
+.review-drawer .ec-batch-run:hover:not(:disabled){ background:var(--amber-deep); color:var(--ivory); }
+.review-viewbar{ margin:10px 0 12px; padding:0 2px; }
+.review-view-switch{ gap:4px; border:0; padding:3px; border-radius:7px; background:color-mix(in oklab,var(--ink) 7%,transparent); }
+.review-view-switch button{ border-radius:5px; padding:7px 13px; }
+.review-view-switch button.is-active{ background:var(--ivory); box-shadow:0 1px 5px color-mix(in oklab,var(--ink) 12%,transparent); color:var(--ink); }
+.review-edit-pack{ padding:7px 0; }
+.review-env-index{
+  position:sticky;
+  top:-20px;
+  z-index:4;
+  grid-template-columns:repeat(9,minmax(0,1fr));
+  gap:6px;
+  margin:0 0 14px;
+  padding:8px;
+  border:1px solid color-mix(in oklab,var(--ink) 16%,transparent);
+  border-radius:12px;
+  background:color-mix(in oklab,var(--paper) 96%,transparent);
+  box-shadow:0 8px 24px color-mix(in oklab,var(--ink) 8%,transparent);
+  backdrop-filter:blur(10px);
+}
+.review-env-index button,
+.review-env-index button:nth-child(3n),
+.review-env-index button:nth-last-child(-n+3){
+  min-height:56px;
+  padding:6px 5px 7px;
+  border:0;
+  border-radius:8px;
+  background:color-mix(in oklab,var(--ivory) 68%,transparent);
+  transition:transform .15s,background .15s,color .15s;
+}
+.review-env-index button:hover:not(:disabled){ transform:translateY(-2px); background:var(--ivory); color:var(--ink); }
+.review-env-index button:disabled{ cursor:default; opacity:.48; }
+.review-env-index button b{ font-size:var(--fs-sm); }
+.review-env-index button span{
+  display:-webkit-box;
+  overflow:hidden;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  font-family:var(--serif-cn);
+  font-size:var(--text-caption);
+  line-height:1.3;
+}
+.review-env-index button em{
+  position:absolute;
+  top:5px;
+  right:6px;
+  display:grid;
+  place-items:center;
+  min-width:18px;
+  height:18px;
+  padding:0 5px;
+  border-radius:999px;
+  background:var(--amber-deep);
+  color:var(--ivory);
+  font-family:var(--mono);
+  font-size:var(--text-micro);
+  line-height:1;
+  box-sizing:border-box;
+  font-style:normal;
+}
+.review-env-index button.has-note::after{ content:none; }
+.review-env-index button.is-active{ background:var(--ink); color:var(--ivory); }
+.review-env-index button.is-active b{ color:var(--ivory); }
+.review-dossier{ display:grid; gap:16px; border:0; }
+.review-empty-summary{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 13px;
+  border:1px dashed color-mix(in oklab,var(--ink) 24%,transparent);
+  border-radius:9px;
+  background:color-mix(in oklab,var(--ivory) 46%,transparent);
+  color:var(--mute);
+}
+.review-empty-summary>span{ font-family:var(--mono); font-size:var(--text-caption); letter-spacing:.06em; }
+.review-empty-summary>div{ display:flex; gap:5px; }
+.review-empty-summary b{
+  display:grid;
+  place-items:center;
+  width:25px;
+  height:25px;
+  border-radius:50%;
+  background:color-mix(in oklab,var(--ink) 7%,transparent);
+  color:var(--ink-2);
+  font-family:var(--mono);
+  font-size:var(--text-caption);
+}
+.review-empty-summary small{ margin-left:auto; font-family:var(--mono); font-size:var(--text-caption); }
+.review-env-sheet{
+  display:block;
+  overflow:hidden;
+  scroll-margin-top:98px;
+  border:1px solid color-mix(in oklab,var(--ink) 18%,transparent);
+  border-radius:14px;
+  background:color-mix(in oklab,var(--ivory) 82%,transparent);
+  box-shadow:0 12px 34px color-mix(in oklab,var(--ink) 6%,transparent);
+}
+.review-env-head{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:12px;
+  align-items:center;
+  padding:17px 20px 13px;
+  border-bottom:1px solid var(--rule);
+  background:var(--ivory);
+}
+.review-env-head h5{
+  margin:0;
+  color:var(--ink);
+  font-family:var(--serif-cn);
+  font-size:var(--fs-md);
+  font-weight:500;
+}
+.review-env-head small{
+  display:block;
+  margin-top:2px;
+  color:var(--mute);
+  font-family:var(--mono);
+  font-size:var(--text-caption);
+}
+.review-manuscript{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  padding:14px 16px 16px;
+  border:0;
+  border-top:1px solid var(--rule);
+  background:color-mix(in oklab,var(--paper) 72%,transparent);
+}
+.review-env-no{ font-size:32px; }
+.review-segment{
+  min-width:0;
+  margin:0;
+  padding:10px 12px;
+  border:1px solid var(--rule);
+  border-left:3px solid var(--rule);
+  border-radius:7px;
+  background:var(--paper);
+  font-size:var(--fs-xs);
+  line-height:1.55;
+}
+.review-segment.is-anchored{
+  border-color:color-mix(in oklab,var(--amber-deep) 28%,transparent);
+  border-left-color:var(--amber-deep);
+  background:var(--amber-wash);
+}
+.review-segment-marker{ width:20px; height:20px; font-size:var(--text-micro); line-height:1; }
+.review-manuscript .review-segment:only-child{ grid-column:1/-1; }
+.review-source-details{ border-top:1px solid var(--rule); background:color-mix(in oklab,var(--ivory) 62%,transparent); }
+.review-source-details>summary{
+  display:grid;
+  grid-template-columns:auto auto minmax(0,1fr) auto;
+  gap:8px 12px;
+  align-items:center;
+  padding:11px 16px;
+  cursor:pointer;
+  list-style:none;
+}
+.review-source-details>summary::-webkit-details-marker{ display:none; }
+.review-source-details>summary>span{ color:var(--ink); font-family:var(--mono); font-size:var(--text-caption); font-weight:650; letter-spacing:.06em; }
+.review-source-details>summary>b{ color:var(--amber-deep); font-family:var(--mono); font-size:var(--text-caption); font-weight:500; }
+.review-source-details>summary>small{
+  display:-webkit-box;
+  min-width:0;
+  overflow:hidden;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:1;
+  color:var(--mute);
+  font-size:var(--text-caption);
+  line-height:1.45;
+}
+.review-source-details>summary>em{ color:var(--amber-deep); font-family:var(--mono); font-size:var(--text-caption); font-style:normal; white-space:nowrap; }
+.review-source-details[open]>summary>em{ font-size:0; }
+.review-source-details[open]>summary>em::after{ content:"收起原稿"; font-size:var(--text-caption); }
+.review-margin{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  padding:14px 16px 16px;
+  background:color-mix(in oklab,var(--paper-3) 38%,transparent);
+}
+.review-margin-head{
+  grid-column:1/-1;
+  align-items:center;
+  margin:0;
+  padding:0 2px 3px;
+  color:var(--ink-2);
+}
+.review-margin-head span::before{ content:"先读 / "; color:var(--amber-deep); }
+.review-note.expert-card{
+  min-width:0;
+  margin:0;
+  padding:15px;
+  border:1px solid color-mix(in oklab,var(--ink) 12%,transparent);
+  border-left:4px solid var(--review-accent);
+  border-radius:10px;
+  background:color-mix(in oklab,var(--ivory) 90%,transparent);
+  box-shadow:0 5px 18px color-mix(in oklab,var(--ink) 4.5%,transparent);
+  gap:9px;
+}
+.review-note.expert-card+.review-note{ margin-top:0; }
+.review-margin .review-note:only-of-type{ grid-column:1/-1; }
+.review-note.expert-card .ec-head{
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:start;
+  gap:8px 10px;
+  padding:0 0 9px;
+  border-bottom:1px solid var(--rule);
+}
+.review-note-marker{ width:28px; height:28px; background:color-mix(in oklab,var(--review-accent) 8%,transparent); }
+.review-note.expert-card .ec-who{
+  min-width:0;
+  font-size:var(--fs-sm);
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+.review-note.expert-card .ec-who small{ font-size:var(--text-caption); }
+.review-anchor-kind{
+  grid-column:2;
+  justify-self:start;
+  max-width:100%;
+  padding:3px 6px;
+  border-radius:999px;
+  background:color-mix(in oklab,var(--review-accent) 8%,transparent);
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.4;
+}
+.review-note.expert-card .ec-func{
+  margin:0;
+  padding:0;
+  border:0;
+  color:var(--mute);
+  line-height:1.5;
+}
+.review-note.expert-card .ec-live-review{
+  grid-template-columns:minmax(0,1fr) auto;
+  padding:7px 9px;
+  background:color-mix(in oklab,var(--ivory) 72%,transparent);
+}
+.review-note.expert-card .ec-anchor{
+  max-width:100%;
+  padding:4px 7px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.review-note.expert-card .ec-body{
+  min-width:0;
+  padding:0;
+  font-size:var(--fs-xs);
+  line-height:1.65;
+  overflow-wrap:anywhere;
+}
+.review-note .ec-review-line{
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr);
+  gap:8px;
+  padding:8px 0;
+  border-top:1px dashed color-mix(in oklab,var(--ink) 13%,transparent);
+}
+.review-note .ec-review-line:first-child{ border-top:0; }
+.review-note .ec-review-line+.ec-review-line{ margin-top:0; }
+.review-note .ec-review-line>b{ min-width:0; margin:0; padding-top:2px; color:var(--review-accent); }
+.review-note .ec-review-line>span{ min-width:0; overflow-wrap:anywhere; }
+.review-note .ec-review-line>span b{ display:inline; min-width:0; margin:0; color:var(--ink); font-family:inherit; font-size:inherit; font-weight:600; letter-spacing:0; }
+.review-note .ec-review-line:last-child{
+  margin-top:3px;
+  padding:10px 11px;
+  border:0;
+  border-radius:7px;
+  background:color-mix(in oklab,var(--review-accent) 7%,transparent);
+}
+.review-note-meta{ margin-top:2px; border-top:1px solid var(--rule); }
+.review-note-meta>summary{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 0 0;
+  cursor:pointer;
+  list-style:none;
+  color:var(--ink-2);
+  font-family:var(--mono);
+  font-size:var(--text-caption);
+}
+.review-note-meta>summary::-webkit-details-marker{ display:none; }
+.review-note-meta>summary::after{ content:"+"; color:var(--review-accent); font-weight:700; }
+.review-note-meta[open]>summary::after{ content:"−"; }
+.review-note-meta>summary small{ margin-left:auto; color:var(--mute); font:inherit; }
+.review-note-meta-body{ display:grid; gap:8px; padding-top:9px; }
+.review-note.expert-card .ec-target-picker,
+.review-note.expert-card .ec-resolution,
+.review-note.expert-card .ec-edit-panel,
+.review-note.expert-card .ec-reject-panel,
+.review-note.expert-card .review-inject{ margin-left:0; }
+.review-note.expert-card .review-inject{ padding:7px 9px; background:color-mix(in oklab,var(--ink) 2.5%,transparent); }
+.review-observation-only{
+  margin:0;
+  padding:7px 9px;
+  border:0;
+  border-radius:6px;
+  background:color-mix(in oklab,var(--sage) 7%,transparent);
+  line-height:1.45;
+}
+.review-dossier.is-discipline-mode{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+.review-discipline-group{
+  display:block;
+  overflow:hidden;
+  border:1px solid color-mix(in oklab,var(--ink) 16%,transparent);
+  border-radius:12px;
+  background:color-mix(in oklab,var(--ivory) 72%,transparent);
+}
+.review-discipline-group>header{ min-height:92px; padding:16px; border:0; border-bottom:1px solid var(--rule); }
+.review-discipline-note{ padding:12px; }
+.review-discipline-note .review-note{ max-width:none; }
+
+.review-verdict-band{ margin-top:24px; }
+.review-verdict-band>header{ padding-bottom:10px; }
+.review-verdict-list{ display:block; }
+.review-verdict-workspace{ display:grid; grid-template-columns:minmax(250px,310px) minmax(0,1fr); min-height:360px; overflow:hidden; border:1px solid var(--rule); border-radius:12px; background:var(--ivory); }
+.review-verdict-index{ min-width:0; border-right:1px solid var(--rule); background:var(--paper-2); }
+.review-verdict-index>header{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:14px 15px 9px; }
+.review-verdict-index>header span{ color:var(--mute); font-family:var(--mono); font-size:var(--text-micro); letter-spacing:.08em; text-transform:uppercase; }
+.review-verdict-index>header strong{ color:var(--ink); font-family:var(--mono); font-size:var(--text-caption); font-weight:600; }
+.review-verdict-summary{ display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 15px 12px; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); }
+.review-verdict-summary b{ color:var(--sage); font-size:var(--fs-xs); }
+.review-verdict-index nav{ display:grid; border-top:1px solid var(--rule); }
+.review-verdict-index-item{ display:grid; gap:5px; width:100%; min-width:0; padding:11px 14px; border:0; border-top:1px solid color-mix(in srgb,var(--rule) 72%,transparent); background:transparent; color:var(--ink); cursor:pointer; text-align:left; transition:background .24s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.16,1,.3,1),opacity .18s ease; }
+.review-verdict-index-item:first-child{ border-top:0; }
+.review-verdict-index-item:hover{ background:color-mix(in srgb,var(--ivory) 58%,transparent); }
+.review-verdict-index-item:active{ transform:translateY(1px) scale(.995); }
+.review-verdict-index-item.is-active{ background:var(--ivory); box-shadow:inset 3px 0 0 var(--amber-deep); }
+.review-verdict-index-item.is-resolved:not(.is-active){ opacity:.66; }
+.review-verdict-index-top{ display:grid; grid-template-columns:26px minmax(0,1fr) auto; align-items:baseline; gap:7px; }
+.review-verdict-index-top i{ color:var(--amber-deep); font-family:var(--mono); font-size:var(--text-caption); font-style:normal; }
+.review-verdict-index-top b{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--serif-cn); font-size:var(--fs-xs); font-weight:500; }
+.review-verdict-index-top em{ padding:2px 5px; border-radius:4px; background:color-mix(in srgb,var(--sage) 10%,transparent); color:var(--sage); font-family:var(--mono); font-size:var(--text-micro); font-style:normal; white-space:nowrap; }
+.review-verdict-index-issue{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink-2); font-size:var(--text-caption); line-height:1.5; }
+.review-verdict-index-meta{ display:flex; justify-content:space-between; gap:8px; color:var(--mute); font-family:var(--mono); font-size:var(--text-micro); }
+.review-verdict-detail-stack{ min-width:0; background:var(--ivory); }
+.review-verdict-row.is-posttrial{ display:block; min-height:100%; margin:0; padding:17px 19px 18px; border:0; border-radius:0; background:var(--ivory); }
+.review-verdict-row.is-posttrial[hidden]{ display:none!important; }
+.review-verdict-row.is-posttrial.is-active{ animation:review-detail-in .28s cubic-bezier(.16,1,.3,1) both; }
+@keyframes review-detail-in{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+.review-detail-kicker{ display:flex; justify-content:space-between; gap:12px; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--rule); color:var(--mute); font-family:var(--mono); font-size:var(--text-micro); letter-spacing:.06em; }
+.review-detail-kicker span{ color:var(--amber-deep); font-weight:700; }
+.review-verdict-row.is-posttrial.is-candidate{ border-color:rgba(77,98,87,.5); }
+.review-verdict-row.is-posttrial.is-rejected{ opacity:.72; }
+.posttrial-head{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:start; margin-bottom:8px; }
+.posttrial-head b{ display:block; font-family:var(--serif-cn); font-size:var(--fs-sm); font-weight:500; }
+.posttrial-head small{ display:block; margin-top:2px; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); }
+.posttrial-source{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:8px; align-items:start; margin:0; padding:8px 10px; border-left:2px solid var(--amber-deep); background:var(--paper-2); }
+.posttrial-source-label{ padding-top:2px; color:var(--amber-deep); font-family:var(--mono); font-size:var(--text-micro); font-weight:700; letter-spacing:.06em; white-space:nowrap; }
+.posttrial-source-copy{ display:-webkit-box; min-width:0; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; color:var(--ink-2); font-size:var(--fs-xs); line-height:1.55; }
+.posttrial-source-copy.is-structured{ display:grid; gap:1px; -webkit-line-clamp:unset; }
+.posttrial-source-copy.is-structured .ec-review-line{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.posttrial-source.is-expanded .posttrial-source-copy{ display:block; overflow:visible; }
+.posttrial-source.is-expanded .posttrial-source-copy.is-structured .ec-review-line{ overflow:visible; white-space:normal; }
+.posttrial-source-toggle{ padding:2px 0; border:0; border-bottom:1px solid currentColor; background:transparent; color:var(--mute); cursor:pointer; font-family:var(--mono); font-size:var(--text-caption); white-space:nowrap; }
+.posttrial-source-toggle:hover{ color:var(--amber-deep); }
+.posttrial-flow{ display:grid; gap:8px; margin-top:8px; }
+.posttrial-flow>section{ min-width:0; padding-top:0; border-top:0; }
+.posttrial-flow .ec-resolution{ gap:5px; padding:0; border:0; }
+.posttrial-flow .ec-section-lbl{ display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); }
+.posttrial-flow .ec-section-lbl b{ color:var(--ink); font-weight:500; }
+.posttrial-flow .ec-section-lbl small{ color:var(--mute); }
+.posttrial-flow .ec-resolution-picker{ max-width:none; margin-top:0; }
+.posttrial-flow .ec-edit-panel,.posttrial-flow .ec-reject-panel{ max-width:none; margin-top:4px; }
+.posttrial-flow .ec-reject-panel{ display:grid; gap:9px; }
+.posttrial-flow .ec-reject-panel[hidden]{ display:none!important; }
+.posttrial-flow .ec-reject-panel>div{ margin-top:0; }
+.ec-evidence-summary{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:8px; margin:0; padding:6px 9px; border:1px solid color-mix(in srgb, var(--sage) 24%, transparent); border-radius:7px; background:color-mix(in srgb, var(--sage) 5%, transparent); color:var(--sage); font-family:var(--mono); font-size:var(--text-caption); }
+.ec-evidence-label{ padding:2px 6px; border-radius:999px; background:color-mix(in srgb, var(--sage) 12%, transparent); font-weight:700; letter-spacing:.04em; }
+.ec-evidence-summary button{ flex:none; padding:2px 0 2px 9px; border:0; border-left:1px solid currentColor; background:transparent; color:inherit; cursor:pointer; font:inherit; }
+.posttrial-flow .ec-evidence-list{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; margin-top:8px; }
+.posttrial-flow .ec-evidence-list[hidden]{ display:none!important; }
+.posttrial-flow .ec-evidence-chip{ display:grid; gap:3px; min-width:0; padding:8px 10px; border-radius:7px; text-align:left; line-height:1.45; }
+.posttrial-flow .ec-evidence-chip span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink); }
+.posttrial-flow .ec-evidence-chip small{ color:var(--mute); font-size:var(--text-caption); }
+.posttrial-flow .ec-evidence-chip.is-linked small{ color:var(--sage); }
+.ec-decision-note-field{ display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:8px; max-width:none; margin-top:4px; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); }
+.ec-decision-note-field[hidden]{ display:none!important; }
+.posttrial-flow .ec-decision-note{ width:100%; margin-top:0; padding:7px 8px; border:1px solid var(--rule); border-radius:5px; background:var(--paper); }
+.posttrial-wait{ padding:16px; border:1px dashed var(--rule); border-radius:8px; background:var(--paper-2); color:var(--mute); text-align:center; font-family:var(--mono); font-size:var(--fs-2xs); }
+
+@media(max-width:980px){
+  .trial-first-layout{ grid-template-columns:1fr; }
+  .review-focus-summary{ position:static; order:-1; }
+  .review-focus-list{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .review-focus-list article{ grid-template-columns:24px minmax(0,1fr); }
+  .posttrial-flow .ec-evidence-list{ grid-template-columns:1fr; }
+  .review-verdict-workspace{ grid-template-columns:1fr; }
+  .review-verdict-index{ border-right:0; border-bottom:1px solid var(--rule); }
+  .review-verdict-index nav{ grid-auto-flow:column; grid-auto-columns:minmax(230px,72vw); overflow-x:auto; overscroll-behavior-inline:contain; scroll-snap-type:x proximity; }
+  .review-verdict-index-item{ border-top:0; border-right:1px solid var(--rule); scroll-snap-align:start; }
+  .review-verdict-index-item.is-active{ box-shadow:inset 0 -3px 0 var(--amber-deep); }
+}
+@media(max-width:640px){
+  .stage{ scroll-margin-top:236px; }
+  .review-focus-list{ grid-template-columns:1fr; }
+  .review-drawer{ width:100vw; }
+  .review-drawer-head{ padding:16px; }
+  .review-drawer-body{ padding:14px 14px 26px; }
+  .review-verdict-row.is-posttrial{ padding:14px 12px; }
+  .posttrial-head{ grid-template-columns:1fr; }
+  .posttrial-source{ grid-template-columns:minmax(0,1fr) auto; }
+  .posttrial-source-label{ grid-column:1; }
+  .posttrial-source-copy{ grid-column:1 / -1; grid-row:2; }
+  .posttrial-source-toggle{ grid-column:2; grid-row:1; }
+  .ec-decision-note-field{ grid-template-columns:1fr; }
+  .review-verdict-index>header{ padding-inline:12px; }
+  .review-verdict-summary{ padding-inline:12px; }
+}
+@media(prefers-reduced-motion:reduce){ .review-verdict-row.is-posttrial.is-active{ animation:none; } }
+@media(max-width:900px){
+  .review-env-index{ grid-template-columns:repeat(3,minmax(0,1fr)); top:-14px; }
+  .review-manuscript{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .review-dossier.is-discipline-mode{ grid-template-columns:1fr; }
+}
+@media(max-width:640px){
+  .review-drawer-head{ padding:20px 20px 18px 24px; }
+  .review-drawer-head h4{ font-size:30px; }
+  .review-drawer-head>div>span,
+  .review-drawer-head p{ display:none; }
+  .review-drawer-stats{ gap:5px; margin-top:10px; }
+  .review-drawer-stats b:first-child{ display:none; }
+  .review-drawer-stats b{ font-size:var(--text-micro); }
+  .review-drawer-body{ padding:12px 12px 24px; background:var(--paper-2); }
+  .review-drawer .ec-batch-bar{ grid-template-columns:1fr; }
+  .review-drawer .ec-batch-run{ width:100%; }
+  .review-viewbar{ flex-direction:row; align-items:center; flex-wrap:wrap; }
+  .review-edit-pack{ align-self:flex-start; }
+  .review-env-index{ gap:4px; padding:6px; border-radius:9px; }
+  .review-env-index button,
+  .review-env-index button:nth-child(3n),
+  .review-env-index button:nth-last-child(-n+3){ min-height:62px; }
+  .review-empty-summary{ align-items:flex-start; flex-wrap:wrap; }
+  .review-empty-summary small{ width:100%; margin-left:0; }
+  .review-manuscript{ grid-template-columns:1fr; padding:16px 14px 14px; }
+  .review-manuscript>header{ grid-template-columns:auto minmax(0,1fr); }
+  .review-manuscript header small{ grid-column:2; }
+  .review-margin{ grid-template-columns:1fr; padding:12px; }
+  .review-note.expert-card{ padding:13px; }
+  .review-note.expert-card .ec-live-review{ grid-template-columns:1fr; }
+  .review-note.expert-card .ec-live-review button{ justify-self:start; }
+  .review-note .ec-review-line{ grid-template-columns:36px minmax(0,1fr); gap:6px; }
+  .review-source-details>summary{ grid-template-columns:auto 1fr auto; }
+  .review-source-details>summary>small{ grid-column:1/-1; grid-row:2; }
+}
 </style>
 </head>
-<body>
+<body class="is-readable-detail">
 <script>
 /* Scheme A · 入场隐藏态守卫（同步运行避免 FOUC；reduce-motion / 无 IO → 内容默认全显示，不隐藏） */
 (function(){ try{ var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; if (!rm && 'IntersectionObserver' in window){ document.documentElement.classList.add('reveal-on'); } }catch(e){} })();
@@ -1723,22 +2550,23 @@ window.__ANIM = window.__ANIM || { reveal: { step: 75 } };
 </script>
 <!-- 共享脚本统一带 ?v= 防缓存 desync：无版本号时 returning 浏览器可能吃旧缓存→脚本版本对不上→运行时静默 bail（阶段不交互、候选数停 0）。改文件必须 bump ?v=。 -->
 <script src="./shared/wendao.js?v=3" defer></script>
-<script src="./shared/fanya.js?v=2" defer></script>
 <script src="./shared/live-stats.js?v=1" defer></script>
 <!-- ===== Practice runtime: 4 stages now actually run ===== -->
 <script src="./shared/pharmaco-store.js?v=31" defer></script>
 <script src="./shared/nav-stations-contract.js?v=31" defer></script>
-<script src="./shared/practice-runtime-contract.js?v=discipline-review-v4" defer></script>
-<script src="./shared/toast.js?v=2" defer></script>
-<script src="./shared/faq.js?v=1" defer></script>
-<script src="./shared/practice-runtime.js?v=discipline-review-v13" defer></script>
+<script src="./shared/practice-segments.js?v=review-dossier-v1" defer></script>
+<script src="./shared/practice-review.js?v=review-domain-v7-concise" defer></script>
+<script src="./shared/practice-runtime-contract.js?v=trial-first-v6-single-decision" defer></script>
+<script src="./shared/toast.js?v=3-color-token" defer></script>
+<script src="./shared/faq.js?v=2-neutral-color" defer></script>
+<script src="./shared/practice-runtime.js?v=41-env-hotspot" defer></script>
 <script src="./shared/rerun-bridge.js?v=3" defer></script>
-<script src="./shared/backend-client.js?v=5-practice-review" defer></script>
+<script src="./shared/backend-client.js?v=7-structured-pack" defer></script>
 <!-- ===== 虚拟教室 ===== 优先 3D；core=仿真大脑；2.5D 为回退 -->
 <script>window.__MV_DEFER_2D = true;</script>
-<script src="./shared/mv-classroom-core.js?v=1" defer></script>
-<script src="./shared/metaverse-classroom.js?v=16-lazy" defer></script>
-<script type="module" src="./shared/metaverse-classroom-3d.js?v=15-lazy"></script>
+<script src="./shared/mv-classroom-core.js?v=2-swot-context" defer></script>
+<script src="./shared/metaverse-classroom.js?v=21-recovery-first" defer></script>
+<script type="module" src="./shared/metaverse-classroom-3d.js?v=21-recovery-first"></script>
 <!-- 兜底：仅当 3D 模块“真失败/缺席”（非 __MV3D_PENDING 延迟懒加载）时回退 2.5D，避免空白；延迟态留给 IntersectionObserver -->
 <script>
 window.addEventListener('load', function () {
@@ -1809,7 +2637,7 @@ window.addEventListener('load', function () {
       <a class="loop-step" href="#stage-ii">
         <span class="seq">ii</span>
         <span class="cn">试错+证据<small>B · TRIAL &amp; EVIDENCE</small></span>
-        <span class="out">产出 · <b>五路学科审校 · 仿真关键时刻 · 教师判断</b></span>
+        <span class="out">产出 · <b>五路学科审校 · 仿真关键时刻 · 处理建议</b></span>
         <span class="arr">→</span>
       </a>
       <a class="loop-step" href="#stage-iii">
@@ -1818,7 +2646,7 @@ window.addEventListener('load', function () {
         <span class="out">产出 · <b>按 9 个教学环节回写实践包 / 数据 / 资产库</b></span>
       </a>
       <div class="loop-feedback">
-        <span><span class="arrow"></span>数据源：<b>教师真实班级 + 泛雅</b>；本轮确认后按 <b>9 个教学环节</b> 归位写回到<b>本课实践包 / 教学数据 / 个人资产库</b></span>
+        <span><span class="arrow"></span>数据源：<b>教师选择 + 本机虚拟班演练</b>；本轮确认后按 <b>9 个教学环节</b> 归位写回到<b>本课实践包 / 教学数据 / 个人资产库</b></span>
         <span>循环 · #03 · 累计沉淀 17 个可复用片段</span>
       </div>
     </nav>
@@ -1847,8 +2675,8 @@ window.addEventListener('load', function () {
     <div class="stage-h" data-reveal>
       <div class="num">i<small>STAGE · 生成实践包</small></div>
       <div>
-        <h3 id="stage-i-title">把<span class="it"> 9 个教学环节 </span>导航产物，<br/>合成一份可以上课堂的实践包。</h3>
-        <p>读取课程主题、教学导航段落、学生画像、课时长度，输出一份含"任务 · 角色 · 评价证据 · 资料"的课堂实践包——下一步进入"试错+证据"段，接受五路学科审校并关联虚拟班仿真记录。</p>
+        <h3 id="stage-i-title">先确认<span class="it"> 9 个教学环节 </span>设计摘要，<br/>再生成一份可以上课堂的完整实践包。</h3>
+        <p>课程、班级、课时与章节决定课堂边界；九张摘要卡提供可编辑的生成要求。本地 Qwen 据此展开教师动作、学生任务、资源、评价证据与时间安排，生成后可继续编辑、审校并下载。</p>
       </div>
     </div>
 
@@ -1866,79 +2694,141 @@ window.addEventListener('load', function () {
           <div class="wiz-chips"></div>
         </div>
         <div class="wiz-group" data-wiz="class">
-          <div class="wiz-lbl"><span>② 选 <b>班级</b></span><small>按课程联动</small></div>
+          <div class="wiz-lbl"><span>② 选 <b>班级</b></span><small>单一年级 · 药事管理班</small></div>
           <div class="wiz-chips"></div>
         </div>
         <div class="wiz-group" data-wiz="session">
-          <div class="wiz-lbl"><span>③ 选 <b>课时</b></span><small>第 N 周 · 节次 · 时长</small></div>
+          <div class="wiz-lbl"><span>③ 选 <b>课时</b></span><small>第 1 周 → 第 18 周（期末周）</small></div>
           <div class="wiz-chips"></div>
         </div>
         <div class="wiz-group" data-wiz="chapter">
-          <div class="wiz-lbl"><span>④ 选 <b>章节</b></span><small>按课程联动</small></div>
+          <div class="wiz-lbl"><span>④ 选 <b>章节</b></span><small>全部显示 · 非本课时锁定</small></div>
           <div class="wiz-chips"></div>
         </div>
         <div class="wiz-hint" id="wizHint" style="grid-column:1/-1">
-          按 <b>i → ii → iii → iv</b> 顺序选择（默认已自动补选示例）· 选择会即时同步到右上 hero meta 与下方实践包 · 选择会持久化到浏览器
-        </div>
-
-        <!-- 四项选完后的出口:调用本机模型生成,结果显示在下方独立一栏 -->
-        <div class="pack-cta" style="grid-column:1/-1">
-          <span class="hint">⌥ 四项选定后生成 · 调用本机 Qwen 产出九环节 · 九个环节均可编辑</span>
-          <button type="button" class="btn-primary" id="inline-generate-pack">生成实践包 ↓</button>
+          按 <b>i → ii → iii → iv</b> 依次选择；课时与章节双向保持一致，非本课时章节会锁定 · 结果即时同步到下方设计摘要 · 选择会持久化到浏览器
         </div>
       </div>
     </div>
 
-    <!-- 生成结果:独占整栏,九个教学环节铺开 -->
-    <div class="pack-result" data-reveal>
-      <aside class="pack-preview">
+    <!-- 同一工作区按 摘要 → 生成 → 实践包 三种互斥状态切换，避免两套九宫格纵向叠加。 -->
+    <div class="pack-result pack-workspace" data-pack-workspace data-pack-view="briefs" data-reveal>
+      <aside class="design-summary" data-pack-panel="briefs">
         <div class="pack-preview-h">
-          <h4>课堂实践包预览<small>由教师真实输入合成 · 待试错+证据</small></h4>
+          <h4 tabindex="-1">课堂教学设计摘要<small>九个环节均为生成要求 · 教师可直接修改</small></h4>
           <span class="pid">P-2024-Q3</span>
         </div>
 
         <div class="pack-items env-grid">
           <div class="pack-item" data-env="01">
             <div class="hd">
-              <span class="env-badge">01 学情诊断</span>
-              <a class="fanya-lnk" data-fanya href="https://demo.fanya.chaoxing.com/portal" target="_blank" rel="noopener">🔗 泛雅</a>
+              <span class="env-badge">01 学习者与教学情境分析</span>
+              <b class="env-count"></b>
             </div>
-            <div class="body" data-pack-field="env01">诊断学生对本章主题的先验认知 · 探查常见误解 · 记录认知起点</div>
+            <span class="brief-tag">生成要求</span>
+            <div class="body" data-brief-field="env01">分析本班学生对本章主题的先验认知、常见误解与学习起点，并提出可在课前或开场完成的诊断方式。</div>
           </div>
           <div class="pack-item" data-env="02">
-            <div class="hd"><span class="env-badge">02 目标与量规</span><b class="env-count"></b></div>
-            <div class="body" data-pack-field="env02">本节学习目标 · 评价量规核心维度</div>
+            <div class="hd"><span class="env-badge">02 预期学习结果与评价证据设计</span><b class="env-count"></b></div>
+            <span class="brief-tag">生成要求</span>
+            <div class="body" data-brief-field="env02">生成可观察的学习结果，为每项结果匹配课堂产出、评价证据与判定标准，确保目标、活动和评价一致。</div>
           </div>
           <div class="pack-item" data-env="03">
-            <div class="hd"><span class="env-badge">03 知识与误区</span><b class="env-count"></b></div>
-            <div class="body" data-pack-field="env03">本章核心概念 · 常见混淆点 · 待破解误区</div>
+            <div class="hd"><span class="env-badge">03 教学内容结构化与前概念诊断</span><b class="env-count"></b></div>
+            <span class="brief-tag">生成要求</span>
+            <div class="body" data-brief-field="env03">梳理本章核心概念及其关系，指出学生容易混淆的前概念，并设计用于暴露误区的诊断问题。</div>
           </div>
           <div class="pack-item" data-env="04">
-            <div class="hd"><span class="env-badge">04 案例与证据</span><b class="env-count"></b></div>
-            <div class="body" data-pack-field="env04">真实案例 · 政策证据 · 引用材料</div>
+            <div class="hd"><span class="env-badge">04 真实性学习情境与资源设计</span><b class="env-count"></b></div>
+            <span class="brief-tag">生成要求</span>
+            <div class="body" data-brief-field="env04">基于教师已提供的案例、政策或行业材料构建真实性学习情境；不得补造来源，材料不足时明确标注待核实。</div>
           </div>
           <div class="pack-item" data-env="05">
-            <div class="hd"><span class="env-badge">05 任务链设计</span><b class="env-count"></b></div>
-            <div class="body" data-pack-field="env05">递进问题链 · 分歧锚点 · 可评价产出任务</div>
+            <div class="hd"><span class="env-badge">05 学习活动与教学支架设计</span><b class="env-count"></b></div>
+            <span class="brief-tag">生成要求</span>
+            <div class="body" data-brief-field="env05">设计递进问题链、分歧锚点、学生任务与必要支架，明确教师动作、学生协作方式和可评价产出。</div>
           </div>
           <div class="pack-item" data-env="06">
-            <div class="hd"><span class="env-badge">06 课中调控</span><b class="env-count"></b></div>
-            <div class="body" data-pack-field="env06">分组监控节点 · 沉默干预 · 核心追问策略</div>
+            <div class="hd"><span class="env-badge">06 形成性评价与适应性调控</span><b class="env-count"></b></div>
+            <span class="brief-tag">生成要求</span>
+            <div class="body" data-brief-field="env06">设置课中形成性检查、分组监控和沉默学生干预节点，并给出依据学生表现调整追问或支架的规则。</div>
           </div>
           <div class="pack-item" data-env="07">
-            <div class="hd"><span class="env-badge">07 评价与画像</span><b class="env-count"></b></div>
-            <div class="body" data-pack-field="env07">量规维度 · 学生类型识别 · 画像标签</div>
+            <div class="hd"><span class="env-badge">07 表现性评价与学习成效诊断</span><b class="env-count"></b></div>
+            <span class="brief-tag">生成要求</span>
+            <div class="body" data-brief-field="env07">形成可直接使用的表现性评价标准，列明评价维度、可观察指标、等级锚点以及对学习成效的诊断方式。</div>
           </div>
           <div class="pack-item" data-env="08">
-            <div class="hd"><span class="env-badge">08 复盘与决策</span><b class="env-count"></b></div>
-            <div class="body" data-pack-field="env08">复盘提问 · 被低估的视角 · 下轮改进决策</div>
+            <div class="hd"><span class="env-badge">08 反思性实践与教学改进</span><b class="env-count"></b></div>
+            <span class="brief-tag">生成要求</span>
+            <div class="body" data-brief-field="env08">设计教师和学生的课后复盘问题，区分课堂事实、可能原因与改进假设，并提出下一轮可验证的调整。</div>
           </div>
           <div class="pack-item" data-env="09">
-            <div class="hd"><span class="env-badge">09 资产沉淀</span><b class="env-count"></b></div>
-            <div class="body" data-pack-field="env09">可复用任务题库 · 角色卡 · 案例数据包</div>
+            <div class="hd"><span class="env-badge">09 教学知识建构与专业共享</span><b class="env-count"></b></div>
+            <span class="brief-tag">生成要求</span>
+            <div class="body" data-brief-field="env09">整理可复用的任务、问题、角色卡、评价标准和案例材料，标注适用情境、版本与共享前需要核验的内容。</div>
           </div>
         </div>
 
+        <div class="pack-cta">
+          <span class="hint">九项生成要求确认后，由本地 Qwen 展开为完整课堂实践包；生成前不会覆盖摘要。</span>
+          <div class="pack-cta-actions">
+            <button type="button" class="btn-ghost" data-pack-return-output hidden>返回当前实践包</button>
+            <button type="button" class="btn-primary" id="inline-generate-pack">生成完整实践包 ↓</button>
+          </div>
+        </div>
+
+      </aside>
+
+      <section class="pack-generating" data-pack-panel="generating" hidden aria-labelledby="pack-generating-title" aria-live="polite">
+        <div class="pack-generation-map" aria-hidden="true">
+          <span style="--pack-node:0">01</span><span style="--pack-node:1">02</span><span style="--pack-node:2">03</span>
+          <span style="--pack-node:3">04</span><span style="--pack-node:4">05</span><span style="--pack-node:5">06</span>
+          <span style="--pack-node:6">07</span><span style="--pack-node:7">08</span><span style="--pack-node:8">09</span>
+        </div>
+        <div class="pack-generating-copy">
+          <span class="eyebrow">LOCAL QWEN · STRUCTURED GENERATION</span>
+          <h4 id="pack-generating-title" tabindex="-1">正在展开完整课堂实践包</h4>
+          <p>九项设计摘要已经安全保存，本机模型正在生成可编辑的教学活动、评价证据、支架与反思方案。
+            <small data-pack-generation-context>生成过程中无需停留在本区域，完成后会自动切换到实践包。</small>
+          </p>
+          <div class="pack-generation-line" aria-hidden="true"></div>
+          <div class="pack-generation-phases" aria-label="生成流程">
+            <span>读取课程约束</span><span>展开九个教学环节</span><span>校验完整结构</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="pack-preview" data-pack-panel="output" hidden>
+        <button type="button" class="pack-input-recap" data-pack-edit-briefs>
+          <span class="mark">DESIGN INPUT</span>
+          <span><b>课堂教学设计摘要 · 9/9 已确认</b><small>输入已收起，点击查看或修改生成要求</small></span>
+          <span class="arr" aria-hidden="true">edit ↗</span>
+        </button>
+        <div class="pack-preview-h">
+          <div>
+            <h4 tabindex="-1">完整课堂实践包<small>本地 Qwen 结构化生成 · 可继续编辑、分环节重生成与下载</small></h4>
+            <span class="pack-export-status" role="status" aria-live="polite"></span>
+          </div>
+          <div class="pack-preview-actions" aria-label="实践包下载">
+            <span class="pid">P-2024-Q3</span>
+            <button type="button" class="pack-export-btn" data-pack-export="docx">下载 Word</button>
+            <button type="button" class="pack-export-btn" data-pack-export="pdf">下载 PDF</button>
+            <button type="button" class="pack-export-btn" data-pack-export="md">下载 MD</button>
+            <button type="button" class="pack-export-btn is-bundle" data-pack-export="zip">下载 ZIP</button>
+          </div>
+        </div>
+        <div class="pack-items env-grid">
+          <div class="pack-item" data-env="01"><div class="hd"><span class="env-badge">01 学习者与教学情境分析</span><button type="button" class="pack-regenerate" data-pack-regenerate="env01">重新生成</button></div><div class="body" data-pack-field="env01"></div></div>
+          <div class="pack-item" data-env="02"><div class="hd"><span class="env-badge">02 预期学习结果与评价证据设计</span><button type="button" class="pack-regenerate" data-pack-regenerate="env02">重新生成</button></div><div class="body" data-pack-field="env02"></div></div>
+          <div class="pack-item" data-env="03"><div class="hd"><span class="env-badge">03 教学内容结构化与前概念诊断</span><button type="button" class="pack-regenerate" data-pack-regenerate="env03">重新生成</button></div><div class="body" data-pack-field="env03"></div></div>
+          <div class="pack-item" data-env="04"><div class="hd"><span class="env-badge">04 真实性学习情境与资源设计</span><button type="button" class="pack-regenerate" data-pack-regenerate="env04">重新生成</button></div><div class="body" data-pack-field="env04"></div></div>
+          <div class="pack-item" data-env="05"><div class="hd"><span class="env-badge">05 学习活动与教学支架设计</span><button type="button" class="pack-regenerate" data-pack-regenerate="env05">重新生成</button></div><div class="body" data-pack-field="env05"></div></div>
+          <div class="pack-item" data-env="06"><div class="hd"><span class="env-badge">06 形成性评价与适应性调控</span><button type="button" class="pack-regenerate" data-pack-regenerate="env06">重新生成</button></div><div class="body" data-pack-field="env06"></div></div>
+          <div class="pack-item" data-env="07"><div class="hd"><span class="env-badge">07 表现性评价与学习成效诊断</span><button type="button" class="pack-regenerate" data-pack-regenerate="env07">重新生成</button></div><div class="body" data-pack-field="env07"></div></div>
+          <div class="pack-item" data-env="08"><div class="hd"><span class="env-badge">08 反思性实践与教学改进</span><button type="button" class="pack-regenerate" data-pack-regenerate="env08">重新生成</button></div><div class="body" data-pack-field="env08"></div></div>
+          <div class="pack-item" data-env="09"><div class="hd"><span class="env-badge">09 教学知识建构与专业共享</span><button type="button" class="pack-regenerate" data-pack-regenerate="env09">重新生成</button></div><div class="body" data-pack-field="env09"></div></div>
+        </div>
       </aside>
     </div>
   </section>
@@ -1948,64 +2838,55 @@ window.addEventListener('load', function () {
     <div class="stage-h" data-reveal>
       <div class="num">ii<small>STAGE · 试错+证据</small></div>
       <div>
-        <h3 id="stage-ii-title">不让模板替教师定稿，<br/>让<span class="it">五路学科审校</span>与<span class="it">虚拟班仿真记录</span>并列呈现。</h3>
-        <p>A · 药学、管理、法规、教学设计与数据循证五路视角提出审校建议；B · AI 虚拟班按既定剧本推进并记录提问、答复、沉默、风险与关键时刻。系统只建议关联，是否支持修订由教师判断。</p>
+        <h3 id="stage-ii-title">先把课<span class="it">跑一遍</span>，<br/>再根据真实发生的关键时刻决定改什么。</h3>
+        <p>五路学科审校先压缩为本轮观察重点，帮助教师带着问题看试教；证据出现前不接受任何采纳决定。系统先匹配相关试教记录，具体怎么处理由教师决定。</p>
       </div>
     </div>
 
-    <!-- A · 五路学科审校 -->
-    <div class="substage" data-substage="A">
-      <div class="substage-h" data-reveal>
-        <span class="lab">A · 五路学科审校</span>
-        <h4>五个学科视角并行发现问题</h4>
-        <span class="note">真模型逐卡锚定批注 · 未连接时保留固定种子 · 目标环节可多选</span>
-      </div>
+    <div class="trial-first-layout">
+      <div class="trial-classroom">
+        <div class="substage-h" data-reveal>
+          <span class="lab">A · 虚拟班试教</span>
+          <h4>AI 虚拟班按剧本推进，<span class="it">同步记录关键时刻</span></h4>
+          <span class="note">提问 · 答复 · 沉默 · 风险信号 · 评价标准歧义</span>
+        </div>
 
-    <!-- 五路批量审校总控 · 由 practice-runtime.js 接管;并发上限 2,完成一张呈现一张 -->
-    <div class="ec-batch-bar" data-ec-role="batch-bar" data-reveal>
-      <button type="button" class="ec-batch-run" data-review-act="run-all">五路审校当前稿件</button>
-      <span class="ec-batch-status" data-ec-role="batch-status" role="status" aria-live="polite">本机后端未连接 · 当前显示固定审校种子</span>
-    </div>
-
-    <!-- 由 practice-runtime.js · renderExpertCards 按所选章节动态填充 -->
-    <div class="expert-grid" data-ec-role="grid" aria-live="polite" data-reveal-stagger></div>
-
-      <div class="adopt-bar" data-adopt-bar="review" data-reveal>
-        <span>修订候选 · <span class="pct">0 / 5</span> · 证据已关联 0 · 教师已判断 0</span>
-        <span class="syn">教师决策痕迹将随候选保留</span>
-      </div>
-    </div>
-
-    <!-- B · 虚拟班级关键时刻 -->
-    <div class="substage">
-      <div class="substage-h" data-reveal>
-        <span class="lab">B · 虚拟班关键时刻</span>
-        <h4>AI 虚拟班按剧本推进，<span class="it">同步记录关键时刻</span></h4>
-        <span class="note">提问 · 答复 · 沉默 · 风险信号 · 量规歧义</span>
-      </div>
-
-    <!-- ===== 元宇宙虚拟教室 (2026-05-29) — 由 shared/metaverse-classroom.js 渲染 =====
-         合并原「左侧剧本 theater + 右侧画像矩阵 sim-side」为单一沉浸式教室:
-         四组聚落圆桌 · 发言气泡 · 底部字幕条 · 分析面板。 -->
+    <!-- ===== 元宇宙虚拟教室 — Stage II 进入视区即挂载，保留占位高度防 CLS ===== -->
     <style>
-      /* 占位高度 = 3D 初始挂载高度(head ~54 + stage 540 + scrub ~34 + 控制行 ~48),消除懒挂载时下方内容被推移的 CLS;
-         移动端 stage 为 62vw(min 320px),对应下调。数值依据 metaverse-classroom-3d.js buildUI 结构与其注入 CSS 常量 */
       #mv-classroom, #mv-classroom [data-mv-placeholder] { min-height: 680px; }
       @media (max-width: 760px) {
         #mv-classroom, #mv-classroom [data-mv-placeholder] { min-height: max(500px, calc(62vw + 170px)); }
       }
     </style>
     <div id="mv-classroom" role="region" aria-label="AI 虚拟班级 · 3D 立场课堂仿真（可播放录播或自由仿真；下方字幕条会朗读当前发言）">
-      <!-- 占位:预留高度防 CLS(高度规则见上方 style);3D/2.5D 挂载时 innerHTML 会被清空替换。滚动至此 IntersectionObserver 自动加载 -->
+      <!-- 3D/2.5D 挂载时 innerHTML 会被清空替换；占位高度与挂载后主体一致，避免 CLS。 -->
       <div data-mv-placeholder style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--mute);font-family:var(--mono);font-size:var(--fs-xs);background:radial-gradient(120% 90% at 50% 0%, #fbf8f1 0%, #efe8d9 100%);border-radius:var(--r-lg);">
         <span aria-hidden="true" style="font-size:30px;opacity:.7">🏫</span>
-        <span>3D 虚拟教室 · 滚动至此自动加载</span>
+        <span>3D 虚拟教室 · 正在准备本轮试教</span>
       </div>
+    </div>
+      </div>
+
+      <aside class="review-focus-summary" data-review-role="focus-summary" aria-label="本轮审校观察重点">
+        <div class="review-focus-head">
+          <span>五路学科审校</span>
+          <b data-review-role="focus-gate">固定种子 · 等待锚定</b>
+        </div>
+        <h4>带着这 3 个问题看试教</h4>
+        <p>证据前只读；这些是观察焦点，不是采纳决定。</p>
+        <div class="review-focus-list" data-review-role="focus-list">
+          <article><b>05</b><span>问题链是否出现可观察的行为锚点？</span><small>教学设计 × 药学情境</small></article>
+          <article><b>04</b><span>案例引用与数据证据能否支撑判断？</span><small>法规合规 × 数据循证</small></article>
+          <article><b>08</b><span>管理权衡是否在学生讨论中真正显化？</span><small>管理决策</small></article>
+        </div>
+        <button type="button" class="review-focus-open" data-review-act="open-drawer">查看完整审校依据 →</button>
+        <span class="review-focus-status" data-ec-role="batch-status" role="status" aria-live="polite">后台未连接 · 当前使用固定观察种子</span>
+      </aside>
     </div>
 
     <!-- 仿真记录流：关键时刻随录播逐条出现（联动 window.PharmacoPilotMV） -->
     <div class="km-stream-h" data-reveal>
-      <span class="ksh-lab">仿真记录流 · 随录播浮现</span>
+      <span class="ksh-lab">B · 仿真证据 · 随录播浮现</span>
       <span class="ksh-hint">▶ 播放上方录播 · 关键时刻按发生时间逐条出现（回拖则取消）</span>
     </div>
 
@@ -2016,61 +2897,98 @@ window.addEventListener('load', function () {
           <span>KEY MOMENT 01</span>
           <b>02:05</b>
         </div>
-        <h4>立场结构性冲突 · 一致性评价 vs 替代焦虑</h4>
-        <div class="km-quote">"学生 A 引用一致性评价支持替代，学生 B 提出 2 年原研使用者的替代焦虑——Agent 17 秒识别，教师 15 秒后执行分组介入。"</div>
-        <p>系统建议关联「教学设计审校 · 分歧锚点」；是否值得复用，由教师确认。</p>
+        <h4>SWOT 内外部边界出现结构性分歧</h4>
+        <div class="km-quote">"学生 A 将门店排班能力归为内部劣势 W，学生 B 将行业药师供给归为外部威胁 T——Agent 提示应拆成两条并分别举证。"</div>
+        <p>系统建议关联「教学设计审校 · W/T 边界锚点」；是否补入分类判据，由教师确认。</p>
         <div class="km-tag">
           <span class="pill pill-amber">问题链 #3</span>
-          <span class="pill pill-sage">待教师判断</span>
+          <span class="pill pill-sage">待处理</span>
         </div>
         <div class="km-meta">
-          <span>相关 <b>05 任务链设计</b></span>
-          <span>Δ介入 <b>15 sec</b></span>
+          <span>相关 <b>03 教学内容结构化与前概念诊断 / 05 学习活动与教学支架设计</b></span>
+          <span>边界修正 <b>W / T</b></span>
         </div>
       </div>
 
       <div class="km-card" data-reveal>
         <div class="km-time">
           <span>KEY MOMENT 02</span>
-          <b>00:48</b>
+          <b>02:00</b>
         </div>
-        <h4>"价格 / 厂家 / 患者反应"三选一锚点生效</h4>
-        <div class="km-quote">"教师抛出三选一锚点后，14 秒内 7 位学生响应——这条仿真记录可与具体化提问的修订候选关联。"</div>
-        <p>系统建议关联「教学设计审校 · 问题链修订」；是否构成支持证据，由教师确认。</p>
+        <h4>威胁（T）类证据讨论中出现集体沉默</h4>
+        <div class="km-quote">"8 位具产业或门店实习背景的学生识别出竞争威胁，却没有引用竞店、人才供给或区域市场数据。"</div>
+        <p>系统建议关联「形成性评价与适应性调控 · 环境证据追问」；是否新增支架，由教师确认。</p>
         <div class="km-tag">
-          <span class="pill pill-amber">问题链 #1</span>
-          <span class="pill pill-indigo">破冰策略</span>
+          <span class="pill pill-amber">威胁（T）类证据</span>
+          <span class="pill pill-indigo">沉默信号</span>
         </div>
         <div class="km-meta">
-          <span>相关 <b>05 任务链设计</b></span>
-          <span>响应 <b>7 / 32</b></span>
+          <span>相关 <b>06 形成性评价与适应性调控</b></span>
+          <span>待追问 <b>8 人</b></span>
         </div>
       </div>
 
       <div class="km-card" data-reveal>
         <div class="km-time">
           <span>KEY MOMENT 03</span>
-          <b>01:48</b>
+          <b>01:24</b>
         </div>
-        <h4>学生引入"长期患者依从性"维度——超出实践包预设</h4>
-        <div class="km-quote">"B 组主动提出'已稳定服用 2 年的患者切换风险'——这是预设未覆盖、却真实存在的临床决策维度。"</div>
-        <p>系统建议与 06 课中调控的修订候选关联；是否构成支持、是否写回，由教师确认。</p>
+        <h4>问题链 · 第 3 题 — 从 W/T 边界转向 TOWS</h4>
+        <div class="km-quote">"执业药师不足应归为 W 还是 T？学生先说明分析层级，再分别提出内部能力与外部趋势证据。"</div>
+        <p>系统建议关联「问题链修订 · SWOT 到 TOWS 转化」；是否写回实践包，由教师确认。</p>
         <div class="km-tag">
           <span class="pill pill-amber">问题链 #3</span>
           <span class="pill pill-ink">需要决策</span>
         </div>
         <div class="km-meta">
-          <span>相关 <b>06 课中调控</b></span>
+          <span>相关 <b>03 教学内容结构化 / 05 学习活动与教学支架设计</b></span>
           <span>待教师确认</span>
         </div>
       </div>
     </div>
 
+    <section class="review-verdict-band" data-ec-role="verdict-band" aria-label="试教后处理建议">
+      <header><h5>C · 试教后处理建议</h5><span>一次聚焦一条 · 五路意见均保留</span></header>
+      <div data-ec-role="verdict-list"><p class="review-verdict-empty">尚无仿真证据 · 先运行虚拟班并读取关键时刻</p></div>
+    </section>
+
       <div class="adopt-bar" data-adopt-bar="km" style="margin-top:18px;" data-reveal>
-        <span>本轮试错 · 关键时刻 <b style="color:var(--ink)">3</b> 处 · 风险信号 <b style="color:var(--ink)">3</b> 项 · 学生表态 <b style="color:var(--ink)">14 / 32</b> · 立场迁移 <b style="color:var(--ink)">+0.7</b></span>
-        <span class="syn">互动数据 · 关联记录 · 教师判断轨迹 形成可追溯记录</span>
+        <span>本轮试错 · 关键时刻 <b style="color:var(--ink)">3</b> 处 · 风险信号 <b style="color:var(--ink)">3</b> 项 · 学生表态 <b style="color:var(--ink)">0 / 32</b> · 分类修正 <b style="color:var(--ink)">—</b></span>
+        <span class="syn">互动数据 · 关联记录 · 处理轨迹 形成可追溯记录</span>
       </div>
-    </div>
+
+    <!-- 完整审校卷宗：答辩可一键展示，但不占主流程高度，不承载采纳决策。 -->
+    <div class="review-drawer-scrim" data-review-act="close-drawer" hidden></div>
+    <aside class="review-drawer" data-review-surface="drawer" aria-label="五路学科审校完整卷宗" aria-hidden="true" inert>
+      <header class="review-drawer-head">
+        <div><span>PROFESSIONAL REVIEW DOSSIER</span><h4>五路学科审校</h4><p>先看问题与建议；锚点、版本和原稿依据按需展开。这里不形成采纳决定。</p><div class="review-drawer-stats"><b>5 路审校</b><b>问题 → 建议 → 原稿依据</b><b>证据前只读</b></div></div>
+        <button type="button" data-review-act="close-drawer" aria-label="关闭完整审校卷宗">×</button>
+      </header>
+      <div class="review-drawer-body">
+        <div class="ec-batch-bar" data-ec-role="batch-bar">
+          <button type="button" class="ec-batch-run" data-review-act="run-all">重新运行五路审校</button>
+          <span class="ec-batch-status" data-ec-role="drawer-batch-status" role="status" aria-live="polite">本机后端未连接 · 当前显示固定审校种子</span>
+        </div>
+        <div class="review-viewbar">
+          <div class="review-view-switch" role="tablist" aria-label="审校卷宗组织方式">
+            <button type="button" class="is-active" data-review-view="env" role="tab" aria-selected="true">按环节</button>
+            <button type="button" data-review-view="discipline" role="tab" aria-selected="false">按学科</button>
+          </div>
+          <button type="button" class="review-edit-pack" data-review-act="edit-pack">回 Stage I 编辑实践包</button>
+        </div>
+        <p class="review-edit-warning" data-ec-role="edit-warning" hidden>修改实践包会提升修订号，并使本轮模型批注变为“针对旧稿”。</p>
+        <nav class="review-env-index" data-ec-role="env-index" aria-label="九个教学环节审校索引"></nav>
+        <div class="review-dossier" data-ec-role="grid" aria-live="polite"></div>
+        <details class="review-unlocated" data-ec-role="unlocated-basket">
+          <summary>未定位篮 · <b>0</b> 条</summary>
+          <div data-ec-role="unlocated-list"><p>当前没有未定位意见。</p></div>
+        </details>
+        <div class="adopt-bar" data-adopt-bar="review">
+          <span>证据前只读 · 五路审校仅形成观察重点</span>
+          <span class="syn">锚定、旧稿与未定位门禁保持有效</span>
+        </div>
+      </div>
+    </aside>
   </section>
 
   <!-- ===== Stage iii — 确认写回 · 按 9 个教学环节回写 ===== -->
@@ -2097,7 +3015,7 @@ window.addEventListener('load', function () {
             <span class="id">KM-01 · 02:05</span>
             <span class="kind">moment</span>
           </div>
-          <div class="title">立场结构性冲突 · 一致性评价 vs 替代焦虑</div>
+          <div class="title">SWOT 内外部边界分歧 · 门店能力 W vs 人才供给 T</div>
           <div class="meta"><span>已关联 · 风险 高</span><span><b>待教师判断</b></span></div>
         </div>
         <div class="mig-card">
@@ -2105,7 +3023,7 @@ window.addEventListener('load', function () {
             <span class="id">CMT-02 · 设计建议</span>
             <span class="kind">expert</span>
           </div>
-          <div class="title">"价格 / 厂家 / 患者反应"三选一锚点</div>
+          <div class="title">T 维环境证据追问 · 竞店 / 人才 / 区域市场</div>
           <div class="meta"><span>来自 教学设计审校</span><span><b>待教师判断</b></span></div>
         </div>
         <div class="mig-card">
@@ -2113,7 +3031,7 @@ window.addEventListener('load', function () {
             <span class="id">KM-03 · 01:48</span>
             <span class="kind">moment</span>
           </div>
-          <div class="title">长期患者依从性 · 超预设维度</div>
+          <div class="title">问题链从 W/T 边界转向 TOWS 策略组合</div>
           <div class="meta"><span>来自虚拟班仿真记录</span><span>系统建议关联</span></div>
         </div>
       </div>
@@ -2138,10 +3056,10 @@ window.addEventListener('load', function () {
         </div>
         <div class="mig-card right is-draft">
           <div class="top">
-            <span class="id">T-集采类 · 草案</span>
+            <span class="id">T-SWOT/TOWS · 草案</span>
             <span class="kind">asset · draft</span>
           </div>
-          <div class="title">集采类课题通用模板 v0.1<br/>4 方利益 + 政策证据 + 立场迁移量规</div>
+          <div class="title">环境分析课题通用模板 v0.1<br/>内外部边界 + 环境证据 + TOWS 策略评价维度</div>
           <div class="meta"><span>来自邵老师沉淀建议</span><span>待教师确认</span></div>
         </div>
       </div>
@@ -2168,13 +3086,13 @@ window.addEventListener('load', function () {
       </div>
       <div class="sync-cell is-ready">
         <div class="sc-lbl">写回 ②<span class="dot"></span></div>
-        <div class="sc-target">教学数据工作台 · 08 复盘与决策</div>
+        <div class="sc-target">教学数据工作台 · 08 反思性实践与教学改进</div>
         <div class="sc-detail">修订候选 · 仿真记录关联 · 教师判断 → <b>同步进入 data-detail 下一轮改进队列</b></div>
       </div>
       <div class="sync-cell is-pending">
         <div class="sc-lbl">写回 ③<span class="dot"></span></div>
-        <div class="sc-target">个人教学资产库 · 09 资产沉淀</div>
-        <div class="sc-detail">模板 <b>T-集采类</b> v0.1 · 待教师在确认写回时勾选是否一并沉淀</div>
+        <div class="sc-target">个人教学资产库 · 09 教学知识建构与专业共享</div>
+        <div class="sc-detail">模板 <b>T-SWOT/TOWS</b> v0.1 · 待教师在确认写回时勾选是否一并沉淀</div>
       </div>
     </div>
 
@@ -2217,7 +3135,6 @@ window.addEventListener('load', function () {
     <div class="colo">
       <h5>合作伙伴</h5>
       <a data-wendao="home" style="cursor:pointer">闻道 · 科学探索</a>
-      <a data-fanya style="cursor:pointer">泛雅 · 课程平台</a>
       <a href="#faq">常见问题 · FAQ</a>
       <a href="mailto:editor@pharmacopilot.cn">联系编辑部</a>
     </div>
@@ -2246,16 +3163,8 @@ window.addEventListener('load', function () {
   const UPDATED_KEY = 'pp.practice.meta.updatedAt';
   const meta = document.getElementById('practiceMeta');
   const updatedEl = document.getElementById('practiceUpdated');
-  const sourcePill = document.getElementById('practiceSource');
   // 注意：不要在此早退——下方 loop-stepper 跟踪 / window.ppPracticeTouchUpdated 与 #practiceMeta 无关，
   // #practiceMeta 不存在时只跳过"可编辑元信息"那段即可（用 if (meta) 包裹），其余照常初始化。
-
-  const fanyaConnected = !!window.FANYA_CONNECTED;
-  if (sourcePill) {
-    sourcePill.classList.toggle('is-fanya', fanyaConnected);
-    sourcePill.classList.toggle('is-local', !fanyaConnected);
-    sourcePill.textContent = fanyaConnected ? '泛雅 · 状态：实时同步' : '泛雅 · 状态：未连接';
-  }
 
   // 仅"可编辑元信息"这段依赖 #practiceMeta；不存在则跳过，不影响下方 stepper / 写回钩子
   if (meta) {
@@ -2399,27 +3308,45 @@ window.addEventListener('load', function () {
 (function(){
   var grid = document.getElementById('kmStream');
   if (!grid) return;
-  var cards = Array.prototype.slice.call(grid.querySelectorAll('.km-card'));
-  if (!cards.length) return;
+  var cards = [], lastT = 0;
   function fmtT(s){ var m = Math.floor(s/60), ss = s%60; return (m<10?'0':'')+m+':'+(ss<10?'0':'')+ss; }
   function parseT(card){ var b = card.querySelector('.km-time b'); if (!b) return null; var m = String(b.textContent).trim().match(/(\d+):(\d+)/); return m ? (+m[1]*60 + +m[2]) : null; }
-  cards.forEach(function(c){
-    c._t = parseT(c);
-    var s = document.createElement('span'); s.className = 'km-status'; s.textContent = '待捕获'; c.appendChild(s); c._status = s;
-  });
   function apply(t){
+    lastT = Math.max(0, Number(t) || 0);
     cards.forEach(function(c){
       if (c._t == null) return;
-      var was = c.classList.contains('is-captured'), now = (t >= c._t);
+      var was = c.classList.contains('is-captured'), now = (lastT >= c._t);
       c.classList.toggle('is-captured', now);
       if (c._status) c._status.textContent = now ? ('已捕获 ' + fmtT(c._t)) : '待捕获';
       if (now && !was){ c.classList.remove('just-captured'); void c.offsetWidth; c.classList.add('just-captured'); }
     });
   }
+  function currentT(){
+    var mv = window.PharmacoPilotMV;
+    if (mv && typeof mv.getT === 'function'){
+      var t = Number(mv.getT());
+      if (Number.isFinite(t)) return t;
+    }
+    return lastT;
+  }
+  function bindCards(){
+    cards = Array.prototype.slice.call(grid.querySelectorAll('.km-card'));
+    cards.forEach(function(c){
+      c._t = parseT(c);
+      var s = c.querySelector('.km-status');
+      if (!s){ s = document.createElement('span'); s.className = 'km-status'; c.appendChild(s); }
+      c._status = s;
+    });
+    apply(currentT());
+  }
+  bindCards();
+  /* practice-runtime.js 会替换整组卡片；重绘后必须重新读取节点，不能继续操作旧 NodeList。 */
+  window.addEventListener('practice:keymoments-rendered', bindCards);
   // 元宇宙教室改为“滚动到才懒加载”，hook 出现时机不再固定：立即可用则直接注册，否则监听 mv:ready 事件（无时限，避免 7.5s 轮询超时后联动永久降级）
   function registerMV(){
     if (!(window.PharmacoPilotMV && typeof window.PharmacoPilotMV.onTime === 'function')) return false;
     grid.classList.add('is-live-capture');
+    bindCards();
     window.PharmacoPilotMV.onTime(apply); // 注册即用当前 tSec 回调一次
     return true;
   }

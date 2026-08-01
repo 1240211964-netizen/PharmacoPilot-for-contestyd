@@ -110,14 +110,14 @@
         {
           key: "ethics",
           label: "学生关心政策伦理，教师定位是 SWOT 方法",
-          rationale: "命中 11 票（39%）· 最高优先级议程。建议在案例与证据环节 案例材料中显式加入伦理证据。",
+          rationale: "命中 11 票（39%）· 最高优先级议程。建议在真实性学习情境与资源设计环节 案例材料中显式加入伦理证据。",
           score: 3.8,
           meta: { recommended: true, lintTriggers: ["agenda-not-yet-saved"] },
         },
         {
           key: "policy",
           label: "学生想做行业对比，教师定位是单家企业",
-          rationale: "建议在目标与量规环节 目标改写时纳入「与同行对比」维度。",
+          rationale: "建议在预期学习结果与评价证据设计环节 目标改写时纳入「与同行对比」维度。",
           score: 3.5,
         },
         {
@@ -138,8 +138,8 @@
     },
 
     feedbackByKey: {
-      "ethics": { summary: "✓ 高优先级张力识别",      riskBadges: ["议程源头", "高优先级"],  detail: "建议在案例与证据环节 案例材料显式加入伦理证据（如医保谈判降价幅度合理性数据），让议程在下游获得证据兑现。" },
-      "policy": { summary: "✓ 中等优先级张力",        riskBadges: ["议程源头"],             detail: "建议在目标与量规环节 目标改写时纳入「与同行对比」维度。" },
+      "ethics": { summary: "✓ 高优先级张力识别",      riskBadges: ["议程源头", "高优先级"],  detail: "建议在真实性学习情境与资源设计环节 案例材料显式加入伦理证据（如医保谈判降价幅度合理性数据），让议程在下游获得证据兑现。" },
+      "policy": { summary: "✓ 中等优先级张力",        riskBadges: ["议程源头"],             detail: "建议在预期学习结果与评价证据设计环节 目标改写时纳入「与同行对比」维度。" },
       "align": {  summary: "△ 无明显张力",            riskBadges: ["建议警惕过滤"],         detail: "议程与预设完全一致需警惕——可能是学生没真说，或采集方式诱导。" },
       "narrow": { summary: "✕ 违反学生主体性约束",   riskBadges: ["禁条触发"],             detail: "强行收敛违反 contract.FORBIDDEN_CHANGES 中「不得让学生议程站退化为调查表」。" },
     },
@@ -166,7 +166,7 @@
         id: "agenda-action-map",
         buttonLabel: "⬇ 生成议程—课堂动作映射表",
         outputTitle: "议程→课堂动作映射 v1",
-        outputCue: "为每条议程标注对应的下游动作（目标与量规环节/6/8 各做什么）。",
+        outputCue: "为每条议程标注对应的下游动作（预期学习结果与评价证据设计环节/6/8 各做什么）。",
         writeback: { to: "artifactLibrary" },
       },
     ],

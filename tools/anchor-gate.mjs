@@ -1,3 +1,12 @@
+import "../shared/practice-segments.js";
+
+const {
+  segmentRanges,
+  deriveSegmentKey,
+} = globalThis.PharmacoPracticeSegments;
+
+export { segmentRanges, deriveSegmentKey };
+
 /* ============================================================
    批注锚定门禁 · anchor-gate
    ------------------------------------------------------------
@@ -49,10 +58,10 @@ function normalizeChar(ch) {
  */
 export function repeatedLabels(envText) {
   const counts = new Map();
-  const re = /(?:^|·)\s*([^：:·]{2,12})[：:]/g;
-  let m;
-  while ((m = re.exec(envText))) {
-    const label = m[1].trim();
+  for (const { start, end } of segmentRanges(envText)) {
+    const match = envText.slice(start, end).match(/^\s*([^：:·；;]{2,12})[：:]/);
+    if (!match) continue;
+    const label = match[1].trim();
     counts.set(label, (counts.get(label) || 0) + 1);
   }
   return new Set([...counts].filter(([, n]) => n >= 2).map(([label]) => label));
@@ -91,32 +100,6 @@ function trimEdgePunct(norm) {
 
 function countCjk(text) {
   return (text.match(/[一-鿿]/g) || []).length;
-}
-
-/* ---- segmentKey 推导：按命中位置反查所在段落，不信模型 --------------- */
-// 实践包环节文本形如： "情境导入：… · 任务指令：… · 输出要求：…"
-export function deriveSegmentKey(envText, hitStart) {
-  const parts = segmentRanges(envText);
-  for (const { start, end } of parts) {
-    if (hitStart >= start && hitStart < end) {
-      const chunk = envText.slice(start, end);
-      const label = chunk.match(/^\s*([^：:]{2,12})[：:]/);
-      return label ? label[1].trim() : chunk.slice(0, 12).trim();
-    }
-  }
-  return null;
-}
-
-function segmentRanges(envText) {
-  const parts = [];
-  const re = /\s·\s/g;
-  let prev = 0, m;
-  while ((m = re.exec(envText))) {
-    parts.push({ start: prev, end: m.index });
-    prev = re.lastIndex;
-  }
-  parts.push({ start: prev, end: envText.length });
-  return parts;
 }
 
 /**

@@ -2,7 +2,7 @@
    PharmacoPilot · 教学导航 渲染器 (v4 stages overlay)
    ------------------------------------------------------------
    Reads from PharmacoPilotNavigationContract (stages-v4):
-     · NAV_STAGES (9)        — 前台横向 chip 栏
+     · NAV_STAGES (9)        — 前台侧栏主导航 + 阶段概览
      · SUB_NODES (12)        — 后台数据节点（兼容 station ids 1-11）
      · NAV_STATIONS (legacy) — 与 station<N>.payload.js 配合
    and PharmacoPilotDecisionBank, renders into pharmaco's
@@ -36,6 +36,9 @@
     const STAGE_CHAIN = C.STAGE_CHAIN || {};
     const stageById = Object.fromEntries(STAGES.map((g) => [g.id, g]));
     const TOTAL_STAGES = STAGES.length; // 9
+    const stageShortLabel = (stage) => stage
+      ? (stage.title || stage.shortLabel || stage.displayName || stage.id)
+      : "";
     // 子节点 key (含 "11a"/"11b") → 环节 id 的反查
     function stageOfSubNode(key) {
       const entry = SUB_NODES[String(key)];
@@ -43,7 +46,7 @@
     }
     // 当前 station id → 当前环节 id
     function stageOfStation(stid) {
-      // S8 复盘与决策含 split：默认归 S8 复盘（用户可通过 chip 切到 S9）
+      // S8 反思性实践与教学改进含 split：默认归 S8 复盘（用户可通过 chip 切到 S9）
       if (stid === 11) return "S8";
       const entry = SUB_NODES[String(stid)];
       return entry ? entry.stageId : null;
@@ -90,12 +93,12 @@
           align-items: center; gap: 10px; padding: 5px 0;
           font-family: var(--serif-cn); font-size: var(--fs-xs);
         }
-        .agcl-rank { font-family: var(--mono); color: var(--mute, #999); font-size: var(--fs-2xs); }
-        .agcl-lbl  { color: var(--ink, #1a1714); }
+        .agcl-rank { font-family: var(--mono); color: var(--mute); font-size: var(--fs-2xs); }
+        .agcl-lbl  { color: var(--ink); }
         .agcl-bar  { display: block; height: 8px; border-radius: 4px;
-                     background: rgba(168,73,42,0.08); position: relative; overflow: hidden; }
+                     background: color-mix(in srgb, var(--amber-deep) 8%, transparent); position: relative; overflow: hidden; }
         .agcl-bar i { display: block; height: 100%; border-radius: 4px; transition: width .35s ease; }
-        .agcl-val  { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #999); white-space: nowrap; }
+        .agcl-val  { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); white-space: nowrap; }
 
         /* ---- 06 证据密度 + 议程对照 ---- */
         .evdensity-wrap { padding: 6px 0 4px; }
@@ -105,44 +108,44 @@
           align-items: center; gap: 10px;
           font-family: var(--serif-cn); font-size: var(--fs-xs);
         }
-        .evd-lbl { color: var(--ink, #1a1714); }
+        .evd-lbl { color: var(--ink); }
         .evd-track {
           display: block; height: 10px; border-radius: 5px;
-          background: rgba(168,73,42,0.08); overflow: hidden;
+          background: color-mix(in srgb, var(--amber-deep) 8%, transparent); overflow: hidden;
         }
         .evd-track i { display: block; height: 100%; border-radius: 5px; transition: width .35s ease; }
         .evd-val { font-family: var(--mono); font-size: var(--fs-2xs); text-align: right; }
-        .evd-agendas { margin-top: 12px; padding-top: 10px; border-top: 1px dashed rgba(168,73,42,0.18); }
+        .evd-agendas { margin-top: 12px; padding-top: 10px; border-top: 1px dashed color-mix(in srgb, var(--amber-deep) 18%, transparent); }
         .evd-agendas-hd {
           font-family: var(--mono); font-size: var(--fs-2xs);
-          color: var(--mute, #999); letter-spacing: 0.08em; margin-bottom: 6px;
+          color: var(--mute); letter-spacing: 0.08em; margin-bottom: 6px;
         }
         .evd-agendas-row { display: flex; flex-wrap: wrap; gap: 8px; }
         .evd-agenda {
           display: inline-flex; align-items: center; gap: 5px;
           padding: 3px 8px; border-radius: 12px; font-size: var(--fs-2xs);
           font-family: var(--serif-cn);
-          background: #faf6ee; color: var(--ink, #1a1714);
-          border: 1px solid rgba(168,73,42,0.15);
+          background: #faf6ee; color: var(--ink);
+          border: 1px solid color-mix(in srgb, var(--amber-deep) 15%, transparent);
         }
         .evd-agenda i { width: 6px; height: 6px; border-radius: 50%; background: #d88a3a; }
-        .evd-agenda.is-covered i { background: var(--sage, #6a9a7b); }
-        .evd-agenda.is-miss { color: var(--amber-deep, #a8492a); border-color: rgba(168,73,42,0.4); }
-        .evd-agenda.is-miss i { background: var(--amber-deep, #a8492a); }
+        .evd-agenda.is-covered i { background: var(--sage); }
+        .evd-agenda.is-miss { color: var(--amber-deep); border-color: color-mix(in srgb, var(--amber-deep) 40%, transparent); }
+        .evd-agenda.is-miss i { background: var(--amber-deep); }
         .evd-callout {
           margin-top: 12px; padding: 8px 10px;
-          background: #faf6ee; border-left: 3px solid var(--amber-deep, #a8492a);
+          background: #faf6ee; border-left: 3px solid var(--amber-deep);
           font-family: var(--serif-cn); font-size: var(--fs-xs);
-          color: var(--ink, #1a1714);
+          color: var(--ink);
         }
-        .evd-callout b { color: var(--amber-deep, #a8492a); margin-right: 4px; }
+        .evd-callout b { color: var(--amber-deep); margin-right: 4px; }
         /* === 05 方法论严谨链 chain-row === */
         .chain-rows { display: flex; flex-direction: column; gap: 6px; padding: 4px 0; }
         .chain-row {
           display: grid; grid-template-columns: 36px 44px 1fr auto;
           align-items: center; gap: 8px;
           padding: 7px 8px; border-radius: 6px;
-          background: rgba(168,73,42,0.04);
+          background: color-mix(in srgb, var(--amber-deep) 4%, transparent);
           font-family: var(--serif-cn); font-size: var(--fs-xs);
         }
         .chain-row .cr-lvl {
@@ -153,32 +156,32 @@
         }
         .chain-row .cr-type {
           font-family: var(--mono); font-size: var(--fs-2xs);
-          color: var(--ink, #1a1714); letter-spacing: 0.04em;
+          color: var(--ink); letter-spacing: 0.04em;
         }
-        .chain-row .cr-text { color: var(--ink, #1a1714); line-height: 1.4; }
+        .chain-row .cr-text { color: var(--ink); line-height: 1.4; }
         .chain-row .cr-meta { display: flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: var(--fs-2xs); }
         .chain-row .cr-diff { font-weight: 600; }
-        .chain-row .cr-block { color: var(--amber-deep, #a8492a); font-weight: 500; }
+        .chain-row .cr-block { color: var(--amber-deep); font-weight: 500; }
         /* === M · station 11 S8 复盘视图 === */
         .s8-view .ar-section { padding: 8px 0; }
         .s8-view .ar-section + .ar-section {
-          border-top: 1px dashed rgba(168,73,42,0.18); margin-top: 8px; padding-top: 12px;
+          border-top: 1px dashed color-mix(in srgb, var(--amber-deep) 18%, transparent); margin-top: 8px; padding-top: 12px;
         }
         .s8-view .ar-head {
           display: flex; justify-content: space-between; align-items: baseline;
           font-family: var(--mono); font-size: var(--fs-2xs);
-          color: var(--mute, #999); letter-spacing: 0.06em;
+          color: var(--mute); letter-spacing: 0.06em;
           margin-bottom: 8px;
         }
-        .s8-view .ar-head .ar-legend { color: var(--amber-deep, #a8492a); }
+        .s8-view .ar-head .ar-legend { color: var(--amber-deep); }
         .s8-view .ar-list { display: flex; flex-direction: column; gap: 4px; }
         .s8-view .ar-row {
           display: grid; grid-template-columns: 1fr auto auto; gap: 12px;
           align-items: center; padding: 5px 8px; border-radius: 5px;
-          background: rgba(168,73,42,.04);
+          background: color-mix(in srgb, var(--amber-deep) 4%, transparent);
           font-family: var(--serif-cn); font-size: var(--fs-xs);
         }
-        .s8-view .ar-row .ar-text { color: var(--ink, #1a1714); }
+        .s8-view .ar-row .ar-text { color: var(--ink); }
         .s8-view .ar-row .ar-cells {
           display: inline-flex; gap: 3px;
           font-family: var(--mono); font-size: var(--fs-2xs);
@@ -186,82 +189,82 @@
         .s8-view .ar-row .ar-cell {
           width: 14px; text-align: center; display: inline-block;
         }
-        .s8-view .ar-row .ar-cell.ar-yes { color: var(--sage, #6a9a7b); font-weight: 600; }
+        .s8-view .ar-row .ar-cell.ar-yes { color: var(--sage); font-weight: 600; }
         .s8-view .ar-row .ar-cell.ar-no { color: rgba(0,0,0,.18); }
         .s8-view .ar-row .ar-score {
           font-family: var(--mono); font-size: var(--fs-2xs);
-          color: var(--amber-deep, #a8492a); font-weight: 600;
+          color: var(--amber-deep); font-weight: 600;
           min-width: 28px; text-align: right;
         }
         .s8-view .ar-empty {
           padding: 14px; text-align: center;
-          color: var(--mute, #999); font-size: var(--fs-2xs);
-          background: rgba(168,73,42,.03); border-radius: 6px;
+          color: var(--mute); font-size: var(--fs-2xs);
+          background: color-mix(in srgb, var(--amber-deep) 3%, transparent); border-radius: 6px;
         }
         .s8-view .pr-row {
           display: grid; grid-template-columns: 40px 38px 1fr; gap: 8px;
           align-items: center; padding: 5px 8px; border-radius: 5px;
-          background: rgba(168,73,42,.04);
+          background: color-mix(in srgb, var(--amber-deep) 4%, transparent);
           font-family: var(--serif-cn); font-size: var(--fs-xs);
           margin-bottom: 3px;
         }
         .s8-view .pr-row .pr-id {
           font-family: var(--mono); font-size: var(--fs-2xs);
-          color: var(--amber-deep, #a8492a); font-weight: 600;
+          color: var(--amber-deep); font-weight: 600;
         }
         .s8-view .pr-row .pr-t {
           font-family: var(--mono); font-size: var(--fs-2xs);
-          color: var(--mute, #999);
+          color: var(--mute);
         }
-        .s8-view .pr-row .pr-rule { color: var(--ink, #1a1714); font-size: var(--fs-2xs); }
-        .s8-view .pr-row .pr-empty { color: var(--mute, #999); font-style: italic; }
+        .s8-view .pr-row .pr-rule { color: var(--ink); font-size: var(--fs-2xs); }
+        .s8-view .pr-row .pr-empty { color: var(--mute); font-style: italic; }
         /* === M · station 11 S9 资产视图 (extra) === */
         .s9-view .evd-source {
           display: block; font-family: var(--mono);
-          font-size: var(--fs-2xs); color: var(--mute, #999); margin-top: 1px;
+          font-size: var(--fs-2xs); color: var(--mute); margin-top: 1px;
           letter-spacing: 0.02em;
         }
 
         /* ====== O · DARK MODE 覆盖 · 数据驱动图表组件 ====== */
         html[data-theme="dark"] .agcl-lbl { color: var(--ivory); }
         html[data-theme="dark"] .agcl-val { color: var(--mute-2); }
-        html[data-theme="dark"] .agcl-bar { background: rgba(255,253,247,.06); }
+        html[data-theme="dark"] .agcl-bar { background: color-mix(in srgb, var(--ivory) 6%, transparent); }
         html[data-theme="dark"] .agcl-rank { color: var(--mute-2); }
 
         html[data-theme="dark"] .evd-lbl { color: var(--ivory); }
-        html[data-theme="dark"] .evd-track { background: rgba(255,253,247,.06); }
-        html[data-theme="dark"] .evd-agendas { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .evd-track { background: color-mix(in srgb, var(--ivory) 6%, transparent); }
+        html[data-theme="dark"] .evd-agendas { border-top-color: var(--on-dark-veil); }
         html[data-theme="dark"] .evd-agendas-hd { color: var(--mute-2); }
         html[data-theme="dark"] .evd-agenda {
-          background: rgba(255,253,247,.04); color: var(--on-dark);
-          border-color: rgba(255,253,247,.10);
+          background: color-mix(in srgb, var(--ivory) 4%, transparent); color: var(--on-dark);
+          border-color: var(--on-dark-veil);
         }
         html[data-theme="dark"] .evd-agenda.is-miss {
-          background: rgba(217,119,87,.12); color: var(--amber-soft); border-color: rgba(217,119,87,.35);
+          background: color-mix(in srgb, var(--amber) 12%, transparent); color: var(--amber-soft); border-color: color-mix(in srgb, var(--amber) 35%, transparent);
         }
         html[data-theme="dark"] .evd-callout {
-          background: rgba(217,119,87,.10); color: var(--on-dark); border-left-color: var(--amber);
+          background: color-mix(in srgb, var(--amber) 10%, transparent); color: var(--on-dark); border-left-color: var(--amber);
         }
         html[data-theme="dark"] .evd-callout b { color: var(--amber-soft); }
 
         html[data-theme="dark"] .chain-row {
-          background: rgba(255,253,247,.04);
+          background: color-mix(in srgb, var(--ivory) 4%, transparent);
         }
         html[data-theme="dark"] .chain-row .cr-type { color: var(--on-dark-mute); }
         html[data-theme="dark"] .chain-row .cr-text { color: var(--ivory); }
         html[data-theme="dark"] .chain-row .cr-block { color: var(--amber-soft); }
 
         html[data-theme="dark"] .s8-view .ar-row {
-          background: rgba(255,253,247,.04); color: var(--on-dark);
+          background: color-mix(in srgb, var(--ivory) 4%, transparent); color: var(--on-dark);
         }
         html[data-theme="dark"] .s8-view .ar-row .ar-text { color: var(--ivory); }
-        html[data-theme="dark"] .s8-view .ar-row .ar-cell.ar-no { color: rgba(255,253,247,.18); }
+        html[data-theme="dark"] .s8-view .ar-row .ar-cell.ar-no { color: color-mix(in srgb, var(--ivory) 18%, transparent); }
         html[data-theme="dark"] .s8-view .ar-row .ar-score { color: var(--amber-soft); }
         html[data-theme="dark"] .s8-view .ar-empty {
-          background: rgba(255,253,247,.04); color: var(--mute-2);
+          background: color-mix(in srgb, var(--ivory) 4%, transparent); color: var(--mute-2);
         }
         html[data-theme="dark"] .s8-view .pr-row {
-          background: rgba(255,253,247,.04);
+          background: color-mix(in srgb, var(--ivory) 4%, transparent);
         }
         html[data-theme="dark"] .s8-view .pr-row .pr-rule { color: var(--on-dark); }
         html[data-theme="dark"] .s8-view .pr-row .pr-empty { color: var(--mute-2); }
@@ -277,8 +280,8 @@
       st.textContent = `
         /* qchain-rich: 每个选项展开成 head + rationale 两行 */
         .qchain.qchain-rich li { padding: 10px 0 10px 32px; cursor: pointer; transition: background .12s; }
-        .qchain.qchain-rich li:hover { background: rgba(217,119,87,0.04); }
-        .qchain.qchain-rich li.is-selected { background: var(--amber-wash, #f7e6d8); }
+        .qchain.qchain-rich li:hover { background: color-mix(in srgb, var(--amber) 4%, transparent); }
+        .qchain.qchain-rich li.is-selected { background: var(--amber-wash); }
         .qchain.qchain-rich .qopt-head {
           display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
           font-family: var(--serif-cn); font-size: var(--fs-sm); color: var(--ink);
@@ -295,25 +298,25 @@
           line-height: 1.55; color: var(--ink-soft);
         }
         /* ann 三档变体（保留 .ann.fork 作为 .ann-rec 的别名） */
-        .ann.ann-alt { background: var(--paper-3, #ece5d3); color: var(--ink-2); }
+        .ann.ann-alt { background: var(--paper-3); color: var(--ink-2); }
         .ann.ann-avoid {
           background: transparent; color: var(--mute);
-          border: 1px solid var(--rule-2, rgba(27,25,22,.18));
+          border: 1px solid var(--rule-2);
         }
         .ann.ann-rec {
-          background: var(--amber-wash, #f7e6d8); color: var(--amber-deep, #a8492a);
-          border: 1px solid var(--amber-deep, #a8492a); font-weight: 600;
+          background: var(--amber-wash); color: var(--amber-deep);
+          border: 1px solid var(--amber-deep); font-weight: 600;
         }
         /* decision-dock 按钮三档 + 保存禁用 */
         .decision-dock .btn-s.dd-opt.is-selected {
-          background: var(--amber-wash, #f7e6d8);
-          border-color: var(--amber-deep, #a8492a);
-          color: var(--amber-deep, #a8492a); font-weight: 600;
+          background: var(--amber-wash);
+          border-color: var(--amber-deep);
+          color: var(--amber-deep); font-weight: 600;
         }
         .decision-dock .btn-s.is-avoid { color: var(--mute); border-style: dashed; }
         .decision-dock .btn-s.fill[disabled] {
-          background: var(--paper-3, #ece5d3); color: var(--mute-2, #98938b);
-          border-color: var(--rule, rgba(27,25,22,.10));
+          background: var(--paper-3); color: var(--mute-2);
+          border-color: var(--rule);
           cursor: not-allowed;
         }
         /* 产物区门禁：保存判断前置灰 */
@@ -326,13 +329,13 @@
         }
 
         /* dark mode */
-        html[data-theme="dark"] .qchain.qchain-rich li:hover { background: rgba(217,119,87,0.08); }
-        html[data-theme="dark"] .qchain.qchain-rich li.is-selected { background: rgba(217,119,87,.18); }
+        html[data-theme="dark"] .qchain.qchain-rich li:hover { background: color-mix(in srgb, var(--amber) 8%, transparent); }
+        html[data-theme="dark"] .qchain.qchain-rich li.is-selected { background: color-mix(in srgb, var(--amber) 18%, transparent); }
         html[data-theme="dark"] .qchain.qchain-rich .qopt-rationale { color: var(--on-dark-mute); }
         html[data-theme="dark"] .qchain.qchain-rich .qopt-score b { color: var(--ivory); }
-        html[data-theme="dark"] .ann.ann-alt { background: rgba(255,253,247,.06); color: var(--on-dark); }
-        html[data-theme="dark"] .ann.ann-avoid { color: var(--mute-2); border-color: rgba(255,253,247,.18); }
-        html[data-theme="dark"] .ann.ann-rec { background: rgba(217,119,87,.25); color: var(--amber-soft); border-color: var(--amber-soft); }
+        html[data-theme="dark"] .ann.ann-alt { background: color-mix(in srgb, var(--ivory) 6%, transparent); color: var(--on-dark); }
+        html[data-theme="dark"] .ann.ann-avoid { color: var(--mute-2); border-color: color-mix(in srgb, var(--ivory) 18%, transparent); }
+        html[data-theme="dark"] .ann.ann-rec { background: color-mix(in srgb, var(--amber) 25%, transparent); color: var(--amber-soft); border-color: var(--amber-soft); }
       `;
       document.head.appendChild(st);
     })();
@@ -353,7 +356,7 @@
         .qchain-stepper .qstep {
           display: inline-flex; align-items: center; gap: 5px;
           padding: 3px 8px; border-radius: 12px;
-          color: var(--mute-2, #c0c0c0);
+          color: var(--mute-2);
           font-style: normal;
           transition: all .2s;
         }
@@ -392,11 +395,11 @@
           display: flex; align-items: flex-start; gap: 8px;
         }
         .chain-q-opts li:hover {
-          border-color: var(--amber-soft); background: rgba(217,119,87,0.04);
+          border-color: var(--amber-soft); background: color-mix(in srgb, var(--amber) 4%, transparent);
         }
         .chain-q-opts li.is-wrong {
-          border-color: rgba(168,73,42,0.5);
-          background: rgba(168,73,42,0.04);
+          border-color: color-mix(in srgb, var(--amber-deep) 50%, transparent);
+          background: color-mix(in srgb, var(--amber-deep) 4%, transparent);
           color: var(--mute);
         }
         .chain-q-opts li.is-wrong::before { content: "✕ "; color: var(--amber-deep); font-weight: 700; }
@@ -423,7 +426,7 @@
           padding: 4px 0;
         }
         .chain-hint-item + .chain-hint-item {
-          border-top: 1px dotted rgba(168,73,42,0.18);
+          border-top: 1px dotted color-mix(in srgb, var(--amber-deep) 18%, transparent);
           margin-top: 6px; padding-top: 8px;
         }
         .chain-hint-lvl {
@@ -461,7 +464,7 @@
         .chain-wrong-toast {
           margin: 10px 0 0;
           padding: 8px 12px;
-          background: rgba(168,73,42,0.08);
+          background: color-mix(in srgb, var(--amber-deep) 8%, transparent);
           border-left: 3px solid var(--amber-deep);
           border-radius: 0 6px 6px 0;
           font-family: var(--serif-cn); font-size: var(--fs-sm);
@@ -487,9 +490,9 @@
           cursor: pointer; letter-spacing: 0.04em;
           transition: background .14s;
         }
-        .chain-completed-cta .btn-next-stage:hover { background: var(--maroon, #872c14); }
+        .chain-completed-cta .btn-next-stage:hover { background: var(--maroon); }
         .chain-completed-cta .btn-next-stage:disabled {
-          background: var(--paper-3, #ece5d3); color: var(--mute-2);
+          background: var(--paper-3); color: var(--mute-2);
           border-color: var(--rule); cursor: not-allowed;
         }
         /* 5×4 矩阵 cell 数字字号升 14px(适老化补完) */
@@ -517,7 +520,7 @@
           margin: 10px 0 0;
           padding: 8px 12px;
           background: rgba(106,154,123,0.06);
-          border-left: 3px solid var(--sage, #6a9a7b);
+          border-left: 3px solid var(--sage);
           border-radius: 0 6px 6px 0;
           font-family: var(--serif-cn); font-size: var(--fs-xs);
           color: var(--ink-soft); line-height: 1.6;
@@ -609,7 +612,7 @@
           min-width: 36px;
         }
         .figure-card.rich-04 .bp-bar.is-high  { background: var(--amber-deep); }
-        .figure-card.rich-04 .bp-bar.is-mid   { background: var(--amber, #d97757); }
+        .figure-card.rich-04 .bp-bar.is-mid   { background: var(--amber); }
         .figure-card.rich-04 .bp-bar.is-low   { background: var(--sage); }
         .figure-card.rich-04 .bp-bar.is-empty {
           background: transparent;
@@ -639,7 +642,7 @@
         .figure-card.rich-04 .goal-evidence-pairs {
           margin: 14px 22px 6px;
           padding-top: 12px;
-          border-top: 1px dashed rgba(168,73,42,0.18);
+          border-top: 1px dashed color-mix(in srgb, var(--amber-deep) 18%, transparent);
         }
         .figure-card.rich-04 .ge-pairs-h {
           font-family: var(--mono); font-size: var(--fs-2xs);
@@ -654,7 +657,7 @@
           line-height: 1.55;
         }
         .figure-card.rich-04 .ge-pair + .ge-pair {
-          border-top: 1px dotted rgba(168,73,42,0.12);
+          border-top: 1px dotted color-mix(in srgb, var(--amber-deep) 12%, transparent);
         }
         .figure-card.rich-04 .ge-goal {
           color: var(--ink); text-align: right;
@@ -698,11 +701,11 @@
           transition: transform .14s, box-shadow .14s;
         }
         .figure-card.rich-11 .fm-cell.is-fulfilled {
-          background: var(--sage, #6a9a7b); color: var(--ivory);
+          background: var(--sage); color: var(--ivory);
         }
         .figure-card.rich-11 .fm-cell.is-empty {
-          background: rgba(168,73,42,0.04);
-          border: 1px dashed rgba(168,73,42,0.3);
+          background: color-mix(in srgb, var(--amber-deep) 4%, transparent);
+          border: 1px dashed color-mix(in srgb, var(--amber-deep) 30%, transparent);
           color: var(--mute-2);
         }
         .figure-card.rich-11 .fm-cell:hover {
@@ -737,7 +740,7 @@
         .figure-card.rich-11 .fm-unfulfill-section {
           margin-top: 14px;
           padding-top: 10px;
-          border-top: 1px dashed rgba(168,73,42,0.18);
+          border-top: 1px dashed color-mix(in srgb, var(--amber-deep) 18%, transparent);
         }
         .figure-card.rich-11 .fm-unfulfill-h {
           font-family: var(--mono); font-size: var(--fs-2xs);
@@ -802,7 +805,7 @@
         .figure-card.rich-02 .pq-h {
           margin: 14px 22px 0;
           padding-top: 12px;
-          border-top: 1px dashed rgba(168,73,42,0.18);
+          border-top: 1px dashed color-mix(in srgb, var(--amber-deep) 18%, transparent);
           font-family: var(--mono); font-size: var(--fs-2xs);
           letter-spacing: 0.08em; color: var(--mute);
         }
@@ -810,7 +813,7 @@
         /* v6.4 S5 议程→角色 Sankey 流向图 */
         .figure-card.rich-08 .sankey-wrap {
           margin: 14px 22px 6px; padding-top: 12px;
-          border-top: 1px dashed rgba(168,73,42,0.18);
+          border-top: 1px dashed color-mix(in srgb, var(--amber-deep) 18%, transparent);
         }
         .figure-card.rich-08 .sankey-h {
           font-family: var(--mono); font-size: var(--fs-2xs);
@@ -826,7 +829,7 @@
           fill: var(--ink); font-weight: 500;
         }
         .figure-card.rich-08 .sk-agenda-node {
-          fill: rgba(168,73,42,0.4); stroke: var(--amber-deep);
+          fill: color-mix(in srgb, var(--amber-deep) 40%, transparent); stroke: var(--amber-deep);
           stroke-width: 1;
         }
         .figure-card.rich-08 .sk-role-node {
@@ -834,7 +837,7 @@
           stroke-width: 1;
         }
         .figure-card.rich-08 .sk-flow {
-          fill: none; stroke: rgba(168,73,42,0.35);
+          fill: none; stroke: color-mix(in srgb, var(--amber-deep) 35%, transparent);
           stroke-width: 8; opacity: 0.65;
           transition: opacity .15s, stroke .15s;
         }
@@ -846,34 +849,34 @@
         html[data-theme="dark"] .figure-card.rich-04 .bp-lvl { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-04 .bp-lvl small { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-04 .bp-meta { color: var(--mute-2); }
-        html[data-theme="dark"] .figure-card.rich-04 .bp-cov i.is-empty { border-color: rgba(255,253,247,.16); }
-        html[data-theme="dark"] .figure-card.rich-04 .goal-evidence-pairs { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-04 .bp-cov i.is-empty { border-color: color-mix(in srgb, var(--ivory) 16%, transparent); }
+        html[data-theme="dark"] .figure-card.rich-04 .goal-evidence-pairs { border-top-color: var(--on-dark-veil); }
         html[data-theme="dark"] .figure-card.rich-04 .ge-pairs-h { color: var(--mute-2); }
-        html[data-theme="dark"] .figure-card.rich-04 .ge-pair + .ge-pair { border-top-color: rgba(255,253,247,.06); }
+        html[data-theme="dark"] .figure-card.rich-04 .ge-pair + .ge-pair { border-top-color: color-mix(in srgb, var(--ivory) 6%, transparent); }
         html[data-theme="dark"] .figure-card.rich-04 .ge-goal { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-04 .ge-evidence { color: var(--on-dark-mute); }
         html[data-theme="dark"] .figure-card.rich-04 .ge-arrow { color: var(--amber-soft); }
 
         /* S2 参与度象限 dark mode */
-        html[data-theme="dark"] .figure-card.rich-02 .participation-quads { border-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-02 .participation-quads { border-color: var(--on-dark-veil); }
         html[data-theme="dark"] .figure-card.rich-02 .participation-quads::before,
-        html[data-theme="dark"] .figure-card.rich-02 .participation-quads::after { background: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-02 .participation-quads::after { background: var(--on-dark-veil); }
         html[data-theme="dark"] .figure-card.rich-02 .pq-label { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-02 .pq-axis-x,
         html[data-theme="dark"] .figure-card.rich-02 .pq-axis-y { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-02 .pq-meta { color: var(--mute-2); }
-        html[data-theme="dark"] .figure-card.rich-02 .pq-h { color: var(--mute-2); border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-02 .pq-h { color: var(--mute-2); border-top-color: var(--on-dark-veil); }
 
         /* S5 Sankey dark mode */
-        html[data-theme="dark"] .figure-card.rich-08 .sankey-wrap { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-08 .sankey-wrap { border-top-color: var(--on-dark-veil); }
         html[data-theme="dark"] .figure-card.rich-08 .sankey-h { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-08 .sk-agenda-label,
         html[data-theme="dark"] .figure-card.rich-08 .sk-role-label { fill: #faf6ee; }
 
         /* S6 规则卡片 dark mode */
-        html[data-theme="dark"] .figure-card.rich-09 .rule-card { background: rgba(255,253,247,.04); }
+        html[data-theme="dark"] .figure-card.rich-09 .rule-card { background: color-mix(in srgb, var(--ivory) 4%, transparent); }
         html[data-theme="dark"] .figure-card.rich-09 .rc-id {
-          background: rgba(217,119,87,0.22); color: var(--amber-soft);
+          background: color-mix(in srgb, var(--amber) 22%, transparent); color: var(--amber-soft);
         }
         html[data-theme="dark"] .figure-card.rich-09 .rc-t { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-09 .rc-label { color: var(--ivory); }
@@ -881,7 +884,7 @@
         html[data-theme="dark"] .figure-card.rich-09 .rc-if,
         html[data-theme="dark"] .figure-card.rich-09 .rc-then { color: var(--on-dark); }
         html[data-theme="dark"] .figure-card.rich-09 .rc-kw {
-          background: rgba(255,253,247,.06); color: var(--amber-soft);
+          background: color-mix(in srgb, var(--ivory) 6%, transparent); color: var(--amber-soft);
         }
 
         /* S8 议程兑现矩阵 dark mode */
@@ -890,27 +893,27 @@
         html[data-theme="dark"] .figure-card.rich-11 .fm-col-h,
         html[data-theme="dark"] .figure-card.rich-11 .fm-totals-h { color: var(--mute-2); }
         html[data-theme="dark"] .figure-card.rich-11 .fm-cell.is-empty {
-          background: rgba(255,253,247,.04);
-          border-color: rgba(255,253,247,.18);
+          background: color-mix(in srgb, var(--ivory) 4%, transparent);
+          border-color: color-mix(in srgb, var(--ivory) 18%, transparent);
         }
         html[data-theme="dark"] .figure-card.rich-11 .fm-score { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-11 .fm-dim-total,
         html[data-theme="dark"] .figure-card.rich-11 .fm-col-total {
-          border-top-color: rgba(255,253,247,.10);
+          border-top-color: var(--on-dark-veil);
           color: var(--amber-soft);
         }
-        html[data-theme="dark"] .figure-card.rich-11 .fm-corner-bot { border-top-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .figure-card.rich-11 .fm-unfulfill-section { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-corner-bot { border-top-color: var(--on-dark-veil); }
+        html[data-theme="dark"] .figure-card.rich-11 .fm-unfulfill-section { border-top-color: var(--on-dark-veil); }
 
         /* v6+ 题链 controls dark mode 补充 */
-        html[data-theme="dark"] .qstep-reset { color: var(--mute-2); border-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .qstep-reset:hover { color: var(--amber-soft); background: rgba(217,119,87,.10); border-color: var(--amber-soft); }
-        html[data-theme="dark"] .chain-completed-cta { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .qstep-reset { color: var(--mute-2); border-color: var(--on-dark-veil); }
+        html[data-theme="dark"] .qstep-reset:hover { color: var(--amber-soft); background: color-mix(in srgb, var(--amber) 10%, transparent); border-color: var(--amber-soft); }
+        html[data-theme="dark"] .chain-completed-cta { border-top-color: var(--on-dark-veil); }
         html[data-theme="dark"] .chain-reflection-helper { color: var(--mute-2); }
         html[data-theme="dark"] .chain-wrong-toast {
-          background: rgba(217,119,87,.12); color: var(--amber-soft);
+          background: color-mix(in srgb, var(--amber) 12%, transparent); color: var(--amber-soft);
         }
-        html[data-theme="dark"] .chain-q-actions { border-top-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .chain-q-actions { border-top-color: var(--on-dark-veil); }
         html[data-theme="dark"] .chain-q-actions .chain-meta { color: var(--mute-2); }
         html[data-theme="dark"] .chain-transfer-saved-note {
           background: rgba(106,154,123,.10); color: var(--on-dark);
@@ -977,10 +980,10 @@
           transition: background .14s;
         }
         .chain-q-actions .btn-s.chain-save:hover {
-          background: var(--maroon, #872c14);
+          background: var(--maroon);
         }
         .chain-q-actions .btn-s.chain-save[disabled] {
-          background: var(--paper-3, #ece5d3); color: var(--mute-2);
+          background: var(--paper-3); color: var(--mute-2);
           border-color: var(--rule); cursor: not-allowed;
         }
         .chain-q-scaffold {
@@ -994,7 +997,7 @@
         .chain-q-scaffold li + li { margin-top: 4px; }
         html[data-theme="dark"] .chain-q-reflection textarea,
         html[data-theme="dark"] .chain-q-transfer textarea {
-          background: #211f1d; color: var(--ivory); border-color: rgba(255,253,247,.10);
+          background: #211f1d; color: var(--ivory); border-color: var(--on-dark-veil);
         }
 
         /* ── Inline decision dock (Q3 嵌进 question-card) ── */
@@ -1020,7 +1023,7 @@
         }
         .decision-dock.decision-dock-inline .dd-actions .btn-s.dd-opt:hover {
           border-color: var(--amber-soft);
-          background: rgba(217,119,87,0.04);
+          background: color-mix(in srgb, var(--amber) 4%, transparent);
         }
         .decision-dock.decision-dock-inline .dd-actions .btn-s.dd-opt.is-selected {
           border-color: var(--amber-deep); background: var(--amber-wash);
@@ -1031,16 +1034,20 @@
           padding: 6px 14px;
         }
         html[data-theme="dark"] .decision-dock.decision-dock-inline .dd-actions .btn-s.dd-opt {
-          background: #2a2722; color: var(--on-dark); border-color: rgba(255,253,247,.10);
+          background: #2a2722; color: var(--on-dark); border-color: var(--on-dark-veil);
         }
         html[data-theme="dark"] .decision-dock.decision-dock-inline .dd-actions .btn-s.dd-opt:hover {
-          background: rgba(217,119,87,0.08);
+          background: color-mix(in srgb, var(--amber) 8%, transparent);
         }
 
         /* ── Locked artifact (chain mode + Q4 未完成) ── */
         .artifact.is-chain-locked {
           opacity: 0.55; position: relative;
         }
+        /* v6.3: 已依教师决策成稿的产物卡 —— 与"待生成"的模板态区分开 */
+        .artifact.is-drafted { border-color: var(--sage); }
+        .artifact.is-drafted .artifact-h { color: var(--ink); }
+        .artifact-body .dim { color: var(--mute-2); font-style: italic; }
         .artifact.is-chain-locked .artifact-body,
         .artifact.is-chain-locked button[data-artifact-id] {
           pointer-events: none;
@@ -1055,7 +1062,7 @@
         }
         .artifact-chain-lock::before { content: "🔒"; font-size: var(--fs-2xs); }
         html[data-theme="dark"] .artifact-chain-lock {
-          background: rgba(217,119,87,0.12);
+          background: color-mix(in srgb, var(--amber) 12%, transparent);
         }
 
         /* ── Locked decision dock (Q1/Q2 期间，独立 dock 路径已废弃,留 CSS 兜底) ── */
@@ -1070,7 +1077,7 @@
           text-align: center;
           font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.06em;
           color: var(--amber-deep);
-          background: rgba(255,253,247,0.92);
+          background: color-mix(in srgb, var(--ivory) 92%, transparent);
           padding: 6px 0;
           pointer-events: none;
         }
@@ -1082,7 +1089,7 @@
           content: "🔒 需先补齐上游证据，方可拍板并保存判断";
           position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
           font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.05em;
-          color: var(--amber-deep); background: rgba(255,253,247,0.86); text-align: center; padding: 6px 10px; pointer-events: none;
+          color: var(--amber-deep); background: color-mix(in srgb, var(--ivory) 86%, transparent); text-align: center; padding: 6px 10px; pointer-events: none;
         }
         #stationDetail.is-evidence-locked .artifact { opacity: 0.55; position: relative; }
         #stationDetail.is-evidence-locked .artifact .artifact-body,
@@ -1151,7 +1158,7 @@
           cursor: pointer; letter-spacing: 0.04em;
         }
         .chain-card .btn-s.chain-save[disabled] {
-          background: var(--paper-3, #ece5d3); color: var(--mute-2);
+          background: var(--paper-3); color: var(--mute-2);
           border-color: var(--rule); cursor: not-allowed;
         }
         .chain-card.is-saved {
@@ -1210,30 +1217,30 @@
         }
 
         /* ── Dark mode 覆盖 ── */
-        html[data-theme="dark"] .chain-q-stem { background: rgba(217,119,87,0.10); color: var(--ivory); }
-        html[data-theme="dark"] .chain-q-opts li { background: #2a2722; border-color: rgba(255,253,247,.10); color: var(--on-dark); }
-        html[data-theme="dark"] .chain-q-opts li:hover { background: rgba(217,119,87,0.08); }
+        html[data-theme="dark"] .chain-q-stem { background: color-mix(in srgb, var(--amber) 10%, transparent); color: var(--ivory); }
+        html[data-theme="dark"] .chain-q-opts li { background: #2a2722; border-color: var(--on-dark-veil); color: var(--on-dark); }
+        html[data-theme="dark"] .chain-q-opts li:hover { background: color-mix(in srgb, var(--amber) 8%, transparent); }
         html[data-theme="dark"] .chain-q-opts li.is-correct { background: rgba(106,154,123,0.12); color: var(--ivory); }
-        html[data-theme="dark"] .chain-q-opts li.is-wrong { background: rgba(168,73,42,0.10); color: var(--mute-2); }
-        html[data-theme="dark"] .chain-hint-drawer { background: rgba(255,253,247,.04); color: var(--on-dark-mute); }
-        html[data-theme="dark"] .chain-card { background: #2a2722; border-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] .chain-q-opts li.is-wrong { background: color-mix(in srgb, var(--amber-deep) 10%, transparent); color: var(--mute-2); }
+        html[data-theme="dark"] .chain-hint-drawer { background: color-mix(in srgb, var(--ivory) 4%, transparent); color: var(--on-dark-mute); }
+        html[data-theme="dark"] .chain-card { background: #2a2722; border-color: var(--on-dark-veil); }
         html[data-theme="dark"] .chain-card-stem { color: var(--ivory); }
-        html[data-theme="dark"] .chain-card textarea { background: #211f1d; color: var(--ivory); border-color: rgba(255,253,247,.10); }
-        html[data-theme="dark"] .consent-card { background: #211f1d; border-color: rgba(255,253,247,.16); color: var(--ivory); }
+        html[data-theme="dark"] .chain-card textarea { background: #211f1d; color: var(--ivory); border-color: var(--on-dark-veil); }
+        html[data-theme="dark"] .consent-card { background: #211f1d; border-color: color-mix(in srgb, var(--ivory) 16%, transparent); color: var(--ivory); }
         html[data-theme="dark"] .consent-body .consent-lead { color: var(--ivory); }
         html[data-theme="dark"] .consent-body .consent-text { color: var(--on-dark); }
         html[data-theme="dark"] .decision-dock.is-chain-locked::after { background: rgba(33,31,29,0.92); color: var(--amber-soft); }
 
         /* ── S1 三角图气泡 + 4 类定位排序条形图 (A+B 优化) ── */
         .figure-card.rich-01 .bubble .bubble-fill { transition: r .3s ease; }
-        .figure-card.rich-01 .bubble.is-top .bubble-fill { fill: var(--amber-deep, #a8492a); }
+        .figure-card.rich-01 .bubble.is-top .bubble-fill { fill: var(--amber-deep); }
         .figure-card.rich-01 .bubble.is-top .bubble-halo {
-          fill: var(--amber-deep, #a8492a); opacity: 0.18;
+          fill: var(--amber-deep); opacity: 0.18;
         }
-        .figure-card.rich-01 .bubble.is-ok .bubble-fill { fill: var(--sage, #6a9a7b); }
+        .figure-card.rich-01 .bubble.is-ok .bubble-fill { fill: var(--sage); }
         .figure-card.rich-01 .bubble.is-warn .bubble-fill {
-          fill: rgba(217,119,87,0.42);
-          stroke: var(--amber-deep, #a8492a);
+          fill: color-mix(in srgb, var(--amber) 42%, transparent);
+          stroke: var(--amber-deep);
           stroke-width: 1.2;
           stroke-dasharray: 2,2;
         }
@@ -1242,16 +1249,16 @@
           font-size: var(--fs-2xs); font-weight: 700;
           pointer-events: none;
         }
-        .figure-card.rich-01 .bubble.is-warn .bubble-val { fill: var(--ink, #1a1714); }
+        .figure-card.rich-01 .bubble.is-warn .bubble-val { fill: var(--ink); }
         .figure-card.rich-01 .bubble .bubble-name {
-          fill: var(--ink, #1a1714);
+          fill: var(--ink);
           font-family: var(--serif-cn);
           font-size: var(--fs-2xs);
           font-weight: 500;
           pointer-events: none;
         }
         .figure-card.rich-01 .bubble.is-top .bubble-name {
-          fill: var(--amber-deep, #a8492a);
+          fill: var(--amber-deep);
           font-weight: 600;
         }
 
@@ -1259,11 +1266,11 @@
         .figure-card.rich-01 .loc-bars {
           padding: 10px 16px 4px;
           margin-top: 4px;
-          border-top: 1px dashed rgba(168,73,42,0.18);
+          border-top: 1px dashed color-mix(in srgb, var(--amber-deep) 18%, transparent);
         }
         .figure-card.rich-01 .loc-bars-h {
           font-family: var(--mono); font-size: var(--fs-2xs);
-          letter-spacing: 0.06em; color: var(--mute, #999);
+          letter-spacing: 0.06em; color: var(--mute);
           margin-bottom: 10px;
           display: flex; justify-content: space-between; align-items: center;
           gap: 12px; flex-wrap: wrap;
@@ -1271,12 +1278,12 @@
         .figure-card.rich-01 .loc-expand-all {
           font-family: var(--mono); font-size: var(--fs-2xs);
           padding: 5px 12px; cursor: pointer;
-          background: var(--paper); color: var(--amber-deep, #a8492a);
-          border: 1px solid var(--amber-deep, #a8492a); border-radius: 4px;
+          background: var(--paper); color: var(--amber-deep);
+          border: 1px solid var(--amber-deep); border-radius: 4px;
           letter-spacing: 0.04em; white-space: nowrap;
           transition: background .12s, color .12s;
         }
-        .figure-card.rich-01 .loc-expand-all:hover { background: var(--amber-wash, #f7e6d8); }
+        .figure-card.rich-01 .loc-expand-all:hover { background: var(--amber-wash); }
         .figure-card.rich-01 .loc-expand-all .arrow {
           display: inline-block; transition: transform .2s; margin-left: 4px;
         }
@@ -1288,7 +1295,7 @@
         }
         .figure-card.rich-01 .loc-toggle {
           font-family: var(--mono); font-size: var(--fs-sm);
-          color: var(--mute, #999); text-align: center; line-height: 1;
+          color: var(--mute); text-align: center; line-height: 1;
           transition: transform .2s ease;
         }
         .figure-card.rich-01 .loc-detail[open] .loc-toggle { transform: rotate(180deg); }
@@ -1299,13 +1306,13 @@
         .figure-card.rich-01 .loc-summary::-webkit-details-marker { display: none; }
         .figure-card.rich-01 .loc-summary::marker { display: none; }
         .figure-card.rich-01 .loc-summary:hover .loc-toggle {
-          color: var(--amber-deep, #a8492a);
+          color: var(--amber-deep);
         }
         .figure-card.rich-01 .loc-detail {
           padding: 0;
         }
         .figure-card.rich-01 .loc-detail[open] {
-          background: rgba(168,73,42,0.025);
+          background: color-mix(in srgb, var(--amber-deep) 2.5%, transparent);
           border-radius: 4px;
           padding: 0 4px;
         }
@@ -1314,12 +1321,12 @@
         .figure-card.rich-01 .loc-breakdown {
           padding: 8px 0 12px 90px;
           margin: 4px 0 8px;
-          border-left: 2px solid rgba(168,73,42,0.18);
+          border-left: 2px solid color-mix(in srgb, var(--amber-deep) 18%, transparent);
           margin-left: 4px;
         }
-        .figure-card.rich-01 .loc-breakdown.is-top { border-left-color: var(--amber-deep, #a8492a); }
-        .figure-card.rich-01 .loc-breakdown.is-ok  { border-left-color: var(--sage, #6a9a7b); }
-        .figure-card.rich-01 .loc-breakdown.is-warn { border-left-color: rgba(217,119,87,0.5); }
+        .figure-card.rich-01 .loc-breakdown.is-top { border-left-color: var(--amber-deep); }
+        .figure-card.rich-01 .loc-breakdown.is-ok  { border-left-color: var(--sage); }
+        .figure-card.rich-01 .loc-breakdown.is-warn { border-left-color: color-mix(in srgb, var(--amber) 50%, transparent); }
         .figure-card.rich-01 .bd-row {
           display: grid; grid-template-columns: 110px 1fr 54px 1.4fr;
           gap: 10px; align-items: center; padding: 3px 8px;
@@ -1328,67 +1335,67 @@
         .figure-card.rich-01 .bd-dim {
           font-family: var(--serif-cn);
           font-size: var(--fs-xs);
-          color: var(--ink-soft, #444);
+          color: var(--ink-soft);
         }
         .figure-card.rich-01 .bd-track {
-          height: 6px; background: rgba(168,73,42,0.05);
+          height: 6px; background: color-mix(in srgb, var(--amber-deep) 5%, transparent);
           border-radius: 3px; overflow: hidden;
         }
         .figure-card.rich-01 .bd-track i {
           display: block; height: 100%; transition: width .35s ease;
         }
-        .figure-card.rich-01 .loc-breakdown.is-top .bd-track i { background: var(--amber-deep, #a8492a); }
-        .figure-card.rich-01 .loc-breakdown.is-ok .bd-track i  { background: var(--sage, #6a9a7b); }
-        .figure-card.rich-01 .loc-breakdown.is-warn .bd-track i { background: rgba(217,119,87,0.5); }
+        .figure-card.rich-01 .loc-breakdown.is-top .bd-track i { background: var(--amber-deep); }
+        .figure-card.rich-01 .loc-breakdown.is-ok .bd-track i  { background: var(--sage); }
+        .figure-card.rich-01 .loc-breakdown.is-warn .bd-track i { background: color-mix(in srgb, var(--amber) 50%, transparent); }
         .figure-card.rich-01 .bd-val {
           font-family: var(--mono); font-size: var(--fs-2xs);
-          text-align: right; color: var(--ink, #1a1714); font-weight: 600;
+          text-align: right; color: var(--ink); font-weight: 600;
         }
         .figure-card.rich-01 .bd-note {
           font-family: var(--serif-cn);
-          color: var(--mute, #999); font-size: var(--fs-xs);
+          color: var(--mute); font-size: var(--fs-xs);
           line-height: 1.55;
         }
-        html[data-theme="dark"] .figure-card.rich-01 .loc-detail[open] { background: rgba(255,253,247,0.04); }
-        html[data-theme="dark"] .figure-card.rich-01 .loc-breakdown { border-left-color: rgba(255,253,247,0.18); }
+        html[data-theme="dark"] .figure-card.rich-01 .loc-detail[open] { background: color-mix(in srgb, var(--ivory) 4%, transparent); }
+        html[data-theme="dark"] .figure-card.rich-01 .loc-breakdown { border-left-color: color-mix(in srgb, var(--ivory) 18%, transparent); }
         html[data-theme="dark"] .figure-card.rich-01 .bd-dim { color: var(--on-dark-mute); }
         html[data-theme="dark"] .figure-card.rich-01 .bd-val { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-01 .bd-note { color: var(--mute-2); }
-        html[data-theme="dark"] .figure-card.rich-01 .bd-track { background: rgba(255,253,247,0.06); }
+        html[data-theme="dark"] .figure-card.rich-01 .bd-track { background: color-mix(in srgb, var(--ivory) 6%, transparent); }
         .figure-card.rich-01 .loc-name {
           font-family: var(--serif-cn);
-          color: var(--ink, #1a1714); font-weight: 500;
+          color: var(--ink); font-weight: 500;
         }
         .figure-card.rich-01 .loc-track {
-          height: 8px; background: rgba(168,73,42,0.05);
+          height: 8px; background: color-mix(in srgb, var(--amber-deep) 5%, transparent);
           border-radius: 4px; overflow: hidden;
         }
         .figure-card.rich-01 .loc-fill {
           display: block; height: 100%;
-          background: var(--mute-2, #c0c0c0);
+          background: var(--mute-2);
           transition: width .35s ease;
         }
-        .figure-card.rich-01 .loc-row.is-top .loc-fill { background: var(--amber-deep, #a8492a); }
-        .figure-card.rich-01 .loc-row.is-ok .loc-fill  { background: var(--sage, #6a9a7b); }
-        .figure-card.rich-01 .loc-row.is-warn .loc-fill { background: rgba(217,119,87,0.5); }
+        .figure-card.rich-01 .loc-row.is-top .loc-fill { background: var(--amber-deep); }
+        .figure-card.rich-01 .loc-row.is-ok .loc-fill  { background: var(--sage); }
+        .figure-card.rich-01 .loc-row.is-warn .loc-fill { background: color-mix(in srgb, var(--amber) 50%, transparent); }
         .figure-card.rich-01 .loc-val {
           font-family: var(--mono); font-size: var(--fs-xs);
-          text-align: right; color: var(--ink, #1a1714); font-weight: 600;
+          text-align: right; color: var(--ink); font-weight: 600;
         }
-        .figure-card.rich-01 .loc-row.is-top .loc-val { color: var(--amber-deep, #a8492a); }
+        .figure-card.rich-01 .loc-row.is-top .loc-val { color: var(--amber-deep); }
         .figure-card.rich-01 .loc-note {
           font-family: var(--serif-cn);
-          color: var(--mute, #999); font-size: var(--fs-xs);
+          color: var(--mute); font-size: var(--fs-xs);
           line-height: 1.55;
         }
         .figure-card.rich-01 .loc-row.is-top .loc-name {
-          color: var(--amber-deep, #a8492a); font-weight: 600;
+          color: var(--amber-deep); font-weight: 600;
         }
         html[data-theme="dark"] .figure-card.rich-01 .loc-name { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-01 .loc-val { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-01 .loc-note { color: var(--mute-2); }
-        html[data-theme="dark"] .figure-card.rich-01 .loc-bars { border-top-color: rgba(255,253,247,0.10); }
-        html[data-theme="dark"] .figure-card.rich-01 .loc-track { background: rgba(255,253,247,0.06); }
+        html[data-theme="dark"] .figure-card.rich-01 .loc-bars { border-top-color: var(--on-dark-veil); }
+        html[data-theme="dark"] .figure-card.rich-01 .loc-track { background: color-mix(in srgb, var(--ivory) 6%, transparent); }
         html[data-theme="dark"] .figure-card.rich-01 .bubble .bubble-name { fill: #faf6ee; }
 
         /* ── 候选 1：5×4 评分矩阵（替代三角图 + 4 类条形图 + breakdown 抽屉）── */
@@ -1464,7 +1471,7 @@
         .figure-card.rich-01 .rm-cell {
           position: relative;
           height: 26px;
-          background: rgba(168,73,42,0.04);
+          background: color-mix(in srgb, var(--amber-deep) 4%, transparent);
           border-radius: 3px;
           overflow: hidden;
           display: flex; align-items: center; justify-content: flex-end;
@@ -1474,17 +1481,17 @@
         }
         .figure-card.rich-01 .rm-cell:hover {
           transform: translateY(-1px);
-          box-shadow: 0 2px 6px rgba(168,73,42,0.18);
+          box-shadow: 0 2px 6px color-mix(in srgb, var(--amber-deep) 18%, transparent);
         }
         .figure-card.rich-01 .rm-cell .rm-bar {
           position: absolute; left: 0; top: 0; bottom: 0;
           display: block;
-          background: rgba(168,73,42,0.10);
+          background: color-mix(in srgb, var(--amber-deep) 10%, transparent);
           transition: width .35s ease;
         }
-        .figure-card.rich-01 .rm-cell.is-top .rm-bar  { background: rgba(168,73,42,0.30); }
+        .figure-card.rich-01 .rm-cell.is-top .rm-bar  { background: color-mix(in srgb, var(--amber-deep) 30%, transparent); }
         .figure-card.rich-01 .rm-cell.is-ok .rm-bar   { background: rgba(106,154,123,0.28); }
-        .figure-card.rich-01 .rm-cell.is-warn .rm-bar { background: rgba(217,119,87,0.22); }
+        .figure-card.rich-01 .rm-cell.is-warn .rm-bar { background: color-mix(in srgb, var(--amber) 22%, transparent); }
         .figure-card.rich-01 .rm-cell .rm-num {
           position: relative; z-index: 1;
           font-family: var(--mono); font-size: var(--fs-sm); font-weight: 600;
@@ -1553,7 +1560,7 @@
           line-height: 1.55;
         }
         .figure-card.rich-01 .rm-detail-list li + li {
-          border-top: 1px dotted rgba(168,73,42,0.12);
+          border-top: 1px dotted color-mix(in srgb, var(--amber-deep) 12%, transparent);
         }
         .figure-card.rich-01 .rm-dt-dim {
           font-family: var(--serif-cn); font-size: var(--fs-xs);
@@ -1571,15 +1578,15 @@
 
         /* dark mode */
         html[data-theme="dark"] .figure-card.rich-01 .alignment-note {
-          background: rgba(255,253,247,0.05); color: var(--on-dark-mute);
+          background: color-mix(in srgb, var(--ivory) 5%, transparent); color: var(--on-dark-mute);
         }
         html[data-theme="dark"] .figure-card.rich-01 .rm-col-h {
-          background: rgba(255,253,247,0.05); color: var(--ivory);
+          background: color-mix(in srgb, var(--ivory) 5%, transparent); color: var(--ivory);
         }
         html[data-theme="dark"] .figure-card.rich-01 .rm-col-h:hover {
-          background: rgba(217,119,87,0.18);
+          background: color-mix(in srgb, var(--amber) 18%, transparent);
         }
-        html[data-theme="dark"] .figure-card.rich-01 .rm-cell { background: rgba(255,253,247,0.05); }
+        html[data-theme="dark"] .figure-card.rich-01 .rm-cell { background: color-mix(in srgb, var(--ivory) 5%, transparent); }
         html[data-theme="dark"] .figure-card.rich-01 .rm-cell .rm-num { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-01 .rm-total { color: var(--ivory); }
         html[data-theme="dark"] .figure-card.rich-01 .rm-dim { color: var(--on-dark-mute); }
@@ -1589,14 +1596,14 @@
         /* 前后节承接 折叠抽屉(替代原 spiral-context 永远展开) */
         .figure-card.rich-01 .spiral-disclosure {
           margin-top: 12px;
-          border-top: 1px dashed rgba(168,73,42,0.18);
+          border-top: 1px dashed color-mix(in srgb, var(--amber-deep) 18%, transparent);
           padding-top: 10px;
         }
         .figure-card.rich-01 .spiral-summary {
           list-style: none; cursor: pointer;
           padding: 6px 0;
           font-family: var(--mono); font-size: var(--fs-2xs);
-          letter-spacing: 0.04em; color: var(--mute, #999);
+          letter-spacing: 0.04em; color: var(--mute);
           display: flex; align-items: center; gap: 6px;
         }
         .figure-card.rich-01 .spiral-summary::-webkit-details-marker { display: none; }
@@ -1607,7 +1614,7 @@
         .figure-card.rich-01 .spiral-disclosure[open] .spiral-summary .arrow {
           transform: rotate(180deg);
         }
-        .figure-card.rich-01 .spiral-summary:hover { color: var(--amber-deep, #a8492a); }
+        .figure-card.rich-01 .spiral-summary:hover { color: var(--amber-deep); }
       `;
       document.head.appendChild(st);
     })();
@@ -1626,7 +1633,7 @@
       7:  { cn: "教学过程",   em: "节奏+学情校准点" },
       8:  { cn: "探究协作",   em: "协作任务" },
       9:  { cn: "形成性评价", em: "动态调节" },
-      10: { cn: "表现性评价", em: "量规证据" },
+      10: { cn: "表现性评价与学习成效诊断", em: "评价证据" },
       11: { cn: "教学反思",   em: "资源积累" },
     };
 
@@ -1658,7 +1665,7 @@
     };
 
     // ---- State ----
-    let activeId = 1; // 默认聚焦 S1 · 学情诊断（首站）
+    let activeId = 1; // 默认聚焦 S1 · 学习者与教学情境分析（首站）
     let activeStageId = null; // v4: chip 显式点击时设置；为 null 时回落到 stageOfStation(activeId)
     let activeSubKey = null;  // v4: 子节点 tile 显式点击时设置；用于区分 1 vs 1b、2 vs 2-3 等同 station 不同 pass
 
@@ -1686,7 +1693,7 @@
       return stationById[id + 1] || null;
     }
 
-    // ---- L3 · 学习产出链顶卡（v4 · 改用 STAGE_CHAIN + 9 个教学环节 displayName） ----
+    // ---- L3 · 学习产出链顶卡（v4 · 改用 STAGE_CHAIN + 9 个教学环节短标签） ----
     function renderChainTopcard(s) {
       // 由 active station 反查所属环节
       const sub = SUB_NODES[String(s.id)];
@@ -1716,27 +1723,27 @@
         const key = chain.topCardFromKeys[i] || "产物";
         const live = liveJudgmentFor(sid);
         const liveTag = live
-          ? `<span class="ci-live" title="你在上游环节的实际判断" style="display:block;margin-top:2px;font-size: var(--fs-2xs);color:var(--sage,#6a9a7b);">✓ ${esc(live.length > 22 ? live.slice(0, 22) + "…" : live)}</span>`
+          ? `<span class="ci-live" title="你在上游环节的实际判断">✓ ${esc(live.length > 22 ? live.slice(0, 22) + "…" : live)}</span>`
           : "";
-        return `<li><span class="ci-num">${padN(stageIdx(sid))}</span><span class="ci-cn">${esc(src.displayName)}</span><span class="ci-key">${esc(key)}</span>${liveTag}</li>`;
+        return `<li><span class="ci-num">${padN(stageIdx(sid))}</span><span class="ci-cn">${esc(stageShortLabel(src))}</span><span class="ci-key">${esc(key)}</span>${liveTag}</li>`;
       }).filter(Boolean).join("");
 
       const exportKeys = chain.topCardToKeys.map((k) => `<span class="chain-key">${esc(k)}</span>`).join("");
 
       const outFlow = chain.outputsTo.length
-        ? `<div class="chain-out-note">流向 <b>${chain.outputsTo.length}</b> 环节 · ${chain.outputsTo.map((sid) => {
+        ? `<div class="chain-out-note"><span class="chain-out-summary">流向 <b>${chain.outputsTo.length}</b> 环节</span><span class="chain-out-links">${chain.outputsTo.map((sid) => {
             const target = stageById[sid];
             if (!target) return "";
-            return `<a data-stage="${esc(sid)}" class="chain-out-link">${padN(stageIdx(sid))} ${esc(target.displayName)}</a>`;
-          }).filter(Boolean).join(" · ")}</div>`
+            return `<a data-stage="${esc(sid)}" class="chain-out-link">${padN(stageIdx(sid))} ${esc(stageShortLabel(target))}</a>`;
+          }).filter(Boolean).join("")}</span></div>`
         : `<p class="chain-empty">本环节为终点 · 无下游</p>`;
 
-      // S7 → S2 反向修订通道（量规反修订）
+      // S7 → S2 反向修订通道（评价标准反向修订）
       const revisionNote = (chain.revisionsTo && chain.revisionsTo.length)
         ? `<div class="chain-revision-note">↩ 反向修订 · ${chain.revisionsTo.map((sid) => {
             const target = stageById[sid];
             if (!target) return "";
-            return `<a data-stage="${esc(sid)}" class="chain-out-link">${padN(stageIdx(sid))} ${esc(target.displayName)}</a>`;
+            return `<a data-stage="${esc(sid)}" class="chain-out-link">${padN(stageIdx(sid))} ${esc(stageShortLabel(target))}</a>`;
           }).filter(Boolean).join(" · ")}</div>`
         : "";
 
@@ -1790,8 +1797,8 @@
         const sc = stageCounts();
         const pad2 = (n) => String(n).padStart(2, "0");
         deckHead.innerHTML = `
-          <b>${pad2(sc.done)}</b> 完成<span class="sep">·</span>
-          <span class="stat-live"><i></i>${stagePadIdx} 进行中</span><span class="sep">·</span>
+          <b>${pad2(sc.done)}</b> 已完成<span class="sep">·</span>
+          <span class="stat-live" aria-label="当前环节 ${stagePadIdx}"><i></i>当前 · <b>${stagePadIdx}</b></span><span class="sep">·</span>
           <b>${pad2(sc.todo)}</b> 待开始
         `;
       }
@@ -1826,7 +1833,7 @@
       }).join("");
     }
 
-    // ---- Render: node list (v4 · 9 个教学环节分组 by phase) ----
+    // ---- Render: primary stage navigation (9 个教学环节分组 by phase) ----
     function renderNodeList() {
       const el = document.getElementById("nodeList");
       if (!el) return;
@@ -1846,20 +1853,22 @@
           const isCur = g.id === cur;
           const statusKind = stageStatusCls(g.id);
           const cls = ["node-item", statusKind, isCur ? "is-active" : ""].filter(Boolean).join(" ");
-          const check = statusKind === "is-done" ? '<span class="check">✓</span>' : "<span></span>";
+          const check = statusKind === "is-done" ? '<span class="check" aria-label="已完成">✓</span>' : "";
           // 跳转到该环节首子节点
           const firstSub = g.subNodeIds && g.subNodeIds[0];
           const firstStid = (typeof firstSub === "number") ? firstSub : ((SUB_NODES[String(firstSub)] || {}).legacyStationId);
-          html += `<li class="${cls}" data-st="${firstStid || ""}" data-stage="${esc(g.id)}" role="button" tabindex="0">
+          html += `<li class="${cls}" data-st="${firstStid || ""}" data-stage="${esc(g.id)}" role="button" tabindex="0" title="${esc(g.title)}" aria-label="环节 ${String(idx).padStart(2, "0")} · ${esc(g.title)}"${isCur ? ' aria-current="step"' : ""}>
             <span class="n">${String(idx).padStart(2, "0")}</span>
-            <span>${esc(g.displayName || g.title)}</span>
-            ${check}
+            <span class="node-title">${esc(g.title)}</span>
+            <span class="node-status">${check}</span>
           </li>`;
         }
       }
       el.innerHTML = html;
       const meta = document.getElementById("nodeListMeta");
-      if (meta) meta.textContent = `${stageCounts().done} / ${TOTAL_STAGES}`;
+      if (meta) meta.textContent = `已完成 ${stageCounts().done} / ${TOTAL_STAGES}`;
+      // 侧栏是唯一的九环节导航；重绘后让 bridge 恢复其状态徽章。
+      try { if (window.__navAfterStageNavigationRender) window.__navAfterStageNavigationRender(); } catch (e) {}
     }
 
 
@@ -1964,14 +1973,14 @@
         return `
           <div class="sub-pass-banner sub-pass-stage1">
             <span class="spb-lbl">${esc(part)} · 学习目标</span>
-            <span class="spb-body">把教学目标改写为可观察、可评价、可由学生产出证明的学习成果。3-5 条为宜，覆盖知识 / 应用 / 高阶判断三个层级；同时回应来自学情诊断（环节 01）的课程定位、学情低分项、议程张力。</span>
+            <span class="spb-body">把教学目标改写为可观察、可评价、可由学生产出证明的学习成果。3-5 条为宜，覆盖知识 / 应用 / 高阶判断三个层级；同时回应来自学习者与教学情境分析（环节 01）的课程定位、学情低分项、议程张力。</span>
           </div>
         `;
       }
       if (sub.focus === "rubric") {
         const stage = stageById[sub.stageId];
         const part = `步骤 ${(stage && stage.subNodeIds || []).indexOf(subKey) + 1} / ${(stage && stage.subNodeIds || []).length}`;
-        // 检查 Store 中是否有来自评价与画像（环节 07）的待审修订
+        // 检查 Store 中是否有来自表现性评价与学习成效诊断（环节 07）的待审修订
         let revisionNote = "";
         try {
           const store = window.PharmacoPilotStore;
@@ -1981,27 +1990,27 @@
             revisionNote = `
               <div class="spb-revision-pending">
                 <span class="spb-rev-tag">↩ 待审反向修订 · ${revs.length} 条</span>
-                <span class="spb-rev-hint">来自评价与画像（环节 07）的量规修订建议，必须显式确认或驳回后才能继续。</span>
+                <span class="spb-rev-hint">来自表现性评价与学习成效诊断（环节 07）的评价标准修订建议，必须显式确认或驳回后才能继续。</span>
               </div>
             `;
           }
         } catch (e) {}
         return `
           <div class="sub-pass-banner sub-pass-stage2">
-            <span class="spb-lbl">${esc(part)} · 评价证据 + 5 维量规</span>
-            <span class="spb-body">为每条目标设计可采集的评价证据，并配套 5 维量规（一致性 / 真实性 / 学情 / 高阶 / 评价）。每个维度有 4 等级描述符；预留批判意识维度。本节点同时是评价与画像（环节 07）反向修订的收件方。</span>
+            <span class="spb-lbl">${esc(part)} · 评价证据 + 5 维评价标准</span>
+            <span class="spb-body">为每条目标设计可采集的评价证据，并配套 5 维评价标准（一致性 / 真实性 / 学情 / 高阶 / 评价）。每个维度有 4 等级描述符；预留批判意识维度。本节点同时是表现性评价与学习成效诊断（环节 07）反向修订的收件方。</span>
             ${revisionNote}
           </div>
         `;
       }
-      // S7 三段：评分 → 反馈/画像 → 量规反向修订
+      // S7 三段：评分 → 反馈/画像 → 评价标准反向修订
       if (sub.focus === "scoring") {
         const stage = stageById[sub.stageId];
         const part = `步骤 ${(stage && stage.subNodeIds || []).indexOf(subKey) + 1} / ${(stage && stage.subNodeIds || []).length}`;
         return `
           <div class="sub-pass-banner sub-pass-data">
             <span class="spb-lbl">${esc(part)} · 数据采集 · 评分</span>
-            <span class="spb-body">用目标与量规（环节 02）的 5 维量规给学生作品逐条打分。只采集数据，不做评价定性，不写反馈语；产出原始评分表 + 低分维度 Pareto 图。</span>
+            <span class="spb-body">用预期学习结果与评价证据设计（环节 02）的 5 维评价标准给学生作品逐条打分。只采集数据，不做评价定性，不写反馈语；产出原始评分表 + 低分维度 Pareto 图。</span>
           </div>
         `;
       }
@@ -2020,11 +2029,11 @@
         const part = `步骤 ${(stage && stage.subNodeIds || []).indexOf(subKey) + 1} / ${(stage && stage.subNodeIds || []).length}`;
         return `
           <div class="sub-pass-banner sub-pass-meta">
-            <span class="spb-lbl">${esc(part)} · 元动作 · 量规反向修订</span>
-            <span class="spb-body">基于本轮评分发现的量规问题（某维度区分度不足 / 过严 / 缺失关键维度），向目标与量规（环节 02）提交修订建议。这是评价与画像（环节 07）→ 目标与量规（环节 02）反向修订通道的发起点；建议会进入环节 02 的「评价证据 + 5 维量规」待审列表，下一轮备课进入该环节前必须显式确认或驳回。</span>
+            <span class="spb-lbl">${esc(part)} · 元动作 · 评价标准反向修订</span>
+            <span class="spb-body">基于本轮评分发现的评价标准问题（某维度区分度不足 / 过严 / 缺失关键维度），向预期学习结果与评价证据设计（环节 02）提交修订建议。这是表现性评价与学习成效诊断（环节 07）→ 预期学习结果与评价证据设计（环节 02）反向修订通道的发起点；建议会进入环节 02 的「评价证据 + 5 维评价标准」待审列表，下一轮备课进入该环节前必须显式确认或驳回。</span>
             <div class="spb-revision-outbound">
               <span class="spb-rev-tag">↩ 反向修订发起 · 环节 07 → 环节 02</span>
-              <span class="spb-rev-hint">提交后会在环节 02「评价证据 + 5 维量规」节点顶部显示「待审反向修订 N 条」。</span>
+              <span class="spb-rev-hint">提交后会在环节 02「评价证据 + 5 维评价标准」节点顶部显示「待审反向修订 N 条」。</span>
             </div>
           </div>
         `;
@@ -2083,7 +2092,7 @@
       const stage = stageById[stageId];
       const stageIdx = STAGES.findIndex((g) => g.id === stageId) + 1;
       const stageBadge = stage
-        ? `<span class="pill pill-amber">环节 ${pad(stageIdx)} · ${esc(stage.displayName)}</span>`
+        ? `<span class="pill pill-amber">环节 ${pad(stageIdx)} · ${esc(stage.title)}</span>`
         : "";
       // 节点定位徽章 + h3 子节点标题
       // 多子节点环节：显示「步骤 i / N」徽章 + 用 sub.subTitle 做 h3
@@ -2114,9 +2123,11 @@
       return `
         <div class="detail-head">
           <div class="detail-tags">
-            ${stageBadge}
-            ${subBadge}
-            <span class="pill ${phase.pillClass}">${esc(phase.tag)}</span>
+            <span class="detail-tag-context">
+              ${stageBadge}
+              ${subBadge}
+              <span class="pill ${phase.pillClass}">${esc(phase.tag)}</span>
+            </span>
             <span class="right">
               <span class="pill pill-mute">${decisions.length} 个判断选项</span>
               <span class="pill pill-mute">${s.qualityDimensions.length} 维评价</span>
@@ -2331,12 +2342,13 @@
       const fld = (q3 && q3.postSelectReflection && q3.postSelectReflection.field) || "reflection";
       const prompt = (q3 && q3.postSelectReflection && q3.postSelectReflection.prompt) || "用一句话写下你的理由";
       const placeholder = (q3 && q3.postSelectReflection && q3.postSelectReflection.placeholder) || "一句话说明...";
-      // v6.1: 梯度示例 helper(从 q3.postSelectReflection.gradient 读,缺省给 3 档通用梯度)
-      const gradient = (q3 && q3.postSelectReflection && q3.postSelectReflection.gradient)
-        || ["不算", "勉强算", "算"];
+      // v6.2: 梯度只能来自题目自带的 gradient——各题动词不同（"算…吗" / "愿意…吗" / 二选一），
+      // 旧版兜底 ["不算","勉强算","算"] 是为"算成功了吗"写的，漏给其余题会答非所问。
+      // 因此缺省时**不显示**参考梯度：给错提示比不给提示更糟。
+      const gradient = (q3 && q3.postSelectReflection && q3.postSelectReflection.gradient) || null;
       const saved = reflections[fld];
-      const helperHtml = saved ? "" : `
-        <p class="chain-reflection-helper">参考梯度: ${gradient.map((g, i) => `<b>${esc(g)}</b>`).join(" → ")} — 选择最贴近你判断的那个,然后说明理由</p>
+      const helperHtml = (saved || !Array.isArray(gradient) || !gradient.length) ? "" : `
+        <p class="chain-reflection-helper">参考梯度: ${gradient.map((g) => `<b>${esc(g)}</b>`).join(" → ")} — 选择最贴近你判断的那个,然后说明理由</p>
       `;
       return `
         <div class="chain-q chain-q-reflection" data-chain-card="reflection" data-station="${s.id}" data-field="${esc(fld)}" data-step="3r">
@@ -2400,7 +2412,7 @@
         ctaHtml = `
           <div class="chain-completed-cta">
             <button class="btn-s btn-next-stage" onclick="window.__navSetStation(${nextStid}, '${esc(nextStage.id)}', '${esc(subKey)}')">
-              下一环节 · ${esc(nextIdx)} ${esc(nextStage.displayName)} →
+              下一环节 · ${esc(nextIdx)} ${esc(stageShortLabel(nextStage))} →
             </button>
           </div>
         `;
@@ -2529,7 +2541,7 @@
       const stageIdx = STAGES.findIndex((g) => g.id === stageId) + 1;
       const stagePadIdx = pad(stageIdx);
       const headTitle = stage
-        ? `# 环节 ${stagePadIdx} · ${esc(stage.displayName)} · ${esc(s.title)}`
+        ? `# 环节 ${stagePadIdx} · ${esc(stage.title)} · ${esc(s.title)}`
         : `# ${esc(s.title)}`;
       // v5 苏格拉底题链：chain mode 下，产物在题链 4 阶全部走完前锁定
       const chainBank = getChainBank(s.id);
@@ -2557,56 +2569,126 @@
       const lockBanner = isLocked
         ? `<div class="artifact-chain-lock">${esc(progressText)}</div>`
         : "";
-      return `
-        <div class="artifact${isLocked ? " is-chain-locked" : ""}">
-          ${lockBanner}
-          <div class="artifact-h">
-            <span>本节点产物 · <b>${esc(productFilename(s))}</b> · 待生成</span>
-            <span>评价维度 ${s.qualityDimensions.length}</span>
-          </div>
-          <div class="artifact-body">
+
+      // ── v6.3 产物卡状态化 ──────────────────────────────────────────
+      // 旧版整张卡是静态模板、表头永远写死"待生成"：教师做完一个环节后
+      // 产物毫无变化，L3 产出链也就名不副实。现改为读 Store：
+      //   未决策 → 仍显示"将产出什么"的模板（此时它是规格，合理）
+      //   已决策 → 换成教师真实决策的草稿（判断 / 理由 / 流向）
+      const judgmentNow = (typeof lookupChainJudgment === "function") ? lookupChainJudgment(s) : null;
+      const cpNow = (store && store.getChainProgress) ? store.getChainProgress(s.id) : { reflections: {} };
+      const artsNow = (store && store.getArtifacts) ? (store.getArtifacts(s.id) || []) : [];
+
+      let stateLabel = "待生成";
+      if (artsNow.length) {
+        const at = artsNow[artsNow.length - 1].savedAt;
+        const hhmm = at ? new Date(at).toTimeString().slice(0, 5) : "";
+        stateLabel = `✓ 已生成${hhmm ? " · " + hhmm : ""}`;
+      } else if (judgmentNow) {
+        stateLabel = "✓ 判断已定 · 待生成产物";
+      }
+
+      // 反思正文：字段名由本站题链的 Q3 决定，取不到就退回模板态
+      let reflectionText = "";
+      if (chainBank) {
+        const q3 = (chainBank.chain || []).find((q) => q.step === 3);
+        const fld = q3 && q3.postSelectReflection && q3.postSelectReflection.field;
+        // Store 里反思存为 { text, ts }；兼容早期直接存字符串的数据
+        const rec = fld ? (cpNow.reflections || {})[fld] : null;
+        reflectionText = (rec && typeof rec === "object") ? (rec.text || "") : (rec || "");
+      }
+
+      // 流向下游：与 L3 顶卡同源（STAGE_CHAIN），不另造一套口径
+      const chainDef = STAGE_CHAIN[stageId] || { outputsTo: [], topCardToKeys: [] };
+      const flowTargets = (chainDef.outputsTo || []).map((sid) => {
+        const idx = STAGES.findIndex((x) => x.id === sid) + 1;
+        const st = stageById[sid];
+        return `${pad(idx)} ${st ? st.displayName || st.title : sid}`;
+      });
+      const flowLine = (chainDef.topCardToKeys || []).length
+        ? `${(chainDef.topCardToKeys || []).join(" / ")} → ${flowTargets.length ? flowTargets.join(" · ") : "本环节为终点"}`
+        : (flowTargets.length ? flowTargets.join(" · ") : "本环节为终点");
+
+      const guide = stationGuide(s);
+      const bodyHtml = judgmentNow
+        ? `
+<span class="k">${headTitle}</span><br/>
+<span class="s">## 我的判断</span><br/>
+${esc(judgmentNow.label || judgmentNow.key)}<br/>
+<span class="s">## 我的理由</span><br/>
+${reflectionText ? esc(reflectionText) : '<span class="dim">（Q3 反思未填写）</span>'}<br/>
+<span class="s">## 流向下游</span><br/>
+${esc(flowLine)}<br/>
+<span class="s">## 评价依据</span><br/>
+${s.qualityDimensions.map((q) => esc(q)).join(" · ")}
+        `
+        : `
 <span class="k">${headTitle}</span><br/>
 <span class="s">## 关键教学判断</span><br/>
 ${esc(s.userMindset)}<br/>
-<span class="s">## 本节点要做的</span><br/>
-${esc(s.what)}<br/>
-<span class="s">## 为什么</span><br/>
-${esc(s.why)}<br/>
+<span class="s">## 做好是什么样</span><br/>
+${esc(guide.good)}<br/>
+<span class="s">## 怎么做好</span><br/>
+${esc(guide.how)}<br/>
+<span class="s">## 设计依据</span><br/>
+${esc(guide.why)}<br/>
 <span class="s">## 产物类型</span><br/>
 ${esc(s.artifactType)}<br/>
 <span class="s">## 评价依据</span><br/>
 ${s.qualityDimensions.map((q) => esc(q)).join(" · ")}<br/>
 <span class="s">## 后台校验点（隐藏式）</span><br/>
 ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
+        `;
+
+      return `
+        <div class="artifact${isLocked ? " is-chain-locked" : ""}${judgmentNow ? " is-drafted" : ""}">
+          ${lockBanner}
+          <div class="artifact-h">
+            <span>本节点产物 · <b>${esc(productFilename(s))}</b> · ${esc(stateLabel)}</span>
+            <span>评价维度 ${s.qualityDimensions.length}</span>
           </div>
+          <div class="artifact-body">${bodyHtml}</div>
         </div>
       `;
     }
 
-    // ---- 本节点说明（本节点要做的 / 为什么 / 怎么做）— 折叠成 disclosure ----
-    //      全部默认收起（环节地图已在顶部提供「学/做/得」三轴速读，详情留给用户主动展开）。
+    // ---- 本节点说明：主视图只突出「做好是什么样」+「怎么做好」 ----
+    //      设计依据保留为二级折叠，不与当前操作争夺首屏注意力。
+    function stationGuide(s) {
+      const subKey = effectiveSubKey();
+      return C.SWOT_NODE_GUIDES?.[String(subKey)] || {
+        good: s.what,
+        how: s.how,
+        why: s.why,
+      };
+    }
+
     function renderStationIntro(s) {
+      // 合并节点 2-3 只在主体顶部呈现一次说明；
+      // 下方「议程协商」追加段不再复制同两张卡。
+      if (_suppressDetailHead) return "";
+      const guide = stationGuide(s);
       return `
         <details class="station-intro-disclosure">
           <summary class="sid-summary">
             <span class="sid-label">本节点说明</span>
-            <span class="sid-preview">${esc(s.what)}</span>
+            <span class="sid-preview">${esc(guide.good)}</span>
             <span class="sid-caret" aria-hidden="true">⌄</span>
           </summary>
           <div class="station-intro">
             <div class="intro-card">
-              <span class="intro-lbl">本节点要做的</span>
-              <p>${esc(s.what)}</p>
+              <span class="intro-lbl">做好是什么样</span>
+              <p>${esc(guide.good)}</p>
             </div>
             <div class="intro-card">
-              <span class="intro-lbl">为什么这么做</span>
-              <p>${esc(s.why)}</p>
-            </div>
-            <div class="intro-card">
-              <span class="intro-lbl">怎么做</span>
-              <p>${esc(s.how)}</p>
+              <span class="intro-lbl">怎么做好</span>
+              <p>${esc(guide.how)}</p>
             </div>
           </div>
+          <details class="intro-rationale">
+            <summary>设计依据 · 为什么这样做</summary>
+            <p>${esc(guide.why)}</p>
+          </details>
         </details>
       `;
     }
@@ -2634,7 +2716,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
     function figureFor(s) {
       if (s.id === 2)  return figureStation02();
       if (s.id === 4) {
-        // S2 两段：4-a 目标 → 认知层级金字塔 + 目标↔证据；4-b 量规 → 5 维量规矩阵 + 证据覆盖热图
+        // S2 两段：4-a 目标 → 认知层级金字塔 + 目标↔证据；4-b 评价标准 → 5 维评价标准矩阵 + 证据覆盖热图
         const sk = effectiveSubKey();
         const sub = sk ? SUB_NODES[sk] : null;
         return (sub && sub.focus === "rubric") ? figureStation04Rubric() : figureStation04();
@@ -2643,7 +2725,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       if (s.id === 8)  return figureStation08();
       if (s.id === 9)  return figureStation09();
       if (s.id === 10) {
-        // S7 三段：10-a 评分 → 评分+Pareto；10-b 反馈画像 → 量规雷达；10-c 量规修订 → 反向修订对照
+        // S7 三段：10-a 评分 → 评分+Pareto；10-b 反馈画像 → 评价雷达图；10-c 评价标准修订 → 反向修订对照
         const sk = effectiveSubKey();
         const sub = sk ? SUB_NODES[sk] : null;
         const f = sub && sub.focus;
@@ -2845,7 +2927,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       `;
     }
 
-    // 04 (4-b) · 量规设计 — 5 维量规矩阵 × 4 等级 + 证据覆盖热图（payload 可覆盖 e4.rubric5d）
+    // 04 (4-b) · 评价标准设计 — 5 维评价标准矩阵 × 4 等级 + 证据覆盖热图（payload 可覆盖 e4.rubric5d）
     function figureStation04Rubric() {
       const e4 = efigOf(4);
       const defaultRubric = [
@@ -2866,7 +2948,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         const cells = (r.levels || []).map((lv, i) => {
           const lvl = i + 1;
           const isCur = lvl === r.cur;
-          return `<div class="r4r-cell${isCur ? " is-cur" : ""}" style="flex:1;min-width:0;padding:4px 5px;border:1px solid ${isCur ? "var(--amber-deep)" : "var(--rule,#e7e1d8)"};border-radius:4px;background:${isCur ? "rgba(217,119,87,.12)" : "transparent"};font-size: var(--fs-2xs);line-height:1.3;color:${isCur ? "var(--amber-deep)" : "var(--mute,#8a8178)"};"><b style="display:block;font-size: var(--fs-2xs);letter-spacing:.04em;opacity:.7;">L${lvl}</b>${esc(lv)}</div>`;
+          return `<div class="r4r-cell${isCur ? " is-cur" : ""}" style="flex:1;min-width:0;padding:4px 5px;border:1px solid ${isCur ? "var(--amber-deep)" : "var(--rule)"};border-radius:4px;background:${isCur ? "rgba(217,119,87,.12)" : "transparent"};font-size: var(--fs-2xs);line-height:1.3;color:${isCur ? "var(--amber-deep)" : "var(--mute)"};"><b style="display:block;font-size: var(--fs-2xs);letter-spacing:.04em;opacity:.7;">L${lvl}</b>${esc(lv)}</div>`;
         }).join("");
         const cov = Math.max(0, Math.min(3, Number(r.cov) || 0));
         const covBlocks = [0, 1, 2].map((j) => `<i style="display:inline-block;width:8px;height:8px;margin-left:2px;border-radius:1px;background:${j < cov ? "var(--amber-deep)" : "rgba(168,73,42,.15)"};"></i>`).join("");
@@ -2874,7 +2956,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           <div class="r4r-row" style="display:flex;align-items:stretch;gap:8px;margin:6px 0;">
             <div class="r4r-dim" style="width:84px;flex:none;">
               <b style="display:block;font-size: var(--fs-xs);color:var(--ink);">${esc(r.dim)}</b>
-              <small style="font-size: var(--fs-2xs);color:var(--mute,#8a8178);line-height:1.25;">${esc(r.full || "")}</small>
+              <small style="font-size: var(--fs-2xs);color:var(--mute);line-height:1.25;">${esc(r.full || "")}</small>
             </div>
             <div class="r4r-levels" style="flex:1;display:flex;gap:4px;">${cells}</div>
             <div class="r4r-cov" style="width:32px;flex:none;text-align:right;align-self:center;" title="证据覆盖 ${cov}/3">${covBlocks}</div>
@@ -2883,20 +2965,20 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       };
       return `
         <div class="figure-card rich-04b">
-          <div class="fcard-lbl"><span>FIGURE · 5 维量规矩阵</span><b>5 维 × 4 等级 · 证据覆盖热图</b></div>
-          <div style="display:flex;gap:10px;font-size: var(--fs-2xs);color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">
+          <div class="fcard-lbl"><span>FIGURE · 5 维评价标准矩阵</span><b>5 维 × 4 等级 · 证据覆盖热图</b></div>
+          <div style="display:flex;gap:10px;font-size: var(--fs-2xs);color:var(--mute);letter-spacing:.04em;margin:2px 0 6px;">
             <span><i style="display:inline-block;width:8px;height:8px;border:1px solid var(--amber-deep);border-radius:2px;background:rgba(217,119,87,.12);vertical-align:middle;"></i> 当前设计等级</span>
             <span style="margin-left:auto;"><i style="display:inline-block;width:8px;height:8px;background:var(--amber-deep);border-radius:1px;vertical-align:middle;"></i> 证据覆盖 /3</span>
           </div>
           ${rubric.map(row).join("")}
           <div class="bloom-gap" style="margin-top:8px;">
             <b>★ 怎么用</b> · ${weak.length
-              ? `${esc(weak.join(" / "))} 维只到 L2、证据覆盖偏低 — 先为高阶目标（TOWS / 批判）配可观察证据，并补「批判意识」描述符，否则量规判不出高低`
+              ? `${esc(weak.join(" / "))} 维只到 L2、证据覆盖偏低 — 先为高阶目标（TOWS / 批判）配可观察证据，并补「批判意识」描述符，否则评价标准判不出高低`
               : "5 维均 ≥ L3 且证据覆盖良好"}
           </div>
           <div class="figure-foot">
-            <span>来源 · 量规设计稿 v0.2 · 5 维 × 4 等级</span>
-            <details class="figure-drill"><summary>展开量规细则 →</summary>
+            <span>来源 · 评价标准设计稿 v0.2 · 5 维 × 4 等级</span>
+            <details class="figure-drill"><summary>展开评价标准细则 →</summary>
               <ol class="drill-list">
                 ${rubric.map((r) => `<li><b>${esc(r.dim)} · ${esc(r.full || "")}</b><br/>${(r.levels || []).map((lv, i) => `<span style="display:block;padding-left:6px;font-size: var(--fs-2xs);">· L${i + 1} ${esc(lv)}</span>`).join("")}</li>`).join("")}
               </ol>
@@ -2930,7 +3012,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         <div class="figure-card rich-06">
           <div class="fcard-lbl"><span>FIGURE · 案例证据密度</span><b>${esc(subject)} · ${bars.length} 维证据</b></div>
           ${dataNotice ? `
-            <div class="evd-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber,#b8860b);font-size: var(--fs-2xs);color:var(--amber-deep,#a8492a);line-height:1.45;border-radius:0 4px 4px 0;">
+            <div class="evd-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber);font-size: var(--fs-2xs);color:var(--amber-deep);line-height:1.45;border-radius:0 4px 4px 0;">
               ${esc(dataNotice.text || "⚠ 当前为示例数据")}
             </div>
           ` : ""}
@@ -3092,7 +3174,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       `;
     }
 
-    // 09 · 动态学情触发 — 理解曲线 + 学情校准点（payload 驱动，对齐任务链环节时间线）
+    // 09 · 动态学情触发 — 理解曲线 + 学情校准点（payload 驱动，对齐学习活动与教学支架设计环节时间线）
     function figureStation09() {
       // S6 三锚点共用一图（同一 45' 时间轴）：高亮当前锚点而非拆图
       const __sk09 = effectiveSubKey();
@@ -3199,7 +3281,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
               const rules = (saved && Object.keys(saved).length)
                 ? Object.keys(saved).map((id) => Object.assign({ anchorId: id }, saved[id]))
                 : recRules;
-              if (!rules.length) return `<span class="figure-foot-note">锚点规则（在课中调控环节生成产物后写入）</span>`;
+              if (!rules.length) return `<span class="figure-foot-note">锚点规则（在形成性评价与适应性调控环节生成产物后写入）</span>`;
               const srcTag = (saved && Object.keys(saved).length) ? "已保存" : "推荐";
               return `<details class="figure-drill"><summary>展开锚点规则 →</summary>
                 <ol class="drill-list">
@@ -3212,7 +3294,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       `;
     }
 
-    // 10 · 表现性评价 — 量规雷达（payload 驱动，支持 5 维五边形 / 6 维六边形）
+    // 10 · 表现性评价与学习成效诊断 — 评价雷达图（payload 驱动，支持 5 维五边形 / 6 维六边形）
     // v4.2: 若教师已在 10-a 子节点保存评分，优先用 Store 数据生成能力画像；否则用 payload 默认值
     function figureStation10() {
       const e10 = efigOf(10);
@@ -3275,14 +3357,14 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
 
       return `
         <div class="figure-card rich-10">
-          <div class="fcard-lbl"><span>FIGURE · 量规雷达</span><b>${N} 维评价 · ${dataSourceLabel}</b></div>
+          <div class="fcard-lbl"><span>FIGURE · 评价雷达图</span><b>${N} 个评价维度 · ${dataSourceLabel}</b></div>
           ${!hasUserScore ? `
-            <div class="rubric-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber,#b8860b);font-size: var(--fs-2xs);color:var(--amber-deep,#a8492a);line-height:1.45;border-radius:0 4px 4px 0;">
-              ⚠ 当前为样例评分。在子节点 10-a 完成 5 维量规评分后，能力画像将基于实测数据重新生成。
+            <div class="rubric-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber);font-size: var(--fs-2xs);color:var(--amber-deep);line-height:1.45;border-radius:0 4px 4px 0;">
+              ⚠ 当前为样例评分。在子节点 10-a 完成 5 个评价维度的评分后，能力画像将基于实测数据重新生成。
             </div>
           ` : ""}
           <div class="rubric-wrap">
-            <svg class="rubric-svg" viewBox="-50 -20 380 290" preserveAspectRatio="xMidYMid meet" aria-label="量规雷达">
+            <svg class="rubric-svg" viewBox="-50 -20 380 290" preserveAspectRatio="xMidYMid meet" aria-label="评价雷达图">
               <g transform="translate(${cx},${cy})">
                 <polygon points="${ringPolyAt(0.33)}" fill="none" stroke="rgba(168,73,42,0.10)"/>
                 <polygon points="${ringPolyAt(0.66)}" fill="none" stroke="rgba(168,73,42,0.10)"/>
@@ -3317,12 +3399,12 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           <div class="figure-foot">
             <span>来源 · ${esc((e10 && e10.subtitle) || "课后作品 32 份")}</span>
             ${(e10 && e10.rubric && e10.rubric.length) ? `
-              <details class="figure-drill"><summary>展开量规细则 →</summary>
+              <details class="figure-drill"><summary>展开评价标准细则 →</summary>
                 <ol class="drill-list">
                   ${e10.rubric.map((r) => `<li><b>${esc(r.dim)}</b><br/>${(r.levels || []).map((lv) => `<span style="display:block;padding-left:6px;font-size: var(--fs-2xs);">· ${esc(lv)}</span>`).join("")}</li>`).join("")}
                 </ol>
               </details>
-            ` : `<span class="figure-foot-note">量规细则（5 维已在雷达图展示）</span>`}
+            ` : `<span class="figure-foot-note">评价标准细则（5 维已在雷达图展示）</span>`}
           </div>
         </div>
       `;
@@ -3341,7 +3423,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         { dim: "TOWS 可操作性", mean: 44, weightInTotal: 0.24 },
         { dim: "条目证据性", mean: 46, weightInTotal: 0.22 },
       ];
-      const col = (st) => st === "miss" ? "var(--amber-deep)" : st === "warn" ? "var(--amber,#b8860b)" : "var(--sage)";
+      const col = (st) => st === "miss" ? "var(--amber-deep)" : st === "warn" ? "var(--amber)" : "var(--sage)";
       const barRow = (b) => {
         const v = Math.max(0, Math.min(100, Number(b[1]) || 0));
         const st = (b[2] || {}).status;
@@ -3359,18 +3441,18 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         const cumPct = Math.round((cum / totW) * 100);
         return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size: var(--fs-2xs);">
           <span style="width:96px;flex:none;color:var(--amber-deep);font-weight:600;">${esc(p.dim)}</span>
-          <span style="width:46px;flex:none;color:var(--mute,#8a8178);">均分 ${p.mean}</span>
+          <span style="width:46px;flex:none;color:var(--mute);">均分 ${p.mean}</span>
           <div style="flex:1;height:8px;background:rgba(168,73,42,.10);border-radius:2px;overflow:hidden;"><i style="display:block;height:100%;width:${Math.round(((p.weightInTotal || 0) / maxW) * 100)}%;background:var(--amber-deep);"></i></div>
-          <span style="width:54px;flex:none;text-align:right;color:var(--mute,#8a8178);">累计 ${cumPct}%</span>
+          <span style="width:54px;flex:none;text-align:right;color:var(--mute);">累计 ${cumPct}%</span>
         </div>`;
       };
       const lowest = pareto[0] || { dim: "—", mean: "—" };
       return `
         <div class="figure-card rich-10a">
           <div class="fcard-lbl"><span>FIGURE · 评分采集</span><b>5 维原始评分 · 低分维度 Pareto</b></div>
-          <div style="font-size: var(--fs-2xs);color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">5 组作品均分 · 只采集数据，不做定性、不写反馈</div>
+          <div style="font-size: var(--fs-2xs);color:var(--mute);letter-spacing:.04em;margin:2px 0 6px;">5 组作品均分 · 只采集数据，不做定性、不写反馈</div>
           ${bars.map(barRow).join("")}
-          <div style="margin-top:9px;font-size: var(--fs-2xs);color:var(--mute,#8a8178);letter-spacing:.04em;">低分维度 Pareto · 排下一轮优先项</div>
+          <div style="margin-top:9px;font-size: var(--fs-2xs);color:var(--mute);letter-spacing:.04em;">低分维度 Pareto · 排下一轮优先项</div>
           ${pareto.map(paretoRow).join("")}
           <div class="bloom-gap" style="margin-top:8px;"><b>★ 怎么用</b> · 最该优先补的是「${esc(lowest.dim)}」（均分 ${lowest.mean}）— 本步只采集，反馈语在下一步「反馈与画像」写</div>
           <div class="figure-foot"><span>来源 · 课后作品 32 份 · 5 组</span></div>
@@ -3378,7 +3460,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       `;
     }
 
-    // 10 (10-c) · 量规反向修订 — 低分维 → 修订建议 → 回写 S2
+    // 10 (10-c) · 评价标准反向修订 — 低分维 → 修订建议 → 回写 S2
     function figureStation10Revision() {
       const e10 = efigOf(10);
       const pareto = (e10 && e10.paretoLowDimensions && e10.paretoLowDimensions.length) ? e10.paretoLowDimensions : [
@@ -3391,14 +3473,14 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           : "证据要求偏宽 — 收紧合格线，要求可复核出处",
       }));
       const row = (q) => `
-        <div style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;padding:6px 8px;border:1px solid var(--rule,#e7e1d8);border-radius:5px;background:rgba(217,119,87,.04);">
-          <span style="flex:none;width:86px;font-size: var(--fs-2xs);font-weight:600;color:var(--amber-deep);line-height:1.3;">${esc(q.dim)}<br/><small style="font-weight:400;color:var(--mute,#8a8178);">均分 ${q.mean}</small></span>
+        <div style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;padding:6px 8px;border:1px solid var(--rule);border-radius:5px;background:rgba(217,119,87,.04);">
+          <span style="flex:none;width:86px;font-size: var(--fs-2xs);font-weight:600;color:var(--amber-deep);line-height:1.3;">${esc(q.dim)}<br/><small style="font-weight:400;color:var(--mute);">均分 ${q.mean}</small></span>
           <span style="flex:1;font-size: var(--fs-2xs);line-height:1.45;color:var(--ink);">${esc(q.fix)}</span>
         </div>`;
       return `
         <div class="figure-card rich-10c">
-          <div class="fcard-lbl"><span>FIGURE · 量规反向修订</span><b>低分维 → 修订项 → 回写 S2</b></div>
-          <div style="font-size: var(--fs-2xs);color:var(--mute,#8a8178);letter-spacing:.04em;margin:2px 0 6px;">把本轮量规暴露的问题反向修订到「环节 02 目标与量规」</div>
+          <div class="fcard-lbl"><span>FIGURE · 评价标准反向修订</span><b>低分维 → 修订项 → 回写 S2</b></div>
+          <div style="font-size: var(--fs-2xs);color:var(--mute);letter-spacing:.04em;margin:2px 0 6px;">把本轮评价标准暴露的问题反向修订到「环节 02 预期学习结果与评价证据设计」</div>
           ${proposals.map(row).join("")}
           <div class="bloom-gap" style="margin-top:6px;"><b>↩ 回写通道</b> · 确认后经 rubricRevision 通道送回 S2；S2 须显式确认或驳回后方可继续（教学评一体化闭环）</div>
           <div class="figure-foot"><span>来源 · 本轮 5 维评分 · ${proposals.length} 条修订建议</span></div>
@@ -3539,9 +3621,9 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       ];
       const bars = (e11 && e11.bars && e11.bars.length) ? e11.bars : defaultBars;
       const STATUS_COLOR = {
-        ok:   "var(--sage, #6a9a7b)",
-        warn: "var(--amber, #d97757)",
-        miss: "var(--mute-2, #c0c0c0)",
+        ok:   "var(--sage)",
+        warn: "var(--amber)",
+        miss: "var(--mute-2)",
       };
       const total = bars.length;
       const valuable = bars.filter((b) => (b[2] || {}).status === "ok").length;
@@ -3568,7 +3650,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
             <b>★ 沉淀策略</b> · 保留 ok 状态 (${valuable} 类) · 修订 warn 状态 · 丢弃 miss 状态（如「课堂气氛」不可复用）
           </div>
           <div class="figure-foot">
-            <span>来源 · 学期资产库 / 案例 v2 / 量规 v2 / 法规更新日志</span>
+            <span>来源 · 学期资产库 / 案例 v2 / 评价标准 v2 / 法规更新日志</span>
             <a href="#" data-demo-toast="点「生成下一轮改进计划」按钮 产出完整资产清单">→ 见产物按钮</a>
           </div>
         </div>
@@ -3636,7 +3718,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         { lvl: 6, type: "批判",   text: "SWOT 工具本身有哪些局限？" },
       ];
       const misc = (e5 && e5.keyMisconceptions) || [];
-      const DIFF_COLOR = { low: "#3a8a4e", med: "#5a7090", high: "#b8860b", "v.high": "#a8492a" };
+      const DIFF_COLOR = { low: "var(--ok)", med: "#5a7090", high: "#b8860b", "v.high": "var(--amber-deep)" };
       const DIFF_LABEL = { low: "低", med: "中", high: "高", "v.high": "极高" };
 
       const figure = `
@@ -3675,8 +3757,8 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
                     ${esc(m.text)}
                     <span class="ann ${sev}">${freqPct}% · ${esc(m.stage || "")}</span>
                     ${m.intervention ? `
-                      <div style="margin-top:4px;padding:6px 9px;background:rgba(106,154,123,.08);border-left:2px solid var(--sage,#6a9a7b);font-size: var(--fs-2xs);color:var(--ink-soft,#3a3a3a);line-height:1.5;">
-                        <span style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--sage,#6a9a7b);letter-spacing:.04em;">教学对策 · </span>${esc(m.intervention)}
+                      <div style="margin-top:4px;padding:6px 9px;background:rgba(106,154,123,.08);border-left:2px solid var(--sage);font-size: var(--fs-2xs);color:var(--ink-soft);line-height:1.5;">
+                        <span style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--sage);letter-spacing:.04em;">教学对策 · </span>${esc(m.intervention)}
                       </div>
                     ` : ""}
                   </li>`;
@@ -3926,13 +4008,13 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
                 <span class="zpd-num">◇ ${esc(a.id)}</span>
                 <span class="zpd-t">${String(a.t).padStart(2, "0")}'</span>
                 <span class="zpd-when">${esc(a.label || "")}${a.format ? " · " + esc(a.format) : ""}</span>
-                <span class="zpd-rule">→ 在课中调控环节设规则</span>
+                <span class="zpd-rule">→ 在形成性评价与适应性调控环节设规则</span>
               </div>
             `).join("")}
           </div>
           <div class="figure-foot">
-            <span>动态学情触发 · 任务链环节定义 · 课中调控环节落地</span>
-            <a href="#" data-demo-toast="锚点编辑器在课中调控环节完成">去课中调控环节编辑规则 →</a>
+            <span>动态学情触发 · 学习活动与教学支架设计环节定义 · 形成性评价与适应性调控环节落地</span>
+            <a href="#" data-demo-toast="锚点编辑器在形成性评价与适应性调控环节完成">去形成性评价与适应性调控环节编辑规则 →</a>
           </div>
         </div>
       `;
@@ -3968,7 +4050,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         const z = subKey.slice(-2).toUpperCase(); // Z1/Z2/Z3
         return `trigger-rules.${z.toLowerCase()}.md`;
       }
-      // S2 UbD 两段：目标 vs 量规分文件
+      // S2 UbD 两段：目标与评价标准分别存放
       if (s.id === 4 && subKey === "4-a") return "learning-objectives.md";
       if (s.id === 4 && subKey === "4-b") return "rubric.md";
       // S5 时间线 v0 vs v1 回写分文件
@@ -4032,7 +4114,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           const nsub = SUB_NODES[nextSubKey] || {};
           nextStationId = nsub.legacyStationId;
           nextStageId = nextStg.id;
-          nextLabel = `下一环节 · ${pad(stageIdx + 2)} ${nextStg.displayName} →`;
+          nextLabel = `下一环节 · ${pad(stageIdx + 2)} ${stageShortLabel(nextStg)} →`;
         }
       }
 
@@ -4064,8 +4146,8 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       });
       document.addEventListener("keydown", (e) => {
         if (e.key !== "Enter" && e.key !== " ") return;
-        // 键盘可达:题链选项 / 环节卡 / 理论 chip — 统一转发到既有 click 委托
-        const act = e.target.closest(".chain-q-opts li[data-opt-key], [data-stage][role='button'], .sc-theory[data-theory-stage]");
+        // 键盘可达:题链选项 / 环节导航 — 统一转发到既有 click 委托
+        const act = e.target.closest(".chain-q-opts li[data-opt-key], [data-stage][role='button']");
         if (act) { e.preventDefault(); act.click(); return; }
         const t = e.target.closest("[data-st]");
         if (!t) return;
@@ -4076,6 +4158,45 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         const stageHint = t.getAttribute("data-stage-hint") || (subkey && SUB_NODES[subkey] ? SUB_NODES[subkey].stageId : null);
         setStation(id, stageHint, subkey);
       });
+    }
+
+    // 窄屏下把唯一的九环节导航收进抽屉；桌面端仍保持可见的侧栏。
+    function bindNavigationDrawer() {
+      const toggle = document.getElementById("stageDrawerToggle");
+      const close = document.getElementById("stageDrawerClose");
+      const scrim = document.getElementById("stageDrawerScrim");
+      const navigation = document.getElementById("stageNavigation");
+      if (!toggle || !close || !scrim || !navigation) return;
+
+      const root = document.documentElement;
+      const mobileQuery = window.matchMedia("(max-width: 1180px)");
+      const syncA11y = () => {
+        const hidden = mobileQuery.matches && !root.classList.contains("stage-drawer-open");
+        navigation.setAttribute("aria-hidden", String(hidden));
+        navigation.toggleAttribute("inert", hidden);
+      };
+      const setOpen = (open) => {
+        const isOpen = Boolean(open && mobileQuery.matches);
+        root.classList.toggle("stage-drawer-open", isOpen);
+        toggle.setAttribute("aria-expanded", String(isOpen));
+        scrim.setAttribute("aria-hidden", String(!isOpen));
+        syncA11y();
+      };
+
+      toggle.addEventListener("click", () => setOpen(true));
+      close.addEventListener("click", () => setOpen(false));
+      scrim.addEventListener("click", () => setOpen(false));
+      // 捕获阶段先收起抽屉：全局环节路由会同步重绘 nodeList，不能等其冒泡处理之后。
+      document.addEventListener("click", (e) => {
+        if (root.classList.contains("stage-drawer-open") && e.target.closest("#stageNavigation [data-stage]")) {
+          setOpen(false);
+        }
+      }, true);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+      if (mobileQuery.addEventListener) mobileQuery.addEventListener("change", () => setOpen(false));
+      syncA11y();
     }
 
     function setStation(id, stageOverride, subKeyOverride, opts) {
@@ -4119,7 +4240,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       currentSubKey: () => effectiveSubKey(),
       // 让 bridge 在 Store 事件后刷新 stage/phase 视觉 + 子节点 ✓ 标记
       refreshStageVisuals: () => {
-        try { renderStageChips(); renderPhaseProgress(); renderStageBreadcrumb(); renderSubNodeRow(); } catch (e) {}
+        try { renderNodeList(); renderPhaseProgress(); renderStageBreadcrumb(); renderSubNodeRow(); } catch (e) {}
       },
       // 反向修订 / 议程兑现等需要重 render 整个 detail 面板（banner 内容依赖 Store）
       refreshDetail: () => {
@@ -4129,12 +4250,9 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
 
     function renderAll() {
       renderTopChrome();
-      renderStageChips();
       renderStageBreadcrumb();
       renderSubNodeRow();
       renderPhaseProgress();
-      // legacy: 保留 renderTiles 但不再注入，避免 11-tile 重复
-      // renderTiles();
       renderNodeList();
       renderDetail();
       renderRail();
@@ -4245,7 +4363,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         const g = stageById[up] || {};
         const uc = STAGE_CHAIN[up] || {};
         const idx = STAGES.findIndex((x) => x.id === up) + 1;
-        return { id: up, idx, name: g.displayName || g.title || up, products: uc.topCardToKeys || [] };
+        return { id: up, idx, name: stageShortLabel(g) || up, products: uc.topCardToKeys || [] };
       });
     }
     // 子节点 enterCondition 是否未满足（回写/再修订节点的硬前置）
@@ -4295,37 +4413,6 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           </div>`;
       }
       return html;
-    }
-
-    // 9 个教学环节 chip 栏
-    function renderStageChips() {
-      const el = document.getElementById("stageChips");
-      if (!el) return;
-      if (!STAGES.length) { el.innerHTML = '<div class="stage-chip" style="grid-column:1/-1;text-align:center;color:var(--mute-2)">contract.NAV_STAGES 未加载</div>'; return; }
-      el.innerHTML = STAGES.map((g, idx) => {
-        const next = STAGES[idx + 1];
-        const isLast = !next;
-        const isCrossPhase = next && next.phase !== g.phase;
-        const cls = [
-          "stage-chip",
-          stageStatusCls(g.id),
-          isLast ? "is-last" : "",
-          isCrossPhase ? "is-cross-phase" : "",
-        ].filter(Boolean).join(" ");
-        const subCount = (g.subNodeIds || []).length;
-        const idxStr = String(idx + 1).padStart(2, "0");
-        const hasTheory = g.theoryDrawer && g.theoryDrawer.length > 0;
-        const isDoneNow = stageStatusCls(g.id) === "is-done";
-        return `<div class="${cls}" data-stage="${esc(g.id)}" data-phase="${esc(g.phase)}" role="button" tabindex="0">
-          <span class="sc-num">${idxStr}</span>
-          <span class="sc-cn">${esc(g.displayName || g.title)}</span>
-          ${subCount > 1 ? `<span class="sc-sub-count">${subCount}</span>` : ""}
-          ${hasTheory ? `<span class="sc-theory" data-theory-stage="${esc(g.id)}" title="方法依据 · ${esc(g.theoryDrawer.length)} 条" role="button" tabindex="0" aria-label="查看方法依据">方</span>` : ""}
-          ${isDoneNow ? `<span class="sc-done-mark" aria-label="已完成">✓</span>` : ""}
-        </div>`;
-      }).join("");
-      // 桥层钩子：chip 栏重渲染会清掉桥层注入的徽章（如 S2 修订徽章），渲染完成后通知桥层补回
-      try { if (window.__navAfterStageChipsRender) window.__navAfterStageChipsRender(); } catch (e) {}
     }
 
     // 方法依据 popover · 单例全局浮层
@@ -4391,7 +4478,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         return s && s.legacyStationId === activeId && /[a-z]$/i.test(k);
       });
       if (splitMatch) sub = SUB_NODES[splitMatch];
-      const stageTitle = g.title || g.displayName;
+      const stageTitle = g.title || stageShortLabel(g);
       const subTitle = sub ? sub.subTitle : "";
 
       // mini-map: 9 个点按 phase 分 3 段（课前 5 / 课中 1 / 课后 3）
@@ -4708,6 +4795,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
     } catch (e) {}
     renderAll();
     bindClicks();
+    bindNavigationDrawer();
     bindChainEvents();
   });
 })();

@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=4" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=4" />
+<link rel="stylesheet" href="./shared/tokens.css?v=6-readability-floor" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=9-neutral-color" />
 <style>
 /* ============== Direction BC — Editorial × Workbench ============== */
 body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01", "cv11", "tnum"; }
@@ -31,7 +31,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   min-width: 0; flex: 0 1 auto;
 }
 .issue-strip i { width: 4px; height: 4px; border-radius: 50%; background: var(--amber); display: inline-block; margin: 0 6px; vertical-align: middle; }
-.issue-strip .sep { color: rgba(255,253,247,.3); }
+.issue-strip .sep { color: color-mix(in srgb, var(--ivory) 30%, transparent); }
 .issue-strip .pulse {
   width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
   animation: pulse 1.6s infinite ease-in-out; display: inline-block; margin-right: 5px;
@@ -73,7 +73,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   white-space: nowrap;
 }
 .app-tabs a:hover { color: var(--ink); }
-.app-tabs a.is-active { background: var(--ivory); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.app-tabs a.is-active { background: var(--ivory); color: var(--ink); box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 5%, transparent); }
 .app-tabs a kbd { font-family: var(--mono); font-size: var(--fs-2xs); padding: 0 4px;
                   background: var(--paper-3); border-radius: 3px; color: var(--mute); }
 
@@ -168,7 +168,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 /* Universal pill */
 .pill { font-family: var(--mono); font-size: var(--fs-2xs); padding: 2px 8px;
         border-radius: 4px; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 5px; }
-.pill-live { background: rgba(77,98,87,0.14); color: var(--sage); }
+.pill-live { background: color-mix(in srgb, var(--sage) 14%, transparent); color: var(--sage); }
 .pill-live i { width: 5px; height: 5px; border-radius: 50%; background: var(--sage); animation: pulse 1.6s infinite ease-in-out; }
 .pill-amber { background: var(--amber-wash); color: var(--amber-deep); }
 .pill-ink { background: var(--ink); color: var(--ivory); }
@@ -298,48 +298,48 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   animation: pulse 1.6s infinite ease-in-out;
 }
 .console-inner {
-  background: var(--ink); color: #e6e2da;
+  background: var(--ink); color: var(--paper-3);
   border-radius: 10px; overflow: hidden; margin-top: 12px;
 }
 .console-tabs {
-  display: flex; gap: 0; background: #15130f;
-  padding: 8px 8px 0; border-bottom: 1px solid rgba(255,255,255,.06);
+  display: flex; gap: 0; background: var(--ink);
+  padding: 8px 8px 0; border-bottom: 1px solid color-mix(in srgb, var(--ivory) 6%, transparent);
   align-items: flex-end;
 }
 .c-tab {
-  padding: 7px 11px; font-size: var(--fs-2xs); color: rgba(255,250,240,.55);
+  padding: 7px 11px; font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 55%, transparent);
   border-radius: 6px 6px 0 0; cursor: pointer; display: flex; align-items: center; gap: 6px;
   font-family: var(--mono); white-space: nowrap;
 }
 .c-tab i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.5; flex-shrink: 0; }
 .c-tab.is-active { background: var(--ink); color: var(--ivory); }
-.c-tab.is-active i { background: var(--sage); opacity: 1; box-shadow: 0 0 0 3px rgba(77,98,87,.2); }
+.c-tab.is-active i { background: var(--sage); opacity: 1; box-shadow: 0 0 0 3px color-mix(in srgb, var(--sage) 20%, transparent); }
 .c-right { margin-left: auto; padding: 7px 10px; font-family: var(--mono); font-size: var(--fs-2xs);
-           color: rgba(255,250,240,.4); white-space: nowrap; }
+           color: color-mix(in srgb, var(--ivory) 40%, transparent); white-space: nowrap; }
 .console-body {
-  height: 340px; display: grid; grid-template-columns: 138px 1fr;
+  height: 400px; display: grid; grid-template-columns: 252px 1fr;
 }
 .c-side {
-  background: #15130f; padding: 12px 0;
-  border-right: 1px solid rgba(255,255,255,.06); overflow: hidden;
+  background: var(--ink); padding: 12px 0;
+  border-right: 1px solid color-mix(in srgb, var(--ivory) 6%, transparent); overflow: hidden;
 }
 .c-side-h { padding: 6px 12px; font-family: var(--mono); font-size: var(--fs-2xs);
-            letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,250,240,.35); }
+            letter-spacing: 0.1em; text-transform: uppercase; color: color-mix(in srgb, var(--ivory) 35%, transparent); }
 .c-side-i {
-  padding: 6px 12px; font-size: var(--fs-2xs); color: rgba(255,250,240,.7);
+  padding: 6px 12px; font-size: var(--fs-2xs); line-height: 1.35; color: color-mix(in srgb, var(--ivory) 70%, transparent);
   display: flex; align-items: center; gap: 8px; cursor: default;
   border-left: 2px solid transparent;
 }
-.c-side-i .num { font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,250,240,.3); }
+.c-side-i .num { font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 30%, transparent); }
 .c-side-i.done .num { color: var(--sage); }
-.c-side-i.act { background: rgba(217,119,87,.1); border-left-color: var(--amber);
+.c-side-i.act { background: color-mix(in srgb, var(--amber) 10%, transparent); border-left-color: var(--amber);
                 color: var(--ivory); }
 .c-side-i.act .num { color: var(--amber); }
 .c-side-i .ph { font-family: var(--serif-en); font-style: italic; font-size: var(--fs-2xs);
-                color: rgba(217,119,87,.5); margin-left: auto; }
+                color: color-mix(in srgb, var(--amber) 50%, transparent); margin-left: auto; }
 .c-main { padding: 14px 16px; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 .c-prompt {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06);
+  background: color-mix(in srgb, var(--ivory) 4%, transparent); border: 1px solid color-mix(in srgb, var(--ivory) 6%, transparent);
   border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;
   display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-xs);
 }
@@ -347,11 +347,11 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   font-family: var(--mono); font-size: var(--fs-2xs); color: var(--amber-soft);
   letter-spacing: 0.08em; text-transform: uppercase;
 }
-.c-prompt .what { color: rgba(255,250,240,.92); line-height: 1.55; }
+.c-prompt .what { color: color-mix(in srgb, var(--ivory) 92%, transparent); line-height: 1.55; }
 
 /* container-query adaptivity — at narrower widths the tabs/side-rail tighten further */
 @container (max-width: 520px) {
-  .console-body { grid-template-columns: 118px 1fr; }
+  .console-body { grid-template-columns: 210px 1fr; }
   .c-tab { padding: 6px 9px; font-size: var(--fs-2xs); }
   .c-right { display: none; }
   .c-side-i, .c-side-h { padding-left: 10px; padding-right: 10px; }
@@ -361,15 +361,15 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   display: flex; flex-direction: column; justify-content: flex-end; }
 .s-row {
   padding: 6px 0; display: flex; gap: 10px; font-family: var(--mono);
-  color: rgba(255,250,240,.55); opacity: 0; transform: translateY(4px);
-  transition: all .4s; border-bottom: 1px dashed rgba(255,255,255,.05);
+  color: color-mix(in srgb, var(--ivory) 55%, transparent); opacity: 0; transform: translateY(4px);
+  transition: all .4s; border-bottom: 1px dashed color-mix(in srgb, var(--ivory) 5%, transparent);
 }
 .s-row.show { opacity: 1; transform: none; }
-.s-row .ts { color: rgba(255,250,240,.5); flex-shrink: 0; font-size: var(--fs-2xs); padding-top: 1px; }
+.s-row .ts { color: color-mix(in srgb, var(--ivory) 50%, transparent); flex-shrink: 0; font-size: var(--fs-2xs); padding-top: 1px; }
 .s-row .kind { color: var(--sage); flex-shrink: 0; min-width: 52px; font-size: var(--fs-2xs); }
 .s-row.tool .kind { color: var(--amber); }
 .s-row.write .kind { color: var(--indigo-soft); }
-.s-row.cite .kind { color: #d4b75a; }
+.s-row.cite .kind { color: var(--gold); }
 .s-row .msg .wenda-q {
   color: var(--amber-soft);
   text-decoration: underline dotted;
@@ -380,20 +380,20 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .s-row .msg .wenda-q:hover {
   color: var(--ivory);
-  background: rgba(217,119,87,.18);
+  background: color-mix(in srgb, var(--amber) 18%, transparent);
 }
-.s-row .msg { color: rgba(255,250,240,.88); flex: 1; line-height: 1.5; }
+.s-row .msg { color: color-mix(in srgb, var(--ivory) 88%, transparent); flex: 1; line-height: 1.5; }
 .s-row .msg b { color: var(--ivory); font-weight: 500; }
 .s-row .msg .ok { color: var(--sage); }
 .s-row .msg .tag {
-  background: rgba(217,119,87,.15); color: var(--amber-soft);
+  background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber-soft);
   font-size: var(--fs-2xs); padding: 1px 5px; border-radius: 3px;
   font-family: var(--mono);
 }
 .console-foot {
-  padding: 8px 14px; background: #15130f; border-top: 1px solid rgba(255,255,255,.06);
+  padding: 8px 14px; background: var(--ink); border-top: 1px solid color-mix(in srgb, var(--ivory) 6%, transparent);
   display: flex; justify-content: space-between;
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,250,240,.4);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 40%, transparent);
 }
 
 /* ============ Atlas strip — replaces marquee, previews training map ============ */
@@ -420,13 +420,13 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .atlas-strip-head h2 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-soft); }
 .atlas-strip-head .subline {
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.55);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 55%, transparent);
   letter-spacing: 0.04em; margin-top: 10px;
   display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap;
 }
-.atlas-strip-head .subline .sep { color: rgba(255,255,255,.2); }
+.atlas-strip-head .subline .sep { color: color-mix(in srgb, var(--ivory) 20%, transparent); }
 .atlas-strip-head .subline .here {
-  background: rgba(217,119,87,.18); color: var(--amber-soft);
+  background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber-soft);
   padding: 2px 10px; border-radius: 999px;
   font-family: var(--mono); letter-spacing: 0.04em;
   display: inline-flex; align-items: center; gap: 6px;
@@ -441,19 +441,19 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .atlas-strip-head .head-r { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
 .atlas-strip-head .stat {
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.55);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 55%, transparent);
   letter-spacing: 0.04em;
 }
 .atlas-strip-head .stat b { color: var(--ivory); font-weight: 500; }
-.atlas-strip-head .stat .sep { color: rgba(255,255,255,.2); margin: 0 8px; }
+.atlas-strip-head .stat .sep { color: color-mix(in srgb, var(--ivory) 20%, transparent); margin: 0 8px; }
 .atlas-strip-head .btn-d {
   font-size: var(--fs-xs); padding: 7px 14px; border-radius: 6px;
-  background: transparent; border: 1px solid rgba(255,255,255,.25);
+  background: transparent; border: 1px solid color-mix(in srgb, var(--ivory) 25%, transparent);
   color: var(--ivory); cursor: pointer; font-family: inherit; text-decoration: none;
   display: inline-flex; align-items: center; gap: 6px;
   transition: all .15s; white-space: nowrap;
 }
-.atlas-strip-head .btn-d:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.45); }
+.atlas-strip-head .btn-d:hover { background: color-mix(in srgb, var(--ivory) 6%, transparent); border-color: color-mix(in srgb, var(--ivory) 45%, transparent); }
 
 /* ============================================================
    Atlas v2 — 3 parallel lanes + traveling spotlight
@@ -478,19 +478,19 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   position: relative;
   padding: 16px 14px 10px;
   border-radius: 10px;
-  background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,0));
-  border: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ivory) 2.5%, transparent), transparent);
+  border: 1px solid color-mix(in srgb, var(--ivory) 6%, transparent);
   transition: border-color .2s, background .2s;
 }
 .atlas-lane.is-current {
   border-color: color-mix(in oklab, var(--lane-c, var(--amber)) 38%, transparent);
   background: linear-gradient(180deg,
               color-mix(in oklab, var(--lane-c, var(--amber)) 10%, transparent),
-              rgba(255,255,255,0));
+              transparent);
 }
-.atlas-lane.lane-pre  { --lane-c: #d97757; }   /* amber */
-.atlas-lane.lane-in   { --lane-c: #6a9a7b; }   /* sage  */
-.atlas-lane.lane-post { --lane-c: #8b9bc4; }   /* indigo-soft */
+.atlas-lane.lane-pre  { --lane-c: var(--amber); }   /* amber */
+.atlas-lane.lane-in   { --lane-c: color-mix(in srgb, var(--sage) 85%, var(--ivory)); }   /* sage  */
+.atlas-lane.lane-post { --lane-c: color-mix(in srgb, var(--indigo) 50%, var(--indigo-soft)); }   /* indigo-soft */
 
 .lane-head {
   display: flex; align-items: baseline; gap: 10px;
@@ -498,7 +498,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .lane-head .lh-stage {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.16em;
-  text-transform: uppercase; color: rgba(255,255,255,.55);
+  text-transform: uppercase; color: color-mix(in srgb, var(--ivory) 55%, transparent);
 }
 .lane-head .lh-title {
   font-family: var(--serif-cn); font-size: var(--fs-sm); color: var(--ivory);
@@ -506,7 +506,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .lane-head .lh-cnt {
   margin-left: auto; font-family: var(--mono); font-size: var(--fs-2xs);
-  color: rgba(255,255,255,.4);
+  color: color-mix(in srgb, var(--ivory) 40%, transparent);
 }
 .atlas-lane.is-current .lh-stage { color: var(--lane-c); }
 .atlas-lane.is-current .lh-cnt   { color: color-mix(in oklab, var(--lane-c) 70%, white); }
@@ -519,7 +519,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   content: ""; position: absolute; left: 4px; right: 4px; top: 25px;
   height: 1px;
   background: repeating-linear-gradient(90deg,
-    rgba(255,255,255,.22) 0 6px, transparent 6px 11px);
+    color-mix(in srgb, var(--ivory) 22%, transparent) 0 6px, transparent 6px 11px);
 }
 .lane-rail .lane-fill {
   position: absolute; left: 4px; top: 25px; height: 1px;
@@ -547,13 +547,13 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .lane-node .lnd {
   width: 11px; height: 11px; border-radius: 50%;
   background: var(--ink);
-  border: 1.5px solid rgba(255,255,255,.32);
+  border: 1.5px solid color-mix(in srgb, var(--ivory) 32%, transparent);
   position: relative; z-index: 1;
   transition: all .25s;
 }
 .lane-node.is-done .lnd {
-  background: rgba(255,255,255,.55);
-  border-color: rgba(255,255,255,.55);
+  background: color-mix(in srgb, var(--ivory) 55%, transparent);
+  border-color: color-mix(in srgb, var(--ivory) 55%, transparent);
 }
 .lane-node.is-done .lnd::after {
   content: ""; position: absolute; left: 3px; top: 4.5px;
@@ -582,40 +582,41 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .lane-node .lnl .ln-num {
   font-family: var(--mono); font-size: var(--fs-2xs);
-  color: rgba(255,255,255,.55); letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--ivory) 55%, transparent); letter-spacing: 0.04em;
 }
 .lane-node .lnl .ln-cn {
   font-family: var(--serif-cn); font-size: var(--fs-xs);
-  color: rgba(255,255,255,.74); font-weight: 500;
-  margin-top: 2px;
+  color: color-mix(in srgb, var(--ivory) 74%, transparent); font-weight: 500;
+  margin-top: 2px; max-width: 152px; min-height: 2.8em;
+  white-space: normal; line-height: 1.4; text-align: center;
 }
 .lane-node.is-done .lnl { opacity: .5; }
 .lane-node.is-active .ln-num { color: var(--lane-c); }
 .lane-node.is-active .ln-cn  { color: var(--ivory); font-size: var(--fs-xs); }
-.lane-node:hover:not(.is-active) .lnd { transform: scale(1.18); border-color: rgba(255,255,255,.6); }
+.lane-node:hover:not(.is-active) .lnd { transform: scale(1.18); border-color: color-mix(in srgb, var(--ivory) 60%, transparent); }
 .lane-node:hover:not(.is-active) .ln-cn { color: var(--ivory); }
 .lane-node:focus-visible { outline: 0; }
-.lane-node:focus-visible .lnd { box-shadow: 0 0 0 3px rgba(255,255,255,.35); }
+.lane-node:focus-visible .lnd { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ivory) 35%, transparent); }
 
 /* ---- Spotlight card (cycles through stations) ---- */
 .atlas-spot {
   position: relative;
-  border: 1px solid rgba(255,255,255,.1);
+  border: 1px solid color-mix(in srgb, var(--ivory) 10%, transparent);
   border-left: 3px solid var(--spot-c, var(--amber));
   border-radius: 8px;
   padding: 14px 18px 12px;
   background:
     linear-gradient(180deg,
       color-mix(in oklab, var(--spot-c, var(--amber)) 8%, transparent),
-      rgba(255,255,255,.015));
+      color-mix(in srgb, var(--ivory) 1.5%, transparent));
   display: grid;
   grid-template-columns: minmax(140px, 180px) 1fr 1fr 1fr;
   gap: 20px;
   overflow: hidden;
 }
-.atlas-spot[data-stage="pre"]  { --spot-c: #d97757; }
-.atlas-spot[data-stage="in"]   { --spot-c: #6a9a7b; }
-.atlas-spot[data-stage="post"] { --spot-c: #8b9bc4; }
+.atlas-spot[data-stage="pre"]  { --spot-c: var(--amber); }
+.atlas-spot[data-stage="in"]   { --spot-c: color-mix(in srgb, var(--sage) 85%, var(--ivory)); }
+.atlas-spot[data-stage="post"] { --spot-c: color-mix(in srgb, var(--indigo) 50%, var(--indigo-soft)); }
 
 .atlas-spot .sp-anim {
   /* fade-in animation key — re-applied per station change */
@@ -628,7 +629,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 
 .atlas-spot .sp-id {
   display: flex; flex-direction: column; gap: 4px;
-  padding-right: 18px; border-right: 1px dashed rgba(255,255,255,.1);
+  padding-right: 18px; border-right: 1px dashed color-mix(in srgb, var(--ivory) 10%, transparent);
   align-items: flex-start;
 }
 .atlas-spot .sp-id-row {
@@ -650,25 +651,25 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   display: flex; align-items: baseline; gap: 8px;
 }
 .atlas-spot .sp-name .em {
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.5);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 50%, transparent);
   letter-spacing: 0.06em; font-weight: 400;
 }
 
 .atlas-spot .sp-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .atlas-spot .sp-lbl {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
-  text-transform: uppercase; color: rgba(255,255,255,.55);
+  text-transform: uppercase; color: color-mix(in srgb, var(--ivory) 55%, transparent);
   display: flex; align-items: center; gap: 6px;
 }
 .atlas-spot .sp-lbl::before {
   content: ""; width: 3px; height: 3px; border-radius: 50%;
-  background: rgba(255,255,255,.35);
+  background: color-mix(in srgb, var(--ivory) 35%, transparent);
 }
 .atlas-spot .sp-col.is-ai .sp-lbl::before { background: var(--spot-c); }
 .atlas-spot .sp-col p {
   margin: 0;
   font-family: var(--serif-cn); font-size: var(--fs-2xs); line-height: 1.5;
-  color: rgba(255,250,240,.85); text-wrap: pretty;
+  color: color-mix(in srgb, var(--ivory) 85%, transparent); text-wrap: pretty;
 }
 .atlas-spot .sp-col.is-ai p {
   color: color-mix(in oklab, var(--spot-c) 40%, white);
@@ -678,9 +679,9 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .atlas-spot-q {
   grid-column: 1 / -1;
   margin-top: 4px; padding-top: 10px;
-  border-top: 1px dashed rgba(255,255,255,.1);
+  border-top: 1px dashed color-mix(in srgb, var(--ivory) 10%, transparent);
   display: flex; align-items: baseline; gap: 12px;
-  font-family: var(--serif-cn); font-size: var(--fs-xs); color: rgba(255,250,240,.78);
+  font-family: var(--serif-cn); font-size: var(--fs-xs); color: color-mix(in srgb, var(--ivory) 78%, transparent);
   font-style: italic;
 }
 .atlas-spot-q::before {
@@ -694,7 +695,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 /* auto-advance progress hint (small bar at top-right of spotlight) */
 .atlas-spot-progress {
   position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: rgba(255,255,255,.04); overflow: hidden;
+  background: color-mix(in srgb, var(--ivory) 4%, transparent); overflow: hidden;
 }
 .atlas-spot-progress .bar {
   height: 100%; width: 0;
@@ -706,7 +707,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .sp-pause-hint {
   position: absolute; top: 6px; right: 12px;
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.12em;
-  text-transform: uppercase; color: rgba(255,255,255,.45);
+  text-transform: uppercase; color: color-mix(in srgb, var(--ivory) 45%, transparent);
   opacity: 0; transition: opacity .2s;
   display: flex; align-items: center; gap: 5px;
 }
@@ -718,7 +719,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 @media (max-width: 1180px) {
   .atlas-spot { grid-template-columns: 1fr 1fr; }
   .atlas-spot .sp-id { grid-column: 1 / -1; border-right: 0; padding-right: 0;
-    border-bottom: 1px dashed rgba(255,255,255,.1); padding-bottom: 14px; }
+    border-bottom: 1px dashed color-mix(in srgb, var(--ivory) 10%, transparent); padding-bottom: 14px; }
 }
 @media (max-width: 860px) {
   .atlas-lanes { grid-template-columns: 1fr; }
@@ -730,7 +731,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .atlas-strip-track::before {
   content: ""; position: absolute; left: 0; right: 0; top: 30px;
-  height: 1px; background: rgba(255,255,255,.16);
+  height: 1px; background: color-mix(in srgb, var(--ivory) 16%, transparent);
 }
 /* progress fill over the line up to the active node */
 .atlas-strip-track::after {
@@ -749,11 +750,11 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .anode .adot {
   width: 13px; height: 13px; border-radius: 50%;
-  background: var(--ink); border: 1.5px solid rgba(255,255,255,.35);
+  background: var(--ink); border: 1.5px solid color-mix(in srgb, var(--ivory) 35%, transparent);
   position: relative; z-index: 1; transition: all .15s;
 }
 .anode.done .adot {
-  background: rgba(255,255,255,.55); border-color: rgba(255,255,255,.55);
+  background: color-mix(in srgb, var(--ivory) 55%, transparent); border-color: color-mix(in srgb, var(--ivory) 55%, transparent);
 }
 .anode.done .adot::after {
   content: "✓"; position: absolute; inset: 0; display: grid; place-items: center;
@@ -761,25 +762,25 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .anode.active .adot {
   width: 20px; height: 20px; background: var(--amber); border-color: var(--amber);
-  box-shadow: 0 0 0 5px rgba(217,119,87,.18), 0 0 0 12px rgba(217,119,87,.08);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--amber) 18%, transparent), 0 0 0 12px color-mix(in srgb, var(--amber) 8%, transparent);
   animation: nodePulse 2s ease-in-out infinite;
 }
 @keyframes nodePulse {
-  50% { box-shadow: 0 0 0 7px rgba(217,119,87,.14), 0 0 0 16px rgba(217,119,87,.04); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--amber) 14%, transparent), 0 0 0 16px color-mix(in srgb, var(--amber) 4%, transparent); }
 }
 .anode .alabel {
   margin-top: 12px; text-align: center; line-height: 1.25; padding: 0 4px;
 }
 .anode .alabel .num {
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.45);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 45%, transparent);
   letter-spacing: 0.04em; display: block;
 }
 .anode .alabel .cn {
-  font-family: var(--serif-cn); font-size: var(--fs-xs); color: rgba(255,255,255,.78);
+  font-family: var(--serif-cn); font-size: var(--fs-xs); color: color-mix(in srgb, var(--ivory) 78%, transparent);
   display: block; margin-top: 3px; white-space: nowrap; font-weight: 500;
 }
 .anode .alabel .em {
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.35);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 35%, transparent);
   display: block; margin-top: 2px; letter-spacing: 0.04em;
 }
 .anode.active .alabel .num { color: var(--amber); }
@@ -797,14 +798,14 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .atlas-stages .seg {
   display: flex; align-items: center; gap: 8px;
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.12em;
-  text-transform: uppercase; color: rgba(255,255,255,.45);
+  text-transform: uppercase; color: color-mix(in srgb, var(--ivory) 45%, transparent);
   position: relative; padding-bottom: 6px;
 }
 .atlas-stages .seg::after {
-  content: ""; flex: 1; height: 1px; background: rgba(255,255,255,.18);
+  content: ""; flex: 1; height: 1px; background: color-mix(in srgb, var(--ivory) 18%, transparent);
 }
 .atlas-stages .seg.s-pre { grid-column: 1 / 6; color: var(--amber-soft); }
-.atlas-stages .seg.s-pre::after { background: linear-gradient(90deg, rgba(217,119,87,.5), rgba(217,119,87,.15)); }
+.atlas-stages .seg.s-pre::after { background: linear-gradient(90deg, color-mix(in srgb, var(--amber) 50%, transparent), color-mix(in srgb, var(--amber) 15%, transparent)); }
 .atlas-stages .seg.s-in  { grid-column: 6 / 9; }
 .atlas-stages .seg.s-post{ grid-column: 9 / 11; }
 .atlas-stages .seg b { color: var(--ivory); font-weight: 500; font-family: var(--serif-cn); font-size: var(--fs-xs); letter-spacing: 0; text-transform: none; }
@@ -823,26 +824,26 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 
 .atlas-strip-foot {
-  margin-top: 24px; padding-top: 18px; border-top: 1px dashed rgba(255,255,255,.12);
+  margin-top: 24px; padding-top: 18px; border-top: 1px dashed color-mix(in srgb, var(--ivory) 12%, transparent);
   display: flex; justify-content: space-between; align-items: center;
   flex-wrap: wrap; gap: 16px;
 }
 .atlas-strip-foot .legend {
   display: flex; gap: 22px; font-family: var(--mono); font-size: var(--fs-2xs);
-  color: rgba(255,255,255,.5);
+  color: color-mix(in srgb, var(--ivory) 50%, transparent);
 }
 .atlas-strip-foot .legend .item { display: flex; align-items: center; gap: 6px; }
 .atlas-strip-foot .legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.atlas-strip-foot .legend .l-done i { background: rgba(255,255,255,.55); }
+.atlas-strip-foot .legend .l-done i { background: color-mix(in srgb, var(--ivory) 55%, transparent); }
 .atlas-strip-foot .legend .l-active i { background: var(--amber); }
-.atlas-strip-foot .legend .l-pharm i { border: 1.5px solid var(--amber-soft); background: rgba(217,119,87,.08); }
-.atlas-strip-foot .legend .l-todo i { border: 1.5px solid rgba(255,255,255,.3); background: transparent; }
-.atlas-strip-foot .legend .l-pre i  { background: #d97757; }
-.atlas-strip-foot .legend .l-in i   { background: #6a9a7b; }
-.atlas-strip-foot .legend .l-post i { background: #8b9bc4; }
+.atlas-strip-foot .legend .l-pharm i { border: 1.5px solid var(--amber-soft); background: color-mix(in srgb, var(--amber) 8%, transparent); }
+.atlas-strip-foot .legend .l-todo i { border: 1.5px solid color-mix(in srgb, var(--ivory) 30%, transparent); background: transparent; }
+.atlas-strip-foot .legend .l-pre i  { background: var(--amber); }
+.atlas-strip-foot .legend .l-in i   { background: color-mix(in srgb, var(--sage) 85%, var(--ivory)); }
+.atlas-strip-foot .legend .l-post i { background: color-mix(in srgb, var(--indigo) 50%, var(--indigo-soft)); }
 .atlas-strip-foot .handoff {
   display: inline-flex; align-items: center; gap: 10px;
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.55);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 55%, transparent);
   letter-spacing: 0.08em;
 }
 .atlas-strip-foot .handoff .arrow-d {
@@ -865,8 +866,8 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .flow-handoff.dark {
   background: var(--ink);
-  border-top-color: rgba(255,255,255,.08);
-  border-bottom-color: rgba(255,255,255,.08);
+  border-top-color: color-mix(in srgb, var(--ivory) 8%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--ivory) 8%, transparent);
 }
 .flow-handoff-inner {
   max-width: 1280px; margin: 0 auto;
@@ -884,7 +885,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   color: var(--mute);
   display: inline-flex; align-items: center; gap: 8px;
 }
-.flow-handoff.dark .lbl { color: rgba(255,255,255,.45); }
+.flow-handoff.dark .lbl { color: color-mix(in srgb, var(--ivory) 45%, transparent); }
 .flow-handoff .lbl b {
   font-weight: 600; color: var(--ink); letter-spacing: 0.06em;
 }
@@ -893,7 +894,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   content: ""; width: 18px; height: 1px; background: var(--rule);
 }
 .flow-handoff .end.to .lbl { flex-direction: row-reverse; }
-.flow-handoff.dark .lbl::before { background: rgba(255,255,255,.18); }
+.flow-handoff.dark .lbl::before { background: color-mix(in srgb, var(--ivory) 18%, transparent); }
 .flow-handoff .what {
   font-family: var(--serif-cn); font-size: var(--fs-md); line-height: 1.45;
   color: var(--ink); font-weight: 500;
@@ -906,25 +907,25 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .flow-handoff.dark .what .it { color: var(--amber-soft); }
 .flow-handoff .what code {
   font-family: var(--mono); font-size: var(--fs-xs);
-  background: rgba(217,119,87,.08);
+  background: color-mix(in srgb, var(--amber) 8%, transparent);
   color: var(--amber-deep);
   padding: 1px 6px; border-radius: 3px;
   letter-spacing: 0;
 }
 .flow-handoff.dark .what code {
-  background: rgba(255,255,255,.06); color: var(--amber-soft);
+  background: color-mix(in srgb, var(--ivory) 6%, transparent); color: var(--amber-soft);
 }
 .flow-handoff .meta {
   font-family: var(--mono); font-size: var(--fs-2xs);
   color: var(--mute); letter-spacing: 0.05em; line-height: 1.5;
 }
-.flow-handoff.dark .meta { color: rgba(255,255,255,.45); }
+.flow-handoff.dark .meta { color: color-mix(in srgb, var(--ivory) 45%, transparent); }
 .flow-handoff .arrow {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
   font-family: var(--mono); font-size: var(--fs-2xs);
   color: var(--mute); letter-spacing: 0.14em; text-transform: uppercase;
 }
-.flow-handoff.dark .arrow { color: rgba(255,255,255,.4); }
+.flow-handoff.dark .arrow { color: color-mix(in srgb, var(--ivory) 40%, transparent); }
 .flow-handoff .arrow-line {
   position: relative;
   width: 88px; height: 1px;
@@ -966,12 +967,12 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .section { padding: 80px 0; }
 .section.dark { background: var(--ink); color: var(--ivory); padding: 80px 48px; }
 .section.dark .pad { padding: 0; }
-.section.dark .pill-mute { background: rgba(255,255,255,.08); color: rgba(255,255,255,.6); }
+.section.dark .pill-mute { background: color-mix(in srgb, var(--ivory) 8%, transparent); color: color-mix(in srgb, var(--ivory) 60%, transparent); }
 .sec-h {
   display: grid; grid-template-columns: 0.6fr 1.4fr; gap: 48px; align-items: end;
   margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid var(--rule);
 }
-.section.dark .sec-h { border-bottom-color: rgba(255,255,255,.15); }
+.section.dark .sec-h { border-bottom-color: color-mix(in srgb, var(--ivory) 15%, transparent); }
 .sec-h .num {
   font-family: var(--serif-en); font-size: var(--fs-hero-xl); line-height: 0.85;
   font-style: italic; font-weight: 500; color: var(--amber-deep);
@@ -983,7 +984,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   letter-spacing: 0.15em; text-transform: uppercase; color: var(--mute);
   display: block; margin-top: 12px;
 }
-.section.dark .sec-h .num small { color: rgba(255,255,255,.5); }
+.section.dark .sec-h .num small { color: color-mix(in srgb, var(--ivory) 50%, transparent); }
 .sec-h h2 {
   font-family: var(--serif-cn); font-weight: 500; font-size: var(--fs-4xl);
   margin: 0 0 14px; line-height: 1.12; letter-spacing: -0.01em;
@@ -993,7 +994,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .sec-h .lede {
   font-size: var(--fs-sm); line-height: 1.75; color: var(--ink-soft); max-width: 540px; margin: 0;
 }
-.section.dark .sec-h .lede { color: rgba(255,255,255,.7); }
+.section.dark .sec-h .lede { color: color-mix(in srgb, var(--ivory) 70%, transparent); }
 .sec-h .toolbar {
   display: flex; gap: 8px; margin-top: 14px;
 }
@@ -1077,7 +1078,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .db.full .lbl { color: var(--amber-soft); }
 .db.full .lbl span { color: var(--ivory); }
-.db.full p { color: rgba(255,250,240,.8); font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.7; margin: 0; }
+.db.full p { color: color-mix(in srgb, var(--ivory) 80%, transparent); font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.7; margin: 0; }
 
 /* Right rail */
 .wb-rail { background: var(--paper-2); }
@@ -1098,23 +1099,23 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px;
 }
 .pf-cell {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  background: color-mix(in srgb, var(--ivory) 4%, transparent); border: 1px solid color-mix(in srgb, var(--ivory) 10%, transparent);
   border-radius: 12px; padding: 16px; position: relative;
 }
 .pf-cell .top { display: flex; justify-content: space-between; align-items: center; }
 .pf-cell .top .n {
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.5);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 50%, transparent);
   letter-spacing: 0.1em; text-transform: uppercase;
 }
 .pf-cell h3 { font-family: var(--serif-cn); font-size: var(--fs-lg); font-weight: 500; margin: 10px 0 6px; }
-.pf-cell p { font-size: var(--fs-xs); line-height: 1.65; color: rgba(255,255,255,.65); margin: 0 0 12px; }
+.pf-cell p { font-size: var(--fs-xs); line-height: 1.65; color: color-mix(in srgb, var(--ivory) 65%, transparent); margin: 0 0 12px; }
 .pf-progress {
-  height: 3px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; margin-bottom: 10px;
+  height: 3px; background: color-mix(in srgb, var(--ivory) 8%, transparent); border-radius: 2px; overflow: hidden; margin-bottom: 10px;
 }
 .pf-progress i { display: block; height: 100%; background: var(--amber); border-radius: 2px; }
 .pf-meta { display: flex; justify-content: space-between; font-family: var(--mono); font-size: var(--fs-2xs);
-           color: rgba(255,255,255,.5); }
-.pf-cell.act { background: rgba(217,119,87,.08); border-color: rgba(217,119,87,.35); }
+           color: color-mix(in srgb, var(--ivory) 50%, transparent); }
+.pf-cell.act { background: color-mix(in srgb, var(--amber) 8%, transparent); border-color: color-mix(in srgb, var(--amber) 35%, transparent); }
 .pf-cell.act .pf-progress i { background: var(--amber); }
 
 /* Scene + insights row */
@@ -1122,12 +1123,12 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px;
 }
 .scene {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  background: color-mix(in srgb, var(--ivory) 4%, transparent); border: 1px solid color-mix(in srgb, var(--ivory) 10%, transparent);
   border-radius: 14px; padding: 26px 28px;
 }
 .scene-h {
   display: flex; justify-content: space-between; align-items: flex-start;
-  padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 14px;
+  padding-bottom: 16px; border-bottom: 1px solid color-mix(in srgb, var(--ivory) 10%, transparent); margin-bottom: 14px;
   gap: 16px;
 }
 .scene-h .doc {
@@ -1135,7 +1136,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   line-height: 1.3;
 }
 .scene-h .doc small {
-  display: block; font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.5);
+  display: block; font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 50%, transparent);
   letter-spacing: 0.04em; font-weight: 400; margin-top: 4px;
 }
 .scene-h .info {
@@ -1145,37 +1146,37 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .beat-row {
   display: grid; grid-template-columns: 48px 70px 1fr; gap: 12px; align-items: start;
-  padding: 9px 0; border-bottom: 1px dashed rgba(255,255,255,.08);
+  padding: 9px 0; border-bottom: 1px dashed color-mix(in srgb, var(--ivory) 8%, transparent);
   font-size: var(--fs-xs);
 }
-.beat-row .t { font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.4); padding-top: 4px; }
+.beat-row .t { font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 40%, transparent); padding-top: 4px; }
 .beat-row .role {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em; text-transform: uppercase;
   padding: 3px 6px; border-radius: 4px; text-align: center; height: 22px;
 }
-.role-T { background: rgba(217,119,87,.2); color: var(--amber-soft); }
-.role-S { background: rgba(77,98,87,.25); color: #b5cdba; }
-.role-A { background: rgba(255,255,255,.08); color: var(--ivory); }
-.beat-row .what { color: rgba(255,253,247,.92); line-height: 1.7; font-family: var(--serif-cn); font-size: var(--fs-sm); }
+.role-T { background: color-mix(in srgb, var(--amber) 20%, transparent); color: var(--amber-soft); }
+.role-S { background: color-mix(in srgb, var(--sage) 25%, transparent); color: color-mix(in srgb, var(--sage-soft) 80%, var(--sage)); }
+.role-A { background: color-mix(in srgb, var(--ivory) 8%, transparent); color: var(--ivory); }
+.beat-row .what { color: color-mix(in srgb, var(--ivory) 92%, transparent); line-height: 1.7; font-family: var(--serif-cn); font-size: var(--fs-sm); }
 .beat-row .what .em { color: var(--amber); font-style: italic; font-family: var(--serif-en); }
 .beat-row.note .what {
-  background: rgba(217,119,87,.1); padding: 8px 12px; border-radius: 6px;
+  background: color-mix(in srgb, var(--amber) 10%, transparent); padding: 8px 12px; border-radius: 6px;
   color: var(--amber-soft); font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.6;
 }
 .beat-row.note .what b { color: var(--ivory); font-weight: 500; }
 
 .scene-foot {
-  margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.1);
+  margin-top: 16px; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--ivory) 10%, transparent);
   display: flex; justify-content: space-between; align-items: center;
-  font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.5);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 50%, transparent);
 }
 .scene-foot b { color: var(--ivory); }
 
 /* Insights rail */
 .insights { display: flex; flex-direction: column; gap: 10px; }
-.insights h3 { font-family: var(--serif-cn); font-size: var(--fs-sm); margin: 0 0 4px; color: rgba(255,255,255,.85); }
+.insights h3 { font-family: var(--serif-cn); font-size: var(--fs-sm); margin: 0 0 4px; color: color-mix(in srgb, var(--ivory) 85%, transparent); }
 .insight-card {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  background: color-mix(in srgb, var(--ivory) 4%, transparent); border: 1px solid color-mix(in srgb, var(--ivory) 10%, transparent);
   border-radius: 10px; padding: 14px;
 }
 .insight-card .ll {
@@ -1186,7 +1187,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   font-family: var(--serif-cn); font-size: var(--fs-sm); font-weight: 500; margin: 4px 0 6px; line-height: 1.4;
   color: var(--ivory);
 }
-.insight-card .bb { font-size: var(--fs-2xs); color: rgba(255,255,255,.7); line-height: 1.65; }
+.insight-card .bb { font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 70%, transparent); line-height: 1.65; }
 .insight-card .bb b { color: var(--ivory); font-weight: 500; }
 
 /* ============ 03 教学数据 — portraits + KPI mini sparks + wave ============ */
@@ -1285,18 +1286,18 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .wave-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; }
 .wave-head h3 { font-family: var(--serif-cn); font-size: var(--fs-xl); font-weight: 500; margin: 0; line-height: 1.2; }
 .wave-head h3 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-soft); }
-.wave-head .meta { font-family: var(--mono); font-size: var(--fs-2xs); color: rgba(255,255,255,.5);
+.wave-head .meta { font-family: var(--mono); font-size: var(--fs-2xs); color: color-mix(in srgb, var(--ivory) 50%, transparent);
                    letter-spacing: 0.08em; text-align: right; }
 .wave-head .meta b { color: var(--amber-soft); font-weight: 500; }
 .wave-chart { height: 140px; position: relative; }
 .wave-chart svg { width: 100%; height: 100%; display: block; }
 .wave-legend {
   display: flex; gap: 28px; margin-top: 16px; font-family: var(--mono); font-size: var(--fs-2xs);
-  color: rgba(255,255,255,.6);
+  color: color-mix(in srgb, var(--ivory) 60%, transparent);
 }
 .wave-legend i { display: inline-block; width: 14px; height: 2px; vertical-align: middle; margin-right: 6px; }
 .wave-legend .l-t i { background: var(--amber); }
-.wave-legend .l-s i { background: #94b0a2; }
+.wave-legend .l-s i { background: color-mix(in srgb, var(--sage) 50%, var(--sage-soft)); }
 .wave-legend .l-x i { background: var(--ivory); }
 
 /* Top exchange callouts on top of wave */
@@ -1306,7 +1307,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   margin-top: 18px;
 }
 .wave-callout {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  background: color-mix(in srgb, var(--ivory) 4%, transparent); border: 1px solid color-mix(in srgb, var(--ivory) 10%, transparent);
   border-radius: 8px; padding: 10px 12px; flex: 1; min-width: 200px;
 }
 .wave-callout .l { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--amber-soft);
@@ -1345,16 +1346,16 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .colo-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; }
 .colo-brand .logo { font-family: var(--serif-en); font-size: var(--fs-3xl); font-weight: 600; letter-spacing: -0.02em; }
 .colo-brand .logo .it { font-style: italic; color: var(--amber); }
-.colo-brand p { color: rgba(255,255,255,.55); font-size: var(--fs-xs); line-height: 1.7; margin: 10px 0 0; }
+.colo-brand p { color: color-mix(in srgb, var(--ivory) 55%, transparent); font-size: var(--fs-xs); line-height: 1.7; margin: 10px 0 0; }
 .colo h5, .colo h3 { font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.16em;
-           text-transform: uppercase; color: rgba(255,255,255,.4); margin: 0 0 14px; }
+           text-transform: uppercase; color: color-mix(in srgb, var(--ivory) 40%, transparent); margin: 0 0 14px; }
 .colo a { display: block; font-family: var(--serif-cn); font-size: var(--fs-sm);
-          color: rgba(255,255,255,.85); padding: 4px 0; text-decoration: none; }
+          color: color-mix(in srgb, var(--ivory) 85%, transparent); padding: 4px 0; text-decoration: none; }
 .colo a:hover { color: var(--amber-soft); }
 .colo-foot {
-  margin-top: 36px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.1);
+  margin-top: 36px; padding-top: 20px; border-top: 1px solid color-mix(in srgb, var(--ivory) 10%, transparent);
   display: flex; justify-content: space-between; font-family: var(--mono); font-size: var(--fs-2xs);
-  color: rgba(255,255,255,.6); /* a11y: .4→.6 on --ink ≈6.8:1(此内联规则覆盖共享 bc-chrome,故须在此改) */
+  color: color-mix(in srgb, var(--ivory) 60%, transparent); /* a11y: .4→.6 on --ink ≈6.8:1(此内联规则覆盖共享 bc-chrome,故须在此改) */
 }
 
 /* Theory citation row — academic basis under sec-h */
@@ -1362,13 +1363,13 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
   margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--rule);
 }
-.section.dark .theory-row { border-top-color: rgba(255,255,255,.15); }
+.section.dark .theory-row { border-top-color: color-mix(in srgb, var(--ivory) 15%, transparent); }
 .theory-h {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--mute); margin-right: 6px;
   display: inline-flex; align-items: center; gap: 8px;
 }
-.section.dark .theory-h { color: rgba(255,255,255,.5); }
+.section.dark .theory-h { color: color-mix(in srgb, var(--ivory) 50%, transparent); }
 .theory-h::before { content: ""; width: 14px; height: 1px; background: var(--mute); }
 .theory-chip {
   font-family: var(--serif-cn); font-size: var(--fs-xs);
@@ -1575,8 +1576,8 @@ html.lenis, html.lenis body { height: auto; }
   <script src="./shared/wendao.js?v=3" defer></script>
   <script src="./shared/fanya.js?v=2" defer></script>
   <script src="./shared/live-stats.js?v=1" defer></script>
-  <script src="./shared/toast.js?v=2" defer></script>
-  <script src="./shared/faq.js?v=1" defer></script>
+  <script src="./shared/toast.js?v=3-color-token" defer></script>
+  <script src="./shared/faq.js?v=2-neutral-color" defer></script>
   <div class="issue-strip">
     <span>VOL. 药事管理 · 2026 春季</span>
     <span class="sep">—</span>
@@ -1686,7 +1687,7 @@ html.lenis, html.lenis body { height: auto; }
           </div>
           <div class="console-inner">
             <div class="console-tabs">
-              <div class="c-tab is-active"><i></i>03 知识 · 问题链</div>
+              <div class="c-tab is-active"><i></i>03 教学内容结构化与前概念诊断 · 问题链</div>
               <div class="c-tab"><i></i>plan.md</div>
               <div class="c-tab"><i></i>cite.txt</div>
               <span class="c-right">session #3417</span>
@@ -1694,29 +1695,29 @@ html.lenis, html.lenis body { height: auto; }
             <div class="console-body">
               <div class="c-side">
                 <div class="c-side-h">9 个教学环节 · 课前</div>
-                <div class="c-side-i done"><span class="num">01</span>学情<span style="margin-left:auto;color:var(--sage)">✓</span></div>
-                <div class="c-side-i done"><span class="num">02</span>目标<span style="margin-left:auto;color:var(--sage)">✓</span></div>
-                <div class="c-side-i act"><span class="num">03</span>知识</div>
-                <div class="c-side-i"><span class="num">04</span>案例</div>
-                <div class="c-side-i"><span class="num">05</span>任务</div>
+                <div class="c-side-i done"><span class="num">01</span>学习者与教学情境分析<span style="margin-left:auto;color:var(--sage)">✓</span></div>
+                <div class="c-side-i done"><span class="num">02</span>预期学习结果与评价证据设计<span style="margin-left:auto;color:var(--sage)">✓</span></div>
+                <div class="c-side-i act"><span class="num">03</span>教学内容结构化与前概念诊断</div>
+                <div class="c-side-i"><span class="num">04</span>真实性学习情境与资源设计</div>
+                <div class="c-side-i"><span class="num">05</span>学习活动与教学支架设计</div>
                 <div class="c-side-h" style="margin-top: 6px;">课中</div>
-                <div class="c-side-i"><span class="num">06</span>课中</div>
+                <div class="c-side-i"><span class="num">06</span>形成性评价与适应性调控</div>
                 <div class="c-side-h" style="margin-top: 6px;">课后</div>
-                <div class="c-side-i"><span class="num">07</span>评价</div>
-                <div class="c-side-i"><span class="num">08</span>复盘</div>
-                <div class="c-side-i"><span class="num">09</span>资产</div>
+                <div class="c-side-i"><span class="num">07</span>表现性评价与学习成效诊断</div>
+                <div class="c-side-i"><span class="num">08</span>反思性实践与教学改进</div>
+                <div class="c-side-i"><span class="num">09</span>教学知识建构与专业共享</div>
               </div>
               <div class="c-main">
                 <div class="c-prompt">
                   <div class="who">prompt</div>
-                  <div class="what">围绕节点 03（知识与误区 · 问题链），为《管理学原理》— SWOT 分析课设计一条 4-6 题的递进式课堂问题链，预设 2-3 个学生分歧锚点。</div>
+                  <div class="what">围绕环节 03（教学内容结构化与前概念诊断 · 问题链），为《管理学原理》— SWOT 分析课设计一条 4-6 题的递进式课堂问题链，预设 2-3 个学生分歧锚点。</div>
                 </div>
                 <div class="stream" id="streamBC"></div>
               </div>
             </div>
             <div class="console-foot">
               <span>已查 7 份资料 · 8 步 · 已成稿 45 分钟问题链</span>
-              <span>下一站 · 04 案例</span>
+              <span>下一环节 · 04 真实性学习情境与资源设计</span>
             </div>
           </div>
         </div>
@@ -1735,7 +1736,7 @@ html.lenis, html.lenis body { height: auto; }
           <span>课中 1</span><span class="sep">/</span>
           <span>课后 3</span>
           <span class="sep">—</span>
-          <span class="here">你在这里 · <b>03 · 知识结构与关键误区</b></span>
+          <span class="here">你在这里 · <b>03 · 教学内容结构化与前概念诊断</b></span>
         </div>
       </div>
       <div class="head-r">
@@ -1760,11 +1761,11 @@ html.lenis, html.lenis body { height: auto; }
           <div class="lane-rail">
             <div class="lane-fill"></div>
             <div class="lane-nodes">
-              <button class="lane-node" data-st="1" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">01</span><span class="ln-cn">学情</span></span></button>
-              <button class="lane-node" data-st="2" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">02</span><span class="ln-cn">目标</span></span></button>
-              <button class="lane-node" data-st="3" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">03</span><span class="ln-cn">知识</span></span></button>
-              <button class="lane-node" data-st="4" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">04</span><span class="ln-cn">案例</span></span></button>
-              <button class="lane-node" data-st="5" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">05</span><span class="ln-cn">任务</span></span></button>
+              <button class="lane-node" data-st="1" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">01</span><span class="ln-cn">学习者与教学情境分析</span></span></button>
+              <button class="lane-node" data-st="2" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">02</span><span class="ln-cn">预期学习结果与评价证据设计</span></span></button>
+              <button class="lane-node" data-st="3" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">03</span><span class="ln-cn">教学内容结构化与前概念诊断</span></span></button>
+              <button class="lane-node" data-st="4" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">04</span><span class="ln-cn">真实性学习情境与资源设计</span></span></button>
+              <button class="lane-node" data-st="5" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">05</span><span class="ln-cn">学习活动与教学支架设计</span></span></button>
             </div>
           </div>
         </div>
@@ -1777,7 +1778,7 @@ html.lenis, html.lenis body { height: auto; }
           <div class="lane-rail">
             <div class="lane-fill"></div>
             <div class="lane-nodes">
-              <button class="lane-node" data-st="6" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">06</span><span class="ln-cn">课中</span></span></button>
+              <button class="lane-node" data-st="6" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">06</span><span class="ln-cn">形成性评价与适应性调控</span></span></button>
             </div>
           </div>
         </div>
@@ -1790,9 +1791,9 @@ html.lenis, html.lenis body { height: auto; }
           <div class="lane-rail">
             <div class="lane-fill"></div>
             <div class="lane-nodes">
-              <button class="lane-node" data-st="7" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">07</span><span class="ln-cn">评价</span></span></button>
-              <button class="lane-node" data-st="8" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">08</span><span class="ln-cn">复盘</span></span></button>
-              <button class="lane-node" data-st="9" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">09</span><span class="ln-cn">资产</span></span></button>
+              <button class="lane-node" data-st="7" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">07</span><span class="ln-cn">表现性评价与学习成效诊断</span></span></button>
+              <button class="lane-node" data-st="8" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">08</span><span class="ln-cn">反思性实践与教学改进</span></span></button>
+              <button class="lane-node" data-st="9" role="tab"><span class="lnd"></span><span class="lnl"><span class="ln-num">09</span><span class="ln-cn">教学知识建构与专业共享</span></span></button>
             </div>
           </div>
         </div>
@@ -1827,7 +1828,7 @@ html.lenis, html.lenis body { height: auto; }
         <span class="item l-pre"><i></i>课前 · 设计</span>
         <span class="item l-in"><i></i>课中 · 调控</span>
         <span class="item l-post"><i></i>课后 · 改进</span>
-        <span id="atlasMode" style="color:rgba(255,255,255,.4); font-family:var(--mono); font-size: var(--fs-2xs);">· 每一站只回答一个判断 · 自动巡演中</span>
+        <span id="atlasMode" style="color:color-mix(in srgb, var(--ivory) 40%, transparent); font-family:var(--mono); font-size: var(--fs-2xs);">· 每一站只回答一个判断 · 自动巡演中</span>
       </div>
       <div class="handoff">
         <span>↓ 在下方完整工作台中操作 · 教学导航</span>
@@ -1890,17 +1891,17 @@ html.lenis, html.lenis body { height: auto; }
             <div class="filter-chip">课后</div>
           </div>
           <ul class="node-list">
-            <li class="node-item is-done"><span class="num">01</span>学情 · 学情诊断<span class="check">✓</span></li>
-            <li class="node-item is-done"><span class="num">02</span>目标 · 目标与量规<span class="check">✓</span></li>
-            <li class="node-item is-active"><span class="num">03</span>知识 · 知识与误区</li>
-            <li class="node-item"><span class="num">04</span>案例 · 案例与证据</li>
-            <li class="node-item"><span class="num">05</span>任务 · 任务链设计</li>
+            <li class="node-item is-done"><span class="num">01</span>学习者与教学情境分析<span class="check">✓</span></li>
+            <li class="node-item is-done"><span class="num">02</span>预期学习结果与评价证据设计<span class="check">✓</span></li>
+            <li class="node-item is-active"><span class="num">03</span>教学内容结构化与前概念诊断</li>
+            <li class="node-item"><span class="num">04</span>真实性学习情境与资源设计</li>
+            <li class="node-item"><span class="num">05</span>学习活动与教学支架设计</li>
             <li style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--mute);letter-spacing:0.1em;padding:10px 10px 4px;text-transform:uppercase;">课中</li>
-            <li class="node-item"><span class="num">06</span>课中 · 课中调控</li>
+            <li class="node-item"><span class="num">06</span>形成性评价与适应性调控</li>
             <li style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--mute);letter-spacing:0.1em;padding:10px 10px 4px;text-transform:uppercase;">课后</li>
-            <li class="node-item"><span class="num">07</span>评价 · 评价与画像</li>
-            <li class="node-item"><span class="num">08</span>复盘 · 复盘与决策</li>
-            <li class="node-item"><span class="num">09</span>资产 · 资产沉淀</li>
+            <li class="node-item"><span class="num">07</span>表现性评价与学习成效诊断</li>
+            <li class="node-item"><span class="num">08</span>反思性实践与教学改进</li>
+            <li class="node-item"><span class="num">09</span>教学知识建构与专业共享</li>
           </ul>
           <p style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--mute);letter-spacing:0.04em;line-height:1.55;margin:18px 0 0;padding-top:14px;border-top:1px dashed var(--rule);">
             课前 <b style="color:var(--ink)">5</b> · 课中 <b style="color:var(--ink)">1</b> · 课后 <b style="color:var(--ink)">3</b>
@@ -1912,10 +1913,10 @@ html.lenis, html.lenis body { height: auto; }
           <div class="dh-tags">
             <span class="pill pill-amber">节点 03</span>
             <span class="pill pill-sage">课前 · 设计与准备</span>
-            <span class="pill pill-indigo">知识与误区 · 问题链</span>
+            <span class="pill pill-indigo">教学内容结构化与前概念诊断 · 问题链</span>
             <span class="pill pill-mute" style="margin-left:auto">耗时 8' · 产出 3 · 评价 6 维</span>
           </div>
-          <h3 class="dh-title">知识与误区 · 问题链<br/><span class="it">— 从知识点到课堂的递进式提问</span></h3>
+          <h3 class="dh-title">教学内容结构化与前概念诊断 · 问题链<br/><span class="it">— 从知识点到课堂的递进式提问</span></h3>
           <div class="dh-sub">
             <span><b>关键判断：</b>本课如何把 SWOT 拆成一条 4-6 题的问题链？</span>
             <span>·</span>
@@ -1959,7 +1960,7 @@ html.lenis, html.lenis body { height: auto; }
             </div>
             <div class="db full">
               <div class="lbl">本节点参考资料 · CITATIONS <span>已审校 7 / 9</span></div>
-              <p>CMS-202407 国家医保谈判公告 · 《管理学原理》第七章 SWOT · 中华医院药事年报 (2024) · Backward Design (Wiggins &amp; McTighe) · 问题链设计范例库 · 学生认知负荷理论 (Sweller) · 课例与分歧预设·顾泲沅课例研究·三所医院匿名处方样本⋯</p>
+              <p>CMS-202407 国家医保谈判公告 · 《管理学原理》第 3 章“管理环境与战略分析” · 中华医院药事年报 (2024) · Backward Design (Wiggins &amp; McTighe) · 问题链设计范例库 · 学生认知负荷理论 (Sweller) · 课例与分歧预设·顾泲沅课例研究·三所医院匿名处方样本⋯</p>
             </div>
           </div>
         </div>
@@ -1987,7 +1988,7 @@ html.lenis, html.lenis body { height: auto; }
           <div class="rail-h" style="margin-top: 22px;">下一节点</div>
           <div class="activity-item next">
             <div class="t">系统建议</div>
-            <div class="b"><b>04 · 案例 · 案例与证据</b><br/>预计耗时 9 分钟 · 可复用本节点的 4 个问题作为案例起点。</div>
+            <div class="b"><b>04 · 真实性学习情境与资源设计</b><br/>预计耗时 9 分钟 · 可复用本节点的 4 个问题作为案例起点。</div>
           </div>
         </div>
       </div>
@@ -1999,7 +2000,7 @@ html.lenis, html.lenis body { height: auto; }
     <div class="flow-handoff-inner" data-reveal-stagger>
       <div class="end from" data-reveal>
         <span class="lbl"><b>FROM · 01 教学导航</b> 产出</span>
-        <div class="what"><code>plan.md</code> · 9 环节材料 · 问题链 <span class="it">v0.2</span> · 评价量规</div>
+        <div class="what"><code>plan.md</code> · 9 环节材料 · 问题链 <span class="it">v0.2</span> · 评价标准</div>
         <div class="meta">课前 5 + 课中 1 + 课后 3 · 每节点一份可审校材料</div>
       </div>
       <div class="arrow" aria-hidden="true" data-reveal>
@@ -2060,7 +2061,7 @@ html.lenis, html.lenis body { height: auto; }
             <h3 class="doc">plan.md · 教学剧本<small>《管理学原理》— SWOT 分析 · 45 min · 32 人虚拟班</small></h3>
             <div class="info">
               <span>SCENE 02 · 关键时刻</span>
-              <span style="color:rgba(255,255,255,.3)">v 0.3 · 录制中</span>
+              <span style="color:color-mix(in srgb, var(--ivory) 30%, transparent)">v 0.3 · 录制中</span>
             </div>
           </div>
 
@@ -2283,7 +2284,7 @@ html.lenis, html.lenis body { height: auto; }
           <div class="wave-head">
             <div>
               <h3>双向能力 <span class="it">指数</span> · 过去 7 周</h3>
-              <div style="font-family:var(--mono);font-size: var(--fs-2xs);color:rgba(255,255,255,.5);letter-spacing:0.06em;margin-top:6px;">
+              <div style="font-family:var(--mono);font-size: var(--fs-2xs);color:color-mix(in srgb, var(--ivory) 50%, transparent);letter-spacing:0.06em;margin-top:6px;">
                 每条线是一类能力的 7 周走势；中间白色实线是 <b style="color:var(--amber-soft)">COUPLING INDEX</b>，反映双向影响的强度。
               </div>
             </div>
@@ -2330,7 +2331,7 @@ html.lenis, html.lenis body { height: auto; }
               <!-- annotation at w5 -->
               <g>
                 <line x1="720" y1="0" x2="720" y2="140" stroke="rgba(217,119,87,0.25)" stroke-dasharray="2,3"/>
-                <text x="726" y="14" font-family="ui-monospace" font-size="9.5" fill="rgba(217,119,87,0.85)" letter-spacing="0.05em">▲ W5 · 引入 05 任务链设计工作流</text>
+                <text x="726" y="14" font-family="ui-monospace" font-size="9.5" fill="rgba(217,119,87,0.85)" letter-spacing="0.05em">▲ W5 · 引入 05 学习活动与教学支架设计工作流</text>
               </g>
               <!-- end dot -->
               <circle cx="1080" cy="12" r="4" fill="#fffdf7"/>
@@ -2348,12 +2349,12 @@ html.lenis, html.lenis body { height: auto; }
               <div class="b">教师 <b>T4 问题链</b> ↑5.7 与学生 <b>S6 协作论证</b> ↑4.2 <b>同向上扬</b> · COUPLING 1.8 · 证据等级 B</div>
             </div>
             <div class="wave-callout">
-              <div class="l">★ 关联提示 · 06 课中调控</div>
+              <div class="l">★ 关联提示 · 06 形成性评价与适应性调控</div>
               <div class="b">教师 <b>T6 互动调控</b> ↑6.8 与学生 <b>S6 协作论证</b> ↑4.2 <b>共变</b> · COUPLING 2.2 · 证据等级 B</div>
             </div>
             <div class="wave-callout">
               <div class="l">★ KEY · 第 5 周</div>
-              <div class="b">引入 <b>05 任务链设计 · 分歧锚点问题链</b>工作流后，COUPLING 单周 <b>↑ 3.4</b>；<b>建议</b>在真实课堂继续验证。</div>
+              <div class="b">引入 <b>05 学习活动与教学支架设计 · 分歧锚点问题链</b>工作流后，COUPLING 单周 <b>↑ 3.4</b>；<b>建议</b>在真实课堂继续验证。</div>
             </div>
           </div>
         </div>
@@ -2408,48 +2409,48 @@ html.lenis, html.lenis body { height: auto; }
   if (!root || !spot) return;
 
   const STATIONS = [
-    { n:'01', cn:'学情', em:'冲突点', stage:'pre',
+    { n:'01', cn:'学习者与教学情境分析', em:'冲突点', stage:'pre',
       do_:'看清这届学生站在哪里——认知前测加上家人慢病/实习/药店这些真实经历，先用 v0 草拟定位，再综合学情+议程做 v1 回写。',
       ai :'汇总上一节诊断热区 · 议程聚类回应 · 经验入口分布图。',
       out:'学情画像 + 议程协商单 + 锁定版课程定位',
       q  :'"本节最大冲突点是什么？"' },
-    { n:'02', cn:'目标', em:'5 维量规', stage:'pre',
-      do_:'先写 3-5 条可观察、可评价的学习目标，再配 5 维量规（含批判意识维度）。',
+    { n:'02', cn:'预期学习结果与评价证据设计', em:'5 维评价标准', stage:'pre',
+      do_:'先写 3-5 条可观察、可评价的学习目标，再配 5 维评价标准（含批判意识维度）。',
       ai :'目标语义检查 · 自动拆出可收集的评价证据 · UbD 两段对齐草稿。',
-      out:'学习目标表 + 5 维量规',
-      q  :'"目标与量规第一应补强哪一项？"' },
-    { n:'03', cn:'知识', em:'问题链',   stage:'pre',
+      out:'学习目标表 + 5 维评价标准',
+      q  :'"预期学习结果与评价证据第一应补强哪一项？"' },
+    { n:'03', cn:'教学内容结构化与前概念诊断', em:'问题链',   stage:'pre',
       do_:'找出学生最易卡住的概念误区，把教材重构为围绕误区的 4-6 题递进问题链，预设 2-3 个分歧锚点。',
       ai :'MAH/MA/生产证 概念边界检测 · 法规条文易混点扫描 · 问题链草稿。',
       out:'问题链 + 误区清单',
       q  :'"学生最易卡在哪个误区？"' },
-    { n:'04', cn:'案例', em:'证据包',   stage:'pre',
+    { n:'04', cn:'真实性学习情境与资源设计', em:'证据包',   stage:'pre',
       do_:'把真实药事案例转化为证据包，并核对每条议程都有对应证据。',
       ai :'闻道·科学探索 检索 · 引用核验 · 议程兑现卡。',
       out:'案例包 + 议程—证据对照表',
       q  :'"议程关切对应的证据是否齐？"' },
-    { n:'05', cn:'任务', em:'时间+任务', stage:'pre',
+    { n:'05', cn:'学习活动与教学支架设计', em:'时间+任务', stage:'pre',
       do_:'先按经验排时间线 → 设计 4 角色协作任务 → 基于任务复杂度回写时间线，并标出 3 个 ZPD 锚点。',
       ai :'节奏排程 · 4 角色生成（资料员/判断员/质询员/汇报员）· ZPD 锚点位置推荐。',
       out:'锁定版时间线 + 协作任务单 + 3 个 ZPD 锚点',
       q  :'"协作任务最应补强哪一项？"' },
-    { n:'06', cn:'课中', em:'即时干预', stage:'in',
+    { n:'06', cn:'形成性评价与适应性调控', em:'即时干预', stage:'in',
       do_:'为 3 个学情校准点分别写「如果 X 则 Y」即时干预规则——条文测温 / 推演投票 / 知识封闭。',
       ai :'实时举手 / 答题热区 + 阈值触发提示 + 反馈语模板。',
       out:'3 条 学情触发—反馈规则 + 反馈语模板',
       q  :'"本校准点的「如果 X 则 Y」规则是什么？"' },
-    { n:'07', cn:'评价', em:'量规反修订', stage:'post',
-      do_:'用 5 维量规评分 → 写反馈语与能力画像 → 把量规问题反向回写到目标与量规。',
-      ai :'评分采集 · 低分维度 Pareto · 反馈语模板生成 · 量规反修订建议。',
-      out:'评分表 + 能力画像 + 反馈语 + 量规修订建议',
+    { n:'07', cn:'表现性评价与学习成效诊断', em:'评价标准反向修订', stage:'post',
+      do_:'依据 5 维评价标准评分 → 写反馈语与能力画像 → 把评价标准问题反向回写到预期学习结果与评价证据设计。',
+      ai :'评分采集 · 低分维度 Pareto · 反馈语模板生成 · 评价标准反向修订建议。',
+      out:'评分表 + 能力画像 + 反馈语 + 评价标准修订建议',
       q  :'"下一轮要补强哪一维？"' },
-    { n:'08', cn:'复盘', em:'改进项',   stage:'post',
+    { n:'08', cn:'反思性实践与教学改进', em:'改进项',   stage:'post',
       do_:'回顾议程兑现 + 即时干预触发摘要 + 学生作品低分诊断，定下一轮第 1 改进项。',
       ai :'议程兑现度回顾表 · 即时干预触发摘要 · 改进决策候选。',
       out:'复盘报告 + 改进决策',
       q  :'"下一轮第一改进项是什么？"' },
-    { n:'09', cn:'资产', em:'知识库',   stage:'post',
-      do_:'挑选并入库本轮最值得保存的资产——案例 v2 / 量规 v2 / 法规更新日志。',
+    { n:'09', cn:'教学知识建构与专业共享', em:'知识库',   stage:'post',
+      do_:'挑选并入库本轮最值得保存的资产——案例 v2 / 评价标准 v2 / 法规更新日志。',
       ai :'自动整理可复用片段 · 学期末汇编 · 写入个人教学资产库。',
       out:'资产清单 + 知识库更新',
       q  :'"本轮最值得沉淀什么？"' },
@@ -2686,7 +2687,7 @@ html.lenis, html.lenis body { height: auto; }
   const stream = document.getElementById('streamBC');
   if (!stream) return;
   const lines = [
-    { ts: '00:01', k: 'plan',  msg: '解析 prompt → 路由到 <b>节点 03</b> · 知识与误区 · 问题链' },
+    { ts: '00:01', k: 'plan',  msg: '解析 prompt → 路由到 <b>环节 03</b> · 教学内容结构化与前概念诊断 · 问题链' },
     { ts: '00:03', k: 'tool',  msg: '调用 <b>闻道·科学探索</b> · <span class="wenda-q" data-wendao="launch" data-wendao-query="2024 国家医保谈判 抗肿瘤药品" title="点击在闻道打开此次检索">&quot;2024 国家医保谈判 抗肿瘤药品&quot;</span>' },
     { ts: '00:08', k: 'cite',  msg: '收到 <b>7 份资料</b> <span class="tag">CMS-202407</span>' },
     { ts: '00:11', k: 'tool',  msg: '调用 <b>循证药学库</b> · 3 个抗肿瘤药匿名样本' },

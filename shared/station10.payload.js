@@ -1,7 +1,7 @@
 /*
- * PharmacoPilot · Station 10 Payload · 评价量规实验台
+ * PharmacoPilot · Station 10 Payload · 表现性评价实验台
  * ------------------------------------------------------------
- * 读目标与量规环节 目标 + 协作任务环节 学生作品 + 课中调控环节 学情触发数据 → 生成 5 维量规 + 反馈语。
+ * 读预期学习结果与评价证据设计环节 目标 + 学习活动与教学支架设计环节 学生作品 + 形成性评价与适应性调控环节 学情触发数据 → 生成 5 维评价标准 + 反馈语。
  *
  * 5 维：条目证据性 / 内外分类 / 条目精炼度 / TOWS 可操作性 / 批判意识
  *
@@ -33,18 +33,18 @@
           snippet: "3 个 ZPD 锚点规则 · Z1 触发 1 次 · Z2 触发 0 次 · Z3 触发 1 次" },
       ],
       outputsTo: [
-        { stationId: 11, label: "教学反思", outKey: "量规评分 + 低分维度 → 复盘报告" },
+        { stationId: 11, label: "教学反思", outKey: "评价维度得分 + 低分维度 → 复盘报告" },
       ],
     },
 
     narrative: {
-      what: "用 5 维量规判断学生作品是否真正体现 SWOT 判断能力，并生成可行动反馈语。",
+      what: "用 5 维评价标准判断学生作品是否真正体现 SWOT 判断能力，并生成可行动反馈语。",
       why:  "学生作品可能格式完整但质量较低，例如缺少证据、分类错误、策略与分析不匹配或缺少风险边界。",
-      how:  "查看量规雷达图 + 低分维度 Pareto 图，判断作品主要问题，生成评价量规与反馈语模板。",
+      how:  "查看评价雷达图 + 低分维度 Pareto 图，判断作品主要问题，生成评价标准与反馈语模板。",
     },
 
     evidenceFigure: {
-      title: "5 维量规雷达 + 低分维度 Pareto",
+      title: "5 维评价雷达图 + 低分维度 Pareto",
       subtitle: "看学生作品在哪一维塌缩",
       evidenceNote: "评分不能只看矩阵完整，还要看证据和策略质量。",
 
@@ -64,7 +64,7 @@
         { dim: "条目证据性",    mean: 46, weightInTotal: 0.22 },
       ],
 
-      // 5 维量规定义（v4.2：每级补行为锚点 + 药事管理实例，解决评分者间信度问题）
+      // 5 维评价标准定义（v4.2：每级补行为锚点 + 药事管理实例，解决评分者间信度问题）
       rubric: [
         {
           dim: "条目证据性",
@@ -155,12 +155,12 @@
     artifacts: [
       {
         id: "rubric-5d",
-        buttonLabel: "⬇ 生成 5 维 SWOT 评价量规",
-        outputTitle: "5 维表现性评价量规",
+        buttonLabel: "⬇ 生成 5 维 SWOT 评价标准",
+        outputTitle: "5 维表现性评价标准",
         outputCue: "把评价重心从格式完整转向判断质量。",
         artifactLines: {
           evidence: "5 维平均分：条目证据性 46 / 内外分类 78 / 精炼度 62 / TOWS 44 / 批判意识 38。",
-          action: "用 5 维量规逐项评分；条目证据性与 TOWS 进入二次修改要求。",
+          action: "用 5 维评价标准逐项评分；条目证据性与 TOWS 进入二次修改要求。",
           constraints: [
             "评分依据必须可解释",
             "反馈必须指向下一步修改",
@@ -188,11 +188,11 @@
     ],
 
     stateMachine: {
-      A: { id: "locked",       desc: "未进入 · 协作任务环节 学生作品未生成" },
+      A: { id: "locked",       desc: "未进入 · 学习活动与教学支架设计环节 学生作品未生成" },
       B: { id: "entered",      desc: "已进入未判断" },
       C: { id: "selected",     desc: "已选未保存" },
       D: { id: "saved",        desc: "已保存判断" },
-      E: { id: "artifactDone", desc: "已生成 5 维量规 + 反馈语 · 数据流入 S8 复盘与决策" },
+      E: { id: "artifactDone", desc: "已生成 5 维评价标准 + 反馈语 · 数据流入 S8 反思性实践与教学改进" },
     },
 
     lintRules: [
@@ -210,7 +210,7 @@
       userJudgments: { path: "userJudgments[10]" },
       artifactLibrary: { path: "artifactLibrary" },
       qualityCheckpoints: {
-        backendMappingTo20Steps: ["学生作品", "评价量规", "评分说明", "反馈语", "二次修改"],
+        backendMappingTo20Steps: ["学生作品", "评价标准", "评分说明", "反馈语", "二次修改"],
       },
     },
   };

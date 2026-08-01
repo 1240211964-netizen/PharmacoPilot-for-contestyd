@@ -35,6 +35,11 @@ const BUNDLES = {
   ],
 };
 
+// 含第三方文档生成依赖的浏览器入口单独 bundle；它只在教师点击下载时执行。
+const APP_BUNDLES = {
+  "practice-export": "shared/practice-export-entry.js",
+};
+
 // --check 模式:不构建,只比对 dist/<page>.bundle.js 的 mtime 是否晚于其全部源文件。
 // 过期(或 bundle 缺失)则列出更新的源文件并 exit 1;全部新鲜则打印 ok。
 if (process.argv.includes("--check")) {
@@ -58,6 +63,23 @@ if (process.argv.includes("--check")) {
       console.log(`✓ dist/${page}.bundle.js 新鲜 (${files.length} 个源文件均早于 bundle)  ok`);
     }
   }
+  for (const [page, entry] of Object.entries(APP_BUNDLES)) {
+    const out = join(DIST, `${page}.bundle.js`);
+    let outMtime = null;
+    try {
+      outMtime = statSync(out).mtimeMs;
+    } catch {
+      console.error(`✗ dist/${page}.bundle.js 不存在,请先 npm run build`);
+      stale = true;
+      continue;
+    }
+    if (statSync(join(WEB, entry)).mtimeMs > outMtime) {
+      console.error(`✗ dist/${page}.bundle.js 已过期: ${entry}`);
+      stale = true;
+    } else {
+      console.log(`✓ dist/${page}.bundle.js 新鲜 (${entry})  ok`);
+    }
+  }
   process.exit(stale ? 1 : 0);
 }
 
@@ -79,4 +101,20 @@ for (const [page, files] of Object.entries(BUNDLES)) {
   console.log(
     `✓ dist/${page}.bundle.js  ${files.length} 文件  ${rawKB.toFixed(0)}KB → ${minKB.toFixed(0)}KB  (压 ${Math.round((1 - minKB / rawKB) * 100)}%)`
   );
+}
+
+for (const [page, entry] of Object.entries(APP_BUNDLES)) {
+  const out = join(DIST, `${page}.bundle.js`);
+  await esbuild.build({
+    entryPoints: [join(WEB, entry)],
+    outfile: out,
+    bundle: true,
+    minify: true,
+    legalComments: "none",
+    charset: "utf8",
+    format: "iife",
+    platform: "browser",
+    target: ["es2022"],
+  });
+  console.log(`✓ dist/${page}.bundle.js  ${entry} → ${(statSync(out).size / 1024).toFixed(0)}KB`);
 }

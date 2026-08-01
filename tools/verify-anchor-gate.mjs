@@ -10,7 +10,7 @@ import {
 
 // 取自运行时真实实践包（第 5 章 · 集采制度）
 const PACK = {
-  env02: "目标：辨析集采规则与临床替代的冲突点 · 量规核心：证据链完整性 · 角色扮演代入感",
+  env02: "目标：辨析集采规则与临床替代的冲突点 · 核心评价维度：证据链完整性 · 角色扮演代入感",
   env04: "待核实来源：具体省份集采执行细则 · 待核实来源：某仿制药临床替代率数据 · 待核实来源：医院药事会最新会议纪要",
   env05: "情境导入：模拟医保局发布某品种集采结果 · 任务指令：分组扮演医院、患者、药企制定替代方案 · 输出要求：列出替代优先级及理由",
 };
@@ -129,7 +129,7 @@ const REV = 12;
 {
   const duplicated = {
     ...PACK,
-    env09: "资产沉淀：形成案例卡 · 证据来源：某仿制药临床替代率数据",
+    env09: "教学知识建构与专业共享：形成案例卡 · 证据来源：某仿制药临床替代率数据",
   };
   const result = anchorAnnotation(
     { targetEnv: "env04", sourceExcerpt: "某仿制药临床替代率数据" }, duplicated, REV);
@@ -150,6 +150,19 @@ const REV = 12;
 {
   assert.equal(deriveSegmentKey(PACK.env05, PACK.env05.indexOf("列出替代")), "输出要求");
   assert.equal(deriveSegmentKey(PACK.env05, PACK.env05.indexOf("分组扮演")), "任务指令");
+}
+
+/* ⑪ 卷宗与门禁共用分段契约：教师输入的中文/半角分号也必须形成同一段落边界。 */
+{
+  const semicolonPack = {
+    ...PACK,
+    env05: "情境导入：模拟医保局发布集采结果；任务指令：分组比较替代方案;输出要求：写出证据边界",
+  };
+  const result = anchorAnnotation(
+    { targetEnv: "env05", sourceExcerpt: "任务指令：分组比较替代方案" }, semicolonPack, REV);
+  assert.equal(result.ok, true);
+  assert.equal(result.anchorBasis, "complete-segment");
+  assert.equal(result.segmentKey, "任务指令");
 }
 
 console.log("verify-anchor-gate: ok");

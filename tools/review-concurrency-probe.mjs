@@ -15,7 +15,7 @@ const BASE = process.env.PHARMACO_MODEL_BASE_URL || "http://127.0.0.1:8080/v1";
 const MODEL = process.env.PHARMACO_MODEL_NAME || "mlx-community/Qwen3.5-9B-4bit";
 
 const PACK = Object.freeze({
-  env02: "目标：辨析集采规则与临床替代的冲突点 · 量规核心：证据链完整性 · 角色扮演代入感",
+  env02: "目标：辨析集采规则与临床替代的冲突点 · 核心评价维度：证据链完整性 · 角色扮演代入感",
   env04: "待核实来源：具体省份集采执行细则 · 待核实来源：某仿制药临床替代率数据 · 待核实来源：医院药事会最新会议纪要",
   env05: "情境导入：模拟医保局发布某品种集采结果 · 任务指令：分组扮演医院、患者、药企制定替代方案 · 输出要求：列出替代优先级及理由",
   env07: "评价维度：政策理解准确度 · 利益平衡合理性 · 临床思维逻辑性 · 产出物：各小组替代方案书 · 评价方式：小组互评 + 教师点评",
@@ -178,4 +178,3 @@ console.log(JSON.stringify({
   startedAt: new Date().toISOString(),
   results,
 }, null, 2));
-

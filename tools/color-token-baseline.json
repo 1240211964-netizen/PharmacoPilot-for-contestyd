@@ -1,0 +1,3892 @@
+{
+  "generatedAt": "2026-08-01T15:50:08.802Z",
+  "schemaVersion": 1,
+  "scope": {
+    "included": "root production HTML + shared CSS/JS",
+    "excluded": [
+      "*-draft.html",
+      "shared/tokens.css",
+      "shared/vendor/**",
+      "dist/**",
+      "node_modules/**"
+    ],
+    "counted": [
+      "hex",
+      "rgb/rgba",
+      "hsl/hsla",
+      "color token fallbacks"
+    ]
+  },
+  "totals": {
+    "files": 47,
+    "hex": 374,
+    "functional": 255,
+    "occurrences": 629,
+    "unique": 341,
+    "tokenFallbacks": 0
+  },
+  "files": {
+    "data-detail.html": {
+      "hex": 42,
+      "functional": 23,
+      "tokenFallbacks": 0,
+      "unique": 36,
+      "values": {
+        "#1b1916": 9,
+        "#2f6a44": 1,
+        "#4d6257": 4,
+        "#6bce8a": 1,
+        "#8e3d22": 4,
+        "#94b0a2": 2,
+        "#9db5a9": 2,
+        "#a8492a": 4,
+        "#b08068": 1,
+        "#b5cdba": 1,
+        "#bb5555": 1,
+        "#c07070": 1,
+        "#d97757": 5,
+        "#e8a070": 1,
+        "#f1cdb9": 1,
+        "#fffdf7": 4,
+        "rgba(0,0,0,0.5)": 1,
+        "rgba(107,206,138,0.18)": 1,
+        "rgba(107,206,138,0.5)": 1,
+        "rgba(168,73,42,0.04)": 1,
+        "rgba(168,73,42,0.35)": 2,
+        "rgba(217,119,87,0.15)": 1,
+        "rgba(217,119,87,0.3)": 1,
+        "rgba(255,253,247,0.4)": 1,
+        "rgba(255,253,247,0.6)": 1,
+        "rgba(255,255,255,0.04)": 1,
+        "rgba(255,255,255,0.08)": 1,
+        "rgba(255,255,255,0.15)": 1,
+        "rgba(255,255,255,0.5)": 1,
+        "rgba(255,255,255,0.55)": 1,
+        "rgba(255,255,255,0.6)": 2,
+        "rgba(255,255,255,0.7)": 1,
+        "rgba(58,75,107,0.12)": 1,
+        "rgba(60,35,20,0.18)": 1,
+        "rgba(60,35,20,0.25)": 2,
+        "rgba(77,98,87,0.32)": 1
+      },
+      "fallbackValues": {}
+    },
+    "gsap-demo.html": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "index.html": {
+      "hex": 20,
+      "functional": 5,
+      "tokenFallbacks": 0,
+      "unique": 12,
+      "values": {
+        "#1b1916": 1,
+        "#4d6257": 4,
+        "#94b0a2": 1,
+        "#a8492a": 3,
+        "#d97757": 6,
+        "#e8a070": 1,
+        "#fffdf7": 4,
+        "rgba(217,119,87,0.25)": 1,
+        "rgba(217,119,87,0.85)": 1,
+        "rgba(255,253,247,0.4)": 1,
+        "rgba(255,253,247,0.6)": 1,
+        "rgba(255,255,255,0.08)": 1
+      },
+      "fallbackValues": {}
+    },
+    "login.html": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "nav-3d.html": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "nav-detail.html": {
+      "hex": 3,
+      "functional": 1,
+      "tokenFallbacks": 0,
+      "unique": 3,
+      "values": {
+        "#a8492a": 2,
+        "#fffdf7": 1,
+        "rgba(255,253,247,0.6)": 1
+      },
+      "fallbackValues": {}
+    },
+    "opening-story.html": {
+      "hex": 29,
+      "functional": 29,
+      "tokenFallbacks": 0,
+      "unique": 50,
+      "values": {
+        "#1b1916": 1,
+        "#2b2925": 2,
+        "#2d2923": 1,
+        "#302d27": 1,
+        "#4a433a": 1,
+        "#5d6f95": 1,
+        "#5f806c": 1,
+        "#6f655b": 2,
+        "#803320": 1,
+        "#a8492a": 1,
+        "#aeb8d3": 1,
+        "#b5cdba": 1,
+        "#c9bba4": 1,
+        "#d5b79d": 3,
+        "#d97757": 1,
+        "#dce2f0": 1,
+        "#dce7df": 1,
+        "#ded2bd": 1,
+        "#e4d8c3": 1,
+        "#e7ddcb": 1,
+        "#eee5d5": 1,
+        "#f3b48a": 1,
+        "#f4eee2": 1,
+        "#f6dfcf": 1,
+        "#fffdf7": 1,
+        "rgba(0,0,0,0.05)": 1,
+        "rgba(238,229,213,0.92)": 1,
+        "rgba(243,180,138,0.14)": 1,
+        "rgba(243,180,138,0.34)": 1,
+        "rgba(243,180,138,0.54)": 1,
+        "rgba(243,180,138,0.62)": 1,
+        "rgba(243,180,138,0.64)": 1,
+        "rgba(243,180,138,0.85)": 1,
+        "rgba(244,238,226,0.64)": 1,
+        "rgba(244,238,226,0.74)": 2,
+        "rgba(244,238,226,0.82)": 1,
+        "rgba(244,238,226,0.92)": 1,
+        "rgba(255,255,255,0.026)": 1,
+        "rgba(255,255,255,0.035)": 2,
+        "rgba(255,255,255,0.055)": 1,
+        "rgba(255,255,255,0.06)": 1,
+        "rgba(255,255,255,0.14)": 2,
+        "rgba(255,255,255,0.16)": 1,
+        "rgba(255,255,255,0.5)": 1,
+        "rgba(255,255,255,0.56)": 1,
+        "rgba(93,111,149,0.12)": 1,
+        "rgba(95,128,108,0.08)": 1,
+        "rgba(95,128,108,0.12)": 2,
+        "rgba(95,128,108,0.20)": 1,
+        "rgba(95,128,108,0.22)": 1
+      },
+      "fallbackValues": {}
+    },
+    "practice-detail.html": {
+      "hex": 37,
+      "functional": 91,
+      "tokenFallbacks": 0,
+      "unique": 82,
+      "values": {
+        "#15140f": 1,
+        "#1d1b18": 1,
+        "#4d6257": 2,
+        "#4f7973": 1,
+        "#647699": 1,
+        "#6d7180": 1,
+        "#81752d": 1,
+        "#88701f": 6,
+        "#8b3c2f": 2,
+        "#8e3d22": 5,
+        "#94b0a2": 1,
+        "#95bba4": 1,
+        "#9a7820": 1,
+        "#9a958c": 1,
+        "#9b3d2b": 1,
+        "#a9a39a": 1,
+        "#b5cdba": 1,
+        "#c4dbcd": 2,
+        "#cccccc": 1,
+        "#d5c4ec": 1,
+        "#d97757": 1,
+        "#efe8d9": 1,
+        "#f0c1ac": 1,
+        "#fbf8f1": 1,
+        "#fffdf7": 1,
+        "rgba(0,0,0,0.22)": 1,
+        "rgba(0,0,0,0.35)": 1,
+        "rgba(0,0,0,0.4)": 1,
+        "rgba(100,100,100,0.05)": 1,
+        "rgba(100,100,100,0.12)": 2,
+        "rgba(112,82,168,0.05)": 1,
+        "rgba(112,82,168,0.12)": 1,
+        "rgba(112,82,168,0.14)": 2,
+        "rgba(112,82,168,0.16)": 2,
+        "rgba(149,187,164,0.08)": 1,
+        "rgba(149,187,164,0.22)": 2,
+        "rgba(149,187,164,0.24)": 1,
+        "rgba(154,149,140,0.18)": 1,
+        "rgba(155,61,43,0.045)": 1,
+        "rgba(155,61,43,0.35)": 1,
+        "rgba(167,144,210,0.24)": 1,
+        "rgba(170,140,40,0.1)": 1,
+        "rgba(170,140,40,0.2)": 4,
+        "rgba(180,180,180,0.18)": 1,
+        "rgba(190,150,60,0.16)": 1,
+        "rgba(239,234,223,0.38)": 1,
+        "rgba(250,247,240,0.93)": 1,
+        "rgba(255,253,247,0.6)": 1,
+        "rgba(255,253,248,0.48)": 1,
+        "rgba(255,253,248,0.54)": 2,
+        "rgba(255,253,248,0.58)": 1,
+        "rgba(255,255,255,0.02)": 1,
+        "rgba(255,255,255,0.04)": 1,
+        "rgba(255,255,255,0.05)": 1,
+        "rgba(255,255,255,0.06)": 2,
+        "rgba(255,255,255,0.08)": 9,
+        "rgba(255,255,255,0.1)": 4,
+        "rgba(255,255,255,0.18)": 1,
+        "rgba(255,255,255,0.4)": 3,
+        "rgba(255,255,255,0.45)": 1,
+        "rgba(255,255,255,0.5)": 5,
+        "rgba(255,255,255,0.55)": 1,
+        "rgba(255,255,255,0.6)": 2,
+        "rgba(255,255,255,0.85)": 1,
+        "rgba(77,98,87,0.06)": 2,
+        "rgba(77,98,87,0.07)": 1,
+        "rgba(77,98,87,0.08)": 2,
+        "rgba(77,98,87,0.1)": 1,
+        "rgba(77,98,87,0.13)": 1,
+        "rgba(77,98,87,0.15)": 1,
+        "rgba(77,98,87,0.18)": 2,
+        "rgba(77,98,87,0.2)": 2,
+        "rgba(77,98,87,0.22)": 2,
+        "rgba(77,98,87,0.25)": 1,
+        "rgba(77,98,87,0.34)": 1,
+        "rgba(77,98,87,0.35)": 1,
+        "rgba(77,98,87,0.45)": 1,
+        "rgba(77,98,87,0.5)": 2,
+        "rgba(77,98,87,0.52)": 1,
+        "rgba(77,98,87,0.72)": 1,
+        "rgba(80,80,80,0.12)": 2,
+        "rgba(80,80,80,0.14)": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/backend-client.js": {
+      "hex": 2,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 2,
+      "values": {
+        "#211f1d": 1,
+        "#a23f32": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/bc-chrome.css": {
+      "hex": 10,
+      "functional": 23,
+      "tokenFallbacks": 0,
+      "unique": 24,
+      "values": {
+        "#0e0d0c": 2,
+        "#18171a": 1,
+        "#211f1d": 2,
+        "#2a2722": 1,
+        "#8a857c": 1,
+        "#98938b": 1,
+        "#a9bfb4": 1,
+        "#b8c4dc": 1,
+        "rgba(0,0,0,0.05)": 1,
+        "rgba(0,0,0,0.4)": 1,
+        "rgba(255,255,255,0.04)": 1,
+        "rgba(255,255,255,0.08)": 1,
+        "rgba(255,255,255,0.1)": 1,
+        "rgba(255,255,255,0.12)": 1,
+        "rgba(255,255,255,0.15)": 2,
+        "rgba(255,255,255,0.2)": 1,
+        "rgba(255,255,255,0.5)": 3,
+        "rgba(255,255,255,0.55)": 3,
+        "rgba(255,255,255,0.6)": 3,
+        "rgba(255,255,255,0.7)": 1,
+        "rgba(255,255,255,0.85)": 1,
+        "rgba(58,75,107,0.30)": 1,
+        "rgba(77,98,87,0.14)": 1,
+        "rgba(77,98,87,0.22)": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/data-render.js": {
+      "hex": 16,
+      "functional": 2,
+      "tokenFallbacks": 0,
+      "unique": 12,
+      "values": {
+        "#1b1916": 3,
+        "#4d6257": 1,
+        "#6f675f": 1,
+        "#94b0a2": 1,
+        "#a8492a": 3,
+        "#b08068": 1,
+        "#d97757": 1,
+        "#e8a070": 1,
+        "#f1cdb9": 1,
+        "#fffdf7": 3,
+        "rgba(255,253,247,0.4)": 1,
+        "rgba(255,255,255,0.08)": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/evaluation-contract.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/evaluation-framework.js": {
+      "hex": 1,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 1,
+      "values": {
+        "#33441177": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/fanya.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/faq.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/live-stats.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/metaverse-classroom-3d.js": {
+      "hex": 78,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 61,
+      "values": {
+        "#000000": 1,
+        "#171311": 1,
+        "#1b1916": 1,
+        "#1b2536": 1,
+        "#241c16": 1,
+        "#2b2320": 2,
+        "#2b2620": 2,
+        "#2c2925": 1,
+        "#2f2c28": 1,
+        "#33441177": 1,
+        "#33485f": 1,
+        "#3a4b6b": 5,
+        "#3d2b1f": 1,
+        "#3d3a34": 3,
+        "#4a3527": 1,
+        "#4a463f": 1,
+        "#4d6257": 4,
+        "#5a4636": 1,
+        "#5a6f63": 1,
+        "#5b5147": 2,
+        "#6b4a2e": 1,
+        "#6f2f2a": 3,
+        "#6f5b3e": 1,
+        "#7a5a3a": 1,
+        "#7a6244": 1,
+        "#7d94b8": 1,
+        "#8472a8": 1,
+        "#8a8f96": 1,
+        "#8c6a44": 1,
+        "#9a5b4a": 1,
+        "#9a9082": 1,
+        "#9fb0c4": 1,
+        "#a8492a": 2,
+        "#a98a60": 1,
+        "#b08440": 1,
+        "#b08c5e": 1,
+        "#b9a07e": 1,
+        "#c2a47a": 1,
+        "#c2ab82": 1,
+        "#c98b5a": 1,
+        "#caa24a": 1,
+        "#cdd6e6": 1,
+        "#cfe2f0": 1,
+        "#d4805f": 1,
+        "#d8c6a0": 1,
+        "#d97757": 1,
+        "#d99a6c": 1,
+        "#dca87e": 1,
+        "#e0a982": 1,
+        "#e3d4b4": 1,
+        "#e8b48c": 1,
+        "#e8e0cf": 1,
+        "#eab98f": 1,
+        "#ece5d3": 1,
+        "#efe9dc": 2,
+        "#f1c9a5": 1,
+        "#f3d3b0": 1,
+        "#f3eee2": 2,
+        "#f4efe6": 1,
+        "#f7f2e6": 1,
+        "#fbf8f1": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/metaverse-classroom.js": {
+      "hex": 53,
+      "functional": 27,
+      "tokenFallbacks": 0,
+      "unique": 72,
+      "values": {
+        "#16120e": 1,
+        "#1a1a1f": 1,
+        "#221c16": 1,
+        "#2e221a": 1,
+        "#33441177": 1,
+        "#3a2e28": 2,
+        "#3f2f22": 1,
+        "#4a3724": 1,
+        "#564026": 1,
+        "#6a93a8": 1,
+        "#6b5238": 1,
+        "#6fa085": 1,
+        "#7a9b6a": 1,
+        "#7aa593": 1,
+        "#7ea0bd": 1,
+        "#8a7da8": 1,
+        "#8a8178": 1,
+        "#8aa3b6": 1,
+        "#95bba4": 1,
+        "#9a82c4": 1,
+        "#9a958c": 1,
+        "#a89255": 1,
+        "#b5852a": 1,
+        "#bd7e7e": 1,
+        "#bfb4a0": 1,
+        "#c0905f": 1,
+        "#c2ad6e": 1,
+        "#c4b08a": 1,
+        "#c8b89a": 1,
+        "#c96f52": 1,
+        "#caa074": 1,
+        "#cbbea8": 1,
+        "#cfc3a8": 1,
+        "#cfc8b8": 1,
+        "#d0bb92": 1,
+        "#d4c4a0": 1,
+        "#d4c8a8": 1,
+        "#d8a778": 1,
+        "#d99f5e": 1,
+        "#d9ccb4": 1,
+        "#e2d0a8": 1,
+        "#e7b58a": 1,
+        "#e8d9b8": 1,
+        "#e9c19b": 1,
+        "#f0c6a0": 1,
+        "#f2d2af": 1,
+        "#f3efe6": 1,
+        "#f8f4ea": 1,
+        "#ffffff": 4,
+        "rgba(0,0,0,0.06)": 2,
+        "rgba(0,0,0,0.08)": 2,
+        "rgba(0,0,0,0.18)": 1,
+        "rgba(0,0,0,0.32)": 1,
+        "rgba(100,145,185,0.09)": 1,
+        "rgba(110,85,52,0.10)": 1,
+        "rgba(120,90,40,0.07)": 1,
+        "rgba(20,18,16,0.5)": 1,
+        "rgba(200,120,70,0.08)": 1,
+        "rgba(217,119,87,0.06)": 1,
+        "rgba(217,119,87,0.12)": 1,
+        "rgba(217,119,87,0.14)": 1,
+        "rgba(217,119,87,0.4)": 1,
+        "rgba(217,119,87,0.7)": 1,
+        "rgba(217,119,87,0.85)": 2,
+        "rgba(247,240,225,0.9)": 2,
+        "rgba(247,244,237,0.97)": 1,
+        "rgba(255,255,255,0.62)": 1,
+        "rgba(255,255,255,0.72)": 1,
+        "rgba(40,30,20,0.20)": 1,
+        "rgba(60,40,28,0.10)": 1,
+        "rgba(74,67,57,0.92)": 1,
+        "rgba(77,98,87,0.14)": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/mv-classroom-core.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/nav-decision-bank.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/nav-map-3d.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/nav-render-store-bridge.js": {
+      "hex": 40,
+      "functional": 13,
+      "tokenFallbacks": 0,
+      "unique": 28,
+      "values": {
+        "#0d0c0a": 1,
+        "#1a1714": 1,
+        "#1a1916": 2,
+        "#211f1d": 2,
+        "#2a2722": 1,
+        "#5a4a3a": 2,
+        "#777777": 2,
+        "#8a3a1f": 2,
+        "#8eb89f": 1,
+        "#998877": 3,
+        "#e3f0e3": 1,
+        "#eaeaea": 1,
+        "#faf6ee": 3,
+        "#fef0d9": 1,
+        "#fff5ec": 3,
+        "#fff8ed": 1,
+        "#ffffff": 13,
+        "rgba(0,0,0,0.1)": 1,
+        "rgba(0,0,0,0.18)": 1,
+        "rgba(0,0,0,0.32)": 2,
+        "rgba(0,0,0,0.5)": 2,
+        "rgba(0,0,0,0.6)": 1,
+        "rgba(106,154,123,0.3)": 1,
+        "rgba(106,154,123,0.4)": 1,
+        "rgba(255,255,255,0.08)": 1,
+        "rgba(255,255,255,0.18)": 1,
+        "rgba(255,255,255,0.28)": 1,
+        "rgba(255,255,255,0.5)": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/nav-render.js": {
+      "hex": 23,
+      "functional": 29,
+      "tokenFallbacks": 0,
+      "unique": 36,
+      "values": {
+        "#211f1d": 3,
+        "#2a2722": 3,
+        "#5a7090": 1,
+        "#888888": 2,
+        "#999999": 1,
+        "#a8b9d4": 1,
+        "#b8860b": 1,
+        "#b8c5b0": 1,
+        "#c0c0c0": 1,
+        "#d88a3a": 1,
+        "#d9d9d9": 1,
+        "#faf6ee": 4,
+        "#ffffff": 3,
+        "rgba(0,0,0,0.05)": 1,
+        "rgba(0,0,0,0.12)": 1,
+        "rgba(0,0,0,0.18)": 1,
+        "rgba(106,154,123,0.04)": 1,
+        "rgba(106,154,123,0.06)": 1,
+        "rgba(106,154,123,0.08)": 3,
+        "rgba(106,154,123,0.10)": 1,
+        "rgba(106,154,123,0.12)": 1,
+        "rgba(106,154,123,0.28)": 1,
+        "rgba(106,154,123,0.4)": 1,
+        "rgba(112,82,168,0.09)": 1,
+        "rgba(168,73,42,0.10)": 3,
+        "rgba(168,73,42,0.15)": 1,
+        "rgba(168,73,42,0.18)": 1,
+        "rgba(168,73,42,0.20)": 1,
+        "rgba(168,73,42,0.25)": 1,
+        "rgba(184,134,11,0.08)": 2,
+        "rgba(217,119,87,0.04)": 1,
+        "rgba(217,119,87,0.06)": 1,
+        "rgba(217,119,87,0.10)": 1,
+        "rgba(217,119,87,0.12)": 2,
+        "rgba(217,119,87,0.20)": 1,
+        "rgba(33,31,29,0.92)": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/nav-stations-contract.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/pharmaco-store.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/practice-export-entry.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/practice-feedback-bridge.js": {
+      "hex": 0,
+      "functional": 2,
+      "tokenFallbacks": 0,
+      "unique": 2,
+      "values": {
+        "rgba(0,0,0,0.25)": 1,
+        "rgba(255,255,255,0.08)": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/practice-review.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/practice-runtime-contract.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/practice-runtime.js": {
+      "hex": 7,
+      "functional": 9,
+      "tokenFallbacks": 0,
+      "unique": 16,
+      "values": {
+        "#33441177": 1,
+        "#555555": 1,
+        "#8e3d22": 1,
+        "#c4dbcd": 1,
+        "#cccccc": 1,
+        "#d5c4ec": 1,
+        "#f0c1ac": 1,
+        "rgba(0,0,0,0.08)": 1,
+        "rgba(100,100,100,0.12)": 1,
+        "rgba(112,82,168,0.16)": 1,
+        "rgba(149,187,164,0.25)": 1,
+        "rgba(167,144,210,0.25)": 1,
+        "rgba(180,180,180,0.18)": 1,
+        "rgba(20,18,16,0.45)": 1,
+        "rgba(77,98,87,0.14)": 1,
+        "rgba(77,98,87,0.2)": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/practice-segments.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/rerun-bridge.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/sample-collection.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/station1.payload.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/station10.payload.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/station11.payload.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/station2.payload.js": {
+      "hex": 4,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 4,
+      "values": {
+        "#3a8a4e": 1,
+        "#5a7090": 1,
+        "#a8492a": 1,
+        "#b8860b": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/station3.payload.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/station4.payload.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/station5.payload.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/station6.payload.js": {
+      "hex": 5,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 3,
+      "values": {
+        "#3a8a4e": 2,
+        "#a23a3a": 2,
+        "#b8860b": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/station7.payload.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/station8.payload.js": {
+      "hex": 3,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 3,
+      "values": {
+        "#3a8a4e": 1,
+        "#a23a3a": 1,
+        "#b8860b": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/station9.payload.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/theory-chips.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    },
+    "shared/toast.js": {
+      "hex": 1,
+      "functional": 1,
+      "tokenFallbacks": 0,
+      "unique": 2,
+      "values": {
+        "#33441177": 1,
+        "rgba(0,0,0,0.18)": 1
+      },
+      "fallbackValues": {}
+    },
+    "shared/wendao.js": {
+      "hex": 0,
+      "functional": 0,
+      "tokenFallbacks": 0,
+      "unique": 0,
+      "values": {},
+      "fallbackValues": {}
+    }
+  },
+  "inventory": [
+    {
+      "value": "#ffffff",
+      "type": "hex",
+      "count": 20,
+      "locations": [
+        "shared/metaverse-classroom.js:1024",
+        "shared/metaverse-classroom.js:1040",
+        "shared/metaverse-classroom.js:1060",
+        "shared/metaverse-classroom.js:1095",
+        "shared/nav-render-store-bridge.js:329",
+        "shared/nav-render-store-bridge.js:376",
+        "shared/nav-render-store-bridge.js:394",
+        "shared/nav-render-store-bridge.js:432",
+        "shared/nav-render-store-bridge.js:456",
+        "shared/nav-render-store-bridge.js:463",
+        "shared/nav-render-store-bridge.js:519",
+        "shared/nav-render-store-bridge.js:1244",
+        "shared/nav-render-store-bridge.js:1250",
+        "shared/nav-render-store-bridge.js:1256",
+        "shared/nav-render-store-bridge.js:1272",
+        "shared/nav-render-store-bridge.js:1274",
+        "shared/nav-render-store-bridge.js:1279",
+        "shared/nav-render.js:154",
+        "shared/nav-render.js:1104",
+        "shared/nav-render.js:1248"
+      ]
+    },
+    {
+      "value": "#a8492a",
+      "type": "hex",
+      "count": 16,
+      "locations": [
+        "data-detail.html:2028",
+        "data-detail.html:2048",
+        "data-detail.html:2048",
+        "data-detail.html:2049",
+        "index.html:1654",
+        "index.html:2194",
+        "index.html:2239",
+        "nav-detail.html:1829",
+        "nav-detail.html:1830",
+        "opening-story.html:34",
+        "shared/data-render.js:462",
+        "shared/data-render.js:462",
+        "shared/data-render.js:463",
+        "shared/metaverse-classroom-3d.js:48",
+        "shared/metaverse-classroom-3d.js:1147",
+        "shared/station2.payload.js:67"
+      ]
+    },
+    {
+      "value": "#1b1916",
+      "type": "hex",
+      "count": 15,
+      "locations": [
+        "data-detail.html:2047",
+        "data-detail.html:2050",
+        "data-detail.html:2051",
+        "data-detail.html:2052",
+        "data-detail.html:2053",
+        "data-detail.html:2054",
+        "data-detail.html:2055",
+        "data-detail.html:2624",
+        "data-detail.html:2625",
+        "index.html:2210",
+        "opening-story.html:26",
+        "shared/data-render.js:462",
+        "shared/data-render.js:463",
+        "shared/data-render.js:467",
+        "shared/metaverse-classroom-3d.js:47"
+      ]
+    },
+    {
+      "value": "#4d6257",
+      "type": "hex",
+      "count": 15,
+      "locations": [
+        "data-detail.html:2005",
+        "data-detail.html:2005",
+        "data-detail.html:2007",
+        "data-detail.html:2265",
+        "index.html:2202",
+        "index.html:2267",
+        "index.html:2268",
+        "index.html:2272",
+        "practice-detail.html:3131",
+        "practice-detail.html:3132",
+        "shared/data-render.js:166",
+        "shared/metaverse-classroom-3d.js:381",
+        "shared/metaverse-classroom-3d.js:1147",
+        "shared/metaverse-classroom-3d.js:1148",
+        "shared/metaverse-classroom-3d.js:1149"
+      ]
+    },
+    {
+      "value": "#d97757",
+      "type": "hex",
+      "count": 15,
+      "locations": [
+        "data-detail.html:2026",
+        "data-detail.html:2026",
+        "data-detail.html:2263",
+        "data-detail.html:2534",
+        "data-detail.html:2535",
+        "index.html:2234",
+        "index.html:2235",
+        "index.html:2300",
+        "index.html:2301",
+        "index.html:2945",
+        "index.html:2946",
+        "opening-story.html:33",
+        "practice-detail.html:1601",
+        "shared/data-render.js:164",
+        "shared/metaverse-classroom-3d.js:1149"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.08)",
+      "type": "functional",
+      "count": 15,
+      "locations": [
+        "data-detail.html:2539",
+        "index.html:2305",
+        "practice-detail.html:165",
+        "practice-detail.html:168",
+        "practice-detail.html:179",
+        "practice-detail.html:221",
+        "practice-detail.html:232",
+        "practice-detail.html:246",
+        "practice-detail.html:1658",
+        "practice-detail.html:1667",
+        "practice-detail.html:1680",
+        "shared/bc-chrome.css:215",
+        "shared/data-render.js:682",
+        "shared/nav-render-store-bridge.js:382",
+        "shared/practice-feedback-bridge.js:36"
+      ]
+    },
+    {
+      "value": "#fffdf7",
+      "type": "hex",
+      "count": 14,
+      "locations": [
+        "data-detail.html:2554",
+        "data-detail.html:2574",
+        "data-detail.html:2575",
+        "data-detail.html:2628",
+        "index.html:2320",
+        "index.html:2337",
+        "index.html:2338",
+        "index.html:2949",
+        "nav-detail.html:1833",
+        "opening-story.html:25",
+        "practice-detail.html:3135",
+        "shared/data-render.js:687",
+        "shared/data-render.js:692",
+        "shared/data-render.js:692"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.5)",
+      "type": "functional",
+      "count": 11,
+      "locations": [
+        "data-detail.html:141",
+        "opening-story.html:447",
+        "practice-detail.html:146",
+        "practice-detail.html:150",
+        "practice-detail.html:199",
+        "practice-detail.html:228",
+        "practice-detail.html:1692",
+        "shared/bc-chrome.css:232",
+        "shared/bc-chrome.css:255",
+        "shared/bc-chrome.css:294",
+        "shared/nav-render-store-bridge.js:516"
+      ]
+    },
+    {
+      "value": "#8e3d22",
+      "type": "hex",
+      "count": 10,
+      "locations": [
+        "data-detail.html:890",
+        "data-detail.html:1010",
+        "data-detail.html:1010",
+        "data-detail.html:1568",
+        "practice-detail.html:897",
+        "practice-detail.html:1210",
+        "practice-detail.html:1452",
+        "practice-detail.html:1633",
+        "practice-detail.html:1873",
+        "shared/practice-runtime.js:340"
+      ]
+    },
+    {
+      "value": "#211f1d",
+      "type": "hex",
+      "count": 8,
+      "locations": [
+        "shared/backend-client.js:68",
+        "shared/bc-chrome.css:534",
+        "shared/bc-chrome.css:634",
+        "shared/nav-render-store-bridge.js:472",
+        "shared/nav-render-store-bridge.js:528",
+        "shared/nav-render.js:1000",
+        "shared/nav-render.js:1228",
+        "shared/nav-render.js:1229"
+      ]
+    },
+    {
+      "value": "#faf6ee",
+      "type": "hex",
+      "count": 7,
+      "locations": [
+        "shared/nav-render-store-bridge.js:281",
+        "shared/nav-render-store-bridge.js:365",
+        "shared/nav-render-store-bridge.js:582",
+        "shared/nav-render.js:128",
+        "shared/nav-render.js:137",
+        "shared/nav-render.js:874",
+        "shared/nav-render.js:1399"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.6)",
+      "type": "functional",
+      "count": 7,
+      "locations": [
+        "data-detail.html:566",
+        "data-detail.html:1043",
+        "practice-detail.html:244",
+        "practice-detail.html:406",
+        "shared/bc-chrome.css:215",
+        "shared/bc-chrome.css:445",
+        "shared/bc-chrome.css:455"
+      ]
+    },
+    {
+      "value": "#88701f",
+      "type": "hex",
+      "count": 6,
+      "locations": [
+        "practice-detail.html:933",
+        "practice-detail.html:1334",
+        "practice-detail.html:1369",
+        "practice-detail.html:1394",
+        "practice-detail.html:1428",
+        "practice-detail.html:1428"
+      ]
+    },
+    {
+      "value": "#2a2722",
+      "type": "hex",
+      "count": 5,
+      "locations": [
+        "shared/bc-chrome.css:552",
+        "shared/nav-render-store-bridge.js:523",
+        "shared/nav-render.js:1037",
+        "shared/nav-render.js:1221",
+        "shared/nav-render.js:1226"
+      ]
+    },
+    {
+      "value": "#33441177",
+      "type": "hex",
+      "count": 5,
+      "locations": [
+        "shared/evaluation-framework.js:278",
+        "shared/metaverse-classroom-3d.js:106",
+        "shared/metaverse-classroom.js:73",
+        "shared/practice-runtime.js:1628",
+        "shared/toast.js:71"
+      ]
+    },
+    {
+      "value": "#3a4b6b",
+      "type": "hex",
+      "count": 5,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:55",
+        "shared/metaverse-classroom-3d.js:381",
+        "shared/metaverse-classroom-3d.js:1147",
+        "shared/metaverse-classroom-3d.js:1148",
+        "shared/metaverse-classroom-3d.js:1149"
+      ]
+    },
+    {
+      "value": "#94b0a2",
+      "type": "hex",
+      "count": 5,
+      "locations": [
+        "data-detail.html:1047",
+        "data-detail.html:2551",
+        "index.html:2317",
+        "practice-detail.html:251",
+        "shared/data-render.js:686"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.1)",
+      "type": "functional",
+      "count": 5,
+      "locations": [
+        "practice-detail.html:138",
+        "practice-detail.html:197",
+        "practice-detail.html:238",
+        "practice-detail.html:1691",
+        "shared/bc-chrome.css:453"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.55)",
+      "type": "functional",
+      "count": 5,
+      "locations": [
+        "data-detail.html:1036",
+        "practice-detail.html:1673",
+        "shared/bc-chrome.css:333",
+        "shared/bc-chrome.css:438",
+        "shared/bc-chrome.css:440"
+      ]
+    },
+    {
+      "value": "#3a8a4e",
+      "type": "hex",
+      "count": 4,
+      "locations": [
+        "shared/station2.payload.js:64",
+        "shared/station6.payload.js:107",
+        "shared/station6.payload.js:110",
+        "shared/station8.payload.js:108"
+      ]
+    },
+    {
+      "value": "#b8860b",
+      "type": "hex",
+      "count": 4,
+      "locations": [
+        "shared/nav-render.js:3705",
+        "shared/station2.payload.js:65",
+        "shared/station6.payload.js:108",
+        "shared/station8.payload.js:109"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.18)",
+      "type": "functional",
+      "count": 4,
+      "locations": [
+        "shared/metaverse-classroom.js:1060",
+        "shared/nav-render-store-bridge.js:281",
+        "shared/nav-render.js:193",
+        "shared/toast.js:24"
+      ]
+    },
+    {
+      "value": "rgba(170,140,40,0.2)",
+      "type": "functional",
+      "count": 4,
+      "locations": [
+        "practice-detail.html:933",
+        "practice-detail.html:1334",
+        "practice-detail.html:1369",
+        "practice-detail.html:1394"
+      ]
+    },
+    {
+      "value": "rgba(255,253,247,0.6)",
+      "type": "functional",
+      "count": 4,
+      "locations": [
+        "data-detail.html:2631",
+        "index.html:2952",
+        "nav-detail.html:1836",
+        "practice-detail.html:3138"
+      ]
+    },
+    {
+      "value": "#3d3a34",
+      "type": "hex",
+      "count": 3,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:55",
+        "shared/metaverse-classroom-3d.js:383",
+        "shared/metaverse-classroom-3d.js:1145"
+      ]
+    },
+    {
+      "value": "#6f2f2a",
+      "type": "hex",
+      "count": 3,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:381",
+        "shared/metaverse-classroom-3d.js:1147",
+        "shared/metaverse-classroom-3d.js:1148"
+      ]
+    },
+    {
+      "value": "#998877",
+      "type": "hex",
+      "count": 3,
+      "locations": [
+        "shared/nav-render-store-bridge.js:346",
+        "shared/nav-render-store-bridge.js:437",
+        "shared/nav-render-store-bridge.js:445"
+      ]
+    },
+    {
+      "value": "#a23a3a",
+      "type": "hex",
+      "count": 3,
+      "locations": [
+        "shared/station6.payload.js:109",
+        "shared/station6.payload.js:111",
+        "shared/station8.payload.js:110"
+      ]
+    },
+    {
+      "value": "#b5cdba",
+      "type": "hex",
+      "count": 3,
+      "locations": [
+        "data-detail.html:295",
+        "opening-story.html:817",
+        "practice-detail.html:178"
+      ]
+    },
+    {
+      "value": "#c4dbcd",
+      "type": "hex",
+      "count": 3,
+      "locations": [
+        "practice-detail.html:1693",
+        "practice-detail.html:1695",
+        "shared/practice-runtime.js:281"
+      ]
+    },
+    {
+      "value": "#d5b79d",
+      "type": "hex",
+      "count": 3,
+      "locations": [
+        "opening-story.html:580",
+        "opening-story.html:618",
+        "opening-story.html:1033"
+      ]
+    },
+    {
+      "value": "#e8a070",
+      "type": "hex",
+      "count": 3,
+      "locations": [
+        "data-detail.html:2548",
+        "index.html:2314",
+        "shared/data-render.js:685"
+      ]
+    },
+    {
+      "value": "#fff5ec",
+      "type": "hex",
+      "count": 3,
+      "locations": [
+        "shared/nav-render-store-bridge.js:335",
+        "shared/nav-render-store-bridge.js:460",
+        "shared/nav-render-store-bridge.js:1236"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.05)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "opening-story.html:96",
+        "shared/bc-chrome.css:75",
+        "shared/nav-render.js:3416"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.08)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "shared/metaverse-classroom.js:315",
+        "shared/metaverse-classroom.js:946",
+        "shared/practice-runtime.js:4036"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.32)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "shared/metaverse-classroom.js:1022",
+        "shared/nav-render-store-bridge.js:274",
+        "shared/nav-render-store-bridge.js:367"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.5)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "data-detail.html:511",
+        "shared/nav-render-store-bridge.js:357",
+        "shared/nav-render-store-bridge.js:473"
+      ]
+    },
+    {
+      "value": "rgba(100,100,100,0.12)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "practice-detail.html:1297",
+        "practice-detail.html:1721",
+        "shared/practice-runtime.js:3999"
+      ]
+    },
+    {
+      "value": "rgba(106,154,123,0.08)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "shared/nav-render.js:407",
+        "shared/nav-render.js:3361",
+        "shared/nav-render.js:3744"
+      ]
+    },
+    {
+      "value": "rgba(112,82,168,0.16)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "practice-detail.html:932",
+        "practice-detail.html:1301",
+        "shared/practice-runtime.js:3998"
+      ]
+    },
+    {
+      "value": "rgba(168,73,42,0.10)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "shared/nav-render.js:3353",
+        "shared/nav-render.js:3354",
+        "shared/nav-render.js:3429"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.12)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "shared/metaverse-classroom.js:1071",
+        "shared/nav-render.js:2935",
+        "shared/nav-render.js:2954"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.85)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "index.html:2334",
+        "shared/metaverse-classroom.js:951",
+        "shared/metaverse-classroom.js:952"
+      ]
+    },
+    {
+      "value": "rgba(255,253,247,0.4)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "data-detail.html:2556",
+        "index.html:2322",
+        "shared/data-render.js:688"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.04)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "data-detail.html:1029",
+        "practice-detail.html:1658",
+        "shared/bc-chrome.css:293"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.06)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "opening-story.html:809",
+        "practice-detail.html:194",
+        "practice-detail.html:1692"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.15)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "data-detail.html:139",
+        "shared/bc-chrome.css:220",
+        "shared/bc-chrome.css:249"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.4)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "practice-detail.html:171",
+        "practice-detail.html:191",
+        "practice-detail.html:211"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.14)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "shared/bc-chrome.css:189",
+        "shared/metaverse-classroom.js:960",
+        "shared/practice-runtime.js:4076"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.2)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "practice-detail.html:1309",
+        "practice-detail.html:1335",
+        "shared/practice-runtime.js:3997"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.22)",
+      "type": "functional",
+      "count": 3,
+      "locations": [
+        "practice-detail.html:931",
+        "practice-detail.html:1300",
+        "shared/bc-chrome.css:612"
+      ]
+    },
+    {
+      "value": "#0e0d0c",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/bc-chrome.css:528",
+        "shared/bc-chrome.css:630"
+      ]
+    },
+    {
+      "value": "#1a1916",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/nav-render-store-bridge.js:472",
+        "shared/nav-render-store-bridge.js:528"
+      ]
+    },
+    {
+      "value": "#2b2320",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:54",
+        "shared/metaverse-classroom-3d.js:383"
+      ]
+    },
+    {
+      "value": "#2b2620",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:416",
+        "shared/metaverse-classroom-3d.js:1149"
+      ]
+    },
+    {
+      "value": "#2b2925",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "opening-story.html:1053",
+        "opening-story.html:1057"
+      ]
+    },
+    {
+      "value": "#3a2e28",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/metaverse-classroom.js:320",
+        "shared/metaverse-classroom.js:321"
+      ]
+    },
+    {
+      "value": "#5a4a3a",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/nav-render-store-bridge.js:321",
+        "shared/nav-render-store-bridge.js:426"
+      ]
+    },
+    {
+      "value": "#5a7090",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/nav-render.js:3705",
+        "shared/station2.payload.js:66"
+      ]
+    },
+    {
+      "value": "#5b5147",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:55",
+        "shared/metaverse-classroom-3d.js:1148"
+      ]
+    },
+    {
+      "value": "#6f655b",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "opening-story.html:29",
+        "opening-story.html:30"
+      ]
+    },
+    {
+      "value": "#777777",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/nav-render-store-bridge.js:1268",
+        "shared/nav-render-store-bridge.js:1275"
+      ]
+    },
+    {
+      "value": "#888888",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/nav-render.js:2782",
+        "shared/nav-render.js:2789"
+      ]
+    },
+    {
+      "value": "#8a3a1f",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/nav-render-store-bridge.js:342",
+        "shared/nav-render-store-bridge.js:466"
+      ]
+    },
+    {
+      "value": "#8b3c2f",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:971",
+        "practice-detail.html:976"
+      ]
+    },
+    {
+      "value": "#95bba4",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1602",
+        "shared/metaverse-classroom.js:930"
+      ]
+    },
+    {
+      "value": "#9a958c",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1604",
+        "shared/metaverse-classroom.js:930"
+      ]
+    },
+    {
+      "value": "#9db5a9",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "data-detail.html:356",
+        "data-detail.html:361"
+      ]
+    },
+    {
+      "value": "#b08068",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "data-detail.html:2264",
+        "shared/data-render.js:165"
+      ]
+    },
+    {
+      "value": "#cccccc",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1697",
+        "shared/practice-runtime.js:283"
+      ]
+    },
+    {
+      "value": "#d5c4ec",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1696",
+        "shared/practice-runtime.js:282"
+      ]
+    },
+    {
+      "value": "#efe9dc",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:458",
+        "shared/metaverse-classroom-3d.js:462"
+      ]
+    },
+    {
+      "value": "#f0c1ac",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1694",
+        "shared/practice-runtime.js:280"
+      ]
+    },
+    {
+      "value": "#f1cdb9",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "data-detail.html:2569",
+        "shared/data-render.js:691"
+      ]
+    },
+    {
+      "value": "#f3eee2",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:47",
+        "shared/metaverse-classroom-3d.js:1144"
+      ]
+    },
+    {
+      "value": "#fbf8f1",
+      "type": "hex",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:2845",
+        "shared/metaverse-classroom-3d.js:354"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.06)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "shared/metaverse-classroom.js:318",
+        "shared/metaverse-classroom.js:1083"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.4)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1591",
+        "shared/bc-chrome.css:553"
+      ]
+    },
+    {
+      "value": "rgba(106,154,123,0.4)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "shared/nav-render-store-bridge.js:529",
+        "shared/nav-render.js:836"
+      ]
+    },
+    {
+      "value": "rgba(112,82,168,0.14)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1368",
+        "practice-detail.html:1395"
+      ]
+    },
+    {
+      "value": "rgba(149,187,164,0.22)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1693",
+        "practice-detail.html:1888"
+      ]
+    },
+    {
+      "value": "rgba(168,73,42,0.35)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "data-detail.html:930",
+        "data-detail.html:948"
+      ]
+    },
+    {
+      "value": "rgba(180,180,180,0.18)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1697",
+        "shared/practice-runtime.js:283"
+      ]
+    },
+    {
+      "value": "rgba(184,134,11,0.08)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "shared/nav-render.js:2999",
+        "shared/nav-render.js:3346"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.06)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "shared/metaverse-classroom.js:938",
+        "shared/nav-render.js:3192"
+      ]
+    },
+    {
+      "value": "rgba(244,238,226,0.74)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "opening-story.html:943",
+        "opening-story.html:979"
+      ]
+    },
+    {
+      "value": "rgba(247,240,225,0.9)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "shared/metaverse-classroom.js:1070",
+        "shared/metaverse-classroom.js:1075"
+      ]
+    },
+    {
+      "value": "rgba(255,253,248,0.54)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1909",
+        "practice-detail.html:1946"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.035)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "opening-story.html:779",
+        "opening-story.html:823"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.14)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "opening-story.html:821",
+        "opening-story.html:822"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.18)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1667",
+        "shared/nav-render-store-bridge.js:394"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.7)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "data-detail.html:143",
+        "shared/bc-chrome.css:242"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.85)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:253",
+        "shared/bc-chrome.css:449"
+      ]
+    },
+    {
+      "value": "rgba(60,35,20,0.25)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "data-detail.html:637",
+        "data-detail.html:1223"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.06)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:969",
+        "practice-detail.html:1990"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.08)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1068",
+        "practice-detail.html:1980"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.18)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1367",
+        "practice-detail.html:1393"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.5)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1309",
+        "practice-detail.html:2422"
+      ]
+    },
+    {
+      "value": "rgba(80,80,80,0.12)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "practice-detail.html:1370",
+        "practice-detail.html:1396"
+      ]
+    },
+    {
+      "value": "rgba(95,128,108,0.12)",
+      "type": "functional",
+      "count": 2,
+      "locations": [
+        "opening-story.html:854",
+        "opening-story.html:877"
+      ]
+    },
+    {
+      "value": "#000000",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:526"
+      ]
+    },
+    {
+      "value": "#0d0c0a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:499"
+      ]
+    },
+    {
+      "value": "#15140f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1648"
+      ]
+    },
+    {
+      "value": "#16120e",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:333"
+      ]
+    },
+    {
+      "value": "#171311",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:54"
+      ]
+    },
+    {
+      "value": "#18171a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/bc-chrome.css:521"
+      ]
+    },
+    {
+      "value": "#1a1714",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:351"
+      ]
+    },
+    {
+      "value": "#1a1a1f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:333"
+      ]
+    },
+    {
+      "value": "#1b2536",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:387"
+      ]
+    },
+    {
+      "value": "#1d1b18",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1648"
+      ]
+    },
+    {
+      "value": "#221c16",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:333"
+      ]
+    },
+    {
+      "value": "#241c16",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:504"
+      ]
+    },
+    {
+      "value": "#2c2925",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:387"
+      ]
+    },
+    {
+      "value": "#2d2923",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:27"
+      ]
+    },
+    {
+      "value": "#2e221a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:333"
+      ]
+    },
+    {
+      "value": "#2f2c28",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:377"
+      ]
+    },
+    {
+      "value": "#2f6a44",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "data-detail.html:1747"
+      ]
+    },
+    {
+      "value": "#302d27",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:925"
+      ]
+    },
+    {
+      "value": "#33485f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:1148"
+      ]
+    },
+    {
+      "value": "#3d2b1f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:54"
+      ]
+    },
+    {
+      "value": "#3f2f22",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:333"
+      ]
+    },
+    {
+      "value": "#4a3527",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:54"
+      ]
+    },
+    {
+      "value": "#4a3724",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:333"
+      ]
+    },
+    {
+      "value": "#4a433a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:28"
+      ]
+    },
+    {
+      "value": "#4a463f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:55"
+      ]
+    },
+    {
+      "value": "#4f7973",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1928"
+      ]
+    },
+    {
+      "value": "#555555",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/practice-runtime.js:3999"
+      ]
+    },
+    {
+      "value": "#564026",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:333"
+      ]
+    },
+    {
+      "value": "#5a4636",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:54"
+      ]
+    },
+    {
+      "value": "#5a6f63",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:48"
+      ]
+    },
+    {
+      "value": "#5d6f95",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:39"
+      ]
+    },
+    {
+      "value": "#5f806c",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:37"
+      ]
+    },
+    {
+      "value": "#647699",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1928"
+      ]
+    },
+    {
+      "value": "#6a93a8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1021"
+      ]
+    },
+    {
+      "value": "#6b4a2e",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:54"
+      ]
+    },
+    {
+      "value": "#6b5238",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:333"
+      ]
+    },
+    {
+      "value": "#6bce8a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "data-detail.html:1699"
+      ]
+    },
+    {
+      "value": "#6d7180",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1928"
+      ]
+    },
+    {
+      "value": "#6f5b3e",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:55"
+      ]
+    },
+    {
+      "value": "#6f675f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/data-render.js:466"
+      ]
+    },
+    {
+      "value": "#6fa085",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#7a5a3a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:1148"
+      ]
+    },
+    {
+      "value": "#7a6244",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:360"
+      ]
+    },
+    {
+      "value": "#7a9b6a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1020"
+      ]
+    },
+    {
+      "value": "#7aa593",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#7d94b8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:50"
+      ]
+    },
+    {
+      "value": "#7ea0bd",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#803320",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:41"
+      ]
+    },
+    {
+      "value": "#81752d",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1928"
+      ]
+    },
+    {
+      "value": "#8472a8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:48"
+      ]
+    },
+    {
+      "value": "#8a7da8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#8a8178",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1042"
+      ]
+    },
+    {
+      "value": "#8a857c",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/bc-chrome.css:524"
+      ]
+    },
+    {
+      "value": "#8a8f96",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:1146"
+      ]
+    },
+    {
+      "value": "#8aa3b6",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#8c6a44",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:352"
+      ]
+    },
+    {
+      "value": "#8eb89f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:375"
+      ]
+    },
+    {
+      "value": "#98938b",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/bc-chrome.css:524"
+      ]
+    },
+    {
+      "value": "#999999",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3717"
+      ]
+    },
+    {
+      "value": "#9a5b4a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:520"
+      ]
+    },
+    {
+      "value": "#9a7820",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1720"
+      ]
+    },
+    {
+      "value": "#9a82c4",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#9a9082",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:48"
+      ]
+    },
+    {
+      "value": "#9b3d2b",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1121"
+      ]
+    },
+    {
+      "value": "#9fb0c4",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:1189"
+      ]
+    },
+    {
+      "value": "#a23f32",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/backend-client.js:54"
+      ]
+    },
+    {
+      "value": "#a89255",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#a8b9d4",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3955"
+      ]
+    },
+    {
+      "value": "#a98a60",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:1143"
+      ]
+    },
+    {
+      "value": "#a9a39a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1921"
+      ]
+    },
+    {
+      "value": "#a9bfb4",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/bc-chrome.css:612"
+      ]
+    },
+    {
+      "value": "#aeb8d3",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:818"
+      ]
+    },
+    {
+      "value": "#b08440",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:1147"
+      ]
+    },
+    {
+      "value": "#b08c5e",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:374"
+      ]
+    },
+    {
+      "value": "#b5852a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1018"
+      ]
+    },
+    {
+      "value": "#b8c4dc",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/bc-chrome.css:615"
+      ]
+    },
+    {
+      "value": "#b8c5b0",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3955"
+      ]
+    },
+    {
+      "value": "#b9a07e",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:358"
+      ]
+    },
+    {
+      "value": "#bb5555",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "data-detail.html:875"
+      ]
+    },
+    {
+      "value": "#bd7e7e",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#bfb4a0",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:271"
+      ]
+    },
+    {
+      "value": "#c07070",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "data-detail.html:876"
+      ]
+    },
+    {
+      "value": "#c0905f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#c0c0c0",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3955"
+      ]
+    },
+    {
+      "value": "#c2a47a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:1142"
+      ]
+    },
+    {
+      "value": "#c2ab82",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:49"
+      ]
+    },
+    {
+      "value": "#c2ad6e",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#c4b08a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1056"
+      ]
+    },
+    {
+      "value": "#c8b89a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1047"
+      ]
+    },
+    {
+      "value": "#c96f52",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#c98b5a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:53"
+      ]
+    },
+    {
+      "value": "#c9bba4",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:32"
+      ]
+    },
+    {
+      "value": "#caa074",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:334"
+      ]
+    },
+    {
+      "value": "#caa24a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:361"
+      ]
+    },
+    {
+      "value": "#cbbea8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:276"
+      ]
+    },
+    {
+      "value": "#cdd6e6",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:387"
+      ]
+    },
+    {
+      "value": "#cfc3a8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:272"
+      ]
+    },
+    {
+      "value": "#cfc8b8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1042"
+      ]
+    },
+    {
+      "value": "#cfe2f0",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:363"
+      ]
+    },
+    {
+      "value": "#d0bb92",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:267"
+      ]
+    },
+    {
+      "value": "#d4805f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:48"
+      ]
+    },
+    {
+      "value": "#d4c4a0",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1047"
+      ]
+    },
+    {
+      "value": "#d4c8a8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:285"
+      ]
+    },
+    {
+      "value": "#d88a3a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:131"
+      ]
+    },
+    {
+      "value": "#d8a778",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:334"
+      ]
+    },
+    {
+      "value": "#d8c6a0",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:49"
+      ]
+    },
+    {
+      "value": "#d99a6c",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:50"
+      ]
+    },
+    {
+      "value": "#d99f5e",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:332"
+      ]
+    },
+    {
+      "value": "#d9ccb4",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:277"
+      ]
+    },
+    {
+      "value": "#d9d9d9",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3955"
+      ]
+    },
+    {
+      "value": "#dca87e",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:53"
+      ]
+    },
+    {
+      "value": "#dce2f0",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:40"
+      ]
+    },
+    {
+      "value": "#dce7df",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:38"
+      ]
+    },
+    {
+      "value": "#ded2bd",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:31"
+      ]
+    },
+    {
+      "value": "#e0a982",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:53"
+      ]
+    },
+    {
+      "value": "#e2d0a8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1047"
+      ]
+    },
+    {
+      "value": "#e3d4b4",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:49"
+      ]
+    },
+    {
+      "value": "#e3f0e3",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:1267"
+      ]
+    },
+    {
+      "value": "#e4d8c3",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:24"
+      ]
+    },
+    {
+      "value": "#e7b58a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:334"
+      ]
+    },
+    {
+      "value": "#e7ddcb",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:951"
+      ]
+    },
+    {
+      "value": "#e8b48c",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:53"
+      ]
+    },
+    {
+      "value": "#e8d9b8",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:266"
+      ]
+    },
+    {
+      "value": "#e8e0cf",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:364"
+      ]
+    },
+    {
+      "value": "#e9c19b",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:334"
+      ]
+    },
+    {
+      "value": "#eab98f",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:383"
+      ]
+    },
+    {
+      "value": "#eaeaea",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:1268"
+      ]
+    },
+    {
+      "value": "#ece5d3",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:47"
+      ]
+    },
+    {
+      "value": "#eee5d5",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:23"
+      ]
+    },
+    {
+      "value": "#efe8d9",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:2845"
+      ]
+    },
+    {
+      "value": "#f0c6a0",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:334"
+      ]
+    },
+    {
+      "value": "#f1c9a5",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:53"
+      ]
+    },
+    {
+      "value": "#f2d2af",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:334"
+      ]
+    },
+    {
+      "value": "#f3b48a",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:35"
+      ]
+    },
+    {
+      "value": "#f3d3b0",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:53"
+      ]
+    },
+    {
+      "value": "#f3efe6",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1105"
+      ]
+    },
+    {
+      "value": "#f4eee2",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:22"
+      ]
+    },
+    {
+      "value": "#f4efe6",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:505"
+      ]
+    },
+    {
+      "value": "#f6dfcf",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "opening-story.html:36"
+      ]
+    },
+    {
+      "value": "#f7f2e6",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom-3d.js:50"
+      ]
+    },
+    {
+      "value": "#f8f4ea",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1056"
+      ]
+    },
+    {
+      "value": "#fef0d9",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:1266"
+      ]
+    },
+    {
+      "value": "#fff8ed",
+      "type": "hex",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:365"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.1)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:520"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.12)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:713"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.22)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1836"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.25)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/practice-feedback-bridge.js:37"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.35)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1680"
+      ]
+    },
+    {
+      "value": "rgba(0,0,0,0.6)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:529"
+      ]
+    },
+    {
+      "value": "rgba(100,100,100,0.05)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1302"
+      ]
+    },
+    {
+      "value": "rgba(100,145,185,0.09)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1051"
+      ]
+    },
+    {
+      "value": "rgba(106,154,123,0.04)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:1165"
+      ]
+    },
+    {
+      "value": "rgba(106,154,123,0.06)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:522"
+      ]
+    },
+    {
+      "value": "rgba(106,154,123,0.10)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:919"
+      ]
+    },
+    {
+      "value": "rgba(106,154,123,0.12)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:1223"
+      ]
+    },
+    {
+      "value": "rgba(106,154,123,0.28)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:1493"
+      ]
+    },
+    {
+      "value": "rgba(106,154,123,0.3)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:367"
+      ]
+    },
+    {
+      "value": "rgba(107,206,138,0.18)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "data-detail.html:1699"
+      ]
+    },
+    {
+      "value": "rgba(107,206,138,0.5)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "data-detail.html:1700"
+      ]
+    },
+    {
+      "value": "rgba(110,85,52,0.10)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1053"
+      ]
+    },
+    {
+      "value": "rgba(112,82,168,0.05)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1301"
+      ]
+    },
+    {
+      "value": "rgba(112,82,168,0.09)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:1106"
+      ]
+    },
+    {
+      "value": "rgba(112,82,168,0.12)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1296"
+      ]
+    },
+    {
+      "value": "rgba(120,90,40,0.07)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1046"
+      ]
+    },
+    {
+      "value": "rgba(149,187,164,0.08)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1861"
+      ]
+    },
+    {
+      "value": "rgba(149,187,164,0.24)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1695"
+      ]
+    },
+    {
+      "value": "rgba(149,187,164,0.25)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/practice-runtime.js:281"
+      ]
+    },
+    {
+      "value": "rgba(154,149,140,0.18)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1887"
+      ]
+    },
+    {
+      "value": "rgba(155,61,43,0.045)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:971"
+      ]
+    },
+    {
+      "value": "rgba(155,61,43,0.35)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:971"
+      ]
+    },
+    {
+      "value": "rgba(167,144,210,0.24)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1696"
+      ]
+    },
+    {
+      "value": "rgba(167,144,210,0.25)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/practice-runtime.js:282"
+      ]
+    },
+    {
+      "value": "rgba(168,73,42,0.04)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "data-detail.html:929"
+      ]
+    },
+    {
+      "value": "rgba(168,73,42,0.15)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:2938"
+      ]
+    },
+    {
+      "value": "rgba(168,73,42,0.18)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3358"
+      ]
+    },
+    {
+      "value": "rgba(168,73,42,0.20)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3355"
+      ]
+    },
+    {
+      "value": "rgba(168,73,42,0.25)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3543"
+      ]
+    },
+    {
+      "value": "rgba(170,140,40,0.1)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1428"
+      ]
+    },
+    {
+      "value": "rgba(190,150,60,0.16)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1720"
+      ]
+    },
+    {
+      "value": "rgba(20,18,16,0.45)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/practice-runtime.js:3955"
+      ]
+    },
+    {
+      "value": "rgba(20,18,16,0.5)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:927"
+      ]
+    },
+    {
+      "value": "rgba(200,120,70,0.08)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1052"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.04)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3460"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.10)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3232"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.14)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:960"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.15)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "data-detail.html:2568"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.20)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:3363"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.25)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "index.html:2333"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.3)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "data-detail.html:2567"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.4)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1071"
+      ]
+    },
+    {
+      "value": "rgba(217,119,87,0.7)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1091"
+      ]
+    },
+    {
+      "value": "rgba(238,229,213,0.92)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:520"
+      ]
+    },
+    {
+      "value": "rgba(239,234,223,0.38)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1918"
+      ]
+    },
+    {
+      "value": "rgba(243,180,138,0.14)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:1119"
+      ]
+    },
+    {
+      "value": "rgba(243,180,138,0.34)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:1149"
+      ]
+    },
+    {
+      "value": "rgba(243,180,138,0.54)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:888"
+      ]
+    },
+    {
+      "value": "rgba(243,180,138,0.62)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:545"
+      ]
+    },
+    {
+      "value": "rgba(243,180,138,0.64)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:460"
+      ]
+    },
+    {
+      "value": "rgba(243,180,138,0.85)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:1119"
+      ]
+    },
+    {
+      "value": "rgba(244,238,226,0.64)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:944"
+      ]
+    },
+    {
+      "value": "rgba(244,238,226,0.82)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:942"
+      ]
+    },
+    {
+      "value": "rgba(244,238,226,0.92)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:87"
+      ]
+    },
+    {
+      "value": "rgba(247,244,237,0.97)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1042"
+      ]
+    },
+    {
+      "value": "rgba(250,247,240,0.93)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1828"
+      ]
+    },
+    {
+      "value": "rgba(255,253,248,0.48)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1951"
+      ]
+    },
+    {
+      "value": "rgba(255,253,248,0.58)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1938"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.02)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:217"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.026)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:780"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.05)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1651"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.055)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:808"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.12)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/bc-chrome.css:293"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.16)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:807"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.2)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/bc-chrome.css:334"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.28)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render-store-bridge.js:398"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.45)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1685"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.56)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:522"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.62)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1094"
+      ]
+    },
+    {
+      "value": "rgba(255,255,255,0.72)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1096"
+      ]
+    },
+    {
+      "value": "rgba(33,31,29,0.92)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/nav-render.js:1232"
+      ]
+    },
+    {
+      "value": "rgba(40,30,20,0.20)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1081"
+      ]
+    },
+    {
+      "value": "rgba(58,75,107,0.12)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "data-detail.html:1465"
+      ]
+    },
+    {
+      "value": "rgba(58,75,107,0.30)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/bc-chrome.css:615"
+      ]
+    },
+    {
+      "value": "rgba(60,35,20,0.18)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "data-detail.html:287"
+      ]
+    },
+    {
+      "value": "rgba(60,40,28,0.10)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1082"
+      ]
+    },
+    {
+      "value": "rgba(74,67,57,0.92)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "shared/metaverse-classroom.js:1105"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.07)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1300"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.1)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1426"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.13)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1166"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.15)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1295"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.25)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:178"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.32)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "data-detail.html:403"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.34)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:969"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.35)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1067"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.45)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:1980"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.52)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:917"
+      ]
+    },
+    {
+      "value": "rgba(77,98,87,0.72)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:917"
+      ]
+    },
+    {
+      "value": "rgba(80,80,80,0.14)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "practice-detail.html:934"
+      ]
+    },
+    {
+      "value": "rgba(93,111,149,0.12)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:878"
+      ]
+    },
+    {
+      "value": "rgba(95,128,108,0.08)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:54"
+      ]
+    },
+    {
+      "value": "rgba(95,128,108,0.20)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:950"
+      ]
+    },
+    {
+      "value": "rgba(95,128,108,0.22)",
+      "type": "functional",
+      "count": 1,
+      "locations": [
+        "opening-story.html:969"
+      ]
+    }
+  ]
+}

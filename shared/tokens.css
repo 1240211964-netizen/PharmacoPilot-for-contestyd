@@ -16,6 +16,7 @@
   --mute-2:       #6f6a64; /* a11y: 原 #7a7470 实测仅 3.98:1(未达标),加深至 4.6:1 on --paper-2；仍略浅于 --mute 保留弱化层级；暗色模式见 bc-chrome.css:520 反向提亮 */
   --rule:         rgba(27, 25, 22, 0.10);
   --rule-2:       rgba(27, 25, 22, 0.18);
+  --rule-3:       rgba(27, 25, 22, 0.28);
 
   /* Brand */
   --amber:        #d97757;
@@ -38,6 +39,10 @@
   --violet-soft:  #a790d2;   /* 类别 C 浅色 */
   --on-dark:      #d6cfbe;   /* 深色面板上的次级文字（stage-deck / 元宇宙等） */
   --on-dark-mute: #c5bda9;   /* 深色面板上的三级 / 弱化文字 */
+  --on-dark-hi:   rgba(255, 253, 247, 0.85);
+  --on-dark-mid:  rgba(255, 253, 247, 0.55);
+  --on-dark-low:  rgba(255, 253, 247, 0.35);
+  --on-dark-veil: rgba(255, 253, 247, 0.10);
 
   /* Tokens */
   --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-xl: 22px; --r-pill: 999px;
@@ -51,31 +56,43 @@
   --serif-en: "Fraunces", "Noto Serif SC", Georgia, serif;                                            /* 西文 / 数字 / 斜体强调 */
   --mono:     "Geist Mono", "Noto Serif SC", "Songti SC", ui-monospace, SFMono-Regular, Menlo, monospace; /* 技术标签 / eyebrow / 代码 / 图例 / 数据记号（拉丁走等宽，中文回退衬线，与 chip 同族） */
 
-  /* Type scale — 全站统一字号刻度；最小地板 12px（中文可读），不再出现 6–11px 的微字 */
-  --fs-2xs:     12px;  /* 最小：微标签 / eyebrow / 角标 */
-  --fs-xs:      13px;  /* 次要元信息 */
-  --fs-sm:      14px;  /* 正文 / 默认阅读尺寸 */
-  --fs-md:      16px;  /* 强调正文 / 小标题 */
-  --fs-lg:      18px;
+  /* Type scale — 视觉刻度，供标题、展示数字和固定比例构图使用；最小地板 12px */
+  --fs-2xs:     12px;  /* 技术微标签 / eyebrow / 角标（绝对地板） */
+  --fs-xs:      13px;  /* 紧凑型次要元信息 */
+  --fs-sm:      14px;  /* 图例 / 状态 / 次要说明 */
+  --fs-md:      16px;  /* 正文 / 表格内容 / 小标题 */
+  --fs-lg:      18px;  /* 强调正文 / 卡片标题 */
   --fs-xl:      22px;
   --fs-2xl:     28px;
   --fs-3xl:     36px;
   --fs-4xl:     48px;
   --fs-hero:    64px;  /* 编辑式大标题 */
   --fs-hero-xl: 84px;  /* 巨号 hero */
+
+  /* Semantic reading roles — 正文/说明/表格/控件优先用角色，不把 12px 微标签当阅读文字 */
+  --text-micro:       12px;  /* 纯技术 ID / 轴刻度 / 装饰序号 */
+  --text-caption:     15px;  /* 图例 / 状态 / 次要元数据 */
+  --text-control:     16px;  /* 导航 / 按钮 / 表单标签 */
+  --text-body:        17px;  /* 正文 / 说明 / 表格内容 */
+  --text-body-strong: 20px;  /* 强调正文 / 关键结论 */
+  --lh-tight:         1.30;
+  --lh-ui:            1.45;
+  --lh-body:          1.65;
 }
 
 /* ============================================================
    排版约定（新增任何文字内容前先读这里，避免再出现"字体不对/太小"）
    ------------------------------------------------------------
-   1. 字号：一律用 var(--fs-*)，禁止裸 px。最小是 --fs-2xs(12px)，
-      不要再写 9/10/11px（<small>/<sub> 等浏览器默认缩小已由本文件兜底）。
-   2. 字体：一律用 var(--sans/--serif-cn/--serif-en/--mono)，
+   1. 字号：正文/说明/表格/控件优先用 var(--text-*)；标题与展示数字用
+      var(--fs-*)。最小 12px，不写 9/10/11px，12px 不承担连续中文说明。
+   2. 拥挤：长中文先换行、再扩容，最后才考虑调整字号层级；不要为了
+      塞进一行而缩小全页文字，也不要把普通标题改成纵排。
+   3. 字体：一律用 var(--sans/--serif-cn/--serif-en/--mono)，
       禁止写裸字体栈或额外 fallback（token 里已含完整 fallback）。
       用途见上方 Fonts 注释；技术标签/图例/eyebrow 用 --mono。
-   3. 颜色：文字色用 var(--ink/--ink-soft/--mute/--mute-2/--amber-deep…)，
+   4. 颜色：文字色用 var(--ink/--ink-soft/--mute/--mute-2/--amber-deep…)，
       禁止裸 hex（A/B/C/D 类别色例外，见各组件）。
-   4. 小组件：图例、eyebrow、折叠按钮等优先复用 bc-chrome.css 里的
+   5. 小组件：图例、eyebrow、折叠按钮等优先复用 bc-chrome.css 里的
       .metric-legend / .u-eyebrow 等类，不要在 HTML 里手写内联 font 样式。
    ============================================================ */
 
@@ -88,6 +105,16 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-feature-settings: "ss01", "cv11";
+}
+
+/* 核心工作页的笔记本可读模式：标题刻度不动，只把低四档映射到可读角色。 */
+body.is-readable-detail {
+  --fs-2xs: var(--text-caption);
+  --fs-xs: var(--text-control);
+  --fs-sm: var(--text-body);
+  --fs-md: var(--text-body-strong);
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
 }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; }
@@ -107,4 +134,7 @@ button { font: inherit; }
 }
 /* <small> 永不低于地板 12px：大字父级里仍按比例缩小，但不会掉到不可读 */
 small { font-size: max(0.85em, var(--fs-2xs)); }
+/* 公式下标仍保留层级，但在核心工作页不许被百分比缩到 12px 以下。 */
+body.is-readable-detail sub,
+body.is-readable-detail sup { font-size: max(0.85em, var(--text-micro)) !important; }
 ::selection { background: var(--amber-soft); color: var(--ink); }

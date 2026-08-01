@@ -4,15 +4,15 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>PharmacoPilot · 教学数据 · 双向能力图谱</title>
-<meta name="description" content="PharmacoPilot 教学数据页:以教师 9 个教学环节与学生 7 个能力维度构建师生双向能力图谱,追踪三时段增量与师生耦合指数,把课堂证据转化为可写回教学环节的改进建议,支持接入真实课堂数据验证。" />
+<meta name="description" content="PharmacoPilot 教学数据页:以教师 9 个教学环节与学生 7 个能力维度构建师生双向能力图谱,比较三种观察口径的前后测分差与环节关联强度及覆盖率,把课堂证据转化为可写回教学环节的改进建议,支持接入真实课堂数据验证。" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23a8492a'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' font-family='Georgia' font-style='italic' fill='%23fffdf7'%3EP%3C/text%3E%3C/svg%3E" />
 <!-- 字体:preconnect + 非阻塞加载(media=print onload),消除原 tokens.css @import 的渲染阻塞 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=4" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=4" />
+<link rel="stylesheet" href="./shared/tokens.css?v=6-readability-floor" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=9-neutral-color" />
 <style>
 /* ============ 教学数据 详情页 ============ */
 
@@ -189,6 +189,7 @@
 
 /* ---- Body: 3 horizontal lanes (teacher / station-line / student) + grid ---- */
 .bi-atlas-body {
+  --atlas-label-col: 124px;
   padding: 28px 36px 24px;
   background:
     linear-gradient(180deg, var(--paper-2) 0, transparent 56px),
@@ -196,7 +197,7 @@
 }
 
 .station-header {
-  display: grid; grid-template-columns: 96px repeat(9, 1fr); gap: 8px;
+  display: grid; grid-template-columns: var(--atlas-label-col) repeat(9, minmax(0, 1fr)); gap: 8px;
   margin-bottom: 8px;
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.06em;
   color: var(--mute); text-align: center;
@@ -216,16 +217,21 @@
 .station-header .stage-post { grid-column: 8 / 11; color: var(--indigo);     border-bottom: 1px dashed var(--indigo);     padding-bottom: 2px; }
 
 .station-numbers {
-  display: grid; grid-template-columns: 96px repeat(9, 1fr); gap: 8px;
+  display: grid; grid-template-columns: var(--atlas-label-col) repeat(9, minmax(0, 1fr)); gap: 8px;
   margin-bottom: 4px;
   font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink); text-align: center;
 }
 .station-numbers .num-cell {
-  padding: 4px 0; font-weight: 600;
+  padding: 8px 6px 10px; min-height: 108px; font-weight: 600;
+  display: flex; flex-direction: column; align-items: center;
 }
 .station-numbers .num-cell .cn {
   font-family: var(--serif-cn); font-weight: 500; font-size: var(--fs-2xs);
-  display: block; margin-top: 2px; color: var(--ink);
+  display: block; width: 100%; max-width: 10em; margin-top: 5px;
+  color: var(--ink); line-height: 1.5; text-align: center;
+  writing-mode: horizontal-tb; text-orientation: mixed;
+  white-space: normal; overflow-wrap: anywhere; line-break: strict;
+  text-wrap: balance; letter-spacing: .01em;
 }
 .station-numbers .num-cell.complete .cn { color: var(--sage); }
 /* .is-hot is set dynamically by data-render.js based on top-2 coupling values
@@ -242,24 +248,28 @@
 
 /* Lane row: avatar/label cell + 9 environment columns of bars */
 .lane {
-  display: grid; grid-template-columns: 96px repeat(9, 1fr); gap: 8px;
+  display: grid; grid-template-columns: var(--atlas-label-col) repeat(9, minmax(0, 1fr)); gap: 8px;
   align-items: stretch; padding: 10px 0;
   border-bottom: 1px dashed var(--rule);
 }
 .lane:last-of-type { border-bottom: 0; }
 .lane-id {
-  display: flex; align-items: center; gap: 10px; padding: 0 4px;
+  display: flex; align-items: center; gap: 8px; padding: 0 6px;
 }
 .lane-id .av {
-  width: 32px; height: 32px; border-radius: 50%;
-  display: grid; place-items: center; font-family: var(--serif-cn);
-  font-size: var(--fs-sm); font-weight: 500; flex-shrink: 0;
+  width: 36px; height: 36px; border-radius: 10px;
+  display: grid; place-items: center; flex-shrink: 0;
 }
 .lane-id .av.t { background: var(--amber-wash); color: var(--amber-deep); }
 .lane-id .av.s { background: var(--sage-soft); color: var(--sage); }
+.lane-id .av svg,
+.student-events .events-id .av svg {
+  width: 20px; height: 20px; fill: none; stroke: currentColor;
+  stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+}
 .lane-id .ll {
   font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 500;
-  line-height: 1.2; color: var(--ink);
+  line-height: 1.35; color: var(--ink); min-width: 0;
 }
 .lane-id .ll small {
   display: block; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
@@ -276,6 +286,9 @@
 }
 .gain:hover { transform: translateY(-1px); box-shadow: 0 6px 14px -8px rgba(60,35,20,.18); }
 .gain.is-near-zero .delta { color: var(--mute-2); }
+.gain.is-unmeasured .fill { height: 0 !important; }
+.gain.is-unmeasured .delta { color: var(--mute-2); background: transparent; }
+.gain.is-negative .fill { background: linear-gradient(180deg, var(--mute-2), var(--mute)); }
 .gain .fill {
   position: absolute; left: 0; right: 0; bottom: 0;
   background: var(--amber);
@@ -287,42 +300,46 @@
   position: relative; z-index: 1;
   font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600;
   color: var(--ink); align-self: center;
-  background: rgba(255,253,247,.85); padding: 1px 5px; border-radius: 3px;
+  background: color-mix(in srgb, var(--ivory) 85%, transparent); padding: 1px 5px; border-radius: 3px;
   letter-spacing: 0.04em;
 }
 .gain.zero { background: var(--paper); border: 1px dashed var(--rule); }
 .gain.zero .delta { color: var(--mute-2); background: transparent; }
 
 /* ============================================================
- * COUPLING v2 · 双时间轴
+ * 教学环节—学习证据关联 · 双时间轴
  * ------------------------------------------------------------
- * .coupling-bridge 是 SVG COUPLING 连线层（唯一暗带），把教师 9 环节连到下方学生 5 节点。
+ * .coupling-bridge 是 SVG 关联连线层（唯一暗带），把教师 9 环节连到下方学生 5 节点。
  * .student-events 是学生轴行（浅底），5 个节点按"产出时机"定位在时间线轴上。
  * （旧版 .exchange-spine 9 列同步 spine 已于 v2 移除）
  * ============================================================ */
 .coupling-bridge {
-  display: grid; grid-template-columns: 96px repeat(9, 1fr); gap: 8px;
-  align-items: stretch; padding: 4px 0 0;
+  display: grid; grid-template-columns: var(--atlas-label-col) repeat(9, minmax(0, 1fr)); gap: 8px;
+  align-items: stretch; padding: 0;
   background: var(--ink); border-radius: 8px 8px 0 0; color: var(--ivory);
   margin: 6px 0 0;
 }
 .coupling-bridge .bridge-id {
-  padding: 6px 4px 0; display: flex; align-items: center; gap: 8px;
-}
-.coupling-bridge .bridge-id .dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--amber);
-  box-shadow: 0 0 0 4px rgba(217,119,87,.2);
+  padding: 0 10px; display: flex; align-items: center;
 }
 .coupling-bridge .bridge-id .ll {
   font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 500;
+  line-height: 1.45; color: color-mix(in oklab, var(--ivory) 88%, var(--ink));
 }
 .coupling-bridge .bridge-id .ll small {
   display: block; font-family: var(--mono); font-size: var(--fs-2xs);
-  color: rgba(255,255,255,.55); margin-top: 1px; letter-spacing: 0.04em;
+  color: color-mix(in oklab, var(--ivory) 55%, var(--ink)); margin-top: 1px;
+  letter-spacing: 0; white-space: nowrap;
 }
+.coupling-bridge .bridge-id .legend-dot {
+  display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+  margin: 0 3px 1px 0; vertical-align: middle;
+}
+.coupling-bridge .bridge-id .legend-dot.is-teacher { background: var(--amber); }
+.coupling-bridge .bridge-id .legend-dot.is-student { background: var(--sage-soft); margin-left: 5px; }
 .coupling-bridge .bridge-track {
   grid-column: 2 / 11;
-  position: relative; height: 88px; overflow: visible;
+  position: relative; height: 56px; overflow: visible;
 }
 .coupling-bridge .bridge-track svg {
   width: 100%; height: 100%; display: block; overflow: visible;
@@ -354,24 +371,23 @@
    "浅—暗—浅"三明治：COUPLING 连线区是唯一暗带，学生行回到浅底，
    让暗带回归"连接通道"的从属地位，纠正视觉重心倒挂。*/
 .student-events {
-  display: grid; grid-template-columns: 96px repeat(9, 1fr); gap: 8px;
+  display: grid; grid-template-columns: var(--atlas-label-col) repeat(9, minmax(0, 1fr)); gap: 8px;
   align-items: stretch; padding: 6px 0 8px;
   background: transparent; color: var(--ink);
   margin: 0 0 12px;
   position: relative;
 }
 .student-events .events-id {
-  padding: 0 4px; display: flex; align-items: center; gap: 10px;
+  padding: 0 6px; display: flex; align-items: center; gap: 8px;
 }
 .student-events .events-id .av {
-  width: 32px; height: 32px; border-radius: 50%;
+  width: 36px; height: 36px; border-radius: 10px;
   background: var(--sage-soft); color: var(--sage);
-  display: grid; place-items: center; font-family: var(--serif-cn);
-  font-size: var(--fs-sm); font-weight: 500; flex-shrink: 0;
+  display: grid; place-items: center; flex-shrink: 0;
 }
 .student-events .events-id .ll {
   font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 500;
-  line-height: 1.2; color: var(--ink);
+  line-height: 1.35; color: var(--ink); min-width: 0;
 }
 .student-events .events-id .ll small {
   display: block; font-family: var(--mono); font-size: var(--fs-2xs);
@@ -408,11 +424,11 @@
   min-height: 84px; position: relative;
   grid-row: 1; z-index: 1;
   border: 1px solid color-mix(in oklab, var(--sage) 34%, var(--rule));
-  box-shadow: 0 1px 2px rgba(27,25,22,.05), 0 8px 18px -14px rgba(27,25,22,.22);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 5%, transparent), 0 8px 18px -14px color-mix(in srgb, var(--ink) 22%, transparent);
   font-family: var(--mono);
   transition: transform .15s, box-shadow .15s;
 }
-.event-node:hover { transform: translateY(-1px); box-shadow: 0 1px 2px rgba(27,25,22,.06), 0 10px 22px -12px rgba(27,25,22,.3); }
+.event-node:hover { transform: translateY(-1px); box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 10px 22px -12px color-mix(in srgb, var(--ink) 30%, transparent); }
 .event-node .node-num {
   font-size: var(--fs-2xs); font-weight: 700; color: var(--sage);
   letter-spacing: 0.06em;
@@ -429,7 +445,7 @@
   margin-top: 2px;
 }
 .event-node.is-baseline .node-delta {
-  background: rgba(255,253,247,.6); color: var(--mute);
+  background: color-mix(in srgb, var(--ivory) 60%, transparent); color: var(--mute);
   font-size: var(--fs-2xs); font-weight: 600;
 }
 /* 实测维度标签 — 让读者看到"每个节点测的是不同维度"，破除"伪轨迹"误读 */
@@ -452,6 +468,8 @@
   border: 1px dashed var(--mute-2); font-weight: 600;
 }
 .event-node.is-predicted .node-dims { color: var(--mute); opacity: 0.7; }
+.event-node.is-missing { opacity: .62; border-style: dashed; }
+.event-node.is-missing .node-delta { background: transparent; color: var(--mute); }
 /* 节点定位（grid-column 决定在 9 环节中的横向位置） */
 .event-node[data-event="EV0"] { grid-column: 2; }   /* 入学基线 · 锚在 env01 列 */
 .event-node[data-event="EV1"] { grid-column: 7; }   /* 课中表现 · 锚在 env06 */
@@ -466,15 +484,34 @@
 }
 /* 证据等级 chip */
 .event-node .node-evidence {
-  position: absolute; top: 6px; right: 6px;
+  position: absolute; top: 8px; right: 8px;
   font-size: var(--fs-2xs); font-weight: 700;
-  width: 14px; height: 14px;
-  display: grid; place-items: center; border-radius: 2px;
-  letter-spacing: 0;
+  width: 18px; height: 18px; box-sizing: border-box;
+  display: grid; place-items: center; border-radius: 4px;
+  line-height: 1; letter-spacing: 0; overflow: hidden;
 }
 .event-node .node-evidence.lv-A { background: var(--sage); color: var(--ivory); }
 .event-node .node-evidence.lv-B { background: var(--amber); color: var(--ivory); }
 .event-node .node-evidence.lv-C { background: var(--mute); color: var(--ivory); }
+.event-node .node-evidence.lv-missing { background: var(--paper-3); color: var(--mute); border: 1px solid var(--rule); }
+.evidence-key {
+  grid-column: 2 / 11; grid-row: 2;
+  display: flex; justify-content: flex-end; align-items: center;
+  flex-wrap: wrap; gap: 6px 14px; padding: 5px 2px 0;
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
+}
+.evidence-key .key-title {
+  color: var(--ink-soft); font-weight: 600; letter-spacing: .06em;
+}
+.evidence-key .key-item { display: inline-flex; align-items: center; gap: 5px; }
+.evidence-key .key-badge {
+  width: 18px; height: 18px; border-radius: 4px;
+  display: inline-grid; place-items: center; flex-shrink: 0;
+  line-height: 1; font-weight: 700; color: var(--ivory);
+}
+.evidence-key .key-badge.lv-A { background: var(--sage); }
+.evidence-key .key-badge.lv-B { background: var(--amber); }
+.evidence-key .key-badge.lv-C { background: var(--mute); }
 /* 跨列 hover 联动：hover 教师某环节 → COUPLING 连到的学生节点同列高亮 */
 .event-node.is-hover-col {
   box-shadow: 0 0 0 2px var(--amber), 0 6px 16px -8px rgba(0,0,0,.5);
@@ -534,6 +571,42 @@
 .ab-chip.is-active { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
 .ab-chip.is-active small { color: rgba(255,255,255,.6); margin-left: 4px; }
 .ab-chip small { color: var(--mute); margin-left: 4px; }
+
+/* ============ 维度评分锚点 popover（点击维度 chip 弹出） ============ */
+.ab-chip.is-dim-tag { cursor: pointer; }
+.ab-chip.is-dim-tag:hover { background: var(--paper-2); }
+.ab-chip.is-dim-tag[aria-expanded="true"] { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+.dim-popover {
+  position: fixed; z-index: 8000; width: min(430px, calc(100vw - 32px));
+  max-height: min(72vh, 560px); overflow-y: auto;
+  background: var(--ivory); border: 1px solid var(--rule-2);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-3);
+  padding: 18px 20px 16px;
+}
+.dim-popover[hidden] { display: none; }
+.dp-head { display: flex; align-items: flex-start; gap: 10px; }
+.dp-id { font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 600; padding: 2px 7px; border-radius: 4px; margin-top: 2px; flex: none; }
+.dp-id.is-teacher { color: var(--amber-deep); border: 1px solid color-mix(in oklab, var(--amber-deep) 40%, var(--rule)); }
+.dp-id.is-student { color: var(--sage); border: 1px solid color-mix(in oklab, var(--sage) 40%, var(--rule)); }
+.dp-head h3 { margin: 0; font-family: var(--serif-cn); font-size: var(--fs-md); line-height: var(--lh-tight); color: var(--ink); }
+.dp-close { margin-left: auto; flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--rule); background: transparent; color: var(--mute); cursor: pointer; font-size: 14px; line-height: 1; }
+.dp-close:hover { color: var(--ink); border-color: var(--rule-3); }
+.dp-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 0; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); }
+.dp-status { padding: 1px 7px; border-radius: 999px; border: 1px solid transparent; font-weight: 600; }
+.dp-status.is-draft { color: var(--gold-deep); border-color: color-mix(in oklab, var(--gold-deep) 35%, transparent); background: color-mix(in oklab, var(--gold-deep) 6%, transparent); }
+.dp-status.is-provisional { color: var(--amber-deep); border-color: color-mix(in oklab, var(--amber-deep) 35%, transparent); background: color-mix(in oklab, var(--amber-deep) 6%, transparent); }
+.dp-status.is-deferred { color: var(--mute); border-color: var(--rule-2); background: var(--paper-2); }
+.dp-signals, .dp-deferred { font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--ink-soft); margin: 12px 0 0; }
+.dp-signals > b { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); font-weight: 600; margin-right: 6px; }
+.dp-note { display: flex; gap: 8px; font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--ink-soft); margin: 10px 0 0; background: var(--paper-2); border-left: 2px solid var(--gold); padding: 8px 10px; border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+.dp-deferred { background: var(--paper-2); border-radius: var(--r-sm); padding: 10px 12px; }
+.dp-levels { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.dp-levels li { display: grid; grid-template-columns: auto auto 1fr; column-gap: 8px; align-items: baseline; padding: 8px 10px; border: 1px solid var(--rule); border-radius: var(--r-sm); }
+.dp-band { font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 700; color: var(--amber-deep); }
+.dp-range { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute-2); }
+.dp-levels li > b { font-size: var(--fs-xs); color: var(--ink); }
+.dp-levels li p { grid-column: 1 / -1; margin: 4px 0 0; font-size: var(--fs-xs); line-height: var(--lh-ui); color: var(--ink-soft); }
+.dp-refs { margin: 14px 0 0; padding-top: 10px; border-top: 1px dashed var(--rule-2); font-family: var(--mono); font-size: var(--fs-2xs); line-height: var(--lh-ui); color: var(--mute); }
 
 /* Lede: three key findings shown ABOVE the chart (was atlas-foot) */
 .atlas-lede {
@@ -703,6 +776,9 @@
   color: var(--amber-deep); margin-right: 6px;
   display: inline-block; width: 24px;
 }
+.fp-crosswalk { width: 100%; border-collapse: collapse; font-family: var(--serif-cn); font-size: var(--fs-2xs); color: var(--ink-soft); }
+.fp-crosswalk th, .fp-crosswalk td { padding: 7px 8px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+.fp-crosswalk th { font-family: var(--mono); color: var(--ink); font-weight: 600; white-space: nowrap; }
 @media (max-width: 960px) {
   .fp-body { grid-template-columns: 1fr; gap: 14px; padding: 18px; }
   .fp-sources { grid-template-columns: 1fr; }
@@ -1015,12 +1091,12 @@
   pointer-events: none;
   background: var(--ink);
   color: var(--ivory);
-  border: 1px solid rgba(255,253,247,.18);
+  border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
   border-radius: 999px;
   padding: 9px 14px;
   font-family: var(--serif-cn);
   font-size: var(--fs-xs);
-  box-shadow: 0 12px 30px -16px rgba(27,25,22,.5);
+  box-shadow: 0 12px 30px -16px color-mix(in srgb, var(--ink) 50%, transparent);
   transition: opacity .2s, transform .2s;
 }
 .data-action-toast.is-show {
@@ -1143,7 +1219,7 @@
    Body rendered by data-render.js · openEnvDrawer(envId). */
 .env-drawer-backdrop {
   position: fixed; inset: 0; z-index: 9000;
-  background: rgba(27, 25, 22, .35);
+  background: color-mix(in srgb, var(--ink) 35%, transparent);
   opacity: 0; transition: opacity .2s;
 }
 .env-drawer-backdrop.is-open { opacity: 1; }
@@ -1241,6 +1317,7 @@
 .ed-section.is-teacher h4 { color: var(--amber-deep); }
 .ed-section.is-student h4 { color: var(--sage); }
 .ed-section.is-coupling h4 { color: var(--indigo); }
+.ed-section.is-rubric h4 { color: var(--ink); }
 .ed-section.is-writeback h4 { color: var(--ink); }
 .ed-section ul {
   margin: 0; padding: 0; list-style: none;
@@ -1266,6 +1343,100 @@
   border-radius: 4px;
 }
 .ed-section .ed-coupling-text b { color: var(--ink); font-weight: 500; }
+
+/* § 8C 维度评分锚点：放在环节抽屉内按需展开，不用 hover 承载五档长文本 */
+.ed-rubric-intro {
+  margin: 0 0 8px;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); line-height: 1.6;
+  color: var(--mute);
+}
+.ed-rubric-list {
+  border-top: 1px solid var(--rule);
+}
+.ed-rubric {
+  border-bottom: 1px solid var(--rule);
+}
+.ed-rubric-summary {
+  list-style: none; cursor: pointer;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto 14px;
+  gap: 10px; align-items: center;
+  padding: 10px 2px;
+  color: var(--ink-soft);
+  transition: color .16s, background .16s;
+}
+.ed-rubric-summary::-webkit-details-marker { display: none; }
+.ed-rubric-summary:hover { color: var(--ink); background: var(--paper-2); }
+.ed-rubric-summary:focus-visible {
+  outline: 2px solid var(--amber-deep); outline-offset: 2px; border-radius: 3px;
+}
+.ed-rubric-title {
+  min-width: 0;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 7px; align-items: baseline;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.35;
+}
+.ed-rubric-title > b {
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--amber-deep);
+}
+.ed-rubric.is-student .ed-rubric-title > b { color: var(--sage); }
+.ed-rubric-title small {
+  grid-column: 2;
+  margin-top: 2px;
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
+  letter-spacing: .04em;
+}
+.ed-rubric-status {
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
+  white-space: nowrap;
+}
+.ed-rubric.is-provisional .ed-rubric-status,
+.ed-rubric.is-deferred .ed-rubric-status { color: var(--amber-deep); }
+.ed-rubric-caret {
+  font-family: var(--mono); font-size: var(--fs-sm); color: var(--mute);
+  transition: transform .18s cubic-bezier(.22,1,.36,1);
+}
+.ed-rubric[open] .ed-rubric-caret { transform: rotate(180deg); }
+.ed-rubric-body {
+  padding: 2px 2px 12px;
+}
+.ed-rubric-signals,
+.ed-rubric-coding,
+.ed-rubric-deferred {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); line-height: 1.55;
+  color: var(--ink-soft); background: var(--paper-2);
+  border-left: 2px solid var(--rule);
+}
+.ed-rubric-signals b,
+.ed-rubric-coding b {
+  display: block; margin-bottom: 2px;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .08em;
+  color: var(--mute);
+}
+.ed-rubric-coding { border-left-color: var(--sage); }
+.ed-rubric-deferred { border-left-color: var(--amber-deep); color: var(--ink-2); }
+.ed-rubric-levels {
+  border-top: 1px dashed var(--rule);
+}
+.ed-rubric-level {
+  display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px;
+  padding: 8px 0; border-bottom: 1px dashed var(--rule);
+}
+.ed-rubric-level:last-child { border-bottom: 0; }
+.ed-rubric-band {
+  font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 700;
+  color: var(--ink); letter-spacing: .05em;
+}
+.ed-rubric-band small {
+  display: block; margin-top: 2px;
+  font-size: var(--fs-2xs); font-weight: 400; letter-spacing: 0; color: var(--mute);
+  white-space: nowrap;
+}
+.ed-rubric-anchor {
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); line-height: 1.55;
+  color: var(--ink-2);
+}
+.ed-rubric-anchor b { display: block; color: var(--ink); font-weight: 500; }
 
 /* X1-X5 5 维耦合分解 */
 .ed-x-breakdown {
@@ -1410,6 +1581,10 @@
 
 @media (max-width: 640px) {
   .env-drawer { width: 100vw; }
+  .ed-rubric-summary { grid-template-columns: minmax(0, 1fr) 14px; }
+  .ed-rubric-status { grid-column: 1; grid-row: 2; white-space: normal; }
+  .ed-rubric-caret { grid-column: 2; grid-row: 1 / span 2; }
+  .ed-rubric-level { grid-template-columns: 82px minmax(0, 1fr); gap: 8px; }
 }
 
 /* hero 单栏：移除右侧状态栏后，slogan 占满整行（覆盖共享的 1.15fr 0.85fr 两栏） */
@@ -1456,7 +1631,8 @@
   .event-node .node-delta { font-size: var(--fs-2xs); padding: 1px 4px; }
   .event-node .node-dims { font-size: var(--fs-2xs); letter-spacing: 0; }
   .event-node .node-when { font-size: var(--fs-2xs); }
-  .event-node .node-evidence { width: 12px; height: 12px; font-size: var(--fs-2xs); top: 4px; right: 4px; }
+  .event-node .node-evidence { width: 18px; height: 18px; top: 6px; right: 6px; line-height: 1; }
+  .evidence-key { justify-content: flex-start; gap: 5px 10px; }
   .ev-span-label { font-size: var(--fs-2xs); padding: 1px 5px; }
 
   /* Lede strip already uses auto-fit, but tighten min for tablet */
@@ -1491,32 +1667,8 @@
   .data-section-h h3 { font-size: var(--fs-2xl); }
 }
 
-/* ============ co / solo 视觉分组 · 教师 9 环节轴 ============
- * is-env-co  = 师生共在（E06/E07）—— amber 顶边、读者首要焦点
- * is-env-solo= 教师独立（E01-E05/E08/E09）—— 教师标记
- * （双时间轴 v2：学生不再有 9 列 lane，故无 is-solo-faded）
- */
-.station-numbers .num-cell.is-env-co {
-  position: relative;
-}
-.station-numbers .num-cell.is-env-co::before {
-  content: ""; position: absolute; left: 14%; right: 14%; top: -2px; height: 2px;
-  background: var(--amber-deep); border-radius: 2px;
-}
-.station-numbers .num-cell.is-env-co::after {
-  content: "师生"; position: absolute; left: 0; right: 0; top: -16px;
-  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em;
-  color: var(--amber-deep); font-weight: 600;
-}
-.station-numbers .num-cell.is-env-solo {
-  position: relative;
-}
-.station-numbers .num-cell.is-env-solo::after {
-  content: "教师"; position: absolute; left: 0; right: 0; top: -16px;
-  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em;
-  color: var(--mute);
-}
-.station-numbers { margin-top: 22px; } /* 留出顶上"师生/教师"小标的空间 */
+/* co / solo 仍作为 KEEP/FIX 与 COUPLING 的底层分类，
+   但不在“教师 9 环节轴”上重复显示角色标记，避免把类型误读为状态。 */
 
 /* "解释·INTERPRET" 区域：新加的 coupling 类型 chip 与 solo 副信号 chip */
 .s-cell .basis-chip.is-coupling {
@@ -1543,26 +1695,26 @@
 .ds-badge {
   display: inline-flex; align-items: center; gap: 6px;
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.06em;
-  background: rgba(255,253,247,.08); color: var(--ivory);
-  border: 1px solid rgba(255,253,247,.18); border-radius: 999px;
+  background: color-mix(in srgb, var(--ivory) 8%, transparent); color: var(--ivory);
+  border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent); border-radius: 999px;
   padding: 3px 10px; cursor: pointer;
   transition: background .15s, border-color .15s;
 }
-.ds-badge:hover { background: rgba(255,253,247,.16); border-color: rgba(255,253,247,.4); }
+.ds-badge:hover { background: color-mix(in srgb, var(--ivory) 16%, transparent); border-color: color-mix(in srgb, var(--ivory) 40%, transparent); }
 .ds-badge .ds-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--mute);
 }
 .ds-badge.is-live .ds-dot { background: #6bce8a; box-shadow: 0 0 0 3px rgba(107,206,138,.18); }
 .ds-badge.is-live { border-color: rgba(107,206,138,.5); }
-.ds-badge .ds-meta { color: rgba(255,253,247,.55); font-size: var(--fs-2xs); }
+.ds-badge .ds-meta { color: color-mix(in srgb, var(--ivory) 55%, transparent); font-size: var(--fs-2xs); }
 
 .ds-drawer {
   position: fixed; right: 24px; top: 96px;
   width: min(520px, calc(100vw - 48px));
   background: var(--ivory); color: var(--ink);
   border: 1px solid var(--ink); border-radius: 12px;
-  box-shadow: 0 18px 48px -16px rgba(27,25,22,.45);
+  box-shadow: 0 18px 48px -16px color-mix(in srgb, var(--ink) 45%, transparent);
   z-index: 50;
 }
 .ds-drawer[hidden] { display: none; }
@@ -1608,17 +1760,16 @@
 }
 </style>
 </head>
-<body>
+<body class="is-readable-detail">
 <script src="./shared/wendao.js?v=3" defer></script>
 <script src="./shared/fanya.js?v=2" defer></script>
 <script src="./shared/live-stats.js?v=1" defer></script>
-<script src="./shared/faq.js?v=1" defer></script>
-<!-- evaluation-framework MUST load before data-render — it provides the dataset & formulas -->
-<script src="./shared/evaluation-framework.js?v=8" defer></script>
-<!-- evaluation-contract: X1-global-coefficient + v2 桥接耦合映射 -->
-<script src="./shared/evaluation-contract.js?v=4" defer></script>
-<script src="./shared/data-render.js?v=13" defer></script>
-<script src="./shared/theory-chips.js?v=32" defer></script>
+<script src="./shared/faq.js?v=2-neutral-color" defer></script>
+<!-- COUPLING 契约先加载；framework 校验 LIVE couplingRubric 时直接复用它。 -->
+<script src="./shared/evaluation-contract.js?v=7-association-summary" defer></script>
+<script src="./shared/evaluation-framework.js?v=14-measurement-contract" defer></script>
+<script src="./shared/data-render.js?v=18-measurement-state" defer></script>
+<script src="./shared/theory-chips.js?v=33-color-token" defer></script>
 <script src="./shared/rerun-bridge.js?v=3" defer></script>
 <script>
 /* ============ Data source drawer wiring ============
@@ -1690,26 +1841,52 @@
       refreshBadge();
     });
     btnDl.addEventListener('click', () => {
-      // 用当前激活的（样本或 LIVE）作为模板下载
-      const buildModeBlock = (mode, dims, getter) => {
-        const v = getter(mode);
-        const out = {};
-        dims.forEach(d => { out[d.id] = +(v?.[d.id] ?? 0).toFixed(2); });
-        return out;
+      // v2 模板始终保留绝对 baseline / current；页面只派生 Δ，不接收 Δ-only 数据。
+      const EC = window.PharmacoPilotEvaluationContract;
+      const buildMeasurementPair = (mode, dims, getter) => {
+        const deltas = getter(mode);
+        const baseline = {};
+        const current = {};
+        dims.forEach(d => {
+          const delta = deltas?.[d.id];
+          if (typeof delta !== 'number' || !Number.isFinite(delta)) {
+            baseline[d.id] = null;
+            current[d.id] = null;
+            return;
+          }
+          const base = delta >= 0 ? Math.min(5, 10 - delta) : Math.max(5, -delta);
+          baseline[d.id] = +base.toFixed(2);
+          current[d.id] = +(base + delta).toFixed(2);
+        });
+        return { baseline, current };
       };
       const sample = {
-        label: '示例 · 我的课程批次',
-        evidenceLevel: 'A',
-        teacher: {
-          cumulative: buildModeBlock('cumulative', EF.TEACHER_DIMS, EF.getActiveTeacherDeltas),
-          weekly:     buildModeBlock('weekly',     EF.TEACHER_DIMS, EF.getActiveTeacherDeltas),
-          single:     buildModeBlock('single',     EF.TEACHER_DIMS, EF.getActiveTeacherDeltas),
+        schemaVersion: EF.LIVE_SCHEMA_VERSION,
+        label: '模板 · 请替换为真实课程批次',
+        evidenceLevel: 'C',
+        measurementMeta: {
+          rubricVersion: 'dimension-rubric-v0.2',
+          taskVersion: 'template-only-not-real',
+          sampleSize: 32,
+          missingRate: 0,
+          raterCount: 2,
         },
-        student: {
-          cumulative: buildModeBlock('cumulative', EF.STUDENT_DIMS, EF.getActiveStudentDeltas),
-          weekly:     buildModeBlock('weekly',     EF.STUDENT_DIMS, EF.getActiveStudentDeltas),
-          single:     buildModeBlock('single',     EF.STUDENT_DIMS, EF.getActiveStudentDeltas),
+        measurements: {
+          teacher: {
+            cumulative: buildMeasurementPair('cumulative', EF.TEACHER_DIMS, EF.getActiveTeacherDeltas),
+            weekly:     buildMeasurementPair('weekly',     EF.TEACHER_DIMS, EF.getActiveTeacherDeltas),
+            single:     buildMeasurementPair('single',     EF.TEACHER_DIMS, EF.getActiveTeacherDeltas),
+          },
+          student: {
+            cumulative: buildMeasurementPair('cumulative', EF.STUDENT_DIMS, EF.getActiveStudentDeltas),
+            weekly:     buildMeasurementPair('weekly',     EF.STUDENT_DIMS, EF.getActiveStudentDeltas),
+            single:     buildMeasurementPair('single',     EF.STUDENT_DIMS, EF.getActiveStudentDeltas),
+          },
         },
+        couplingRubric: Object.fromEntries(['cumulative', 'weekly', 'single'].map(mode => {
+          const block = EF.getActiveCouplingRubric?.(mode) || EC?.SAMPLE_XI_RUBRIC_SCORES?.[mode];
+          return [mode, block ? JSON.parse(JSON.stringify(block)) : { x1: 0, perEnv: {} }];
+        })),
       };
       const json = JSON.stringify(sample, null, 2);
       // 同时写入 textarea 方便直接编辑
@@ -1756,7 +1933,8 @@
       <button type="button" class="ds-close" id="dsClose" aria-label="关闭">×</button>
     </header>
     <p class="ds-hint">
-      粘贴一份按教师 8 维 (T1–T8) × 学生 7 维 (S1–S7) × 三时段 (cumulative / weekly / single) 组织的 JSON。
+      粘贴一份 v2 JSON：教师 8 维与学生 7 维在三个时段都必须保存绝对 <code>baseline / current</code>，系统再派生带正负号的 Δ；未测维度两端都填 <code>null</code>。
+      <code>measurementMeta</code> 必须记录评分标准版本、任务版本、样本量、缺失率和评分者数。学生节点未导入时保持“未测”，不会套样本曲线补值；只有同时提供三时段 <code>couplingRubric</code> 时才计算环节关联。
       校验通过后立即覆盖样本数据；该数据保存在本地浏览器，不上传任何服务器。
     </p>
     <label class="ds-json-lab" for="dsJson">数据 JSON</label>
@@ -1794,9 +1972,7 @@
 <!-- ===== Page hero ===== -->
 <main class="wrap">
   <section class="page-hero">
-    <!-- v2: 移除右侧 hero 状态栏（追踪周期/教师+35.8%/班级+27.0%/耦合+9.5/关注环节）。
-         这些核心数字在下方"成长轨迹"区已完整呈现（COUPLING INDEX +9.5 · +35.8%…+27.0%），hero 不必重复。
-         收为单栏让 slogan 舒展，与教学导航 / 教学实践两页 hero 统一。无 JS 依赖。 -->
+    <!-- hero 不重复输出测量结果；平均分差与关联覆盖率集中在下方测量快照。 -->
     <div class="page-hero-grid is-solo">
       <div>
         <div class="eyebrow">FEATURE 03 · 教学数据</div>
@@ -1841,22 +2017,22 @@
       <span class="lead">指标怎么读 ·</span>
       <span><b>T#</b> 教师 · 教学环节指标</span>
       <span><b>S#</b> 学生 · 能力维度</span>
-      <span><b>COUPLING</b> 师生能力耦合 — 同一改动在教师端 / 学生端的共变强度</span>
-      <span class="dim"><b>↑n</b> 演练增益（设计预演读数 · <b>非</b>真实成效）· 仅作提示，需真实课堂验证</span>
+      <span><b>COUPLING</b> 评价指标耦合信号 — 局部 X2–X5 × 证据系数 × X1 全局系数</span>
+      <span class="dim"><b>Δn</b> 前后分差（可正可负；样本为设计预演读数）· <b>非</b>真实成效</span>
     </div>
 
     <div class="summary-row" data-summary-row>
       <div class="s-cell s" data-summary-role="keep">
         <div class="l">最值得保留 · KEEP</div>
-        <!-- 静态默认对齐契约单一信源（KEEP = co 池中 COUPLING 最强 = 06 课中调控）；data-render.js 会按 LIVE 数据重渲 -->
-        <div class="v"><span class="it" data-slot="num">06</span><small data-slot="name">课中调控</small></div>
-        <div class="d" data-slot="desc">教师 T6 互动调控 ↑6.8 · 学生 S3 利益相关者 ↑5.5 · COUPLING 2.3 师生共在</div>
+        <!-- 静态默认对齐契约单一信源（KEEP = co 池中 COUPLING 最强 = 06 形成性评价与适应性调控）；data-render.js 会按 LIVE 数据重渲 -->
+        <div class="v"><span class="it" data-slot="num">06</span><small data-slot="name">形成性评价与适应性调控</small></div>
+        <div class="d" data-slot="desc">同期观测：教师 T6 ↑6.8 · 学生 S3 ↑5.5；评价指标 COUPLING 2.3</div>
         <svg class="spark" viewBox="0 0 200 36" preserveAspectRatio="none"
-             role="img" aria-label="7 周趋势：本环节维度持续上扬" data-slot="spark">
-          <title data-slot="spark-title">7 周趋势：本环节维度持续上扬</title>
+             role="img" aria-label="当前关联快照，无连续时间序列" data-slot="spark">
+          <title data-slot="spark-title">当前关联快照</title>
           <defs><linearGradient id="data-spark-keep" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4d6257" stop-opacity="0.2"/><stop offset="1" stop-color="#4d6257" stop-opacity="0"/></linearGradient></defs>
-          <path d="M0,30 L20,28 L40,28 L60,24 L80,22 L100,20 L120,16 L140,13 L160,11 L180,8 L200,6 L200,36 L0,36 Z" fill="url(#data-spark-keep)" data-slot="spark-area"/>
-          <polyline points="0,30 20,28 40,28 60,24 80,22 100,20 120,16 140,13 160,11 180,8 200,6" fill="none" stroke="#4d6257" stroke-width="1.5" data-slot="spark-line"/>
+          <path d="M0,16 L200,16 L200,36 L0,36 Z" fill="url(#data-spark-keep)" data-slot="spark-area"/>
+          <polyline points="0,16 200,16" fill="none" stroke="#4d6257" stroke-width="1.5" data-slot="spark-line"/>
         </svg>
         <div class="basis">
           <div class="basis-lab">解释 · INTERPRET</div>
@@ -1869,29 +2045,29 @@
       </div>
       <div class="s-cell" data-summary-role="fix">
         <div class="l">最需要修正 · FIX</div>
-        <div class="v"><span class="it" data-slot="num">07</span><small data-slot="name">评价与画像</small></div>
-        <div class="d" data-slot="desc">量规 R-04 立场迁移度 2 处歧义 · 评分者一致性偏低 · 政策证据引用不足</div>
+        <div class="v"><span class="it" data-slot="num">07</span><small data-slot="name">表现性评价与学习成效诊断</small></div>
+        <div class="d" data-slot="desc">评价标准 R-04 立场迁移度 2 处歧义 · 评分者一致性偏低 · 政策证据引用不足</div>
         <!-- y-range mirrors KEEP (6–30) so the two trend lines are visually comparable -->
         <svg class="spark" viewBox="0 0 200 36" preserveAspectRatio="none"
-             role="img" aria-label="7 周趋势：本环节量规歧义未解" data-slot="spark">
-          <title data-slot="spark-title">7 周趋势：本环节量规歧义未解</title>
+             role="img" aria-label="当前关联快照，局部评价标准歧义未解" data-slot="spark">
+          <title data-slot="spark-title">当前关联快照</title>
           <defs><linearGradient id="data-spark-fix" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d97757" stop-opacity="0.2"/><stop offset="1" stop-color="#d97757" stop-opacity="0"/></linearGradient></defs>
-          <path d="M0,6 L20,8 L40,11 L60,13 L80,16 L100,20 L120,22 L140,24 L160,26 L180,28 L200,30 L200,36 L0,36 Z" fill="url(#data-spark-fix)" data-slot="spark-area"/>
-          <polyline points="0,6 20,8 40,11 60,13 80,16 100,20 120,22 140,24 160,26 180,28 200,30" fill="none" stroke="#a8492a" stroke-width="1.5" data-slot="spark-line"/>
+          <path d="M0,16 L200,16 L200,36 L0,36 Z" fill="url(#data-spark-fix)" data-slot="spark-area"/>
+          <polyline points="0,16 200,16" fill="none" stroke="#a8492a" stroke-width="1.5" data-slot="spark-line"/>
         </svg>
         <div class="basis">
           <div class="basis-lab">解释 · INTERPRET</div>
           <div class="basis-list" data-slot="chips">
             <span class="basis-chip">证据反馈与评价诊断 <small>T7 教师维度</small></span>
             <span class="basis-chip">政策证据识读 <small>S2 学生维度</small></span>
-            <span class="basis-chip">量规歧义建议修正 <small>Biggs 1996</small></span>
+            <span class="basis-chip">评价标准歧义建议修正 <small>Biggs 1996</small></span>
           </div>
         </div>
       </div>
       <div class="s-cell x is-emphasized" data-summary-role="next">
         <div class="l">下一轮优先动作 · NEXT</div>
         <div class="v"><span class="it" data-slot="count">4</span><small>条建议待写回</small></div>
-        <div class="d" data-slot="desc">写回 07 评价与画像 · 08 复盘与决策 · 06 课中调控 · 03 知识与误区</div>
+        <div class="d" data-slot="desc">写回 07 表现性评价与学习成效诊断 · 08 反思性实践与教学改进 · 06 形成性评价与适应性调控 · 03 教学内容结构化与前概念诊断</div>
         <!-- 4 dots = 4 queued actions. First (filled amber, larger) = 立即；others = 本周 / 暂缓 / 后续（静态默认与 data-render.js renderNextSpark 运行时输出一致） -->
         <svg class="spark" viewBox="0 0 200 36"
              role="img" aria-label="4 条建议待写回">
@@ -1922,7 +2098,7 @@
     <div class="evidence-strip" id="evidenceStrip">
       <div class="evidence-strip-head">
         <span class="tag">数据源与证据等级 · DATA SOURCE</span>
-        <span class="lvl">本页数字<b>源自 <span class="ev-badge">B</span> 级证据</b>（虚拟演练，非真实课堂）· COUPLING 按证据等级作置信折扣(×0.8)，能力增量按面值呈现 · 接入真实课堂升级 A · <a href="#evaluationFramework" style="color:var(--amber-deep);text-decoration:underline dashed;text-underline-offset:3px;">查看完整评价框架 →</a></span>
+        <span class="lvl">本页数字<b>源自 <span class="ev-badge">B</span> 级证据</b>（虚拟演练，非真实课堂）· 这是设计的预演与复盘，<b>不是真实教学成效</b>；真实成效以泛雅接入的真实课堂为准 · COUPLING 按证据等级作置信折扣(×0.8)，能力增量按面值呈现 · 接入真实课堂升级 A · <a href="#evaluationFramework" style="color:var(--amber-deep);text-decoration:underline dashed;text-underline-offset:3px;">查看完整评价框架 →</a></span>
       </div>
       <div class="evidence-grid" id="evidenceGrid">
         <!-- 4 cards rendered by renderDataSources() -->
@@ -1935,15 +2111,14 @@
     <div class="data-section-h">
       <div class="num">i<small>SECTION · 9 个教学环节 × 双向</small></div>
       <div>
-        <h3>把教师 9 环节 × 学生 5 节点摊开来，看 COUPLING 怎么连。</h3>
-        <p><b>先说这是什么</b>：本页是<b>教学设计的"预演"</b>——把一节课放进 <b>32 人虚拟班跑 17 轮</b>，看这套设计<b>预期</b>会触发什么师生变化，用来在真上课前打磨设计；它<b>不是</b>对真实学习成效的测量（真实评估待泛雅接入）。所以下面的数字读作"<b>设计在演练里的表现</b>"，而非"学生真的提升了多少"。</p>
-        <p style="margin-top:8px;"><b>双时间轴</b>：教师轴按 <b>9 个教学环节</b>展开（过程性 — 描述教师在做什么）；学生轴按 <b>5 个产出节点</b>展开（结果性 — 描述学生何时产生可观测证据）。两轴<b>节奏不同、不强行同列对齐</b>。中央 COUPLING 是 N 条连线（教师环节 → 学生节点），线粗 = 耦合强度，虚线 = 次要连线。所有数字 <b>仅作"提示"与"关联"</b>——改动建议先到教学实践重跑验证。完整评价框架见下方面板。</p>
+        <h3>教师 9 环节中，哪些已有评价证据可以连接学生节点？</h3>
+        <p class="atlas-intro">这是教学设计预演，不是真实学习成效测量。线越粗表示关联越强，虚线表示次要关联；数字仅作改进提示。</p>
       </div>
     </div>
 
     <div class="bi-atlas">
       <div class="bi-atlas-head">
-        <div class="title">双向能力图谱 · 双时间轴<small>教师 9 环节 → 学生 5 节点 · 7 周累计 · 17 次模拟课堂</small></div>
+        <div class="title">双向能力图谱 · 双时间轴<small>9 个教师环节（5 个有局部耦合评价指标）→ 5 个学生节点（当前连到 E1–E3）</small></div>
         <div class="toggle-row">
           <span class="toggle-chip is-active">累计增量</span>
           <span class="toggle-chip">本周增量</span>
@@ -1956,69 +2131,70 @@
       <div class="atlas-lede">
         <div class="lede-h">
           <span class="tag">7 周累计 · 三条值得关注的 COUPLING 连线</span>
-          <span class="hint">下方图谱：教师 9 环节 → COUPLING → 学生 5 节点 · 建议先看这三条 ↓</span>
+          <span class="hint">下方图谱：5 个有评价指标的环节 → E1–E3；E0 基线与 E4 待接入节点不画线 ↓</span>
         </div>
         <div class="lede-row">
           <!-- 静态默认与 data-render.js renderLedeCards(cumulative) 运行时输出一致：按 COUPLING 强度排序 06 / 07 / 03 -->
           <div class="lede-card">
             <div class="lc-h">
-              <span class="num">06<span class="cn">课中调控</span></span>
+              <span class="num">06<span class="cn">形成性评价与适应性调控</span></span>
               <span class="env">→ E1 · 2.3</span>
             </div>
             <div class="lc-b">
-              <span class="t-em">教师 课中调控 +6.1</span>
-              与 <span class="s-em">学生 课中表现 +2.2</span>
-              形成 主关联，COUPLING 2.3。建议优先验证。
+              同期观测（不作为公式输入）：<span class="t-em">教师 形成性评价与适应性调控 +6.1</span>；
+              <span class="s-em">学生 课中表现 +2.2</span>。<br>
+              评价指标计算：X4=3.0 × 证据系数 B=0.80 × 全局系数 X1(3.0)=0.95 = 2.3，形成主关联。建议优先验证。
             </div>
           </div>
           <div class="lede-card">
             <div class="lc-h">
-              <span class="num">07<span class="cn">评价与画像</span></span>
+              <span class="num">07<span class="cn">表现性评价与学习成效诊断</span></span>
               <span class="env">→ E2 · 2.3</span>
             </div>
             <div class="lc-b">
-              <span class="t-em">教师 评价与画像 +3.6</span>
-              与 <span class="s-em">学生 评价画像 +1.6</span>
-              形成 主关联，COUPLING 2.3。建议优先验证。
+              同期观测（不作为公式输入）：<span class="t-em">教师 表现性评价与学习成效诊断 +3.6</span>；
+              <span class="s-em">学生 评价画像 +1.6</span>。<br>
+              评价指标计算：mean(X4=3.0, X5=3.0) × 证据系数 B=0.80 × 全局系数 X1(3.0)=0.95 = 2.3，形成主关联。建议优先验证。
             </div>
           </div>
           <div class="lede-card">
             <div class="lc-h">
-              <span class="num">03<span class="cn">知识与误区</span></span>
+              <span class="num">03<span class="cn">教学内容结构化与前概念诊断</span></span>
               <span class="env">→ E1 · 1.9</span>
             </div>
             <div class="lc-b">
-              <span class="t-em">教师 知识与误区 +4.7</span>
-              与 <span class="s-em">学生 课中表现 +2.2</span>
-              形成 主关联，COUPLING 1.9。建议优先验证。
+              同期观测（不作为公式输入）：<span class="t-em">教师 教学内容结构化与前概念诊断 +4.7</span>；
+              <span class="s-em">学生 课中表现 +2.2</span>。<br>
+              评价指标计算：X2=2.5 × 证据系数 B=0.80 × 全局系数 X1(3.0)=0.95 = 1.9，形成主关联。建议优先验证。
             </div>
           </div>
         </div>
       </div>
 
       <div class="bi-atlas-body">
-        <!-- Evaluation legend · 教师 8 维 + 学生 7 维（与 framework §2 一致） -->
-        <div class="ability-row" role="group" aria-label="教师评分维度（图例）">
+        <!-- Evaluation legend · 教师 8 维 + 学生 7 维（与 framework §2 一致）
+             chip 为按钮：点击弹出该维度的评分锚点与参考文献（data-render.js bindDimRubricPopovers） -->
+        <div class="ability-row" role="group" aria-label="教师评分维度（图例，点击维度查看评法）">
           <span class="row-label is-teacher">评分维度 · 教师 8 维</span>
-          <span class="ab-chip is-dim-tag is-teacher">T1 学情解释</span>
-          <span class="ab-chip is-dim-tag is-teacher">T2 目标对齐</span>
-          <span class="ab-chip is-dim-tag is-teacher">T3 情境转译</span>
-          <span class="ab-chip is-dim-tag is-teacher">T4 问题链</span>
-          <span class="ab-chip is-dim-tag is-teacher">T5 流程节奏</span>
-          <span class="ab-chip is-dim-tag is-teacher">T6 互动调控</span>
-          <span class="ab-chip is-dim-tag is-teacher">T7 证据反馈</span>
-          <span class="ab-chip is-dim-tag is-teacher">T8 AI 协同</span>
+          <button type="button" class="ab-chip is-dim-tag is-teacher" data-dim="T1" aria-expanded="false">T1 学情解释</button>
+          <button type="button" class="ab-chip is-dim-tag is-teacher" data-dim="T2" aria-expanded="false">T2 目标对齐</button>
+          <button type="button" class="ab-chip is-dim-tag is-teacher" data-dim="T3" aria-expanded="false">T3 情境转译</button>
+          <button type="button" class="ab-chip is-dim-tag is-teacher" data-dim="T4" aria-expanded="false">T4 问题链</button>
+          <button type="button" class="ab-chip is-dim-tag is-teacher" data-dim="T5" aria-expanded="false">T5 流程节奏</button>
+          <button type="button" class="ab-chip is-dim-tag is-teacher" data-dim="T6" aria-expanded="false">T6 互动调控</button>
+          <button type="button" class="ab-chip is-dim-tag is-teacher" data-dim="T7" aria-expanded="false">T7 证据反馈</button>
+          <button type="button" class="ab-chip is-dim-tag is-teacher" data-dim="T8" aria-expanded="false">T8 反思改进</button>
         </div>
 
-        <div class="ability-row" role="group" aria-label="学生评分维度（图例）">
+        <div class="ability-row" role="group" aria-label="学生评分维度（图例，点击维度查看评法）">
           <span class="row-label is-student">评分维度 · 学生 7 维</span>
-          <span class="ab-chip is-dim-tag is-student">S1 工具迁移</span>
-          <span class="ab-chip is-dim-tag is-student">S2 政策识读</span>
-          <span class="ab-chip is-dim-tag is-student">S3 利益相关者</span>
-          <span class="ab-chip is-dim-tag is-student">S4 风险合规</span>
-          <span class="ab-chip is-dim-tag is-student">S5 方案可行性</span>
-          <span class="ab-chip is-dim-tag is-student">S6 协作论证</span>
-          <span class="ab-chip is-dim-tag is-student">S7 反思迁移</span>
+          <button type="button" class="ab-chip is-dim-tag is-student" data-dim="S1" aria-expanded="false">S1 工具迁移</button>
+          <button type="button" class="ab-chip is-dim-tag is-student" data-dim="S2" aria-expanded="false">S2 政策识读</button>
+          <button type="button" class="ab-chip is-dim-tag is-student" data-dim="S3" aria-expanded="false">S3 利益相关者</button>
+          <button type="button" class="ab-chip is-dim-tag is-student" data-dim="S4" aria-expanded="false">S4 风险合规</button>
+          <button type="button" class="ab-chip is-dim-tag is-student" data-dim="S5" aria-expanded="false">S5 方案设计与可行性评估</button>
+          <button type="button" class="ab-chip is-dim-tag is-student" data-dim="S6" aria-expanded="false">S6 协作论证</button>
+          <button type="button" class="ab-chip is-dim-tag is-student" data-dim="S7" aria-expanded="false">S7 反思调节</button>
         </div>
 
         <!-- Stage header (课前 5 / 课中 1 / 课后 3) -->
@@ -2029,69 +2205,69 @@
           <span class="stage-post">07–09 课后 · 沉淀</span>
         </div>
 
-        <!-- 9 个教学环节 · 列宽限制 2 字 tiny 标签 · 与 framework.ENVIRONMENTS[i].short 对应：
-             学情→学情诊断 / 目标→目标与量规 / 知识→知识与误区 / 案例→案例与证据 /
-             任务→任务链设计 / 调控→课中调控 / 画像→评价与画像 / 复盘→复盘与决策 / 资产→资产沉淀
-             .is-hot 由 data-render.js 按 top-3 coupling 动态打 -->
+        <!-- 9 个教学环节使用 Pharmacopilot 0801 规范全称；长标题在各列内居中换行，避免单列竖排拉高整幅图。
+             .is-hot 由 data-render.js 按 top-3 coupling 动态打。 -->
         <div class="station-numbers">
           <span class="head-l">环节</span>
-          <span class="num-cell">01<span class="cn">学情</span></span>
-          <span class="num-cell">02<span class="cn">目标</span></span>
-          <span class="num-cell">03<span class="cn">知识</span></span>
-          <span class="num-cell">04<span class="cn">案例</span></span>
-          <span class="num-cell">05<span class="cn">任务</span></span>
-          <span class="num-cell">06<span class="cn">调控</span></span>
-          <span class="num-cell">07<span class="cn">画像</span></span>
-          <span class="num-cell">08<span class="cn">复盘</span></span>
-          <span class="num-cell">09<span class="cn">资产</span></span>
+          <span class="num-cell">01<span class="cn">学习者与教学情境分析</span></span>
+          <span class="num-cell">02<span class="cn">预期学习结果与评价证据设计</span></span>
+          <span class="num-cell">03<span class="cn">教学内容结构化与前概念诊断</span></span>
+          <span class="num-cell">04<span class="cn">真实性学习情境与资源设计</span></span>
+          <span class="num-cell">05<span class="cn">学习活动与教学支架设计</span></span>
+          <span class="num-cell">06<span class="cn">形成性评价与适应性调控</span></span>
+          <span class="num-cell">07<span class="cn">表现性评价与学习成效诊断</span></span>
+          <span class="num-cell">08<span class="cn">反思性实践与教学改进</span></span>
+          <span class="num-cell">09<span class="cn">教学知识建构与专业共享</span></span>
         </div>
 
         <!-- Teacher lane · 9 个教学环节 -->
         <div class="lane">
           <div class="lane-id">
-            <div class="av t">师</div>
-            <div class="ll">教师 · 本节教师<small>+35.8% 累计</small></div>
+            <div class="av t" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="7.5" cy="7" r="2.7"/><path d="M3.5 19c.4-3.4 1.8-5.2 4-5.2s3.7 1.8 4.1 5.2"/><path d="M13.5 5.5h7v9h-7"/><path d="m15.5 9.6 1.3 1.3 2.1-2.5"/></svg>
+            </div>
+            <div class="ll">教师轴<small>+3.6 / 10 · 已测 8/8</small></div>
           </div>
-          <div class="gain t" title="01 学情诊断 · +1.2">
+          <div class="gain t" title="01 学习者与教学情境分析 · +1.2">
             <span class="fill" style="height: 12%"></span>
             <span class="delta">+1.2</span>
           </div>
-          <div class="gain t" title="02 目标与量规 · +1.8">
+          <div class="gain t" title="02 预期学习结果与评价证据设计 · +1.8">
             <span class="fill" style="height: 18%"></span>
             <span class="delta">+1.8</span>
           </div>
-          <div class="gain t" title="03 知识与误区 · +2.4">
+          <div class="gain t" title="03 教学内容结构化与前概念诊断 · +2.4">
             <span class="fill" style="height: 24%"></span>
             <span class="delta">+2.4</span>
           </div>
-          <div class="gain t" title="04 案例与证据 · +4.8">
+          <div class="gain t" title="04 真实性学习情境与资源设计 · +4.8">
             <span class="fill" style="height: 48%"></span>
             <span class="delta">+4.8</span>
           </div>
-          <div class="gain t" title="05 任务链设计 · +2.2">
+          <div class="gain t" title="05 学习活动与教学支架设计 · +2.2">
             <span class="fill" style="height: 22%"></span>
             <span class="delta">+2.2</span>
           </div>
-          <div class="gain t" title="06 课中调控 · +3.0">
+          <div class="gain t" title="06 形成性评价与适应性调控 · +3.0">
             <span class="fill" style="height: 30%"></span>
             <span class="delta">+3.0</span>
           </div>
-          <div class="gain t" title="07 评价与画像 · +6.4">
+          <div class="gain t" title="07 表现性评价与学习成效诊断 · +6.4">
             <span class="fill" style="height: 64%"></span>
             <span class="delta">+6.4</span>
           </div>
-          <div class="gain t" title="08 复盘与决策 · +3.8">
+          <div class="gain t" title="08 反思性实践与教学改进 · +3.8">
             <span class="fill" style="height: 38%"></span>
             <span class="delta">+3.8</span>
           </div>
-          <div class="gain t" title="09 资产沉淀 · +1.6">
+          <div class="gain t" title="09 教学知识建构与专业共享 · +1.6">
             <span class="fill" style="height: 16%"></span>
             <span class="delta">+1.6</span>
           </div>
         </div>
 
         <!-- ============================================================
-             COUPLING v2 · 双时间轴
+             教学环节—学习证据关联 · 双时间轴
              ------------------------------------------------------------
              改造说明：旧版是 9 列同步 spine（学生 lane 也是 9 列），强行把
              教师独立环节（E01-E05 课前）也按列伪造学生增量。新版改为：
@@ -2103,14 +2279,13 @@
              ============================================================ -->
         <div class="coupling-bridge" data-version="v2-dual-timeline">
           <div class="bridge-id">
-            <span class="dot"></span>
-            <div class="ll">COUPLING<small>教师环节 → 学生节点</small></div>
+            <div class="ll">环节—证据关联<small><i class="legend-dot is-teacher"></i>教学 <span aria-hidden="true">→</span><i class="legend-dot is-student"></i>学习证据</small></div>
           </div>
           <div class="bridge-track" id="couplingBridgeTrack">
-            <!-- viewBox: 900 (9 cols × 100) × 88 (track height) · 由 JS renderCouplingBridge() 重绘
+            <!-- viewBox: 900 (9 cols × 100) × 56 (track height) · 由 JS renderCouplingBridge() 重绘
                  Sankey 式 S 形曲线：首尾竖直切线 C x1,H/2 x2,H/2 x2,H · 同节点入线扇形展开 -->
-            <svg viewBox="0 0 900 88" preserveAspectRatio="none" role="img"
-                 aria-label="COUPLING 连线图：教师 9 个教学环节通过若干条连线连到学生 5 个产出节点；最强连线为 06 课中调控 → E1 课中表现。每条连线的强度见各节点 tooltip。">
+            <svg viewBox="0 0 900 56" preserveAspectRatio="none" role="img"
+                 aria-label="教学环节与学习证据关联图将在统一评价指标契约加载后绘制；EV0 基线与 EV4 待接入节点不画线。">
               <defs>
                 <linearGradient id="bridgeFlow" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stop-color="#d97757"/>
@@ -2118,26 +2293,7 @@
                   <stop offset="1" stop-color="#4d6257"/>
                 </linearGradient>
               </defs>
-              <!-- 次要 COUPLING（细虚线 sage · 先画退背景） -->
-              <path class="bridge-path is-secondary" d="M 150 0 C 150 44, 838 44, 838 88" stroke-width="0.9" opacity="0.3"/>
-              <path class="bridge-path is-secondary" d="M 250 0 C 250 44, 632 44, 632 88" stroke-width="1.0" opacity="0.32"/>
-              <path class="bridge-path is-secondary" d="M 350 0 C 350 44, 644 44, 644 88" stroke-width="1.0" opacity="0.31"/>
-              <path class="bridge-path is-secondary" d="M 450 0 C 450 44, 656 44, 656 88" stroke-width="0.95" opacity="0.3"/>
-              <!-- 主 COUPLING（amber→sage 渐变 S 曲线） -->
-              <path class="bridge-path is-primary" d="M 150 0 C 150 44, 650 44, 650 88" stroke="url(#bridgeFlow)" stroke-width="2.0" opacity="0.55"/>
-              <path class="bridge-path is-primary" d="M 250 0 C 250 44, 527 44, 527 88" stroke="url(#bridgeFlow)" stroke-width="2.6" opacity="0.69"/>
-              <path class="bridge-path is-primary" d="M 350 0 C 350 44, 542 44, 542 88" stroke="url(#bridgeFlow)" stroke-width="2.5" opacity="0.68"/>
-              <path class="bridge-path is-primary" d="M 450 0 C 450 44, 558 44, 558 88" stroke="url(#bridgeFlow)" stroke-width="2.4" opacity="0.64"/>
-              <path class="bridge-path is-primary" d="M 550 0 C 550 44, 573 44, 573 88" stroke="url(#bridgeFlow)" stroke-width="3.6" opacity="0.85"/>
-              <path class="bridge-path is-primary" d="M 650 0 C 650 44, 650 44, 650 88" stroke="url(#bridgeFlow)" stroke-width="2.9" opacity="0.73"/>
-              <path class="bridge-path is-primary" d="M 750 0 C 750 44, 750 44, 750 88" stroke="url(#bridgeFlow)" stroke-width="2.2" opacity="0.6"/>
-              <!-- 端点圆点 -->
-              <circle class="bridge-endpoint-t" cx="250" cy="2.5" r="2.2"/><circle class="bridge-endpoint-s" cx="527" cy="85.5" r="2.2"/>
-              <circle class="bridge-endpoint-t" cx="350" cy="2.5" r="2.1"/><circle class="bridge-endpoint-s" cx="542" cy="85.5" r="2.1"/>
-              <circle class="bridge-endpoint-t" cx="450" cy="2.5" r="2.0"/><circle class="bridge-endpoint-s" cx="558" cy="85.5" r="2.0"/>
-              <circle class="bridge-endpoint-t" cx="550" cy="2.5" r="2.6"/><circle class="bridge-endpoint-s" cx="573" cy="85.5" r="2.6"/>
-              <circle class="bridge-endpoint-t" cx="650" cy="2.5" r="2.4"/><circle class="bridge-endpoint-s" cx="650" cy="85.5" r="2.4"/>
-              <circle class="bridge-endpoint-t" cx="750" cy="2.5" r="1.9"/><circle class="bridge-endpoint-s" cx="750" cy="85.5" r="1.9"/>
+              <desc>默认不写死任何连线；data-render.js 只使用 evaluation-contract.js 的评价指标结果绘制。</desc>
             </svg>
           </div>
         </div>
@@ -2145,8 +2301,10 @@
         <!-- ============ 学生轴 · 5 个产出节点 ============ -->
         <div class="student-events" id="studentEvents">
           <div class="events-id">
-            <div class="av">班</div>
-            <div class="ll">学生 · 26 级<small>+27.0% · 5 节点实测</small></div>
+            <div class="av" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="2.6"/><circle cx="16.5" cy="8.5" r="2.1"/><path d="M3.5 19c.4-3.4 2-5.2 4.5-5.2s4.1 1.8 4.5 5.2"/><path d="M13.2 14.2c2.9-.7 5.8.9 6.3 4.8"/></svg>
+            </div>
+            <div class="ll">学生轴 · 5 节点<small>+3.0 / 10 · 已测 6/7</small></div>
           </div>
 
           <!-- 时间线轴：5 节点串成时间推进，空档填跨度标签（坐标系同 bridge-track）-->
@@ -2159,33 +2317,33 @@
           </div>
 
           <!-- E0 入学基线 · 锚在 env01 列 · 标识为「课前外」 -->
-          <div class="event-node is-baseline" data-event="EV0" title="E0 入学基线 · 第 1 周课前 · 32 卷前测">
+          <div class="event-node is-baseline" data-event="EV0" title="E0 虚拟演练基线 · 第 1 周课前 · 32 卷；真实入学前测待接入">
             <span class="node-num">E0</span>
             <span class="node-name">入学基线</span>
             <span class="node-delta">基线</span>
             <span class="node-dims">7 维基线</span>
             <span class="node-when">第 1 周</span>
-            <span class="node-evidence lv-A" title="证据等级 A · 入学前测">A</span>
+            <span class="node-evidence lv-B" title="证据等级 B · 中强证据" aria-label="证据等级 B：虚拟演练与行为记录">B</span>
           </div>
 
-          <!-- E1 课中表现 · 锚在 env06 课中调控 -->
+          <!-- E1 课中表现 · 锚在 env06 形成性评价与适应性调控 -->
           <div class="event-node" data-event="EV1" title="E1 课中表现 · 第 7 周课中 · 任务卡 + 互动热图">
             <span class="node-num">E1</span>
             <span class="node-name">课中表现</span>
             <span class="node-delta">+2.2</span>
             <span class="node-dims">S3·S6·S2</span>
             <span class="node-when">第 7 周·课中</span>
-            <span class="node-evidence lv-B" title="证据等级 B · 任务卡 + 话语编码">B</span>
+            <span class="node-evidence lv-B" title="证据等级 B · 中强证据" aria-label="证据等级 B：中强证据">B</span>
           </div>
 
-          <!-- E2 评价画像 · 锚在 env07 表现性评价 -->
-          <div class="event-node" data-event="EV2" title="E2 评价画像 · 课后 1-3 天 · 作品 + 量规">
+          <!-- E2 评价画像 · 锚在 env07 表现性评价与学习成效诊断 -->
+          <div class="event-node" data-event="EV2" title="E2 评价画像 · 课后 1-3 天 · 作品 + 评价标准">
             <span class="node-num">E2</span>
             <span class="node-name">评价画像</span>
             <span class="node-delta">+1.6</span>
             <span class="node-dims">S2·S4·S5</span>
             <span class="node-when">课后 1-3 天</span>
-            <span class="node-evidence lv-B" title="证据等级 B · 作品评估">B</span>
+            <span class="node-evidence lv-B" title="证据等级 B · 中强证据" aria-label="证据等级 B：中强证据">B</span>
           </div>
 
           <!-- E3 反思迁移 · 锚在 env08 复盘前后 -->
@@ -2195,7 +2353,7 @@
             <span class="node-delta">+0.9</span>
             <span class="node-dims">S7·S1</span>
             <span class="node-when">课后 7 天</span>
-            <span class="node-evidence lv-B" title="证据等级 B · 反思文本 + 版本对比">B</span>
+            <span class="node-evidence lv-B" title="证据等级 B · 中强证据" aria-label="证据等级 B：中强证据">B</span>
           </div>
 
           <!-- E4 迁移测试 · 锚在 env09 列 · +30d 外延 · C 级证据 → 预测/待验证样式 -->
@@ -2205,7 +2363,14 @@
             <span class="node-delta">≈+2.7</span>
             <span class="node-dims">综合 7 维</span>
             <span class="node-when">+30d · 待验证</span>
-            <span class="node-evidence lv-C" title="证据等级 C · 待真实课堂接入">C</span>
+            <span class="node-evidence lv-C" title="证据等级 C · 弱证据" aria-label="证据等级 C：弱证据，待验证">C</span>
+          </div>
+
+          <div class="evidence-key" role="note" aria-label="A、B、C 证据等级说明">
+            <span class="key-title">证据等级</span>
+            <span class="key-item"><b class="key-badge lv-A">A</b>强证据 · 真实课堂与多源材料</span>
+            <span class="key-item"><b class="key-badge lv-B">B</b>中强证据 · 虚拟演练与行为/版本记录</span>
+            <span class="key-item"><b class="key-badge lv-C">C</b>弱证据 · 单一日志或作品，待验证</span>
           </div>
         </div>
       </div>
@@ -2215,7 +2380,7 @@
         <summary class="fp-summary">
           <span class="fp-tag">评价框架 · FRAMEWORK</span>
           <span class="fp-preview">
-            10 分制 · 教师 8 维 × 9 环节 + 学生 7 维 × 5 节点 · COUPLING(env→event) = √(T<sub>Δ</sub>×Event<sub>Δ</sub>) × pathStrength × decay × syncCoef · 15 项数据源
+            10 分制 · 教师 8 维 × 9 环节 + 学生 7 维 × 5 节点 · COUPLING(env) = mean(X2–X5 适用评价指标) × 证据系数 × X1 全局系数 · 15 项数据源
           </span>
           <span class="fp-caret" aria-hidden="true">⌄</span>
         </summary>
@@ -2234,13 +2399,25 @@
     <div class="data-section-h">
       <div class="num">ii<small>SECTION · 下一轮改进队列</small></div>
       <div>
-        <h3>这里不是大屏、也不是成效测量，<br/>是<span class="it">教学设计预演工作台</span>。</h3>
-        <p><b>把一节课的设计放进虚拟班反复演练，再把"值得保留 / 该修 / 下一步"写回 9 环节</b>——这是设计的<b>预演与复盘</b>，不是给真实教学打分；真实学习成效以泛雅接入的真实课堂为准。每一条建议都含问题来源、证据、建议动作与写回位置——只有点击"更新本课实践包"、"进入教学实践重跑"或"写入资产库"，这一轮才真正闭环。教学导航的方法论框架是上游设计工具，不接收单节课反馈。</p>
+        <!-- 标题只回答本节要解决的问题（对齐另两节的写法）。
+             原句「不是大屏、也不是成效测量，是…」是页面级定位、且靠否定定义自己；
+             证据口径已归入「数据源与证据等级」带，此处不再重复。 -->
+        <h3>看完数据，<span class="it">下一轮</span>先改这几处。</h3>
+        <!-- 说明只补界面看不出的那一件事：建议是系统提的，采纳与否由教师定。
+             四个字段由下方卡片列头承载；闭环条件下沉到按钮区；证据口径归入证据等级带。 -->
+        <p>系统按证据强度排出建议，采纳、改写或暂缓由你决定。</p>
       </div>
     </div>
 
+    <!-- 闭环条件：从区块头下沉到此处（贴着按钮说，而不是在开头预告）。
+         队列内有 8 组按钮，这行只出现一次，避免逐条重复。 -->
+    <div class="metric-legend" role="note" aria-label="闭环条件说明">
+      <span class="lead">怎样才算闭环 ·</span>
+      <span>点击 <b>写入资产库</b> / <b>更新本课实践包</b> / <b>进入教学实践重跑</b> 之一，本轮才真正写回</span>
+    </div>
+
     <div class="queue-list">
-      <!-- Item 01 — 写回 05 任务链设计 -->
+      <!-- Item 01 — 写回 05 学习活动与教学支架设计 -->
       <div class="queue-item is-priority">
         <span class="queue-prio is-p1">P1</span>
         <div class="queue-field">
@@ -2249,7 +2426,7 @@
         </div>
         <div class="queue-field">
           <span class="lbl">证据 · EVIDENCE</span>
-          <span class="v">7 周内 17 次模拟，分歧锚点出现时学生协作论证表达 <b>+4.2</b>；同期教师问题链设计能力 <b>+5.7</b>，COUPLING 1.8（§iii 轨迹 W5 拐点同步上扬）。</span>
+          <span class="v">7 周内 17 次模拟，分歧锚点出现时学生协作论证表达 <b>+4.2</b>；同期教师问题链设计能力 <b>+5.7</b>。评价指标 X2=2.5，经 B 级证据系数与 X1 全局系数折算，COUPLING 为 <b>1.9</b>。</span>
         </div>
         <div class="queue-field">
           <span class="lbl">建议动作 · ACTION</span>
@@ -2257,7 +2434,7 @@
         </div>
         <div class="queue-field">
           <span class="lbl">写回位置 · WRITE-BACK</span>
-          <span class="v"><span class="env">05</span> 任务链设计<small class="queue-writeback-sync">同步至本课实践包 + 资产库 · 问题链模板</small></span>
+          <span class="v"><span class="env">05</span> 学习活动与教学支架设计<small class="queue-writeback-sync">同步至本课实践包 + 资产库 · 问题链模板</small></span>
         </div>
         <div class="queue-field is-verify">
           <span class="lbl">验证设计 · VERIFY</span>
@@ -2281,7 +2458,7 @@
         </div>
         <div class="queue-field">
           <span class="lbl">证据 · EVIDENCE</span>
-          <span class="v">虚拟班级 32 人中沉默学生占比 25%，集中在"药企背景"画像；06 课中调控环节教师增量 <b>+6.4</b> 但学生立场覆盖偏窄。</span>
+          <span class="v">虚拟班级 32 人中沉默学生占比 25%，集中在"药企背景"画像；06 形成性评价与适应性调控环节教师增量 <b>+6.4</b> 但学生立场覆盖偏窄。</span>
         </div>
         <div class="queue-field">
           <span class="lbl">建议动作 · ACTION</span>
@@ -2289,7 +2466,7 @@
         </div>
         <div class="queue-field">
           <span class="lbl">写回位置 · WRITE-BACK</span>
-          <span class="v"><span class="env">06</span> 课中调控<small class="queue-writeback-sync">同步至本课实践包 · stage iii 分组提示词</small></span>
+          <span class="v"><span class="env">06</span> 形成性评价与适应性调控<small class="queue-writeback-sync">同步至本课实践包 · stage iii 分组提示词</small></span>
         </div>
         <div class="queue-field is-verify">
           <span class="lbl">验证设计 · VERIFY</span>
@@ -2304,33 +2481,33 @@
         </div>
       </div>
 
-      <!-- Item 03 — 更新本课实践包 · 07 评价与画像 -->
+      <!-- Item 03 — 更新本课实践包 · 07 表现性评价与学习成效诊断 -->
       <div class="queue-item">
         <span class="queue-prio is-p2">P2</span>
         <div class="queue-field">
           <span class="lbl">问题来源 · SOURCE</span>
-          <span class="v">教学实践 · 量规歧义 R-04<br/><b>立场迁移度缺少可观测锚点</b></span>
+          <span class="v">教学实践 · 评价标准歧义 R-04<br/><b>立场迁移度缺少可观测锚点</b></span>
         </div>
         <div class="queue-field">
           <span class="lbl">证据 · EVIDENCE</span>
-          <span class="v">5 类评审中评价专家提出该维度无 3 级量规；07 评价与画像环节学生政策证据识读 <b>+3.4</b> 但评分一致性偏低。</span>
+          <span class="v">5 类评审中评价专家提出该维度无 3 级评价标准；07 表现性评价与学习成效诊断环节学生政策证据识读 <b>+3.4</b> 但评分一致性偏低。</span>
         </div>
         <div class="queue-field">
           <span class="lbl">建议动作 · ACTION</span>
-          <span class="v">补充<b>3 级行为锚点量规</b>（如"分组前后引用的政策条款是否升级"），并写入下一版评价证据。</span>
+          <span class="v">补充<b>3 级行为锚点评价标准</b>（如"分组前后引用的政策条款是否升级"），并写入下一版评价证据。</span>
         </div>
         <div class="queue-field">
           <span class="lbl">写回位置 · WRITE-BACK</span>
-          <span class="v"><span class="env">07</span> 评价与画像<small class="queue-writeback-sync">同步至本课实践包 评价证据 + 资产库 · 量规</small></span>
+          <span class="v"><span class="env">07</span> 表现性评价与学习成效诊断<small class="queue-writeback-sync">同步至本课实践包 评价证据 + 资产库 · 评价标准</small></span>
         </div>
         <div class="queue-field is-verify">
           <span class="lbl">验证设计 · VERIFY</span>
-          <span class="v">修订量规实验：下轮同时运行 3 级锚点版本 vs 现有量规，对比评分者间一致性（κ 系数）和学生政策引用密度，分离量规设计效应与任务说明效应。</span>
+          <span class="v">评价标准修订实验：下轮同时运行 3 级锚点版本 vs 现有评价标准，对比评分者间一致性（κ 系数）和学生政策引用密度，分离评价标准设计效应与任务说明效应。</span>
         </div>
         <div class="queue-actions">
           <span class="src-tag">优先级 · 中 · 建议在下一轮试错前完成</span>
           <button type="button" class="q-btn is-primary">更新本课实践包 →</button>
-          <button type="button" class="q-btn">写入资产库 · 量规</button>
+          <button type="button" class="q-btn">写入资产库 · 评价标准</button>
           <button type="button" class="q-btn">进入教学实践重跑</button>
           <button type="button" class="q-btn is-ghost">暂缓</button>
         </div>
@@ -2345,7 +2522,7 @@
         </div>
         <div class="queue-field">
           <span class="lbl">证据 · EVIDENCE</span>
-          <span class="v">4 利益方 + 政策证据 + 立场迁移量规的结构，已在 17 次模拟中稳定复用；09 资产沉淀环节增量 <b>+1.6/+1.0</b>，可作模板候选。</span>
+          <span class="v">4 利益方 + 政策证据 + 立场迁移评价维度的结构，已在 17 次模拟中稳定复用；09 教学知识建构与专业共享环节增量 <b>+1.6/+1.0</b>，可作模板候选。</span>
         </div>
         <div class="queue-field">
           <span class="lbl">建议动作 · ACTION</span>
@@ -2353,7 +2530,7 @@
         </div>
         <div class="queue-field">
           <span class="lbl">写回位置 · WRITE-BACK</span>
-          <span class="v"><span class="env">09</span> 资产沉淀<small class="queue-writeback-sync">同步至个人教学资产库</small></span>
+          <span class="v"><span class="env">09</span> 教学知识建构与专业共享<small class="queue-writeback-sync">同步至个人教学资产库</small></span>
         </div>
         <div class="queue-field is-verify">
           <span class="lbl">验证设计 · VERIFY</span>
@@ -2375,73 +2552,31 @@
 <section class="traj-section">
   <div class="wrap">
   <div class="data-section-h is-dark">
-    <div class="num">iii<small>SECTION · 7 周轨迹</small></div>
+    <div class="num">iii<small>SECTION · 测量快照</small></div>
     <div>
-      <h3>放在<span class="it">时间线</span>上看，<br/>三条曲线<span class="it">在第 5 周</span>开始合拍。</h3>
-      <p><b>这是 17 轮演练叠出的预期轨迹（非真实课堂）。</b>第 5 周引入<b>05 任务链设计 · 问题链</b>新工作流后，三条线开始同步上扬——师生能力耦合曲线（白色实线）的斜率在那之后是之前的 2.4 倍。这一关联<b>建议</b>到真实课堂（泛雅）验证。</p>
+      <h3>先看<span class="it">前后差异</span>，<br/>再看关联证据的<span class="it">强度与覆盖</span>。</h3>
+      <p><b>这是虚拟演练推演快照，不是真实课堂轨迹。</b>教师与学生均报告已测维度的平均绝对分差；环节关联报告均值与覆盖率，不把 5 个环节机械相加，也不虚构连续时间曲线。</p>
     </div>
   </div>
 
   <div class="trajectory">
     <div class="traj-head-row">
-      <h5>师生双向能力 <span class="it">指数</span> · 7 周</h5>
-      <div class="meta">COUPLING INDEX <b>+9.5</b> · 第 1 周入学测 vs 第 7 周末综合测 · 5 个关注环节</div>
+      <h5>师生测量 <span class="it">快照</span></h5>
+      <div class="meta">环节—证据关联均值 <b>1.9 / 4</b> · 覆盖 <b>5/9</b> 环节 · 第 1 周入学测 vs 第 7 周末综合测</div>
     </div>
     <div class="traj-chart">
-      <svg viewBox="0 0 1180 200" preserveAspectRatio="none"
-           role="img" aria-label="设计预演的预期轨迹（17 轮演练，非真实课堂）：教师 +35.8%、学生决策 +27.0%、师生耦合 +9.5，三条曲线第 5 周开始合拍">
-        <title>师生双向能力 · 预演预期轨迹</title>
-        <desc>设计预演的预期轨迹（17 轮虚拟班演练，非真实课堂测量）：教师教学设计能力 +35.8%、学生药事管理决策能力 +27.0%、师生能力耦合 +9.5。三条曲线在第 5 周引入"05 任务链设计 · 问题链"工作流后开始合拍。</desc>
-        <defs>
-          <linearGradient id="data-traj-grad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stop-color="#d97757" stop-opacity="0.32"/>
-            <stop offset="1" stop-color="#d97757" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <!-- baseline grid -->
-        <g stroke="rgba(255,255,255,0.08)" stroke-dasharray="2,4">
-          <line x1="0" y1="50" x2="1180" y2="50"/>
-          <line x1="0" y1="100" x2="1180" y2="100"/>
-          <line x1="0" y1="150" x2="1180" y2="150"/>
-        </g>
-        <!-- area under teacher curve -->
-        <path d="M0,140 C100,135 180,124 250,118 C340,110 400,98 480,92 C570,82 640,68 720,58 C800,48 880,38 960,28 C1040,20 1100,14 1180,8 L1180,200 L0,200 Z" fill="url(#data-traj-grad)"/>
-        <!-- teacher line -->
-        <polyline points="0,130 100,124 200,114 300,104 400,90 500,76 600,62 700,48 800,38 900,28 1000,20 1100,12 1180,8"
-                  fill="none" stroke="#e8a070" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
-        <!-- student line -->
-        <polyline points="0,158 100,154 200,148 300,140 400,130 500,116 600,102 700,90 800,78 900,68 1000,58 1100,52 1180,48"
-                  fill="none" stroke="#94b0a2" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
-        <!-- exchange bold white -->
-        <polyline points="0,170 100,162 200,148 300,134 400,114 500,90 600,72 700,58 800,46 900,34 1000,26 1100,18 1180,12"
-                  fill="none" stroke="#fffdf7" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
-        <!-- week labels -->
-        <g fill="rgba(255,253,247,0.4)" font-family="ui-monospace" font-size="12">
-          <text x="0" y="193">w1</text>
-          <text x="180" y="193">w2</text>
-          <text x="360" y="193">w3</text>
-          <text x="540" y="193">w4</text>
-          <text x="720" y="193">w5</text>
-          <text x="900" y="193">w6</text>
-          <text x="1140" y="193">w7</text>
-        </g>
-        <!-- inflection annotation at w5 -->
-        <g>
-          <line x1="720" y1="0" x2="720" y2="200" stroke="rgba(217,119,87,0.3)" stroke-dasharray="3,4"/>
-          <rect x="730" y="2" width="220" height="22" fill="rgba(217,119,87,0.15)" rx="3"/>
-          <text x="738" y="17" font-family="ui-monospace" font-size="12" fill="#f1cdb9" letter-spacing="0.05em">
-            ▲ W5 · 引入 05 任务链设计工作流
-          </text>
-        </g>
-        <!-- end dot -->
-        <circle cx="1180" cy="12" r="5" fill="#fffdf7"/>
-        <circle cx="1180" cy="12" r="11" fill="#fffdf7" fill-opacity="0.18"/>
+      <svg viewBox="0 0 1180 220" preserveAspectRatio="none" role="img" aria-label="虚拟演练推演快照：教师平均分差加3.6分，学生已测六维平均分差加3.0分，环节关联均值1.9分，覆盖5/9环节">
+        <title>虚拟演练推演快照</title>
+        <g fill="var(--ivory)" opacity=".45" font-family="ui-monospace" font-size="12"><text x="20" y="51">教师平均分差</text><text x="20" y="111">学生平均分差</text><text x="20" y="171">关联均值 / 4</text></g>
+        <g fill="var(--ivory)" opacity=".08"><rect x="260" y="36" width="800" height="18" rx="4"/><rect x="260" y="96" width="800" height="18" rx="4"/><rect x="260" y="156" width="800" height="18" rx="4"/></g>
+        <line x1="660" y1="30" x2="660" y2="120" stroke="var(--ivory)" opacity=".42"/>
+        <rect x="660" y="36" width="144" height="18" rx="4" fill="var(--amber-soft)"/><rect x="660" y="96" width="120" height="18" rx="4" fill="var(--sage)"/><rect x="260" y="156" width="380" height="18" rx="4" fill="var(--ivory)"/>
       </svg>
     </div>
     <div class="traj-legend">
-      <span class="l-t"><i></i>新教师教学能力 +35.8%</span>
-      <span class="l-s"><i></i>药事管理决策能力 +27.0%</span>
-      <span class="l-x"><i></i>师生能力耦合 COUPLING +9.5</span>
+      <span class="l-t"><i></i>教师已测维度平均分差 +3.6 / 10</span>
+      <span class="l-s"><i></i>学生已测维度平均分差 +3.0 / 10</span>
+      <span class="l-x"><i></i>环节—证据关联 1.9 / 4 · 覆盖 5/9</span>
     </div>
   </div>
   </div>
@@ -2520,6 +2655,10 @@
     <a class="ed-action" id="envDrawerAction" href="./practice-detail.html#stage-iii">→ 进入教学实践重跑此环节</a>
   </footer>
 </aside>
+
+<!-- 维度评分锚点 popover：内容由 data-render.js bindDimRubricPopovers() 按 framework §8C 填充，
+     静态默认 hidden（fail-closed） -->
+<section class="dim-popover" id="dimPopover" hidden role="dialog" aria-modal="false" aria-labelledby="dimPopoverTitle"></section>
 
 </body>
 </html>

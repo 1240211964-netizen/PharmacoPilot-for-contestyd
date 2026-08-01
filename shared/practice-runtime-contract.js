@@ -1,12 +1,12 @@
 /*
- * PharmacoPilot · Practice Runtime Contract v1.0
+ * PharmacoPilot · Practice Runtime Contract v2.0
  * ------------------------------------------------------------
  * 教学实践（practice-detail.html）的运行时契约。
  *
  * 与 nav-stations-contract 同级，但角色不同：
- *   · nav  侧解决「一节课怎么备」 → 输出 plan.md（9 个教学环节产物）。
- *   · practice 侧解决「这份 plan.md 怎么在虚拟班跑一遍，再把可复用片段
- *     写回到对应的 9 个教学环节里去」→ 输出 KeyMoment / ReviewCandidate / ReusableAsset。
+ *   · nav 侧解决「一节课怎么备」，practice 不把它作为本页生成输入。
+ *   · practice 侧从课程/班级/课时/章节与九环节设计摘要生成完整实践包，
+ *     再在虚拟班跑一遍并把可复用片段按共同的九环节标签归位。
  *
  * 不重复造存储——所有持久化与跨页广播都走 PharmacoPilotStore。
  * 不重复造数据源——本契约只定义：
@@ -22,7 +22,7 @@
 (function attachPracticeContract(global) {
   "use strict";
 
-  const VERSION = "practice-v1";
+  const VERSION = "practice-v2";
 
   // ============================================================
   // 1. 3 阶段状态机
@@ -38,17 +38,17 @@
       en: "GENERATE",
       anchor: "#stage-i",
       reads: {
-        store: ["artifacts[*]", "agendas", "zpdAnchors"],
-        meaning: "读取 nav 已沉淀的 9 个教学环节 plan.md 片段，合成课堂实践包。空场时回落示例剧本。",
+        inputs: ["course", "class", "session", "chapter", "designBriefs.env01-env09"],
+        meaning: "教师确认九环节课堂教学设计摘要后，由本地模型展开完整课堂实践包；导航页不是本阶段的数据源。",
       },
       produces: {
-        practicePack: "{ tasks, roles, rubric, citations } — 待试错的实践包",
+        practicePack: "{ env01…env09 } — 可编辑、可分环节重生成并导出 DOCX/PDF/MD/ZIP 的完整实践包",
       },
       consumedBy: ["ii"],
     },
     {
       // 旧 i/ii/iii 三阶段（simulate/capture/review）合并为「试错+证据」单一阶段。
-      // 同时承载：A · 五路学科审校；B · 虚拟班仿真记录 + 风险信号 + 量规歧义。
+      // 同时承载：A · 五路学科审校；B · 虚拟班仿真记录 + 风险信号 + 评价标准歧义。
       id: "ii",
       key: "trial-evidence",
       seq: "ii",
@@ -57,7 +57,8 @@
       anchor: "#stage-ii",
       reads: { from: "i.practicePack", plan: "store.artifacts" },
       produces: {
-        comments: "Comment[] — 五路学科审校建议，可编辑为修订候选并由教师判断",
+        comments: "Comment[] — 五路学科审校建议；证据出现前只作为观察焦点，不允许进入候选或形成教师判断",
+        observationFocus: "审校建议压缩出的 3 个观察重点；用于指导教师看仿真，不构成采纳决定",
         eventStream: "时间步进的 beats 数组（教师/Agent/学生发言 + 沉默标记）",
         keyMoments: "KeyMoment[] — 3 到 5 条仿真记录，每条含时间戳和可引用片段；只建议关联，不自动验证",
         participation: "32 学生发言计数 + 教师讲/学生说/停顿三段比例",
@@ -181,10 +182,13 @@
       liveReview: "PracticeLiveReview? — 本机模型单卡审校结果；含原文摘录、稿件修订号、模型与提示词版本",
     },
     decisionRules: {
-      supportedNeedsEvidence: "支持/不支持至少关联一条仿真记录；否则只能选证据不足",
+      preEvidenceReadOnly: "证据出现前只允许阅读审校、调整目标环节和标记观察点；state 必须保持 pending，candidateMode 必须保持 null，decision 必须保持 pending",
+      postEvidenceSingleDecision: "至少出现一条 KeyMoment 后，教师只回答一次如何处理建议；界面将该动作映射到 candidateMode、evidenceLinks 与 decision，修改编辑器和暂不修改原因按需展开",
+      supportedNeedsEvidence: "按建议修改或调整后修改必须关联至少一条仿真记录；没有相关记录时只能暂不修改并记录证据不足",
       teacherAuthority: "系统只建议关联，不自动宣布验证结论",
       writebackGate: "仅教师确认支持的候选可按目标环节打包写回",
       anchorGate: "模型批注仅在摘录通过逐字或规范化定位门禁后标记为已锚定；旧修订批注不得进入候选",
+      schemaStable: "COMMENT_SCHEMA 字段保持不变；本次只改变决策时序与界面位置，不改变审计记录的数据形状",
     },
   };
 
@@ -374,6 +378,7 @@
     "不得让模拟课堂退化为「自动答题剧本」；事件流必须如实记录 Agent 检测与教师实际动作。",
     '不得让关键时刻退化为打分；只能输出"标记 + 引用 + 写回建议"，不出分数。',
     '不得让学科审校退化为“赞/踩”；必须可编辑、可选目标环节、可关联仿真记录并保留教师判断。',
+    "不得在仿真证据出现前改变 Comment.state / candidateMode / decision；审校在此时只产生观察焦点。",
     '不得让写回地图退化为"再存一份归档"；每个 Asset 必须显式落到 nav 某站某 slot，且通过 PharmacoPilotStore 广播。',
     "不得绕过 PharmacoPilotStore 自建持久化；practice 与 nav 必须共用同一份 state。",
     "不得创建无目标站的资产；ASSET_TARGETS 表未列出的 slot 一律拒绝写回。",

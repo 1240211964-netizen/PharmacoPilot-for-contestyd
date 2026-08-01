@@ -1,6 +1,6 @@
 /* ============================================================
  *  虚拟教室 · 真 3D 渲染器  metaverse-classroom-3d.js   (2026-06-02)
- *  Three.js (CDN, ESM via importmap) 渲染的"立场教室":
+ *  Three.js（本地 ESM via importmap）渲染的"立场教室":
  *   - 真 3D 房间 + 软阴影 + 暖色教室，自由镜头(环视/缩放/聚焦)
  *   - 32 个程序化 3D 角色(肤色/发型/体态/服装因人而异)
  *   - 头顶实时表情(发言/想说/焦虑/走神) + 名牌 + 发言气泡
@@ -9,13 +9,14 @@
  *
  *  仿真大脑：window.MVCore（shared/mv-classroom-core.js）
  *  挂载点：#mv-classroom（practice-detail.html · stage-ii · 子段 B）
- *  失败回退：WebGL/CDN 不可用 → window.MV2D.mount()（2.5D 渲染器）
+ *  失败回退：WebGL/本地模块不可用 → window.MV2D.mount()（2.5D 渲染器）
  * ============================================================ */
 (function () {
   "use strict";
 
   const MOUNT_ID = "mv-classroom";
   const THREE_VER = "0.160.0";
+  const CONTEXT_RECOVERY_MS = 3000;
 
   /* ---------- 0 · 能力探测 / 回退 ---------- */
   function hasWebGL() {
@@ -24,14 +25,38 @@
       return !!(window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl")));
     } catch (e) { return false; }
   }
+  function setLifecycle(state, reason) {
+    const detail = { renderer: "3d", state, reason: reason ? String(reason) : "" };
+    window.__MV3D_STATUS = state;
+    window.__MV3D_PENDING = state === "pending" || state === "recovering";
+    window.__MV3D_ACTIVE = state === "active";
+    window.__MV3D_FAILURE_REASON = detail.reason;
+    const mount = document.getElementById(MOUNT_ID);
+    if (mount) {
+      mount.dataset.mvRenderer = (state === "active" || state === "recovering") ? "3d" : (state === "fallback" ? "2.5d" : "pending");
+      mount.dataset.mvRendererStatus = state;
+      if (detail.reason) mount.dataset.mvRendererReason = detail.reason;
+      else delete mount.dataset.mvRendererReason;
+    }
+    try { window.dispatchEvent(new CustomEvent("mv:status", { detail })); } catch (e) {}
+  }
   function fallback2D(reason) {
+    setLifecycle("fallback", reason);
+    window.PharmacoPilotMV3D = null;
+    if (window.PharmacoPilotMV && window.PharmacoPilotMV.renderer === "3d") window.PharmacoPilotMV = null;
     console.warn("[MV3D] 回退到 2.5D 教室：" + reason);
     let tries = 0;
     (function wait() {
       if (window.MV2D && window.MV2D.mount) { window.MV2D.mount(); return; }
       if (tries++ < 60) setTimeout(wait, 50);
+      else setLifecycle("failed", String(reason) + "；2.5D 回退渲染器未就绪");
     })();
   }
+  window.PharmacoPilotMV3DControl = {
+    retry() {
+      try { window.location.reload(); } catch (e) { window.location.href = window.location.href; }
+    },
+  };
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ---------- 1 · 小工具 ---------- */
@@ -59,7 +84,7 @@
    * ============================================================ */
   async function start() {
     const mount = document.getElementById(MOUNT_ID);
-    if (!mount) return;                 // 没有挂载点
+    if (!mount) { setLifecycle("absent", "未找到 3D 教室挂载点"); return; }
     if (!window.MVCore) return fallback2D("MVCore 未就绪");
     if (!hasWebGL()) return fallback2D("WebGL 不可用");
 
@@ -69,24 +94,29 @@
       ({ OrbitControls } = await import("three/addons/controls/OrbitControls.js"));
       ({ CSS2DRenderer, CSS2DObject } = await import("three/addons/renderers/CSS2DRenderer.js"));
       try { ({ RoomEnvironment } = await import("three/addons/environments/RoomEnvironment.js")); } catch (e2) {}
-    } catch (e) { return fallback2D("Three.js CDN 加载失败 " + e); }
+    } catch (e) { return fallback2D("Three.js 本地模块加载失败：" + (e && e.message ? e.message : e)); }
 
-    window.__MV3D_ACTIVE = true;
-    const MV = window.MVCore;
-    await MV.loadAgents();   // 加载 32-agent 决策数据（失败也能跑：仅 SCRIPT 段）
-
-    buildUI(mount);
-    const app = new Classroom(THREE, OrbitControls, CSS2DRenderer, CSS2DObject, mount, RoomEnvironment);
-    app.init();
-    window.PharmacoPilotMV3D = app;
-    // 兼容旧 hook（证据流联动）
-    window.PharmacoPilotMV = window.PharmacoPilotMV || {
-      getT: () => app.simT,
-      seek: (t) => app.seek(t),
-      keyMoments: () => app.keyMoments(),
-      onTime: (cb) => app.onTime(cb),
-    };
-    try { window.dispatchEvent(new CustomEvent("mv:ready")); } catch (e) {}  // 通知“证据流”等联动 hook 已就绪（懒加载后时机不定）
+    let app = null;
+    try {
+      const MV = window.MVCore;
+      await MV.loadAgents();   // 加载 32-agent 决策数据（失败也能跑：仅 SCRIPT 段）
+      buildUI(mount);
+      app = new Classroom(THREE, OrbitControls, CSS2DRenderer, CSS2DObject, mount, RoomEnvironment);
+      app.init();
+      window.PharmacoPilotMV3D = app;
+      window.PharmacoPilotMV = {
+        renderer: "3d",
+        getT: () => app.simT,
+        seek: (t) => app.seek(t),
+        keyMoments: () => app.keyMoments(),
+        onTime: (cb) => app.onTime(cb),
+      };
+      setLifecycle("active");
+      try { window.dispatchEvent(new CustomEvent("mv:ready")); } catch (e) {}  // 通知“证据流”等联动 hook 已就绪（懒加载后时机不定）
+    } catch (e) {
+      if (app && app.dispose) app.dispose();
+      return fallback2D("3D 初始化失败：" + (e && e.message ? e.message : e));
+    }
   }
 
   /* ============================================================
@@ -109,7 +139,7 @@
 
       <div class="mv3-stage" id="mv3-stage">
         <div class="mv3-vignette"></div>
-        <div class="mv3-timer-badge" id="mv3-timerbadge" hidden>⏱ <b>5:00</b><span id="mv3-timer-state"></span></div>
+        <div class="mv3-timer-badge" id="mv3-timerbadge" hidden><span>讨论计时</span><b>05:00</b><span id="mv3-timer-state"></span></div>
         <div class="mv3-cam-presets" id="mv3-cam">
           <button type="button" data-cam="orbit" class="is-on">环视</button>
           <button type="button" data-cam="teacher">教师位</button>
@@ -117,16 +147,20 @@
           <button type="button" data-cam="seat">旁听席</button>
           <button type="button" data-cam="podium">俯视</button>
         </div>
-        <div class="mv3-axis mv3-axis-l">◀ 反对替代</div>
-        <div class="mv3-axis mv3-axis-r">支持替代 ▶</div>
+        <div class="mv3-axis mv3-axis-l">◀ 内部能力 S / W</div>
+        <div class="mv3-axis mv3-axis-r">外部环境 O / T ▶</div>
         <div class="mv3-axis mv3-axis-hint">数据层 · 左右=立场 · 远近=投入度</div>
         <div class="mv3-centroid-readout" id="mv3-centroid">班级立场重心 <b>0.00</b></div>
         <div class="mv3-loading" id="mv3-loading">正在构建 3D 教室…</div>
+        <div class="mv3-recovery" id="mv3-recovery" role="status" aria-live="assertive" hidden>
+          <b>正在恢复 3D 教室</b>
+          <span>检测到临时图形中断，正在尝试恢复当前课堂。</span>
+        </div>
         <div class="mv3-inspector" id="mv3-inspector" hidden></div>
         <div class="mv3-caption" id="mv3-caption" role="status" aria-live="polite" aria-atomic="true" aria-label="当前发言字幕">
           <span class="mv3-cap-ts">00:00</span>
           <span class="mv3-cap-role role-T">教师</span>
-          <span class="mv3-cap-text">点击「▶ 播放录播」重演这堂集采替代讨论课；或「自由仿真」自己当老师。右下「数据层」可叠加诊断信息。</span>
+          <span class="mv3-cap-text">点击「播放录播」重演这堂 SWOT/TOWS 环境分析课；或进入自由仿真，根据课堂信号选择教学干预。</span>
         </div>
       </div>
 
@@ -141,35 +175,72 @@
 
       <div class="mv3-controls">
         <div class="mv3-ctrl-l">
-          <button type="button" class="mv3-btn mv3-btn-run" id="mv3-run">▶ 播放录播</button>
-          <button type="button" class="mv3-btn mv3-btn-ghost" id="mv3-reset">⟲ 回到开头</button>
-          <button type="button" class="mv3-btn mv3-btn-mode" id="mv3-live">🎤 自由仿真</button>
+          <button type="button" class="mv3-btn mv3-btn-run" id="mv3-run">播放录播</button>
+          <button type="button" class="mv3-btn mv3-btn-ghost" id="mv3-reset">回到开头</button>
+          <button type="button" class="mv3-btn mv3-btn-mode" id="mv3-live">进入自由仿真</button>
         </div>
-        <div class="mv3-ctrl-teacher" id="mv3-teacher" hidden>
-          <span class="mv3-tlab">教师动作</span>
-          <button type="button" class="mv3-chip" data-act="openq">抛开放问题</button>
-          <button type="button" class="mv3-chip" data-act="callc">点名药企背景</button>
-          <button type="button" class="mv3-chip" data-act="callsilent">点名沉默者</button>
-          <button type="button" class="mv3-chip" data-act="callrandom">随机点名</button>
-          <button type="button" class="mv3-chip" data-act="topic">切议题 ⇆</button>
-          <button type="button" class="mv3-chip" data-act="huddle">分组讨论</button>
-          <button type="button" class="mv3-chip" data-act="timer">⏱ 计时 5:00</button>
-        </div>
-        <div class="mv3-ctrl-r">
-          <button type="button" class="mv3-btn mv3-btn-snd" id="mv3-snd" title="环境声音">🔊 声音</button>
-          <button type="button" class="mv3-btn mv3-btn-data" id="mv3-data">📊 数据层</button>
-          <select id="mv3-seat" class="mv3-select" aria-label="座位排布" title="座位排布">
-            <option value="class">真实座位</option>
-            <option value="stance">立场散布（分析）</option>
-            <option value="group">分组聚类（分析）</option>
-          </select>
-        </div>
+        <section class="mv3-ctrl-teacher" id="mv3-teacher" aria-label="教师情境干预" hidden>
+          <div class="mv3-signal">
+            <span class="mv3-eyebrow">当前课堂信号</span>
+            <strong id="mv3-signal-title">回答尚需证据支撑</strong>
+            <span id="mv3-signal-meta">0 / 32 已发言</span>
+          </div>
+          <div class="mv3-recommendations" aria-label="建议干预">
+            <button type="button" class="mv3-rec mv3-rec-primary" data-rec="0" data-act="openq">
+              <span>建议 01</span>
+              <strong>追问证据来源</strong>
+              <small>让学生区分事实、判断与假设</small>
+            </button>
+            <button type="button" class="mv3-rec" data-rec="1" data-act="callsilent">
+              <span>建议 02</span>
+              <strong>邀请未发言者</strong>
+              <small>扩大参与面，观察是否存在表达门槛</small>
+            </button>
+          </div>
+          <div class="mv3-intervention-foot">
+            <span class="mv3-action-feedback" id="mv3-action-feedback" role="status" aria-live="polite">选择一项干预，再观察学生反应。</span>
+            <button type="button" class="mv3-more-toggle" id="mv3-more-toggle" aria-expanded="false" aria-controls="mv3-more">
+              更多干预 <span aria-hidden="true"></span>
+            </button>
+          </div>
+          <div class="mv3-more" id="mv3-more" aria-hidden="true">
+            <div class="mv3-more-inner">
+              <button type="button" class="mv3-more-action" data-act="callc">
+                <strong>邀请相关经验者</strong><small>从门店或产业经历补充现实证据</small>
+              </button>
+              <button type="button" class="mv3-more-action" data-act="callrandom">
+                <strong>随机邀请未发言者</strong><small>仅从尚未发言的学生中抽取</small>
+              </button>
+              <button type="button" class="mv3-more-action" data-act="topic">
+                <strong>进入下一议题</strong><small id="mv3-next-topic">预览下一个讨论焦点</small>
+              </button>
+              <button type="button" class="mv3-more-action" data-act="huddle">
+                <strong>组织分组讨论</strong><small>5 分钟·每组形成一条判断与一条证据</small>
+              </button>
+            </div>
+          </div>
+        </section>
+        <details class="mv3-observe" id="mv3-observe">
+          <summary>观察设置</summary>
+          <div class="mv3-ctrl-r">
+            <button type="button" class="mv3-view-btn" id="mv3-snd" title="开关环境声音">环境声：关</button>
+            <button type="button" class="mv3-view-btn" id="mv3-data">数据层：关</button>
+            <label class="mv3-view-select">
+              <span>座位视图</span>
+              <select id="mv3-seat" class="mv3-select" aria-label="座位排布" title="座位排布">
+                <option value="class">真实座位</option>
+                <option value="stance">立场散布（分析）</option>
+                <option value="group">分组聚类（分析）</option>
+              </select>
+            </label>
+          </div>
+        </details>
       </div>
 
       <div class="mv3-legend">
-        <span><i style="background:${COL.amber}"></i>A 政策/医保</span>
-        <span><i style="background:${COL.sage}"></i>B 患者/家庭</span>
-        <span><i style="background:${COL.violet}"></i>C 药企背景</span>
+        <span><i style="background:${COL.amber}"></i>A 政策/市场</span>
+        <span><i style="background:${COL.sage}"></i>B 门店/顾客</span>
+        <span><i style="background:${COL.violet}"></i>C 产业/竞争</span>
         <span><i style="background:${COL.grey}"></i>D 观望/被动</span>
         <span class="mv3-lg-sep"></span>
         <span class="mv3-lg-expr">💬 发言　✋ 想说　😟 焦虑　💤 走神</span>
@@ -202,10 +273,19 @@
       this.lastBeatIdx = 0;
       this._raf = null;
       this._lastWall = 0;
+      this._disposed = false;
+      this._contextFallback = false;
+      this._contextRecovering = false;
+      this._contextRecoveryTimer = null;
+      this.onContextLost = null;
+      this.onContextRestored = null;
+      this.onVisibilityChange = null;
       this.huddle = false; this.huddleUntil = 0;   // 分组讨论
       this.timer = null;                            // ⏱ 计时（真实时间）
       this.audio = new MVAudio();                   // 声音层（默认静音，需点击开启）
       this._lastSpokenId = null; this._sndAccum = 0;
+      this.lastIntervention = null;
+      this._lastInterventionTick = -1;
     }
 
     init() {
@@ -234,8 +314,14 @@
       renderer.domElement.className = "mv3-canvas";
       // a11y：canvas 是非文本内容，给屏幕阅读器一个等价描述（动态状态走下方 #mv3-caption 的 aria-live）
       renderer.domElement.setAttribute("role", "img");
-      renderer.domElement.setAttribute("aria-label", "AI 虚拟班 32 人 3D 立场课堂：横轴=对集采替代的立场，纵深=投入度；实时发言见下方字幕条");
+      renderer.domElement.setAttribute("aria-label", "AI 虚拟班 32 人 3D SWOT 环境分析课堂：横轴=内部能力到外部环境的分析重心，纵深=投入度；实时发言见下方字幕条");
       this.renderer = renderer;
+      this.onContextLost = (event) => {
+        this.beginContextRecovery(event);
+      };
+      this.onContextRestored = () => { this.finishContextRecovery(); };
+      renderer.domElement.addEventListener("webglcontextlost", this.onContextLost, false);
+      renderer.domElement.addEventListener("webglcontextrestored", this.onContextRestored, false);
 
       // 基于图像的柔光（RoomEnvironment IBL）——材质从哑光塑料 → 有柔和高光的质感
       if (this.RoomEnvironment) {
@@ -281,10 +367,55 @@
       this.onResize = this.onResize.bind(this);
       window.addEventListener("resize", this.onResize);
       this.ro = new ResizeObserver(this.onResize); this.ro.observe(this.stage);
-      document.addEventListener("visibilitychange", () => { if (document.hidden) this.stop(); else this.loop(); });
+      this.onVisibilityChange = () => { if (document.hidden) this.stop(); else this.loop(); };
+      document.addEventListener("visibilitychange", this.onVisibilityChange);
 
       const ld = this.mount.querySelector("#mv3-loading"); if (ld) ld.remove();
       this.loop();
+    }
+
+    beginContextRecovery(event) {
+      if (event && event.preventDefault) event.preventDefault();
+      if (this._disposed || this._contextRecovering || this._contextFallback) return;
+      this._contextRecovering = true;
+      this.stop();
+      setLifecycle("recovering", "WebGL 上下文丢失，正在尝试恢复");
+      const panel = this.mount.querySelector("#mv3-recovery");
+      if (panel) panel.hidden = false;
+      clearTimeout(this._contextRecoveryTimer);
+      this._contextRecoveryTimer = setTimeout(() => {
+        this.failContextRecovery("WebGL 恢复超时");
+      }, CONTEXT_RECOVERY_MS);
+    }
+
+    finishContextRecovery() {
+      if (this._disposed || !this._contextRecovering) return;
+      clearTimeout(this._contextRecoveryTimer);
+      this._contextRecoveryTimer = null;
+      try {
+        if (this.renderer && this.renderer.resetState) this.renderer.resetState();
+        this.onResize();
+        this.applyFrame(this.simT);
+        const panel = this.mount.querySelector("#mv3-recovery");
+        if (panel) panel.hidden = true;
+        this._contextRecovering = false;
+        this._contextFallback = false;
+        setLifecycle("active");
+        this.loop();
+        try { window.dispatchEvent(new CustomEvent("mv:ready")); } catch (e) {}
+      } catch (e) {
+        this.failContextRecovery("WebGL 恢复失败：" + (e && e.message ? e.message : e));
+      }
+    }
+
+    failContextRecovery(reason) {
+      if (this._disposed || this._contextFallback) return;
+      clearTimeout(this._contextRecoveryTimer);
+      this._contextRecoveryTimer = null;
+      this._contextRecovering = false;
+      this._contextFallback = true;
+      this.dispose();
+      fallback2D(reason);
     }
 
     /* ---------- 灯光 ---------- */
@@ -338,10 +469,10 @@
       frame.position.set(0, 6.5, -11.42); s.add(frame);
       // 屏上议题（CSS2D）—— 可由「切议题」更新
       this.topics = [
-        { b: "原研 → 仿制 <b>替代</b>", sub: "集采落地后的药事委员会决策" },
-        { b: "MAH <b>委托生产</b>责任", sub: "上市许可持有人的质量主体责任边界" },
-        { b: "医保 <b>支付方式</b>改革", sub: "DRG / DIP 下的药品成本与临床价值" },
-        { b: "一致性评价与<b>质量</b>", sub: "仿制药 BE 与窄治疗窗药品的争议" },
+        { b: "SWOT <b>内外部边界</b>", sub: "华康连锁慢病药学服务转型" },
+        { b: "优势 / 机会 <b>不是同义词</b>", sub: "可控资源 vs 外部趋势" },
+        { b: "从 SWOT 到 <b>TOWS</b>", sub: "SO / WO / ST / WT 策略组合" },
+        { b: "证据支撑的<b>环境判断</b>", sub: "会员、排班、医保与竞品数据" },
       ];
       this.topicIdx = 0;
       const topic = document.createElement("div");
@@ -744,7 +875,7 @@
      *  渲染循环
      * ============================================================ */
     loop() {
-      if (this._raf) return;
+      if (this._raf || this._disposed) return;
       const T = this.THREE;
       const tick = (now) => {
         this._raf = requestAnimationFrame(tick);
@@ -790,6 +921,27 @@
       this._raf = requestAnimationFrame(tick);
     }
     stop() { if (this._raf) { cancelAnimationFrame(this._raf); this._raf = null; this._lastWall = 0; } }
+    dispose() {
+      if (this._disposed) return;
+      this._disposed = true;
+      clearTimeout(this._contextRecoveryTimer);
+      this._contextRecoveryTimer = null;
+      this.stop();
+      if (this.ro) { this.ro.disconnect(); this.ro = null; }
+      if (this.onResize) window.removeEventListener("resize", this.onResize);
+      if (this.onVisibilityChange) document.removeEventListener("visibilitychange", this.onVisibilityChange);
+      if (this.renderer && this.renderer.domElement && this.onContextLost) {
+        this.renderer.domElement.removeEventListener("webglcontextlost", this.onContextLost, false);
+      }
+      if (this.renderer && this.renderer.domElement && this.onContextRestored) {
+        this.renderer.domElement.removeEventListener("webglcontextrestored", this.onContextRestored, false);
+      }
+      if (this.controls && this.controls.dispose) this.controls.dispose();
+      if (this.renderer && this.renderer.dispose) this.renderer.dispose();
+      if (this.audio && this.audio.ctx && this.audio.ctx.state !== "closed") {
+        try { this.audio.ctx.close(); } catch (e) {}
+      }
+    }
 
     // 把世界坐标投影为声像 -1..1（屏幕左右）
     panOf(c) {
@@ -1017,7 +1169,9 @@
       track.addEventListener("pointerup", () => { scrubbing = false; });
       track.addEventListener("keydown", (e) => { let d = 0; if (e.key === "ArrowLeft") d = -30; if (e.key === "ArrowRight") d = 30; if (d) { this.applyFrame(this.simT + d); e.preventDefault(); } });
       // 教师动作
-      this.mount.querySelectorAll("#mv3-teacher .mv3-chip").forEach((b) => b.addEventListener("click", () => this.teacherAct(b.dataset.act, b)));
+      this.mount.querySelectorAll("#mv3-teacher [data-act]").forEach((b) => b.addEventListener("click", () => this.teacherAct(b.dataset.act, b)));
+      const moreToggle = $("#mv3-more-toggle");
+      if (moreToggle) moreToggle.addEventListener("click", () => this.setMoreOpen(moreToggle.getAttribute("aria-expanded") !== "true"));
       // 座位
       $("#mv3-seat").addEventListener("change", (e) => this.setSeatMode(e.target.value));
       // 数据层开关
@@ -1025,7 +1179,7 @@
       this.dataBtn.addEventListener("click", () => this.toggleDataLayer());
       // 声音开关（点击=用户手势，满足自动播放策略）
       this.sndBtn = $("#mv3-snd");
-      this.sndBtn.addEventListener("click", () => { const on = this.audio.toggle(); this.sndBtn.classList.toggle("is-on", on); this.sndBtn.textContent = on ? "🔊 声音" : "🔇 静音"; });
+      this.sndBtn.addEventListener("click", () => { const on = this.audio.toggle(); this.sndBtn.classList.toggle("is-on", on); this.sndBtn.textContent = on ? "环境声：开" : "环境声：关"; });
       // 相机预设
       this.mount.querySelectorAll("#mv3-cam button").forEach((b) => b.addEventListener("click", () => {
         this.mount.querySelectorAll("#mv3-cam button").forEach((x) => x.classList.toggle("is-on", x === b));
@@ -1036,9 +1190,12 @@
       this.dataLayer = (on === undefined) ? !this.dataLayer : !!on;
       this.mount.classList.toggle("data-on", this.dataLayer);
       this.mount.classList.toggle("data-off", !this.dataLayer);
-      if (this.dataBtn) this.dataBtn.classList.toggle("is-on", this.dataLayer);
+      if (this.dataBtn) {
+        this.dataBtn.classList.toggle("is-on", this.dataLayer);
+        this.dataBtn.textContent = this.dataLayer ? "数据层：开" : "数据层：关";
+      }
     }
-    setRunBtn() { if (this.runBtn) this.runBtn.textContent = this.playing ? "⏸ 暂停" : (this.simT >= this.MV.T_CAP ? "↻ 重播" : "▶ 播放录播"); }
+    setRunBtn() { if (this.runBtn) this.runBtn.textContent = this.playing ? "暂停录播" : (this.simT >= this.MV.T_CAP ? "重新播放" : "播放录播"); }
 
     toggleLive() {
       if (this.live) this.exitLive(); else this.enterLive();
@@ -1050,6 +1207,9 @@
       this.mount.querySelector("#mv3-live").classList.add("is-on");
       this.mount.querySelector("#mv3-modelbl").textContent = "自由仿真";
       this.mount.querySelector("#mv3-run").disabled = true; this.mount.querySelector("#mv3-run").style.opacity = .4;
+      this.lastIntervention = null;
+      this._lastInterventionTick = -1;
+      this.updateInterventionPanel(true);
       this.setRunBtn();
     }
     exitLive() {
@@ -1058,27 +1218,133 @@
       if (this.huddle) this.endHuddle();
       if (this.timer) { this.timer.on = false; const tb = this.mount.querySelector("#mv3-timerbadge"); if (tb) tb.hidden = true; }
       this.mount.querySelector("#mv3-teacher").hidden = true;
+      this.setMoreOpen(false);
+      const observe = this.mount.querySelector("#mv3-observe"); if (observe) observe.open = false;
       this.mount.querySelector("#mv3-live").classList.remove("is-on");
       this.mount.querySelector("#mv3-modelbl").textContent = "录播回放";
       const run = this.mount.querySelector("#mv3-run"); run.disabled = false; run.style.opacity = 1;
       this.bake(); this.applyFrame(this.simT);
     }
+
+    spokenStudentIds() {
+      const ids = new Set();
+      this.beats.forEach((b) => {
+        if (b.t > this.simT || b.role !== "S" || !b.who) return;
+        const id = String(b.who).split("·")[0];
+        if (this.MV.byId[id]) ids.add(id);
+      });
+      return ids;
+    }
+    interventionContext() {
+      const spoken = this.spokenStudentIds();
+      const rt = this.MV.allRT();
+      let hesitant = 0, attention = 0;
+      this.MV.STUDENTS.forEach((s) => {
+        const cur = rt[s.id]; if (!cur) return;
+        attention += cur.attention || 0;
+        if ((cur.speak_motivation || 0) >= .54 && (cur.social_safety || 0) < .52) hesitant++;
+      });
+      return {
+        spoken,
+        spokenCount: spoken.size,
+        unspokenCount: Math.max(0, this.MV.STUDENTS.length - spoken.size),
+        hesitant,
+        attention: attention / Math.max(1, this.MV.STUDENTS.length),
+      };
+    }
+    recommendationSpecs(ctx) {
+      const next = this.topics[(this.topicIdx + 1) % this.topics.length];
+      const nextName = next.b.replace(/<[^>]+>/g, "");
+      if (this.huddle) return [
+        { act: "huddle", label: "结束讨论并收束", reason: "请每组用一条判断和一条证据汇报" },
+        { act: "topic", label: "预告下一议题", reason: nextName },
+      ];
+      if (this.lastIntervention === "openq") return [
+        { act: "callsilent", label: "邀请未发言者", reason: `${ctx.unspokenCount} 人尚未发言，观察表达门槛` },
+        { act: "callc", label: "邀请相关经验者", reason: "用门店或产业经历校验当前判断" },
+      ];
+      if (["callsilent", "callc", "callrandom"].includes(this.lastIntervention)) return [
+        { act: "openq", label: "追问证据来源", reason: "把个人经验转成可检验的判断依据" },
+        { act: "huddle", label: "转入小组验证", reason: "5 分钟·每组形成一条证据" },
+      ];
+      return [
+        { act: "openq", label: "追问证据来源", reason: "让学生区分事实、判断与假设" },
+        { act: "callsilent", label: "邀请未发言者", reason: `${ctx.unspokenCount} 人尚未发言，扩大观察面` },
+      ];
+    }
+    updateInterventionPanel(force) {
+      if (!this.live) return;
+      const tick = Math.floor(this.simT / 5);
+      if (!force && tick === this._lastInterventionTick) return;
+      this._lastInterventionTick = tick;
+      const ctx = this.interventionContext();
+      const title = this.mount.querySelector("#mv3-signal-title");
+      const meta = this.mount.querySelector("#mv3-signal-meta");
+      if (title) {
+        title.textContent = this.huddle ? "小组正在形成判断与证据"
+          : ctx.hesitant >= 4 ? `${ctx.hesitant} 人有表达意愿，但安全感不足`
+          : ctx.unspokenCount >= 16 ? "参与面较窄，当前回答仍需证据"
+          : ctx.attention < .52 ? "注意力正在下滑，需要转换活动"
+          : "参与正在展开，继续检验证据质量";
+      }
+      if (meta) meta.textContent = `${ctx.spokenCount} / ${this.MV.STUDENTS.length} 已发言 · ${ctx.hesitant} 人有表达意愿 · 议题 ${this.topicIdx + 1} / ${this.topics.length}`;
+      const specs = this.recommendationSpecs(ctx);
+      this.mount.querySelectorAll("#mv3-teacher [data-rec]").forEach((button, index) => {
+        const spec = specs[index]; if (!spec) return;
+        button.dataset.act = spec.act;
+        button.classList.toggle("mv3-rec-primary", index === 0);
+        button.classList.toggle("is-active", this.huddle && spec.act === "huddle");
+        button.querySelector("span").textContent = `建议 0${index + 1}`;
+        button.querySelector("strong").textContent = spec.label;
+        button.querySelector("small").textContent = spec.reason;
+      });
+      const next = this.topics[(this.topicIdx + 1) % this.topics.length];
+      const nextEl = this.mount.querySelector("#mv3-next-topic");
+      if (nextEl) nextEl.textContent = `下一焦点：${next.b.replace(/<[^>]+>/g, "")}`;
+      const moreHuddle = this.mount.querySelector('.mv3-more-action[data-act="huddle"] strong');
+      if (moreHuddle) moreHuddle.textContent = this.huddle ? "结束讨论并收束" : "组织分组讨论";
+    }
+    setMoreOpen(open) {
+      const toggle = this.mount.querySelector("#mv3-more-toggle");
+      const panel = this.mount.querySelector("#mv3-more");
+      if (!toggle || !panel) return;
+      toggle.setAttribute("aria-expanded", String(!!open));
+      panel.setAttribute("aria-hidden", String(!open));
+      panel.classList.toggle("is-open", !!open);
+    }
+    setInterventionFeedback(text) {
+      const el = this.mount.querySelector("#mv3-action-feedback");
+      if (!el) return;
+      el.textContent = text;
+      el.classList.remove("is-fresh"); void el.offsetWidth; el.classList.add("is-fresh");
+    }
     teacherAct(act, btn) {
       const t = this.simT, MV = this.MV;
-      if (act === "openq") { MV.teacherOpenQ(t); MV.teacherLine(t, "谁来从这个角度补充一下？"); flash(btn); }
-      else if (act === "callc") { MV.teacherCallC(t); MV.teacherLine(t, "我想听听有药企背景的同学——有谁愿意从产业角度说说？"); flash(btn); }
-      else if (act === "callsilent") { MV.teacherCallSilent(t); MV.teacherLine(t, "还没出声的同学，谁愿意先说一句你最真实的担心？"); flash(btn); }
+      let feedback = "";
+      if (act === "openq") { MV.teacherOpenQ(t); MV.teacherLine(t, "这项判断的证据是什么？哪些是事实，哪些还是假设？"); feedback = "已发出证据追问·接下来观察学生能否说明依据。"; flash(btn); }
+      else if (act === "callc") { MV.teacherCallC(t); MV.teacherLine(t, "有门店或产业经验的同学，谁愿意用一个现实例子来校验这项判断？"); feedback = "已邀请相关经验者·观察个人经验能否转成可检验证据。"; flash(btn); }
+      else if (act === "callsilent") { MV.teacherCallSilent(t); MV.teacherLine(t, "我想先听听还没发言的同学。你可以只说一个判断，再说说依据。"); feedback = "已降低表达门槛·观察未发言者是否开始参与。"; flash(btn); }
       else if (act === "callrandom") {
-        const quiet = MV.STUDENTS.filter((s) => /[CD]/.test(s.id[0]));
-        const pick = quiet[Math.floor(Math.random() * quiet.length)];
-        MV.teacherCallOn(pick.id); MV.teacherLine(t, `${pick.name}，你怎么看？`); this.focusOn(pick.id); flash(btn);
+        const spoken = this.spokenStudentIds();
+        const pool = MV.STUDENTS.filter((s) => !spoken.has(s.id));
+        const candidates = pool.length ? pool : MV.STUDENTS;
+        const pick = candidates[Math.floor(Math.random() * candidates.length)];
+        MV.teacherCallOn(pick.id); MV.teacherLine(t, `${pick.name}，请先说你的判断，再补充一条依据。`); this.focusOn(pick.id); feedback = `已邀请${pick.name}·该生此前尚未发言。`; flash(btn);
       }
-      else if (act === "topic") { this.cycleTopic(); flash(btn); }
-      else if (act === "huddle") { this.huddle ? this.endHuddle() : this.startHuddle(); flash(btn); }
-      else if (act === "timer") { this.startTimer(300); flash(btn); }
+      else if (act === "topic") { this.cycleTopic(); feedback = `已进入议题 ${this.topicIdx + 1}·先给学生 30 秒形成初步判断。`; flash(btn); }
+      else if (act === "huddle") {
+        if (this.huddle) { this.endHuddle(); feedback = "已结束讨论·接下来每组用一条判断和一条证据汇报。"; }
+        else { this.startHuddle(); feedback = "已开始 5 分钟分组讨论·每组需形成一条判断和一条证据。"; }
+        flash(btn);
+      }
+      else if (act === "timer") { this.startTimer(300); feedback = "已开始 5 分钟计时。"; flash(btn); }
       // 把教师这句立刻反映到 caption
       this.beats = this.beats.concat(MV.beatsUpTo(this.simT).filter((b) => b._teacher && !this.beats.includes(b)));
       this.syncCaptionAndSpeaker();
+      this.lastIntervention = act;
+      this.setInterventionFeedback(feedback);
+      this.setMoreOpen(false);
+      this.updateInterventionPanel(true);
     }
 
     /* ---------- 教师动作：切议题 / 分组讨论 / 计时 ---------- */
@@ -1091,21 +1357,22 @@
     }
     startHuddle() {
       this.huddle = true; this.huddleUntil = this.simT + 60;
-      const h = this.mount.querySelector('.mv3-chip[data-act="huddle"]'); if (h) { h.classList.add("is-active"); h.textContent = "结束讨论"; }
+      this.mount.querySelectorAll('[data-act="huddle"]').forEach((h) => h.classList.add("is-active"));
       this.MV.teacherLine(this.simT, "好，现在分组讨论 5 分钟，每组推一个代表。");
       this.startTimer(300);
-      this.camPreset("top");
-      this.mount.querySelectorAll("#mv3-cam button").forEach((x) => x.classList.toggle("is-on", x.dataset.cam === "top"));
+      this.camPreset("podium");
+      this.mount.querySelectorAll("#mv3-cam button").forEach((x) => x.classList.toggle("is-on", x.dataset.cam === "podium"));
       this.layout(false);
     }
     endHuddle() {
       if (!this.huddle) return;
       this.huddle = false;
-      const h = this.mount.querySelector('.mv3-chip[data-act="huddle"]'); if (h) { h.classList.remove("is-active"); h.textContent = "分组讨论"; }
+      this.mount.querySelectorAll('[data-act="huddle"]').forEach((h) => h.classList.remove("is-active"));
       // 收掉耳语气泡
       Object.values(this.chars).forEach((c) => { if (c.bubbleEl) { c.bubbleEl.classList.remove("is-on", "is-whisper"); c._bubbleTxt = ""; } });
       this.MV.teacherLine(this.simT, "时间到，各组代表准备汇报。");
       this.layout(false);
+      if (this.live) this.updateInterventionPanel(true);
     }
     startTimer(secs) {
       this.timer = { left: secs, total: secs, on: true };
@@ -1249,8 +1516,8 @@
       const s = this.MV.byId[id]; const bk = this.MV.STANCE_BAKED[id]; const a = this.MV.agentOf(id);
       const rt = this.live ? this.MV.rtOf(id) : null; const fs = this.frameState(id);
       const st = rt ? rt.stance_position : fs.st;
-      const stance = st > 0.25 ? "支持替代" : st < -0.25 ? "反对替代" : "骑墙/观望";
-      const grpName = { A: "政策/医保", B: "患者/家庭", C: "药企背景", D: "观望/被动" }[groupOf(id)];
+      const stance = st > 0.25 ? "偏外部环境" : st < -0.25 ? "偏内部能力" : "边界核对/观望";
+      const grpName = { A: "政策/市场", B: "门店/顾客", C: "产业/竞争", D: "观望/被动" }[groupOf(id)];
       const insp = this.mount.querySelector("#mv3-inspector");
       insp.hidden = false;
       insp.innerHTML = `
@@ -1259,7 +1526,7 @@
         <div class="mv3-insp-note">${s.note}</div>
         <div class="mv3-insp-stance">
           <div class="mv3-insp-bar"><i style="left:${(st + 1) / 2 * 100}%"></i></div>
-          <div class="mv3-insp-srow"><span>反对替代</span><b>${stance} · ${st.toFixed(2)}</b><span>支持替代</span></div>
+          <div class="mv3-insp-srow"><span>内部能力 S/W</span><b>${stance} · ${st.toFixed(2)}</b><span>外部环境 O/T</span></div>
         </div>
         <div class="mv3-insp-why">${bk ? bk.why : ""}</div>
         ${a && a.persona ? `<div class="mv3-insp-meta">易动度 ${(bk.m).toFixed(2)} · 立场强度 ${(a.persona.stance_strength || 0).toFixed ? a.persona.stance_strength : a.persona.stance_strength}</div>` : ""}
@@ -1298,14 +1565,14 @@
         </div>
         <div class="mv3-panel">
           <div class="mv3-panel-h">教学风险信号<span>3 项</span></div>
-          <div class="mv3-risk"><i class="rk rk-hi">高</i><b>立场失衡</b>——8 位「药企背景」同学未发声，可能放大集采替代倾向</div>
-          <div class="mv3-risk"><i class="rk rk-mid">中</i><b>政策引用断点</b>——B 组讨论引用率仅 1/17，量规未刺激政策引用</div>
+          <div class="mv3-risk"><i class="rk rk-hi">高</i><b>威胁维度失声</b>——8 位产业/竞争视角学生未发声，T 维证据覆盖不足</div>
+          <div class="mv3-risk"><i class="rk rk-mid">中</i><b>环境证据断点</b>——W/T 分类尚未引用人才供给与竞品数据</div>
           <div class="mv3-risk"><i class="rk rk-lo">低</i><b>讨论时长偏紧</b>——5 分钟对「等机会型」「推举型」画像不友好</div>
         </div>
         <div class="mv3-panel">
-          <div class="mv3-panel-h">量规歧义提示<span>2 处</span></div>
-          <div class="mv3-risk"><i class="rk rk-r">R-04</i><b>立场迁移度</b>缺可观测锚点；内在调整 / 同伴影响 / 教师触发难区分</div>
-          <div class="mv3-risk"><i class="rk rk-r">R-06</i><b>反思深度</b>与「政策引用」维度交叠，可能双计分</div>
+          <div class="mv3-panel-h">评价标准歧义提示<span>2 处</span></div>
+          <div class="mv3-risk"><i class="rk rk-r">R-04</i><b>内外部边界</b>缺可观测锚点；组织可控条件与环境趋势容易混分</div>
+          <div class="mv3-risk"><i class="rk rk-r">R-06</i><b>策略可行性</b>与「证据充分性」维度交叠，可能双计分</div>
         </div>`;
     }
 
@@ -1315,6 +1582,7 @@
     fireTime() {
       const spoke = this.mount.querySelector("#mv3-st-spoke");
       if (spoke) spoke.textContent = String(Math.min(32, 14 + Math.round((this.simT - 132) / 130)));
+      if (this.live) this.updateInterventionPanel(false);
       this.timeCbs.forEach((cb) => { try { cb(this.simT); } catch (e) {} });
     }
     keyMoments() { return this.km; }
@@ -1398,65 +1666,71 @@
   function injectCSS() {
     if (document.getElementById("mv3-style")) return;
     const css = `
-.mv3-root{display:block;border:1px solid var(--rule,#d8d2bf);border-radius:18px;background:var(--paper,#faf7f0);box-shadow:0 2px 14px rgba(120,90,40,.07);overflow:hidden;}
+.mv3-root{display:block;border:1px solid var(--rule);border-radius:18px;background:var(--paper);box-shadow:var(--shadow-1);overflow:hidden;}
 .mv3-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:14px 18px 10px;flex-wrap:wrap;}
 .mv3-head h4{margin:0;font:600 var(--fs-xl,22px) var(--serif-cn);color:var(--ink);}
 .mv3-head h4 small{display:block;margin-top:3px;font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);font-weight:400;letter-spacing:.02em;}
 .mv3-head-r{display:flex;align-items:center;gap:14px;font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);}
-.mv3-mode{padding:2px 9px;border:1px solid var(--rule-2);border-radius:999px;color:var(--amber-deep);}
-.mv3-live{display:inline-flex;align-items:center;gap:6px;color:var(--ink-soft);}
-.mv3-live i{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 0 rgba(217,119,87,.6);animation:mv3pulse 2s infinite;}
-@keyframes mv3pulse{70%{box-shadow:0 0 0 6px rgba(217,119,87,0);}100%{box-shadow:0 0 0 0 rgba(217,119,87,0);}}
-.mv3-stage{position:relative;width:100%;height:540px;background:radial-gradient(120% 90% at 50% 0%, #fbf8f1 0%, #efe8d9 100%);overflow:hidden;cursor:grab;}
+.mv3-mode{flex:none;white-space:nowrap;padding:2px 9px;border:1px solid var(--rule-2);border-radius:999px;color:var(--amber-deep);}
+.mv3-live{display:inline-flex;align-items:center;gap:6px;color:var(--ink-soft);white-space:nowrap;}
+.mv3-sess{white-space:nowrap;}
+.mv3-live i{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 0 color-mix(in srgb, var(--amber) 60%, transparent);animation:mv3pulse 2s infinite;}
+@keyframes mv3pulse{70%{box-shadow:0 0 0 6px transparent;}100%{box-shadow:0 0 0 0 transparent;}}
+.mv3-stage{position:relative;width:100%;height:540px;background:radial-gradient(120% 90% at 50% 0%, var(--ivory) 0%, var(--paper-3) 100%);overflow:hidden;cursor:grab;}
 .mv3-stage:active{cursor:grabbing;}
 .mv3-canvas{display:block;width:100%;height:100%;}
 .mv3-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:4;}
 .mv3-labels>*{pointer-events:none;}
-.mv3-vignette{position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(120% 100% at 50% 38%, transparent 52%, rgba(60,40,20,.10) 82%, rgba(40,26,12,.22) 100%);mix-blend-mode:multiply;}
-.mv3-timer-badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;font:600 var(--fs-sm) var(--mono);color:var(--ink);background:rgba(255,253,247,.9);border:1px solid var(--rule-2);padding:4px 14px;border-radius:999px;box-shadow:var(--shadow-2);}
+.mv3-vignette{position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(120% 100% at 50% 38%, transparent 52%, color-mix(in srgb, var(--ink) 10%, transparent) 82%, color-mix(in srgb, var(--ink) 22%, transparent) 100%);mix-blend-mode:multiply;}
+.mv3-timer-badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:6;font:600 var(--fs-sm) var(--mono);color:var(--ink);background:color-mix(in srgb, var(--ivory) 90%, transparent);border:1px solid var(--rule-2);padding:4px 14px;border-radius:999px;box-shadow:var(--shadow-2);}
+.mv3-timer-badge:not([hidden]){display:flex;align-items:baseline;gap:8px;}
 .mv3-timer-badge b{color:var(--amber-deep);font:600 var(--fs-md) var(--serif-en);}
-.mv3-timer-badge.is-done{background:var(--amber-deep);color:#fff;border-color:var(--amber-deep);}
-.mv3-timer-badge.is-done b{color:#fff;}
-.mv3-name{font:600 var(--fs-2xs,12px) var(--mono);color:var(--ink);white-space:nowrap;text-shadow:0 1px 3px rgba(250,247,240,.95),0 0 3px rgba(250,247,240,.9);transform:translateY(-2px);}
+.mv3-timer-badge.is-done{background:var(--amber-deep);color:var(--ivory);border-color:var(--amber-deep);}
+.mv3-timer-badge.is-done b{color:var(--ivory);}
+.mv3-name{font:600 var(--fs-2xs,12px) var(--mono);color:var(--ink);white-space:nowrap;text-shadow:0 1px 3px color-mix(in srgb, var(--paper) 95%, transparent),0 0 3px color-mix(in srgb, var(--paper) 90%, transparent);transform:translateY(-2px);}
 .mv3-name-A{color:var(--amber-deep);}.mv3-name-B{color:var(--sage);}.mv3-name-C{color:var(--violet);}.mv3-name-D{color:var(--mute);}
-.mv3-name-T{color:#fff;background:var(--amber-deep);padding:1px 7px;border-radius:999px;}
+.mv3-name-T{color:var(--ivory);background:var(--amber-deep);padding:1px 7px;border-radius:999px;}
 .mv3-name-A.mv3-name-A{}
 .mv3-name.is-live{color:var(--amber-deep);font-weight:800;}
-.mv3-expr{font-size:15px;opacity:0;transform:scale(.6);transition:opacity .25s,transform .25s;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+.mv3-expr{font-size:15px;opacity:0;transform:scale(.6);transition:opacity .25s,transform .25s;filter:drop-shadow(0 2px 3px color-mix(in srgb, var(--ink) 18%, transparent));}
 .mv3-expr.is-on{opacity:1;transform:scale(1);}
 .mv3-expr.is-speak{animation:mv3pop .5s ease;}
 @keyframes mv3pop{0%{transform:scale(.4);}60%{transform:scale(1.25);}100%{transform:scale(1);}}
-.mv3-bubble{background:var(--ink);color:#fff;font:var(--fs-2xs,12px) var(--serif-cn);padding:4px 9px;border-radius:9px 9px 9px 2px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s;box-shadow:0 4px 12px rgba(40,25,10,.25);}
+.mv3-bubble{background:var(--ink);color:var(--ivory);font:var(--fs-2xs,12px) var(--serif-cn);padding:4px 9px;border-radius:9px 9px 9px 2px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis;opacity:0;transform:translateY(4px);transition:opacity .2s,transform .2s;box-shadow:0 4px 12px color-mix(in srgb, var(--ink) 25%, transparent);}
 .mv3-bubble.is-on{opacity:1;transform:translateY(0);}
-.mv3-bubble.is-whisper{background:rgba(74,67,57,.92);color:#f3efe6;font-size:11px;padding:2px 8px;border-radius:8px 8px 8px 2px;box-shadow:0 2px 7px rgba(40,25,10,.2);}
-.mv3-board{text-align:center;font:var(--fs-2xs,12px) var(--mono);color:var(--ink-soft);background:rgba(250,247,240,.0);width:200px;line-height:1.5;}
-.mv3-board span{display:block;font-size:10px;color:var(--mute-2);letter-spacing:.18em;}
+.mv3-bubble.is-whisper{background:color-mix(in srgb, var(--ink-soft) 92%, transparent);color:var(--paper-2);font-size:var(--text-micro);padding:3px 8px;border-radius:8px 8px 8px 2px;box-shadow:0 2px 7px color-mix(in srgb, var(--ink) 20%, transparent);}
+.mv3-board{text-align:center;font:var(--fs-2xs,12px) var(--mono);color:var(--ink-soft);background:transparent;width:200px;line-height:1.5;}
+.mv3-board span{display:block;font-size:var(--text-micro);color:var(--mute);letter-spacing:.12em;}
 .mv3-board b{color:var(--amber-deep);}
 .mv3-board i{display:block;font:italic var(--fs-2xs,12px) var(--serif-cn);color:var(--mute-2);margin-top:2px;}
 .mv3-cam-presets{position:absolute;top:12px;right:14px;z-index:6;display:flex;gap:6px;}
-.mv3-cam-presets button{pointer-events:auto;font:var(--fs-2xs,12px) var(--mono);padding:4px 10px;border:1px solid var(--rule-2);background:rgba(255,253,247,.85);color:var(--ink-soft);border-radius:999px;cursor:pointer;backdrop-filter:blur(4px);}
-.mv3-cam-presets button.is-on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.mv3-cam-presets button{pointer-events:auto;font:var(--fs-2xs,12px) var(--mono);padding:4px 10px;border:1px solid var(--rule-2);background:color-mix(in srgb, var(--ivory) 85%, transparent);color:var(--ink-soft);border-radius:999px;cursor:pointer;backdrop-filter:blur(4px);}
+.mv3-cam-presets button.is-on{background:var(--ink);color:var(--ivory);border-color:var(--ink);}
 .mv3-axis{position:absolute;top:50%;font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);z-index:4;pointer-events:none;}
 .mv3-axis-l{left:14px;color:var(--sage);}.mv3-axis-r{right:14px;color:var(--amber-deep);}
-.mv3-axis-hint{top:auto;bottom:10px;left:50%;transform:translateX(-50%);color:var(--mute-2);background:rgba(250,247,240,.7);padding:2px 10px;border-radius:999px;}
-.mv3-centroid-readout{position:absolute;top:12px;left:14px;z-index:5;font:var(--fs-2xs,12px) var(--mono);color:var(--ink);background:rgba(250,247,240,.82);border:1px solid var(--rule-2);padding:3px 10px;border-radius:8px;}
+.mv3-axis-hint{top:auto;bottom:10px;left:50%;transform:translateX(-50%);color:var(--mute-2);background:color-mix(in srgb, var(--paper) 70%, transparent);padding:2px 10px;border-radius:999px;}
+.mv3-centroid-readout{position:absolute;top:12px;left:14px;z-index:5;font:var(--fs-2xs,12px) var(--mono);color:var(--ink);background:color-mix(in srgb, var(--paper) 82%, transparent);border:1px solid var(--rule-2);padding:3px 10px;border-radius:8px;}
 .mv3-centroid-readout b{color:var(--amber-deep);}
 .mv3-loading{position:absolute;inset:0;display:grid;place-items:center;font:var(--fs-sm) var(--mono);color:var(--mute-2);}
+.mv3-recovery{position:absolute;inset:0;z-index:12;place-content:center;justify-items:center;gap:8px;padding:24px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);text-align:center;}
+.mv3-recovery:not([hidden]){display:grid;}
+.mv3-recovery b{font:600 var(--fs-lg) var(--serif-cn);color:var(--ink);}
+.mv3-recovery span{font:var(--fs-xs) var(--mono);color:var(--mute);}
 /* 字幕：贴底、半透明渐变（电影字幕式，不抢戏，露出教室主体） */
-.mv3-caption{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:flex-end;gap:8px;padding:22px 18px 11px;background:linear-gradient(to top, rgba(22,20,17,.74), rgba(22,20,17,.34) 55%, rgba(22,20,17,0));color:#f6f1e7;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease;}
+.mv3-caption{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:flex-end;gap:8px;padding:22px 18px 11px;background:linear-gradient(to top, color-mix(in srgb, var(--ink) 74%, transparent), color-mix(in srgb, var(--ink) 34%, transparent) 55%, transparent);color:var(--paper-2);pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease;}
 .mv3-caption.is-on{opacity:1;transform:translateY(0);}
-.mv3-cap-ts{font:var(--fs-2xs,12px) var(--mono);color:var(--on-dark-mute,#c5bda9);flex:none;padding-bottom:1px;text-shadow:0 1px 2px rgba(0,0,0,.5);}
-.mv3-cap-role{font:600 var(--fs-2xs,12px) var(--serif-cn);padding:1px 8px;border-radius:999px;background:rgba(255,255,255,.18);flex:none;}
-.mv3-cap-role.role-T{background:var(--amber-deep);color:#fff;}.mv3-cap-role.role-A{background:var(--ink-2);color:var(--amber-soft);}
-.mv3-cap-text{font:var(--fs-sm) var(--serif-cn);line-height:1.4;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 3px rgba(0,0,0,.6);}
-.mv3-inspector{position:absolute;top:46px;right:14px;width:280px;z-index:7;background:rgba(255,253,247,.97);border:1px solid var(--rule-2);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow-3);pointer-events:auto;}
+.mv3-cap-ts{font:var(--fs-2xs,12px) var(--mono);color:var(--on-dark-mute);flex:none;padding-bottom:1px;text-shadow:0 1px 2px color-mix(in srgb, var(--ink) 50%, transparent);}
+.mv3-cap-role{font:600 var(--fs-2xs,12px) var(--serif-cn);padding:1px 8px;border-radius:999px;background:color-mix(in srgb, var(--ivory) 18%, transparent);flex:none;}
+.mv3-cap-role.role-T{background:var(--amber-deep);color:var(--ivory);}.mv3-cap-role.role-A{background:var(--ink-2);color:var(--amber-soft);}
+.mv3-cap-text{font:var(--fs-sm) var(--serif-cn);line-height:1.4;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 3px color-mix(in srgb, var(--ink) 60%, transparent);}
+.mv3-inspector{position:absolute;top:46px;right:14px;width:280px;z-index:7;background:color-mix(in srgb, var(--ivory) 97%, transparent);border:1px solid var(--rule-2);border-radius:14px;padding:14px 15px;box-shadow:var(--shadow-3);pointer-events:auto;}
 .mv3-insp-x{position:absolute;top:8px;right:10px;border:none;background:none;font-size:20px;color:var(--mute);cursor:pointer;line-height:1;}
 .mv3-insp-h{display:flex;align-items:baseline;gap:8px;}
 .mv3-insp-h b{font:600 var(--fs-lg) var(--serif-cn);color:var(--ink);}
 .mv3-insp-h span{font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);}
 .mv3-insp-note{margin:6px 0 10px;font:var(--fs-xs) var(--serif-cn);color:var(--ink-soft);line-height:1.5;}
-.mv3-insp-bar{position:relative;height:6px;border-radius:999px;background:linear-gradient(90deg,rgba(125,148,184,.5),rgba(0,0,0,.08) 50%,rgba(217,154,108,.6));}
-.mv3-insp-bar i{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--amber-deep);border:2px solid #fff;transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.mv3-insp-bar{position:relative;height:6px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb, var(--indigo) 50%, transparent),color-mix(in srgb, var(--ink) 8%, transparent) 50%,color-mix(in srgb, var(--amber) 60%, transparent));}
+.mv3-insp-bar i{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--amber-deep);border:2px solid var(--ivory);transform:translate(-50%,-50%);box-shadow:0 1px 4px color-mix(in srgb, var(--ink) 30%, transparent);}
 .mv3-insp-srow{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);}
 .mv3-insp-srow b{color:var(--ink);}
 .mv3-insp-why{margin-top:9px;font:italic var(--fs-xs) var(--serif-cn);color:var(--mute-2);line-height:1.5;border-left:2px solid var(--amber-soft);padding-left:8px;}
@@ -1473,32 +1747,71 @@
 .mv3-tick.t-marker{background:var(--sage);}
 .mv3-tick.t-silence{background:var(--violet);}
 .mv3-tick.t-note{background:var(--gold);}
-.mv3-scrub-head{position:absolute;top:50%;width:13px;height:13px;background:#fff;border:2px solid var(--amber-deep);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(0,0,0,.25);}
-.mv3-controls{display:flex;align-items:center;gap:14px;padding:6px 18px 12px;flex-wrap:wrap;}
-.mv3-btn{font:600 var(--fs-sm) var(--sans);padding:8px 16px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;transition:transform .1s;}
+.mv3-scrub-head{position:absolute;top:50%;width:13px;height:13px;background:var(--ivory);border:2px solid var(--amber-deep);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 1px 4px color-mix(in srgb, var(--ink) 25%, transparent);}
+.mv3-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:12px 16px;padding:8px 18px 16px;}
+.mv3-ctrl-l{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.mv3-btn{font:600 var(--fs-sm) var(--sans);padding:8px 16px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--ivory);cursor:pointer;transition:transform .1s;}
 .mv3-btn:active{transform:scale(.96);}
 .mv3-btn-ghost{background:transparent;color:var(--ink-soft);border-color:var(--rule-2);}
 .mv3-btn-mode{background:transparent;color:var(--amber-deep);border-color:var(--amber);}
-.mv3-btn-mode.is-on{background:var(--amber);color:#fff;border-color:var(--amber);}
-.mv3-btn-data{background:transparent;color:var(--ink-soft);border-color:var(--rule-2);}
-.mv3-btn-data.is-on{background:var(--ink);color:#fff;border-color:var(--ink);}
-.mv3-btn-snd{background:transparent;color:var(--ink-soft);border-color:var(--rule-2);}
-.mv3-btn-snd.is-on{background:var(--sage);color:#fff;border-color:var(--sage);}
+.mv3-btn-mode.is-on{background:var(--amber);color:var(--ivory);border-color:var(--amber);}
 /* —— 数据层：默认隐藏诊断元素，看真实课堂；开启后叠加 —— */
 .mv3-root.data-off .mv3-name,.mv3-root.data-off .mv3-expr,.mv3-root.data-off .mv3-bubble,.mv3-root.data-off .mv3-centroid-readout,.mv3-root.data-off .mv3-legend,.mv3-root.data-off .mv3-analysis{display:none !important;}
 /* 立场轴标签：仅"立场散布"分析排布下出现 */
 .mv3-axis{display:none !important;}
 .mv3-root.seat-stance .mv3-axis{display:block !important;}
-.mv3-ctrl-teacher{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.mv3-tlab{font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);}
-.mv3-chip{font:var(--fs-xs) var(--serif-cn);padding:6px 12px;border-radius:999px;border:1px solid var(--amber);background:var(--amber-wash);color:var(--amber-deep);cursor:pointer;}
-.mv3-chip:hover{background:var(--amber-soft);}
-.mv3-chip.is-flash{animation:mv3flash .6s ease;}
-.mv3-chip.is-active{background:var(--amber);color:#fff;border-color:var(--amber);}
-@keyframes mv3flash{0%{background:var(--amber);color:#fff;}100%{background:var(--amber-wash);color:var(--amber-deep);}}
-.mv3-ctrl-r{margin-left:auto;display:flex;align-items:center;gap:8px;}
-.mv3-seatlab{font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);}
-.mv3-select{font:var(--fs-xs) var(--sans);padding:6px 10px;border-radius:8px;border:1px solid var(--rule-2);background:var(--ivory);color:var(--ink);cursor:pointer;}
+.mv3-ctrl-teacher{grid-column:1/-1;display:grid;grid-template-columns:minmax(220px,.78fr) minmax(0,2fr);gap:0 18px;padding:16px 0 0;border-top:1px solid var(--rule);position:relative;animation:mv3panelin .42s cubic-bezier(.16,1,.3,1) both;}
+.mv3-ctrl-teacher[hidden]{display:none;}
+.mv3-signal{grid-row:1/3;display:flex;flex-direction:column;gap:5px;padding:3px 18px 4px 0;border-right:1px solid var(--rule);}
+.mv3-eyebrow{font:600 var(--fs-2xs,12px) var(--mono);letter-spacing:.08em;color:var(--amber-deep);text-transform:uppercase;}
+.mv3-signal strong{font:600 var(--fs-lg) var(--sans);line-height:1.25;color:var(--ink);max-width:24ch;}
+.mv3-signal>span:last-child{font:var(--fs-2xs,12px) var(--mono);line-height:1.5;color:var(--mute-2);}
+.mv3-recommendations{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr);gap:10px;}
+.mv3-rec{min-width:0;text-align:left;display:grid;grid-template-columns:auto 1fr;gap:3px 12px;align-items:baseline;padding:11px 14px;border:1px solid var(--rule-2);border-radius:12px;background:var(--ivory);color:var(--ink);cursor:pointer;transition:transform .24s cubic-bezier(.16,1,.3,1),background-color .24s ease,border-color .24s ease;}
+.mv3-rec>span{grid-row:1/3;font:600 var(--fs-2xs,12px) var(--mono);letter-spacing:.06em;color:var(--amber-deep);}
+.mv3-rec strong{font:600 var(--fs-sm) var(--sans);line-height:1.3;}
+.mv3-rec small{font:var(--fs-xs) var(--serif-cn);line-height:1.45;color:var(--mute-2);overflow-wrap:anywhere;}
+.mv3-rec:hover{transform:translateY(-2px);border-color:var(--amber);background:color-mix(in srgb,var(--amber-wash) 52%,var(--ivory));}
+.mv3-rec:active{transform:translateY(0) scale(.985);}
+.mv3-rec-primary{background:var(--ink);border-color:var(--ink);color:var(--ivory);}
+.mv3-rec-primary>span{color:var(--amber-soft);}
+.mv3-rec-primary small{color:var(--on-dark-mute);}
+.mv3-rec-primary:hover{background:var(--ink-2);border-color:var(--ink-2);}
+.mv3-rec.is-flash,.mv3-more-action.is-flash{animation:mv3flash .5s cubic-bezier(.16,1,.3,1);}
+.mv3-rec.is-active,.mv3-more-action.is-active{border-color:var(--amber-deep);}
+.mv3-intervention-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:9px;}
+.mv3-action-feedback{font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);line-height:1.45;}
+.mv3-action-feedback.is-fresh{animation:mv3feedback .42s cubic-bezier(.16,1,.3,1);}
+.mv3-more-toggle{display:inline-flex;align-items:center;gap:8px;flex:none;padding:4px 0;border:0;background:transparent;color:var(--amber-deep);font:600 var(--fs-xs) var(--sans);cursor:pointer;}
+.mv3-more-toggle span{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .24s cubic-bezier(.16,1,.3,1);}
+.mv3-more-toggle[aria-expanded="true"] span{transform:rotate(225deg) translate(-1px,-1px);}
+.mv3-more{grid-column:1/-1;display:none;margin-top:12px;}
+.mv3-more.is-open{display:block;animation:mv3morein .28s cubic-bezier(.16,1,.3,1) both;}
+.mv3-more-inner{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);border-top:1px dashed var(--rule-2);border-bottom:1px dashed var(--rule-2);}
+.mv3-more-action{text-align:left;display:flex;flex-direction:column;gap:3px;padding:12px 14px;border:0;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);background:transparent;color:var(--ink);cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),background-color .2s ease;}
+.mv3-more-action:nth-child(2n){border-right:0;}
+.mv3-more-action:nth-last-child(-n+2){border-bottom:0;}
+.mv3-more-action strong{font:600 var(--fs-sm) var(--sans);}
+.mv3-more-action small{font:var(--fs-xs) var(--serif-cn);color:var(--mute-2);line-height:1.4;}
+.mv3-more-action:hover{background:var(--amber-wash);transform:translateX(2px);}
+.mv3-more-action:active{transform:translateX(2px) scale(.985);}
+.mv3-observe{grid-column:2;grid-row:1;position:relative;justify-self:end;}
+.mv3-observe summary{list-style:none;display:inline-flex;align-items:center;gap:9px;padding:8px 13px;border:1px solid var(--rule-2);border-radius:999px;background:transparent;color:var(--ink-soft);font:600 var(--fs-sm) var(--sans);cursor:pointer;user-select:none;}
+.mv3-observe summary::-webkit-details-marker{display:none;}
+.mv3-observe summary::after{content:"";width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .24s cubic-bezier(.16,1,.3,1);}
+.mv3-observe[open] summary{background:var(--ivory);border-color:var(--ink);color:var(--ink);}
+.mv3-observe[open] summary::after{transform:rotate(225deg) translate(-1px,-1px);}
+.mv3-ctrl-r{position:absolute;right:0;top:calc(100% + 8px);z-index:8;width:min(360px,calc(100vw - 48px));display:grid;gap:8px;padding:12px;border:1px solid var(--rule);border-radius:14px;background:var(--ivory);box-shadow:var(--shadow-3);animation:mv3morein .24s cubic-bezier(.16,1,.3,1) both;}
+.mv3-view-btn{width:100%;text-align:left;font:600 var(--fs-xs) var(--sans);padding:9px 10px;border:1px solid var(--rule-2);border-radius:9px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:transform .16s ease,background-color .16s ease;}
+.mv3-view-btn:hover{background:var(--paper);}
+.mv3-view-btn:active{transform:scale(.985);}
+.mv3-view-btn.is-on{background:var(--ink);color:var(--ivory);border-color:var(--ink);}
+.mv3-view-select{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);}
+.mv3-select{min-width:0;width:100%;font:var(--fs-xs) var(--sans);padding:8px 10px;border-radius:8px;border:1px solid var(--rule-2);background:var(--ivory);color:var(--ink);cursor:pointer;}
+@keyframes mv3panelin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes mv3morein{from{opacity:0;transform:translateY(-5px);}to{opacity:1;transform:translateY(0);}}
+@keyframes mv3feedback{from{opacity:.25;transform:translateX(-5px);}to{opacity:1;transform:translateX(0);}}
+@keyframes mv3flash{0%{transform:scale(.985);}45%{border-color:var(--amber-deep);}100%{transform:scale(1);}}
 .mv3-legend{display:flex;align-items:center;gap:14px;padding:0 18px 12px;flex-wrap:wrap;font:var(--fs-2xs,12px) var(--mono);color:var(--mute-2);}
 .mv3-legend span{display:inline-flex;align-items:center;gap:5px;}
 .mv3-legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
@@ -1514,26 +1827,46 @@
 .mv3-risk:first-of-type{border-top:none;}
 .mv3-risk b{color:var(--ink);font-weight:600;}
 .rk{flex:none;font:var(--fs-2xs,12px) var(--mono);padding:1px 6px;border-radius:5px;}
-.rk-hi{background:rgba(168,73,42,.14);color:var(--amber-deep);}
-.rk-mid{background:rgba(176,132,64,.16);color:var(--gold-deep);}
-.rk-lo{background:rgba(118,113,106,.14);color:var(--mute-2);}
-.rk-r{background:rgba(112,82,168,.13);color:var(--violet);}
+.rk-hi{background:color-mix(in srgb, var(--amber-deep) 14%, transparent);color:var(--amber-deep);}
+.rk-mid{background:color-mix(in srgb, var(--gold) 16%, transparent);color:var(--gold-deep);}
+.rk-lo{background:color-mix(in srgb, var(--mute-2) 14%, transparent);color:var(--mute-2);}
+.rk-r{background:color-mix(in srgb, var(--violet) 13%, transparent);color:var(--violet);}
 @media (max-width:760px){
   .mv3-stage{height:62vw;min-height:320px;}
   .mv3-analysis{grid-template-columns:1fr;}
   .mv3-head h4{font-size:var(--fs-lg);}
+  .mv3-controls{grid-template-columns:1fr;padding:8px 12px 14px;}
+  .mv3-ctrl-l{display:grid;grid-template-columns:1fr 1fr;}
+  .mv3-btn{width:100%;padding:8px 10px;}
+  .mv3-btn-mode{grid-column:1/-1;}
+  .mv3-observe{grid-column:1;grid-row:auto;justify-self:stretch;order:2;}
+  .mv3-observe summary{width:100%;justify-content:space-between;box-sizing:border-box;}
+  .mv3-ctrl-r{left:0;right:auto;width:100%;box-sizing:border-box;}
+  .mv3-ctrl-teacher{grid-template-columns:1fr;order:3;gap:12px;}
+  .mv3-signal{grid-row:auto;padding:0 0 12px;border-right:0;border-bottom:1px solid var(--rule);}
+  .mv3-signal strong{max-width:none;font-size:var(--fs-md);}
+  .mv3-recommendations{grid-template-columns:1fr;}
+  .mv3-intervention-foot{align-items:flex-start;flex-direction:column;}
+  .mv3-more-toggle{align-self:flex-end;}
+  .mv3-more-inner{grid-template-columns:1fr;}
+  .mv3-more-action,.mv3-more-action:nth-child(2n){border-right:0;border-bottom:1px solid var(--rule);}
+  .mv3-more-action:last-child{border-bottom:0;}
   /* 字幕：移动端进一步压扁、半透明、省时间戳，第一屏多露教室 */
-  .mv3-caption{padding:16px 12px 8px;gap:6px;background:linear-gradient(to top, rgba(22,20,17,.78), rgba(22,20,17,0));}
+  .mv3-caption{padding:16px 12px 8px;gap:6px;background:linear-gradient(to top, color-mix(in srgb, var(--ink) 78%, transparent), transparent);}
   .mv3-cap-ts{display:none;}
-  .mv3-cap-role{font-size:11px;padding:1px 6px;}
+  .mv3-cap-role{font-size:var(--text-micro);padding:2px 6px;}
   .mv3-cap-text{font-size:var(--fs-xs);-webkit-line-clamp:2;}
+}
+@media (prefers-reduced-motion:reduce){
+  .mv3-ctrl-teacher,.mv3-more.is-open,.mv3-ctrl-r,.mv3-action-feedback.is-fresh,.mv3-rec.is-flash,.mv3-more-action.is-flash{animation:none;}
+  .mv3-rec,.mv3-more-action,.mv3-more-toggle span,.mv3-observe summary::after{transition:none;}
 }
 `;
     const e = document.createElement("style"); e.id = "mv3-style"; e.textContent = css; document.head.appendChild(e);
   }
 
-  /* ---------- 启动（懒加载：滚动到挂载点附近才构建，消除首屏 ~23s 主线程占用 + CLS） ---------- */
-  window.__MV3D_PENDING = true;  // “3D 延迟待命”——供 HTML 兜底区分“延迟”与“真失败/缺席”
+  /* ---------- 启动（进入 Stage II 附近即构建；HTML 占位高度负责防 CLS） ---------- */
+  setLifecycle("pending");  // “3D 延迟待命”——供 HTML 兜底区分“延迟”与“真失败/缺席”
   function lazyBoot() {
     const mount = document.getElementById(MOUNT_ID);
     if (!mount) return;
@@ -1541,7 +1874,7 @@
     const io = new IntersectionObserver(function (es) {
       if (es.some(function (e) { return e.isIntersecting; })) { io.disconnect(); start(); }
     }, { rootMargin: "300px 0px" });   // 提前 300px 预载,滚到时已就绪
-    io.observe(mount);
+    io.observe(mount.closest("#stage-ii") || mount);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", lazyBoot);
   else lazyBoot();

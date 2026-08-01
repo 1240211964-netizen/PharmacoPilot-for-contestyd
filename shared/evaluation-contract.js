@@ -13,7 +13,8 @@
  *   X1=0 → 最高 1.60   X1=2 → 最高 2.72   X1=4 → 最高 3.20
  *   原型阶段数值上限约 2.3–2.5（X1 典型值 2–3）
  *
- * 补充 evaluation-framework.js，不替换。
+ * 本文件是 COUPLING 的唯一计算信源。evaluation-framework.js 只负责能力 Δ、
+ * 学生节点与叙事语义，不再保留另一套同名 COUPLING 公式。
  *
  * ── 双时间轴 v2 适配说明（2026-05-29）──────────────────────────
  *   原 spine（9 列同步耦合）已改为 COUPLING 连线（教师环节 → 学生节点）。
@@ -38,6 +39,21 @@
     4: 1.00,  // 完全一致，不折扣
   };
 
+  const EVIDENCE_COEFFICIENTS = {
+    A: 1.0,
+    B: 0.8,
+    C: 0.5,
+    D: 0.2,
+  };
+
+  // 十进制评价指标统一采用一位小数的四舍五入。Number#toFixed 会受二进制
+  // 浮点表示影响（例如 2.85 在部分运行时得到 2.8），因此在契约层固定规则。
+  function roundRubric(value, digits) {
+    const scale = 10 ** (digits ?? 1);
+    const tolerance = Number.EPSILON * Math.max(1, Math.abs(value)) * 100;
+    return Math.round((value + tolerance) * scale) / scale;
+  }
+
   // ============ § 2 · 各环节适用 Xi 维度 ============
   // X1 已升级为全局系数，不再出现在逐环节映射中
   // null 表示该环节无耦合维度，spine 显示"—"
@@ -53,7 +69,7 @@
     E09: null,
   };
 
-  // ============ § 3 · Xi 维度量规说明（0–4）============
+  // ============ § 3 · Xi 评价维度说明（0–4）============
   // 含义：同一环节内，教师行为变化与学生能力证据变化同时出现的强度
   // 注意：4 分在 B 级证据阶段几乎不可达（需要学生的明确叙说）
   const XI_RUBRIC_LEVELS = [
@@ -70,8 +86,8 @@
    * 计算单个环节的 COUPLING 分数。
    *
    * @param {string} envId          - 'E01'–'E09'
-   * @param {Object} envXiScores    - 该环节的 Xi 量规得分，如 { X2: 2.5 }（0–4）
-   * @param {number} x1Score        - 本轮 X1 量规得分（0–4 整数）
+   * @param {Object} envXiScores    - 该环节的 Xi 评价指标得分，如 { X2: 2.5 }（0–4）
+   * @param {number} x1Score        - 本轮 X1 评价指标得分（0–4 整数）
    * @param {string} evidenceLevel  - 'A' | 'B' | 'C' | 'D'
    * @returns {number|null}         - 保留 1 位小数；该环节无耦合维度则返回 null
    */
@@ -82,20 +98,19 @@
     const scores = dims.map(d => envXiScores[d] ?? 0);
     const rawAvg = scores.reduce((a, b) => a + b, 0) / scores.length;
 
-    const evidenceCoefs = { A: 1.0, B: 0.8, C: 0.5, D: 0.2 };
-    const evidenceCoef = evidenceCoefs[evidenceLevel] ?? 0.8;
+    const evidenceCoef = EVIDENCE_COEFFICIENTS[evidenceLevel] ?? EVIDENCE_COEFFICIENTS.B;
 
     const x1Key = Math.min(4, Math.max(0, Math.round(x1Score)));
     const x1Coef = X1_GLOBAL_COEFFICIENT[x1Key] ?? 0.85;
 
-    return +(rawAvg * evidenceCoef * x1Coef).toFixed(1);
+    return roundRubric(rawAvg * evidenceCoef * x1Coef, 1);
   }
 
   /**
    * 计算全部 9 个环节的 COUPLING 数组（顺序对应 E01–E09）。
    *
    * @param {Object} perEnvXiScores - 按环节 ID 分组的 Xi 得分，如 { E03: { X2: 2.5 }, E04: { X3: 2.0 } }
-   * @param {number} x1Score        - 本轮 X1 量规得分（0–4）
+   * @param {number} x1Score        - 本轮 X1 评价指标得分（0–4）
    * @param {string} evidenceLevel  - 'A' | 'B' | 'C' | 'D'
    * @returns {Array<number|null>}  - 9 个值，null 表示该环节无耦合维度
    */
@@ -105,7 +120,36 @@
     );
   }
 
-  // ============ § 5 · 样本量规得分（仿真 · B 级证据）============
+  function validateRubricBlock(block) {
+    if (!block || typeof block !== 'object') return '评价指标数据必须是对象';
+    if (typeof block.x1 !== 'number' || !Number.isFinite(block.x1) || block.x1 < 0 || block.x1 > 4) {
+      return 'x1 必须是 0–4 的数字';
+    }
+    if (!block.perEnv || typeof block.perEnv !== 'object') return '缺少 perEnv 评价指标得分';
+    for (const [envId, dims] of Object.entries(block.perEnv)) {
+      if (!Object.prototype.hasOwnProperty.call(STATION_COUPLING_DIMS, envId)) {
+        return `未知环节 ${envId}`;
+      }
+      const applicable = STATION_COUPLING_DIMS[envId];
+      if (!applicable || !applicable.length) return `${envId} 未设置局部耦合维度，不应提供评价指标得分`;
+      if (!dims || typeof dims !== 'object') return `${envId} 评价指标得分必须是对象`;
+      for (const [dimId, score] of Object.entries(dims)) {
+        if (!applicable.includes(dimId)) return `${envId}.${dimId} 不属于该环节适用维度`;
+        if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 4) {
+          return `${envId}.${dimId} 必须是 0–4 的数字`;
+        }
+      }
+      for (const dimId of applicable) {
+        if (typeof dims[dimId] !== 'number') return `${envId}.${dimId} 缺失`;
+      }
+    }
+    for (const [envId, dims] of Object.entries(STATION_COUPLING_DIMS)) {
+      if (dims?.length && !block.perEnv[envId]) return `${envId} 缺少局部耦合评价指标分`;
+    }
+    return null;
+  }
+
+  // ============ § 5 · 样本评价指标得分（仿真 · B 级证据）============
   // 真实课堂数据接入后，用实测值替换 perEnv 中的 Xi 得分。
   // X1 全局得分也应随新教师目标对齐质量更新。
   //
@@ -117,7 +161,7 @@
   //   E08 X5=2.0 → 1.5
   const SAMPLE_XI_RUBRIC_SCORES = {
     cumulative: {
-      x1: 3,  // 本轮教师目标对齐高度一致（问题链、任务、量规指向同一能力）
+      x1: 3,  // 本轮教师目标对齐高度一致（问题链、任务、评价标准指向同一能力）
       perEnv: {
         E03: { X2: 2.5 },          // 问题链重写后高阶回应明显，但复杂场景追问仍有缺口
         E04: { X3: 2.0 },          // 案例被真实使用，政策引用准确率仍不足（38%）
@@ -152,26 +196,28 @@
 
   /**
    * 用样本数据生成指定时段的 COUPLING 数组（B 级证据）。
-   * 可作为 evaluation-framework.js deriveCouplingLane() 的替代数据源。
+   * 样本与 LIVE 均通过此入口生成 COUPLING；LIVE 需显式传入 rubricBlock。
    *
    * @param {'cumulative'|'weekly'|'single'} mode
    * @returns {Array<number|null>}
    */
-  function buildCouplingLane(mode) {
-    const sample = SAMPLE_XI_RUBRIC_SCORES[mode];
-    if (!sample) return null;
-    return computeCouplingLane(sample.perEnv, sample.x1, 'B');
+  function buildCouplingLane(mode, rubricBlock, evidenceLevel) {
+    const block = rubricBlock || SAMPLE_XI_RUBRIC_SCORES[mode];
+    if (!block || validateRubricBlock(block)) return null;
+    return computeCouplingLane(block.perEnv, block.x1, evidenceLevel || 'B');
   }
 
   // ============ § 6B · 桥接耦合（v2 · env → event）============
   // 把 9 元环节耦合数组按 framework.ENV_TO_EVENT 映射成 COUPLING 连接列表，
-  // 供需要"教师环节 → 学生节点"语义的视图使用（data-render.js 的 renderCouplingBridge
-  // 默认走 framework.deriveBridges 的 √ 公式；本函数提供量规驱动的等价物，便于二者对照）。
+  // 供“教师环节 → 学生节点”视图使用。连线强度仍来自同一评价指标结果；
+  // 主路径使用环节值，次路径仅作 0.5 权重线索，不启用第二套公式。
   //
   // @returns {Array<{envId, envIndex, eventId, isPrimary, strength}>}
   // envIndex（0-8）供 data-render.js renderCouplingBridge 在 9 列坐标系里定位连线起点。
-  function buildBridgeCoupling(mode) {
-    const lane = buildCouplingLane(mode);
+  function buildBridgeCoupling(mode, rubricBlock, evidenceLevel) {
+    const block = rubricBlock || SAMPLE_XI_RUBRIC_SCORES[mode];
+    const level = evidenceLevel || 'B';
+    const lane = buildCouplingLane(mode, block, level);
     const EF = window.PharmacoPilotEvaluationFramework;
     if (!lane || !EF || !EF.ENV_TO_EVENT) return [];
     const envIds = ['E01','E02','E03','E04','E05','E06','E07','E08','E09'];
@@ -181,10 +227,61 @@
       if (strength == null || strength <= 0) return;
       const link = EF.ENV_TO_EVENT[envId];
       if (!link) return;
-      if (link.primary)   out.push({ envId, envIndex: i, eventId: link.primary,   isPrimary: true,  strength });
-      if (link.secondary) out.push({ envId, envIndex: i, eventId: link.secondary, isPrimary: false, strength: +(strength * 0.5).toFixed(2) });
+      const dims = STATION_COUPLING_DIMS[envId] || [];
+      const scores = dims.map(dimId => block.perEnv[envId]?.[dimId] ?? 0);
+      const xiAverage = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+      const x1Key = Math.min(4, Math.max(0, Math.round(block.x1)));
+      const meta = {
+        dims,
+        xiScores: Object.fromEntries(dims.map(dimId => [dimId, block.perEnv[envId]?.[dimId] ?? 0])),
+        xiAverage: +xiAverage.toFixed(2),
+        stationStrength: strength,
+        x1Score: block.x1,
+        x1Coefficient: X1_GLOBAL_COEFFICIENT[x1Key],
+        evidenceLevel: level,
+        evidenceCoefficient: EVIDENCE_COEFFICIENTS[level] ?? EVIDENCE_COEFFICIENTS.B,
+      };
+      if (link.primary)   out.push({ envId, envIndex: i, eventId: link.primary,   isPrimary: true,  strength, ...meta });
+      if (link.secondary) out.push({ envId, envIndex: i, eventId: link.secondary, isPrimary: false, strength: roundRubric(strength * 0.5, 2), ...meta });
     });
     return out;
+  }
+
+  function buildCouplingProfile(mode, rubricBlock, evidenceLevel) {
+    const block = rubricBlock || SAMPLE_XI_RUBRIC_SCORES[mode];
+    if (!block) return { ok: false, error: '缺少 COUPLING 评价指标', lane: Array(9).fill(null), bridges: [] };
+    const error = validateRubricBlock(block);
+    if (error) return { ok: false, error, lane: Array(9).fill(null), bridges: [] };
+    const level = evidenceLevel || 'B';
+    return {
+      ok: true,
+      error: null,
+      rubric: block,
+      evidenceLevel: level,
+      lane: buildCouplingLane(mode, block, level),
+      bridges: buildBridgeCoupling(mode, block, level),
+    };
+  }
+
+  /**
+   * 汇总的是“已设置局部评价指标的环节平均关联强度”，不是九环节求和指数。
+   * coverage 独立报告，避免多测几个环节就机械抬高总值。
+   */
+  function buildAssociationSummary(lane, totalStations) {
+    const values = (lane || []).filter(v => typeof v === 'number' && Number.isFinite(v));
+    const total = Number.isInteger(totalStations) && totalStations > 0 ? totalStations : 9;
+    if (!values.length) {
+      return { available: false, mean: null, covered: 0, total, coverageRate: 0, scaleMax: 4 };
+    }
+    const mean = roundRubric(values.reduce((a, b) => a + b, 0) / values.length, 1);
+    return {
+      available: true,
+      mean,
+      covered: values.length,
+      total,
+      coverageRate: roundRubric(values.length / total, 2),
+      scaleMax: 4,
+    };
   }
 
   // ============ § 7 · 量程快查（调试 / 文档用）============
@@ -200,13 +297,17 @@
   // ============ EXPORT ============
   window.PharmacoPilotEvaluationContract = {
     X1_GLOBAL_COEFFICIENT,
+    EVIDENCE_COEFFICIENTS,
     STATION_COUPLING_DIMS,
     XI_RUBRIC_LEVELS,
     SAMPLE_XI_RUBRIC_SCORES,
     computeStationCoupling,
     computeCouplingLane,
+    validateRubricBlock,
     buildCouplingLane,
     buildBridgeCoupling,
+    buildCouplingProfile,
+    buildAssociationSummary,
     buildRangeTable,
   };
 })();

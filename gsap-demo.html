@@ -10,19 +10,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=4" />
+<link rel="stylesheet" href="./shared/tokens.css?v=6-readability-floor" />
 <style>
 :root {
-  --demo-paper: #f4eee2;
-  --demo-ink: #1b1916;
-  --demo-ivory: #fffdf7;
-  --demo-amber: #a8492a;
-  --demo-amber-2: #d97757;
-  --demo-sage: #5f806c;
-  --demo-indigo: #5d6f95;
-  --demo-rule: #cdbfa8;
-  --demo-mute: #6f665a; /* a11y: 原 #766d60 在浅纸底仅 4.4:1,加深至 ~4.9:1 */
-  --demo-dark: #171411;
+  --demo-paper: var(--paper-2);
+  --demo-ink: var(--ink);
+  --demo-ivory: var(--ivory);
+  --demo-amber: var(--amber-deep);
+  --demo-amber-2: var(--amber);
+  --demo-sage: var(--sage);
+  --demo-indigo: var(--indigo);
+  --demo-rule: var(--rule-2);
+  --demo-mute: var(--mute);
+  --demo-dark: var(--ink);
 }
 
 * { box-sizing: border-box; }
@@ -33,11 +33,11 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(90deg, rgba(27,25,22,.035) 1px, transparent 1px) 0 0 / 36px 36px,
-    linear-gradient(180deg, rgba(27,25,22,.024) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 3.5%, transparent) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(180deg, color-mix(in srgb, var(--ink) 2.4%, transparent) 1px, transparent 1px) 0 0 / 36px 36px,
     var(--demo-paper);
   color: var(--demo-ink);
-  font-family: var(--sans, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-family: var(--sans);
   overflow-x: hidden;
 }
 
@@ -64,7 +64,7 @@ a {
   gap: 22px;
   padding: 16px 42px;
   border-bottom: 1px solid var(--demo-ink);
-  background: color-mix(in oklab, var(--demo-paper) 88%, white);
+  background: color-mix(in oklab, var(--demo-paper) 88%, var(--ivory));
   backdrop-filter: blur(14px);
 }
 
@@ -76,7 +76,7 @@ a {
 }
 
 .brand b {
-  font-family: var(--serif-en, Georgia, serif);
+  font-family: var(--serif-en);
   font-size: clamp(25px, 2.3vw, 34px);
   line-height: 1;
 }
@@ -88,7 +88,7 @@ a {
 
 .brand span {
   color: var(--demo-mute);
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-family: var(--mono);
   font-size: 12px;
 }
 
@@ -100,7 +100,7 @@ a {
   padding: 3px;
   border: 1px solid var(--demo-rule);
   border-radius: 8px;
-  background: rgba(255,253,247,.52);
+  background: color-mix(in srgb, var(--ivory) 52%, transparent);
 }
 
 .demo-nav a,
@@ -112,14 +112,14 @@ a {
   padding: 0 12px;
   border-radius: 6px;
   color: var(--demo-mute);
-  font-family: var(--serif-cn, Songti SC, serif);
+  font-family: var(--serif-cn);
   font-size: 14px;
 }
 
 .demo-nav a.is-active {
   background: var(--demo-ivory);
   color: var(--demo-ink);
-  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent);
 }
 
 .header-actions {
@@ -168,7 +168,7 @@ a {
   gap: 10px;
   margin-bottom: 14px;
   color: var(--demo-amber);
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-family: var(--mono);
   font-size: 12px;
 }
 
@@ -182,7 +182,7 @@ a {
 .lab-head h1 {
   margin: 0;
   max-width: 880px;
-  font-family: var(--serif-cn, Songti SC, serif);
+  font-family: var(--serif-cn);
   font-size: clamp(38px, 5vw, 76px);
   font-weight: 500;
   line-height: 1.06;
@@ -190,7 +190,7 @@ a {
 
 .lab-head h1 i {
   color: var(--demo-amber);
-  font-family: var(--serif-en, Georgia, serif);
+  font-family: var(--serif-en);
   font-style: italic;
 }
 
@@ -201,8 +201,8 @@ a {
   padding: 12px 14px;
   border: 1px solid var(--demo-rule);
   border-radius: 8px;
-  background: rgba(255,253,247,.56);
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  background: color-mix(in srgb, var(--ivory) 56%, transparent);
+  font-family: var(--mono);
   font-size: 12px;
   color: var(--demo-mute);
 }
@@ -227,7 +227,7 @@ a {
   border: 1px solid var(--demo-ink);
   border-radius: 10px;
   background: var(--demo-ivory);
-  box-shadow: 8px 8px 0 rgba(27,25,22,.18);
+  box-shadow: 8px 8px 0 var(--rule-2);
   overflow: hidden;
 }
 
@@ -244,7 +244,7 @@ a {
 .panel-head h2,
 .panel-head h3 {
   margin: 0;
-  font-family: var(--serif-cn, Songti SC, serif);
+  font-family: var(--serif-cn);
   font-size: 20px;
   font-weight: 500;
 }
@@ -258,8 +258,8 @@ a {
   border-radius: 999px;
   border: 1px solid var(--demo-rule);
   color: var(--demo-mute);
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
-  font-size: 11px;
+  font-family: var(--mono);
+  font-size: var(--text-caption);
   white-space: nowrap;
 }
 
@@ -277,13 +277,13 @@ a {
 }
 
 .cinema .panel-head {
-  border-color: rgba(255,253,247,.16);
-  background: rgba(255,253,247,.04);
+  border-color: color-mix(in srgb, var(--ivory) 16%, transparent);
+  background: color-mix(in srgb, var(--ivory) 4%, transparent);
 }
 
 .cinema .panel-chip {
-  border-color: rgba(255,253,247,.2);
-  color: rgba(255,253,247,.66);
+  border-color: color-mix(in srgb, var(--ivory) 20%, transparent);
+  color: color-mix(in srgb, var(--ivory) 66%, transparent);
 }
 
 .scene-stage {
@@ -313,8 +313,8 @@ a {
   inset: 0;
   z-index: 1;
   background:
-    linear-gradient(90deg, rgba(23,20,17,.88), rgba(23,20,17,.32) 39%, rgba(23,20,17,.05) 72%),
-    linear-gradient(180deg, rgba(23,20,17,.06), rgba(23,20,17,.62));
+    linear-gradient(90deg, color-mix(in srgb, var(--demo-dark) 88%, transparent), color-mix(in srgb, var(--demo-dark) 32%, transparent) 39%, color-mix(in srgb, var(--demo-dark) 5%, transparent) 72%),
+    linear-gradient(180deg, color-mix(in srgb, var(--demo-dark) 6%, transparent), color-mix(in srgb, var(--demo-dark) 62%, transparent));
   pointer-events: none;
 }
 
@@ -334,7 +334,7 @@ a {
   gap: 10px;
   margin-bottom: 20px;
   color: var(--demo-amber-2);
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-family: var(--mono);
   font-size: 12px;
 }
 
@@ -347,7 +347,7 @@ a {
 
 .scene-title {
   margin: 0;
-  font-family: var(--serif-cn, Songti SC, serif);
+  font-family: var(--serif-cn);
   font-size: clamp(46px, 5.5vw, 82px);
   font-weight: 500;
   line-height: 1.06;
@@ -357,10 +357,10 @@ a {
   width: fit-content;
   margin: 20px 0 0;
   padding: 8px 13px;
-  border: 1px solid rgba(255,253,247,.28);
+  border: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
   border-radius: 999px;
-  color: rgba(255,253,247,.72);
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  color: color-mix(in srgb, var(--ivory) 72%, transparent);
+  font-family: var(--mono);
   font-size: 12px;
 }
 
@@ -377,9 +377,9 @@ a {
   min-height: 31px;
   padding: 0 11px;
   border-radius: 999px;
-  background: rgba(255,253,247,.9);
+  background: color-mix(in srgb, var(--ivory) 90%, transparent);
   color: var(--demo-ink);
-  font-family: var(--serif-cn, Songti SC, serif);
+  font-family: var(--serif-cn);
   font-size: 14px;
   will-change: transform, opacity;
 }
@@ -406,7 +406,7 @@ a {
   width: 34px;
   height: 4px;
   border-radius: 999px;
-  background: rgba(255,253,247,.28);
+  background: color-mix(in srgb, var(--ivory) 28%, transparent);
 }
 
 .shot-dot.is-active { background: var(--demo-amber-2); }
@@ -418,7 +418,7 @@ a {
   width: 210px;
   height: 210px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(217,119,87,.24), transparent 65%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--amber) 24%, transparent), transparent 65%);
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -447,7 +447,7 @@ a {
   right: 0;
   bottom: 15px;
   height: 2px;
-  background: rgba(255,253,247,.16);
+  background: color-mix(in srgb, var(--ivory) 16%, transparent);
 }
 
 .stage-progress span {
@@ -469,7 +469,7 @@ a {
   border-radius: 50%;
   border: 2px solid var(--demo-ivory);
   background: var(--demo-amber);
-  box-shadow: 0 0 0 6px rgba(217,119,87,.14);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--amber) 14%, transparent);
   will-change: transform;
 }
 
@@ -480,37 +480,37 @@ a {
   min-height: 76px;
   min-width: 0;
   padding: 9px 6px;
-  border: 1px solid rgba(255,253,247,.12);
+  border: 1px solid color-mix(in srgb, var(--ivory) 12%, transparent);
   border-radius: 8px;
-  background: rgba(255,253,247,.05);
-  color: rgba(255,253,247,.62);
+  background: color-mix(in srgb, var(--ivory) 5%, transparent);
+  color: color-mix(in srgb, var(--ivory) 62%, transparent);
   text-align: left;
   will-change: transform;
 }
 
 .stage-chip b {
-  color: rgba(255,253,247,.60); /* a11y: .44→.60 序号在暗 chip 底达 ~6:1 */
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
-  font-size: 11px;
+  color: color-mix(in srgb, var(--ivory) 60%, transparent); /* a11y: .44→.60 序号在暗 chip 底达 ~6:1 */
+  font-family: var(--mono);
+  font-size: var(--text-caption);
   font-weight: 400;
 }
 
 .stage-chip span {
-  font-family: var(--serif-cn, Songti SC, serif);
+  font-family: var(--serif-cn);
   font-size: 13px;
   line-height: 1.25;
-  color: rgba(255,253,247,.92);
+  color: color-mix(in srgb, var(--ivory) 92%, transparent);
 }
 
 .stage-chip.is-done {
-  border-color: rgba(95,128,108,.5);
-  background: rgba(95,128,108,.16);
+  border-color: color-mix(in srgb, var(--sage) 50%, transparent);
+  background: color-mix(in srgb, var(--sage) 16%, transparent);
 }
 
 .stage-chip.is-active {
   border-color: var(--demo-amber-2);
-  background: rgba(217,119,87,.2);
-  box-shadow: inset 0 0 0 1px rgba(217,119,87,.42);
+  background: color-mix(in srgb, var(--amber) 20%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--amber) 42%, transparent);
 }
 
 .stage-readout {
@@ -520,26 +520,26 @@ a {
   align-items: start;
   margin-top: 18px;
   padding-top: 16px;
-  border-top: 1px solid rgba(255,253,247,.12);
+  border-top: 1px solid color-mix(in srgb, var(--ivory) 12%, transparent);
 }
 
 .stage-num {
   color: var(--demo-amber-2);
-  font-family: var(--serif-en, Georgia, serif);
+  font-family: var(--serif-en);
   font-size: 48px;
   line-height: .9;
 }
 
 .stage-readout h3 {
   margin: 0;
-  font-family: var(--serif-cn, Songti SC, serif);
+  font-family: var(--serif-cn);
   font-size: 24px;
   font-weight: 500;
 }
 
 .stage-readout p {
   margin: 8px 0 0;
-  color: rgba(255,253,247,.66);
+  color: color-mix(in srgb, var(--ivory) 66%, transparent);
   line-height: 1.55;
 }
 
@@ -550,8 +550,8 @@ a {
 }
 
 .console .panel-head {
-  border-color: rgba(255,253,247,.16);
-  background: rgba(255,253,247,.04);
+  border-color: color-mix(in srgb, var(--ivory) 16%, transparent);
+  background: color-mix(in srgb, var(--ivory) 4%, transparent);
 }
 
 .console-stream {
@@ -567,16 +567,16 @@ a {
   align-items: baseline;
   min-height: 38px;
   padding: 8px 0;
-  border-bottom: 1px dashed rgba(255,253,247,.1);
-  color: rgba(255,253,247,.74);
+  border-bottom: 1px dashed color-mix(in srgb, var(--ivory) 10%, transparent);
+  color: color-mix(in srgb, var(--ivory) 74%, transparent);
   font-size: 13px;
   will-change: transform, opacity;
 }
 
 .log-row .ts,
 .log-row .kind {
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
-  font-size: 11px;
+  font-family: var(--mono);
+  font-size: var(--text-caption);
 }
 
 .log-row .kind { color: var(--demo-amber-2); }
@@ -595,7 +595,7 @@ a {
 .node-rail {
   position: relative;
   border-right: 1px solid var(--demo-rule);
-  background: color-mix(in oklab, var(--demo-paper) 76%, white);
+  background: color-mix(in oklab, var(--demo-paper) 76%, var(--ivory));
   padding: 16px;
 }
 
@@ -619,18 +619,18 @@ a {
   padding: 0 10px;
   border-radius: 6px;
   color: var(--demo-mute);
-  font-family: var(--serif-cn, Songti SC, serif);
+  font-family: var(--serif-cn);
 }
 
 .node-item b {
   color: var(--demo-amber);
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-family: var(--mono);
   font-size: 12px;
   font-weight: 400;
 }
 
 .node-item.is-active {
-  background: rgba(168,73,42,.12);
+  background: color-mix(in srgb, var(--amber-deep) 12%, transparent);
   color: var(--demo-ink);
 }
 
@@ -651,7 +651,7 @@ a {
 
 .detail-main h3 {
   margin: 0;
-  font-family: var(--serif-cn, Songti SC, serif);
+  font-family: var(--serif-cn);
   font-size: clamp(28px, 3.2vw, 44px);
   font-weight: 500;
   line-height: 1.14;
@@ -687,7 +687,7 @@ a {
 .artifact-preview {
   border: 1px solid var(--demo-rule);
   border-radius: 8px;
-  background: color-mix(in oklab, var(--demo-paper) 78%, white);
+  background: color-mix(in oklab, var(--demo-paper) 78%, var(--ivory));
   overflow: hidden;
 }
 
@@ -697,7 +697,7 @@ a {
   gap: 12px;
   padding: 12px 14px;
   border-bottom: 1px solid var(--demo-rule);
-  font-family: var(--mono, ui-monospace, Menlo, monospace);
+  font-family: var(--mono);
   font-size: 12px;
   color: var(--demo-mute);
 }
@@ -711,7 +711,7 @@ a {
 .artifact-line {
   height: 10px;
   border-radius: 999px;
-  background: rgba(27,25,22,.14);
+  background: color-mix(in srgb, var(--ink) 14%, transparent);
   transform-origin: left center;
   will-change: transform, opacity;
 }
@@ -836,7 +836,7 @@ a {
             <div class="stage-readout" id="stageReadout">
               <div class="stage-num" id="stageNum">01</div>
               <div>
-                <h3 id="stageName">学情诊断</h3>
+                <h3 id="stageName">学习者与教学情境分析</h3>
                 <p id="stageCopy">先把新教师真正需要判断的入口问题收束出来。</p>
               </div>
             </div>
@@ -864,7 +864,7 @@ a {
           <div class="detail-pane">
             <div class="detail-inner" id="detailInner">
               <div class="detail-main">
-                <h3 id="detailTitle">学情诊断 · 课程入口</h3>
+                <h3 id="detailTitle">学习者与教学情境分析 · 课程入口</h3>
                 <p id="detailCopy">把旧教案、课程目标和学生经验收束成一个可执行的入口判断。</p>
                 <div class="decision-row" id="decisionRow"></div>
               </div>
@@ -912,38 +912,38 @@ a {
   ];
 
   const stages = [
-    ["01", "学情诊断", "先把新教师真正需要判断的入口问题收束出来。"],
-    ["02", "目标与量规", "把课程目标、活动证据和评价标准对齐。"],
-    ["03", "知识与误区", "从知识点走到课堂问题链。"],
-    ["04", "案例与证据", "让政策案例成为可追溯材料。"],
-    ["05", "任务链设计", "把 45 分钟拆成可执行活动。"],
-    ["06", "课中调控", "在课堂中捕捉学情信号并调整。"],
-    ["07", "评价与画像", "把表现性评价写成可复用量规。"],
-    ["08", "复盘与决策", "把本节课的问题写回下一轮设计。"],
-    ["09", "资产沉淀", "沉淀可复用的课程资产包。"]
+    ["01", "学习者与教学情境分析", "先把新教师真正需要判断的入口问题收束出来。"],
+    ["02", "预期学习结果与评价证据设计", "把课程目标、活动证据和评价标准对齐。"],
+    ["03", "教学内容结构化与前概念诊断", "从知识点走到课堂问题链。"],
+    ["04", "真实性学习情境与资源设计", "让政策案例成为可追溯材料。"],
+    ["05", "学习活动与教学支架设计", "把 45 分钟拆成可执行活动。"],
+    ["06", "形成性评价与适应性调控", "在课堂中捕捉学情信号并调整。"],
+    ["07", "表现性评价与学习成效诊断", "把表现性评价写成可复用评价标准。"],
+    ["08", "反思性实践与教学改进", "把本节课的问题写回下一轮设计。"],
+    ["09", "教学知识建构与专业共享", "沉淀可复用的课程资产包。"]
   ];
 
   const workbench = [
     {
-      title: "学情诊断 · 课程入口",
+      title: "学习者与教学情境分析 · 课程入口",
       copy: "把旧教案、课程目标和学生经验收束成一个可执行的入口判断。",
       artifact: "diagnosis-note.md",
       choices: ["课程定位", "学生经验入口", "课前诊断题"]
     },
     {
-      title: "知识与误区 · 问题链",
+      title: "教学内容结构化与前概念诊断 · 问题链",
       copy: "把医保谈判案例中的概念边界和常见误区转成递进式提问。",
       artifact: "question-chain.md",
       choices: ["核心概念边界", "误区追问", "证据链接"]
     },
     {
-      title: "课中调控 · 学情触发",
+      title: "形成性评价与适应性调控 · 学情触发",
       copy: "把课堂中的学生回答、协作密度和卡点转成调节规则。",
       artifact: "trigger-rules.md",
       choices: ["ZPD 锚点", "巡视提示", "反馈语模板"]
     },
     {
-      title: "复盘与决策 · 回写地图",
+      title: "反思性实践与教学改进 · 回写地图",
       copy: "把课堂证据和教师判断写回 9 环节地图，形成下一轮优化入口。",
       artifact: "review-report.md",
       choices: ["议程兑现度", "资产沉淀", "下一轮修改"]
@@ -951,7 +951,7 @@ a {
   ];
 
   const logs = [
-    ["00:01", "规划", "识别 <b>节点 03</b> · 知识与误区"],
+    ["00:01", "规划", "识别 <b>环节 03</b> · 教学内容结构化与前概念诊断"],
     ["00:03", "检索", "调用 <b>闻道·科学探索</b>"],
     ["00:08", "查证", "收到 <b>7 份资料</b> · CMS-202407"],
     ["00:11", "生成", "写入 <b>question-chain.md</b>"],

@@ -39,8 +39,8 @@
  *      解法：按抽象层级 / UbD 阶段拆段，各段输出独立产物。
  *      字段：subNodeIds 用 "<stid>-<letter>" 命名 + focus 字段（区分 banner 类型）
  *      实例：
- *        - S2 = ["4-a", "4-b"]：Stage 1 学习目标 → Stage 2 评价证据 + 量规
- *        - S7 = ["10-a", "10-b", "10-c"]：评分采集 → 反馈与画像 → 量规反向修订
+ *        - S2 = ["4-a", "4-b"]：Stage 1 学习目标 → Stage 2 评价证据 + 评价标准
+ *        - S7 = ["10-a", "10-b", "10-c"]：评分采集 → 反馈与画像 → 评价标准反向修订
  *
  *   4) 单子节点合理 —— S3 / S4 / S8 / S9
  *      内容耦合度高（问题链与误区紧耦合 / 案例与议程证据一体 / 11 拆分已足）。
@@ -183,7 +183,7 @@
       id: 4,
       phase: "pre",
       title: "学习目标与评价证据",
-      displayName: "目标—证据—量规",
+      displayName: "目标—证据—评价标准",
       userMindset: "学生学完后要能做什么？怎么证明？目标如何同时回应定位、学情分析和学习者议程？",
       what: "把教学目标改写为可观察、可评价、可由学生产出证明的学习成果；同时回应来自前面三个环节的输入（课程定位、学情诊断、学习者议程）。",
       why: "目标若不回应学情和议程，再漂亮也是空的——这里强制让目标改写时同时回应前面三个环节(定位、学情低分项、学习者议程主张)。",
@@ -285,16 +285,16 @@
       id: 10,
       phase: "post",
       title: "表现性评价与反馈",
-      displayName: "评价量规实验台",
+      displayName: "表现性评价实验台",
       userMindset: "学生作品怎么评？反馈怎么写？",
-      what: "用评价量规判断学生作品是否真正体现药事管理判断能力，并生成可行动反馈。",
+      what: "用评价标准判断学生作品是否真正体现药事管理判断能力，并生成可行动反馈。",
       why: "学生作品可能格式完整但质量较低，例如缺少证据、分类错误、策略与分析不匹配或缺少风险边界。",
-      how: "查看量规雷达图或低分维度分布图 + 产出链顶卡（学习目标 + 课中学情触发记录），判断作品主要问题，生成评价量规、评分说明和反馈语模板。",
-      evidenceFigure: "量规雷达图 / 学生作品质量分布图 / 低分维度分布图",
+      how: "查看评价雷达图或低分维度分布图 + 产出链顶卡（学习目标 + 课中学情触发记录），判断作品主要问题，生成评价标准、评分说明和反馈语模板。",
+      evidenceFigure: "评价雷达图 / 学生作品质量分布图 / 低分维度分布图",
       decisionQuestion: "表现性评价最应强调什么？",
-      artifactType: "表现性评价量规、学生作品评分表、反馈语模板、二次修改要求",
+      artifactType: "表现性评价标准、学生作品评分表、反馈语模板、二次修改要求",
       qualityDimensions: ["assessment", "alignment"],
-      backendCheckpoints: ["学生作品", "评价量规", "评分说明", "反馈语", "二次修改"],
+      backendCheckpoints: ["学生作品", "评价标准", "评分说明", "反馈语", "二次修改"],
       v3Status: "kept",
       v3Note: "v2 节点 9。新增产出链顶卡（节点 4 + 节点 9 输入）。",
     },
@@ -375,16 +375,17 @@
     7: { inputsFrom: [4, 5], outputsTo: [8, 9], topCardFromKeys: ["目标", "问题链"], topCardToKeys: ["时间线", "3 个 ZPD 锚点"] },
     8: { inputsFrom: [3, 6, 7], outputsTo: [9, 10], topCardFromKeys: ["议程意愿", "案例", "时间线"], topCardToKeys: ["协作任务单", "探究产出"] },
     9: { inputsFrom: [7, 8], outputsTo: [11], topCardFromKeys: ["锚点位置", "探究产出"], topCardToKeys: ["学情触发—反馈—调节规则"] },
-    10: { inputsFrom: [4, 8], outputsTo: [11], topCardFromKeys: ["评价证据", "学生作品"], topCardToKeys: ["量规", "评分", "反馈语"] },
+    10: { inputsFrom: [4, 8], outputsTo: [11], topCardFromKeys: ["评价证据", "学生作品"], topCardToKeys: ["评价标准", "评分", "反馈语"] },
     11: { inputsFrom: [3, 9, 10], outputsTo: [], topCardFromKeys: ["议程", "学情触发记录", "评价结果"], topCardToKeys: ["复盘报告", "资产清单", "下一轮改进"] },
   };
 
   // ============================================================
   // v4 NEW: NAV_STAGES — 9 frontend macro-stages
+  // title 严格采用 Pharmacopilot 0801 的规范全称；shortLabel 为兼容字段，也必须保持全称。
   // ============================================================
   const NAV_STAGES = [
     {
-      id: "S1", phase: "pre", title: "课程定位 · 学情诊断 · 学习者议程协商", displayName: "定位·学情·议程",
+      id: "S1", phase: "pre", title: "学习者与教学情境分析", shortLabel: "学习者与教学情境分析",
       tag: "诊断", pillClass: "pill-amber",
       keyDecision: "本节最大冲突点是什么？",
       learnObjective: "识别学生真实的认知与经验起点",
@@ -396,20 +397,20 @@
       theoryDrawer: ["Bruner 螺旋课程", "Dewey 经验连续性", "Freire 问题提出", "Knowles 成人学习"],
     },
     {
-      id: "S2", phase: "pre", title: "学习目标—评价证据—量规对齐", displayName: "目标与量规",
+      id: "S2", phase: "pre", title: "预期学习结果与评价证据设计", shortLabel: "预期学习结果与评价证据设计",
       tag: "目标", pillClass: "pill-amber",
-      keyDecision: "目标与量规第一应补强哪一项？",
+      keyDecision: "预期学习结果与评价证据第一应补强哪一项？",
       learnObjective: "把目标改成可观察、可评价的成果",
-      doAction: "先写 3-5 条目标，再配 5 维量规",
-      getDeliverable: "学习目标表 + 5 维量规",
+      doAction: "先写 3-5 条目标，再配 5 维评价标准",
+      getDeliverable: "学习目标表 + 5 维评价标准",
       subNodeIds: ["4-a", "4-b"],
-      iterationModel: "UbD 两段：目标（Stage 1）→ 评价证据 + 量规（Stage 2）",
-      pharmacyContext: "药事管理决策能力目标 + 5 维量规（含批判意识维度）",
+      iterationModel: "UbD 两段：目标（Stage 1）→ 评价证据 + 评价标准（Stage 2）",
+      pharmacyContext: "药事管理决策能力目标 + 5 维评价标准（含批判意识维度）",
       theoryDrawer: ["Wiggins & McTighe UbD", "Anderson Bloom 修订版", "Biggs 建设性对齐"],
       acceptsRubricRevision: { from: "S7", channelKey: "rubricRevision" },
     },
     {
-      id: "S3", phase: "pre", title: "知识结构与关键误区定位", displayName: "知识与误区",
+      id: "S3", phase: "pre", title: "教学内容结构化与前概念诊断", shortLabel: "教学内容结构化与前概念诊断",
       tag: "知识", pillClass: "pill-amber",
       keyDecision: "学生最易卡在哪个误区？",
       learnObjective: "找出学生最易卡住的概念误区",
@@ -420,7 +421,7 @@
       theoryDrawer: ["Chi 概念变化", "Shulman PCK"],
     },
     {
-      id: "S4", phase: "pre", title: "真实药事管理案例与证据包", displayName: "案例与证据",
+      id: "S4", phase: "pre", title: "真实性学习情境与资源设计", shortLabel: "真实性学习情境与资源设计",
       tag: "案例", pillClass: "pill-amber",
       keyDecision: "议程关切对应的证据是否齐？",
       learnObjective: "把真实药事案例转化为证据包",
@@ -431,7 +432,7 @@
       theoryDrawer: ["Wiggins 真实性评价", "Christensen 哈佛案例法", "Lave & Wenger 情境学习"],
     },
     {
-      id: "S5", phase: "pre", title: "课堂任务链与支架设计", displayName: "任务链设计",
+      id: "S5", phase: "pre", title: "学习活动与教学支架设计", shortLabel: "学习活动与教学支架设计",
       tag: "任务", pillClass: "pill-amber",
       keyDecision: "协作任务最应补强哪一项？",
       learnObjective: "用任务链 + 支架让学生主动参与",
@@ -443,7 +444,7 @@
       theoryDrawer: ["Chi ICAP", "Vygotsky ZPD", "Wood/Bruner 支架理论"],
     },
     {
-      id: "S6", phase: "in", title: "课中学情捕捉与即时干预", displayName: "课中调控",
+      id: "S6", phase: "in", title: "形成性评价与适应性调控", shortLabel: "形成性评价与适应性调控",
       tag: "课中", pillClass: "pill-sage",
       keyDecision: "本校准点的「如果 X 则 Y」规则是什么？",
       learnObjective: "用形成性评价实时校准课堂节奏",
@@ -455,20 +456,20 @@
       theoryDrawer: ["Black & Wiliam 形成性评价", "Feuerstein 动态评估"],
     },
     {
-      id: "S7", phase: "post", title: "表现性评价与学生能力画像", displayName: "评价与画像",
+      id: "S7", phase: "post", title: "表现性评价与学习成效诊断", shortLabel: "表现性评价与学习成效诊断",
       tag: "评价", pillClass: "pill-indigo",
       keyDecision: "下一轮要补强哪一维？",
-      learnObjective: "把作品评分转化为可行动反馈，并把量规问题回写到「目标与量规」",
-      doAction: "评分采集 → 反馈语与能力画像 → 量规反向修订",
-      getDeliverable: "评分表 + 能力画像 + 反馈语 + 量规修订建议",
+      learnObjective: "把作品评分转化为可行动反馈，并把评价标准问题回写到「预期学习结果与评价证据设计」",
+      doAction: "评分采集 → 反馈语与能力画像 → 评价标准反向修订",
+      getDeliverable: "评分表 + 能力画像 + 反馈语 + 评价标准修订建议",
       subNodeIds: ["10-a", "10-b", "10-c"],
-      iterationModel: "数据采集（评分）→ 教学动作（反馈/画像）→ 元动作（量规修订回写 S2）",
-      pharmacyContext: "5 维量规评分 / 低分维度 Pareto / 能力画像 / 反馈语模板 / 量规反修订建议",
+      iterationModel: "数据采集（评分）→ 教学动作（反馈/画像）→ 元动作（评价标准修订回写 S2）",
+      pharmacyContext: "5 维评价结果 / 低分维度 Pareto / 能力画像 / 反馈语模板 / 评价标准反向修订建议",
       theoryDrawer: ["Hattie 可见的学习", "Hattie 反馈层级"],
       supportsRubricRevision: { to: "S2", channelKey: "rubricRevision" },
     },
     {
-      id: "S8", phase: "post", title: "教师教学复盘与改进决策", displayName: "复盘与决策",
+      id: "S8", phase: "post", title: "反思性实践与教学改进", shortLabel: "反思性实践与教学改进",
       tag: "复盘", pillClass: "pill-indigo",
       keyDecision: "下一轮第一改进项是什么？",
       learnObjective: "把课堂证据复盘为改进决策",
@@ -479,14 +480,14 @@
       theoryDrawer: ["Schön 反思性实践", "Kolb 经验学习圈"],
     },
     {
-      id: "S9", phase: "post", title: "课例资产沉淀与知识库更新", displayName: "资产沉淀",
+      id: "S9", phase: "post", title: "教学知识建构与专业共享", shortLabel: "教学知识建构与专业共享",
       tag: "资产", pillClass: "pill-indigo",
       keyDecision: "本轮最值得沉淀什么？",
       learnObjective: "把单次课例沉淀为可复用资产",
       doAction: "挑选并入库本轮最值得保存的资产",
       getDeliverable: "资产清单 + 知识库更新",
       subNodeIds: ["11b"],
-      pharmacyContext: "案例 v2 / 量规 v2 / 法规更新日志 / 学期末汇编",
+      pharmacyContext: "案例 v2 / 评价标准 v2 / 法规更新日志 / 学期末汇编",
       theoryDrawer: ["Senge 学习型组织", "Nonaka SECI 知识转化", "Siemens 学习分析"],
     },
   ];
@@ -515,16 +516,16 @@
 
   // 11 station ID → env ID（多对一，11 → 2 envs）
   // 注：本表对齐 SUB_NODES[stationId].stageId 的现有事实（已是 canonical）
-  //   旧 station 1+2+3 → E01 学情诊断（合并课程定位 + 学情 + 学习者议程协商）
-  //   旧 station 4   → E02 目标与量规
-  //   旧 station 5   → E03 知识与误区
-  //   旧 station 6   → E04 案例与证据
-  //   旧 station 7+8 → E05 任务链设计
-  //   旧 station 9   → E06 课中调控（前称「动态学情触发台」）
-  //   旧 station 10  → E07 评价与画像
+  //   旧 station 1+2+3 → E01 学习者与教学情境分析（合并课程定位 + 学情 + 学习者议程协商）
+  //   旧 station 4   → E02 预期学习结果与评价证据设计
+  //   旧 station 5   → E03 教学内容结构化与前概念诊断
+  //   旧 station 6   → E04 真实性学习情境与资源设计
+  //   旧 station 7+8 → E05 学习活动与教学支架设计
+  //   旧 station 9   → E06 形成性评价与适应性调控（前称「动态学情触发台」）
+  //   旧 station 10  → E07 表现性评价与学习成效诊断
   //   旧 station 11  → E08 复盘 + E09 资产（split via "11a"/"11b" sub-nodes）
   const STATION_TO_ENV = {
-    1:  'E01', 2:  'E01', 3:  'E01',     // 学情诊断三合一
+    1:  'E01', 2:  'E01', 3:  'E01',     // 学习者与教学情境分析三合一
     4:  'E02',
     5:  'E03',
     6:  'E04',
@@ -592,9 +593,9 @@
         onUnmetUI: "节点 chip 显示锁定图标 + 提示「请先完成 2-3 学情议程合并诊断」",
       },
     },
-    "4":   { stageId: "S2", subTitle: "学习目标与评价证据 + 量规设计", legacyStationId: 4,  order: 1, legacy: true },
+    "4":   { stageId: "S2", subTitle: "学习目标与评价证据 + 评价标准设计", legacyStationId: 4,  order: 1, legacy: true },
     "4-a": { stageId: "S2", subTitle: "学习目标",                  legacyStationId: 4,  order: 1, splitOf: 4, focus: "objectives" },
-    "4-b": { stageId: "S2", subTitle: "评价证据 + 5 维量规",        legacyStationId: 4,  order: 2, splitOf: 4, focus: "rubric", acceptsRubricRevision: { from: "S7", channelKey: "rubricRevision" } },
+    "4-b": { stageId: "S2", subTitle: "评价证据 + 5 维评价标准",        legacyStationId: 4,  order: 2, splitOf: 4, focus: "rubric", acceptsRubricRevision: { from: "S7", channelKey: "rubricRevision" } },
     "5":   { stageId: "S3", subTitle: "知识结构与问题链",          legacyStationId: 5,  order: 1 },
     "6":   { stageId: "S4", subTitle: "真实案例与证据包",          legacyStationId: 6,  order: 1 },
     "7":   { stageId: "S5", subTitle: "课堂时间线",                legacyStationId: 7,  order: 1, revisionPass: "v0", subjectName: "课堂时间线" },
@@ -611,28 +612,127 @@
     "9-z1": { stageId: "S6", subTitle: "Z1 · 条文测温（10'）",      legacyStationId: 9,  order: 1, splitOf: 9, anchorId: "Z1" },
     "9-z2": { stageId: "S6", subTitle: "Z2 · 推演投票（28'）",      legacyStationId: 9,  order: 2, splitOf: 9, anchorId: "Z2" },
     "9-z3": { stageId: "S6", subTitle: "Z3 · 知识封闭（42'）",      legacyStationId: 9,  order: 3, splitOf: 9, anchorId: "Z3" },
-    "10":   { stageId: "S7", subTitle: "表现性评价 + 量规反向修订", legacyStationId: 10, order: 1, legacy: true },
-    "10-a": { stageId: "S7", subTitle: "评分采集（5 维量规打分）",   legacyStationId: 10, order: 1, splitOf: 10, focus: "scoring" },
+    "10":   { stageId: "S7", subTitle: "表现性评价与学习成效诊断 + 评价标准反向修订", legacyStationId: 10, order: 1, legacy: true },
+    "10-a": { stageId: "S7", subTitle: "评分采集（依据 5 维评价标准）",   legacyStationId: 10, order: 1, splitOf: 10, focus: "scoring" },
     "10-b": { stageId: "S7", subTitle: "反馈语 + 能力画像",         legacyStationId: 10, order: 2, splitOf: 10, focus: "feedback-profile" },
-    "10-c": { stageId: "S7", subTitle: "量规反向修订",                 legacyStationId: 10, order: 3, splitOf: 10, focus: "rubric-revision", supportsRubricRevision: { to: "S2", channelKey: "rubricRevision" } },
+    "10-c": { stageId: "S7", subTitle: "评价标准反向修订",                 legacyStationId: 10, order: 3, splitOf: 10, focus: "rubric-revision", supportsRubricRevision: { to: "S2", channelKey: "rubricRevision" } },
     "11a": { stageId: "S8", subTitle: "教师复盘与改进决策",        legacyStationId: 11, order: 1, splitOf: 11 },
     "11b": { stageId: "S9", subTitle: "资产沉淀与知识库更新",      legacyStationId: 11, order: 1, splitOf: 11 },
   };
 
   // ============================================================
+  // v4.3 NEW: SWOT_NODE_GUIDES — 当前前台 18 个可见子步骤的操作说明
+  // ------------------------------------------------------------
+  // 主视图只回答两个问题：「做好是什么样」和「怎么做好」。
+  // why 作为设计依据默认折叠，避免与教师当前操作竞争注意力。
+  // 全部文案贯穿同一示例：华海药业 · 集采常态化 · SWOT → TOWS。
+  const SWOT_NODE_GUIDES = {
+    "1": {
+      good: "本节被定位为「循证决策训练」：学生不是背 SWOT 定义，而是用华海药业与集采证据完成 SWOT 判断并推导 TOWS 策略。",
+      how: "先对照课程能力主线、前后课与学生最终产出，再锁定分析对象、决策任务和可观察产出，生成课程定位 v0。",
+      why: "先锁定课程位置和任务边界，可以避免 SWOT 课退化为四象限概念讲授。",
+    },
+    "2-3": {
+      good: "学情诊断形成可验证的暂时假设：明确学生在 S/W 内外边界、证据引用或 TOWS 转化上卡在哪里，同时标出已有证据、未知项与课中待观察信号。",
+      how: "合并查看 4 题 SWOT 前测、学生药事经验与议程回应；聚类「错在哪」和「最想搞清什么」，输出教学调整项与课中验证点。",
+      why: "好的学情诊断不给学生贴固定标签，而是为后续目标、支架和形成性评价提供可被证伪的设计假设。",
+    },
+    "1b": {
+      good: "锁定版定位明确回应学情与议程：例如把「掌握 SWOT」修订为「判断集采条件下华海药业的内外因素，用证据推导 TOWS 策略」。",
+      how: "对照 v0 定位、SWOT 前测低分项和学生高票议程，只修订定位类型、能力锚点和产出边界，并记录每一处修订的证据来源。",
+      why: "课程定位是可修订假设；在学情和议程进入后回写，才能让定位真正约束后续设计。",
+    },
+    "4-a": {
+      good: "形成 3–5 条可观察的 SWOT 学习结果：能判断内外边界、为条目引用证据、从 SWOT 推导 TOWS，并说明 SWOT 的局限。",
+      how: "用「行为动词 + 华海药业情境 + 学生产出 + 达成条件」改写每条目标，删除「了解」「熟悉」等无法验证的表述。",
+      why: "只有可观察的结果才能与学生产出和评价证据建立对齐关系。",
+    },
+    "4-b": {
+      good: "每条 SWOT 学习结果都有对应产出和可判定标准；5 维评价标准能区分「表格填满」与「证据充分、分类正确、TOWS 可执行」。",
+      how: "为目标逐条配置 SWOT 表、证据注释、TOWS 策略和反思说明；再用具体作品特征写出条目证据性、内外分类、精炼度、TOWS 可操作性与批判意识的评分锚点。",
+      why: "先确定可接受的证据，可以防止评价只看版式完整或教师印象。",
+    },
+    "5": {
+      good: "SWOT 内容被组织成一条递进问题链：四象限定义 → 内外边界 → 证据 → 权重 → TOWS 策略 → 工具局限，且每层命中一个已识别误区。",
+      how: "用华海药业集采案例为每层配 1 个主问题、1 个学生常见错例和 1 个追问；检查学生是否必须使用证据才能进入下一层。",
+      why: "问题链将教材顺序改造为学生的判断路径，避免 SWOT 变成概念清单。",
+    },
+    "6": {
+      good: "华海药业证据包同时覆盖事实、政策、数据、利益相关者和风险边界；学生能用它判断 S/W/O/T 并推导 TOWS，但不会直接得到参考答案。",
+      how: "逐份标注材料来源、时间、角色立场和可支持的 SWOT 判断；用「议程—证据对照表」补齐集采伦理、创新压力等学生高票关切。",
+      why: "真实案例的价值在于支持可追溯判断，而不是用信息量或标准答案代替学生思考。",
+    },
+    "7": {
+      good: "45 分钟 v0 时间线为 SWOT/TOWS 实战留出连续时间，并在 10′、28′、42′预留 3 个学情校准点；课堂不会在「刚填完 SWOT」时被迫结束。",
+      how: "先按导入、边界支架、证据分析、SWOT/TOWS 协作、展示反馈和迁移反思排出 v0；每个校准点只预留 ≤3 分钟。",
+      why: "时间线 v0 是待验证的资源分配假设，后续还需根据协作任务复杂度回写。",
+    },
+    "8": {
+      good: "资料员、判断员、质询员、汇报员都有不可替代的证据产出，最终共同完成「有出处的 SWOT + 有约束的 TOWS」，不出现一人代做、其他人围观。",
+      how: "把每个角色的输入、操作、产出和交接对象写进任务单；参考学生议程中的角色意愿分组，并设置一次证据质询交叉检查。",
+      why: "协作设计的关键不是「有分组」，而是用互相依赖的产出让每个学生参与判断。",
+    },
+    "7b": {
+      good: "锁定版时间线能容纳四角色完成证据提取、分类质询和 TOWS 转化，同时保留 3 个学情校准点与必要的反馈缓冲。",
+      how: "读取协作任务的角色工作量和交接时长，优先压缩教师讲解和重复汇报，不压缩证据判断、TOWS 生成与误区修正。",
+      why: "根据任务密度回写时间线，可以避免教师凭经验低估学生协作所需时间。",
+    },
+    "9-z1": {
+      good: "10′ 条文测温能在学生进入 SWOT 案例推演前发现内外边界误区；例如学生能区分「企业内部排班能力」是 W、「行业药师供给」是 T。",
+      how: "设置 ≤3 分钟的边界判断题，预先写明阈值与动作：如果正确率 <70%，则暂停推演，用「组织可控条件 vs 外部趋势」反例重做一题。",
+      why: "基础边界误区如果带入小组推演，后续 SWOT 和 TOWS 的所有结论都会失真。",
+    },
+    "9-z2": {
+      good: "28′ 推演投票能暴露「同一条证据为何被分到不同象限」的真实分歧，教师依据分歧类型决定继续、追问或重启。",
+      how: "让各组对一条华海药业证据投票并提交理由；若票差 <15%，则启动 3 分钟立场互换，要求双方用来源和企业边界重新论证。",
+      why: "结构性分歧是高价值学情信号；只公布正确答案会浪费学生的论证机会。",
+    },
+    "9-z3": {
+      good: "42′ 知识封闭能确认学生不仅会分 SWOT，还能把核心 S/W/O/T 组合为有执行主体和资源约束的 TOWS 策略。",
+      how: "用 ≤2 分钟的退出条要求每组写 1 条策略及其 SWOT 来源；若 >30% 作品无法追溯或仅有口号，则将 TOWS 转化列为下课首个回炉任务。",
+      why: "课末信号来不及挽回本节课，但可以为下一轮教学和迁移任务提供明确入口。",
+    },
+    "10-a": {
+      good: "5 维评分能区分「四象限填满」与「高质量 SWOT/TOWS」：分类正确、条目有出处、主次清楚、策略可执行、能指出工具局限。",
+      how: "使用同一套行为锚点对 5 组作品逐维评分，每个分数保留作品片段或证据出处；不用展示印象或表格美观度代替判定。",
+      why: "对作品证据进行分维评分，才能让后续能力画像和教学改进可解释。",
+    },
+    "10-b": {
+      good: "能力画像能指出本轮最薄弱的 SWOT 能力，反馈语同时说清「哪条证据不足」「下一步改什么」和「改到什么程度算达标」。",
+      how: "先用低分维度 Pareto 选出一个优先问题，再引用学生作品原句，按「当前证据 → 缺口 → 修订动作 → 达标锚点」生成反馈，允许学生二次修改。",
+      why: "反馈的价值在于缩小当前作品与达标作品之间的差距，而不是再次宣布分数。",
+    },
+    "10-c": {
+      good: "能区分「学生表现不足」与「评价标准写得不清」；若评分者对 TOWS 可操作性或批判意识反复分歧，必须形成可回写 S2 的修订建议。",
+      how: "汇总评分分歧、无法归类的作品与反馈语重复解释点；只修订有证据显示歧义的维度、等级描述或样例锚点，保留版本和修订理由。",
+      why: "评价标准也是可被学生作品检验的设计假设，不应在证据出现后仍保持不变。",
+    },
+    "11a": {
+      good: "复盘用本轮 SWOT 作品、学情触发和议程兑现证据锁定一个下轮改进项，并说清「改什么、为谁改、用什么信号验证」。",
+      how: "对照 5 维低分项、Z1–Z3 触发记录与学生高票议程，区分学生问题、任务问题和评价标准问题，只选一个最有证据的改进动作进入下轮。",
+      why: "反思不是感受汇报，而是从课堂证据到下一个可检验改变的决策过程。",
+    },
+    "11b": {
+      good: "入库的 SWOT 资产都有来源、版本、适用情境和质量边界；优先保存可复用的低分错例、反馈语、修订后案例包和 5 维评价标准，不把「课堂气氛好」当资产。",
+      how: "对候选资产逐项补齐来源课次、学生证据、修订记录、可复用条件和过期检查日期；只将已经教师确认的版本写入个人教学资产库。",
+      why: "只有保留情境和版本边界的经验，才能从一次课例转化为可追溯、可分享的教学知识。",
+    },
+  };
+
+  // ============================================================
   // v4 NEW: STAGE_CHAIN — stage-level L3 product chain
-  // (NOTE S7 → S2 边表示量规反向修订通道，前台显示为虚线返回箭头)
+  // (NOTE S7 → S2 边表示评价标准反向修订通道，前台显示为虚线返回箭头)
   // ============================================================
   const STAGE_CHAIN = {
     S1: { inputsFrom: [],                outputsTo: ["S2", "S4", "S5"],         topCardFromKeys: [],                                 topCardToKeys: ["课程定位", "学情低分项", "议程张力"] },
-    S2: { inputsFrom: ["S1"],            outputsTo: ["S3", "S5", "S7"],         topCardFromKeys: ["定位", "学情", "议程"],            topCardToKeys: ["学习目标", "评价证据", "5 维量规"] },
+    S2: { inputsFrom: ["S1"],            outputsTo: ["S3", "S5", "S7"],         topCardFromKeys: ["定位", "学情", "议程"],            topCardToKeys: ["学习目标", "评价证据", "5 维评价标准"] },
     S3: { inputsFrom: ["S2"],            outputsTo: ["S4", "S5"],               topCardFromKeys: ["学习目标"],                       topCardToKeys: ["概念边界", "误区清单", "问题链"] },
     S4: { inputsFrom: ["S1","S2","S3"],  outputsTo: ["S5"],                     topCardFromKeys: ["议程", "目标", "问题链"],          topCardToKeys: ["案例材料", "议程—证据对照"] },
     S5: { inputsFrom: ["S2","S3","S4"],  outputsTo: ["S6", "S7"],               topCardFromKeys: ["目标", "问题链", "案例"],          topCardToKeys: ["时间线", "学情校准点", "协作任务单"] },
     S6: { inputsFrom: ["S5"],            outputsTo: ["S7", "S8"],               topCardFromKeys: ["锚点位置"],                       topCardToKeys: ["学情触发—反馈—调节规则", "触发记录"] },
-    S7: { inputsFrom: ["S2","S5","S6"],  outputsTo: ["S8"], revisionsTo: ["S2"], topCardFromKeys: ["量规", "学生作品", "学情触发数据"],   topCardToKeys: ["评分", "能力画像"] },
+    S7: { inputsFrom: ["S2","S5","S6"],  outputsTo: ["S8"], revisionsTo: ["S2"], topCardFromKeys: ["评价标准", "学生作品", "学情触发数据"],   topCardToKeys: ["评分", "能力画像"] },
     S8: { inputsFrom: ["S1","S6","S7"],  outputsTo: ["S9"],                     topCardFromKeys: ["议程兑现", "学情触发摘要", "评价结果"], topCardToKeys: ["复盘报告", "改进决策"] },
-    S9: { inputsFrom: ["S8"],            outputsTo: [],                         topCardFromKeys: ["改进决策"],                       topCardToKeys: ["案例 v2", "量规 v2", "法规日志"] },
+    S9: { inputsFrom: ["S8"],            outputsTo: [],                         topCardFromKeys: ["改进决策"],                       topCardToKeys: ["案例 v2", "评价标准 v2", "法规日志"] },
   };
 
   // ============================================================
@@ -681,12 +781,12 @@
   const RUBRIC_REVISION = {
     from: "S7",
     to: "S2",
-    purpose: "学生作品发现的量规维度问题（如某维度区分度不足、过度严格、缺失关键维度）可回写到教学环节 2 修订量规",
+    purpose: "学生作品发现的评价维度问题（如某维度区分度不足、过度严格、缺失关键维度）可回写到教学环节 2 修订评价标准",
     payloadShape: { dim: "string", reason: "string", proposedChange: "string", evidenceArtifactId: "string?" },
     storeKey: "rubricRevisions",
     storeEvent: "rubric:revisionProposed",
-    uiHint: "S7 评分完成后显示「向 S2 提出量规修订」按钮；S2 顶部显示「待审修订 N 条」徽章。",
-    hardConstraint: "下一轮备课进入 S2 时，未处理的量规修订必须在量规设计前显式确认或驳回。",
+    uiHint: "S7 评分完成后显示「向 S2 提出评价标准修订」按钮；S2 顶部显示「待审修订 N 条」徽章。",
+    hardConstraint: "下一轮备课进入 S2 时，未处理的评价标准修订必须在评价标准设计前显式确认或驳回。",
   };
 
   const INTERACTION_CONTRACT = {
@@ -696,7 +796,7 @@
       "证据图：展示可支持教学判断的数据、案例、目标、活动或评价证据",
       "教学判断题：必须是教学决策题，不是知识问答题",
       "系统反馈：解释判断合理性、风险和修正建议",
-      "产物生成：生成可写入教案、任务单、量规、反馈语或复盘清单的文本",
+      "产物生成：生成可写入教案、任务单、评价标准、反馈语或复盘清单的文本",
       "保存资产：写入教学数据页或教学资产库",
     ],
     artifactRequiredSections: [
@@ -754,7 +854,7 @@
     "不得让形成性评价机制（L1）退化为“随便提问几个学生”；每个 ZPD 锚点必须有“如果 X 则 Y”的决策规则。",
     // v4 新增
       "不得在前台铺陈教育理论标签（如 ZPD / UbD / Bloom 等术语）；理论收进每个教学环节的「方法依据」抽屉。",
-      "不得让教学环节 7 的「量规反向修订」失效；学生作品发现的量规问题必须可回写到教学环节 2。",
+      "不得让教学环节 7 的「评价标准反向修订」失效；学生作品发现的评价标准问题必须可回写到教学环节 2。",
     "不得把横向机制（L1/L2/L3）退化为内部数据；议程横条 / 锚点 ◇ 标 / 顶卡产出链必须前台可见。",
     "不得在前台出现「11 节点」「10 tiles」「0/11」等旧叙事；统一为「9 个教学环节 + 12 子节点」。",
   ];
@@ -783,6 +883,7 @@
     // v4 新增导出 — 9 stages overlay
     NAV_STAGES,
     SUB_NODES,
+    SWOT_NODE_GUIDES,
     STAGE_CHAIN,
     STAGE_HORIZONTAL_LAYERS,
     RUBRIC_REVISION,

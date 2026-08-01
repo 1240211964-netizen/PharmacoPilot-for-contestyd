@@ -20,8 +20,9 @@
   const Store = global.PharmacoPilotStore;
   const Nav = global.PharmacoPilotNavigationContract;
   const Practice = global.PharmacoPilotPracticeContract;
-  if (!Store || !Nav || !Practice) {
-    console.warn("[practice-runtime] 缺依赖：store / nav-contract / practice-contract");
+  const Review = global.PharmacoPracticeReview;
+  if (!Store || !Nav || !Practice || !Review) {
+    console.warn("[practice-runtime] 缺依赖：store / nav-contract / practice-contract / practice-review");
     return;
   }
 
@@ -47,6 +48,9 @@
     assets: [],                         // ReusableAsset[]（已生成但未必写回）
     writebackLog: [],                   // 已写回的 store 调用记录
   };
+  let activeMetaverseMomentSource = null;
+  let metaverseMomentLastT = null;
+  let metaverseMomentSignature = "";
 
   // ──────────────────────────────────────────────────────────────
   // 1.5 智能体数据：32 个虚拟人画像 (v0.2)
@@ -265,21 +269,21 @@
 .persona-cell.is-tired::before {
   content: "z";
   position: absolute; top: 1px; right: 2px;
-  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #807a6c);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   opacity: 0.6;
 }
 .persona-cell.is-state-pulse {
-  box-shadow: 0 0 0 2px var(--amber, #d97757), 0 0 12px rgba(217,119,87,.6);
+  box-shadow: 0 0 0 2px var(--amber), 0 0 12px color-mix(in srgb, var(--amber) 60%, transparent);
   transform: scale(1.08);
 }
 /* Group-colored role pill in dark theater for agent-driven beats */
-.beat-row .role.role-S-a { background: rgba(217,119,87,.28); color: #f0c1ac; }
+.beat-row .role.role-S-a { background: color-mix(in srgb, var(--amber) 28%, transparent); color: #f0c1ac; }
 .beat-row .role.role-S-b { background: rgba(149,187,164,.25); color: #c4dbcd; }
 .beat-row .role.role-S-c { background: rgba(167,144,210,.25); color: #d5c4ec; }
 .beat-row .role.role-S-d { background: rgba(180,180,180,.18); color: #ccc; }
 .beat-row .what .who-name {
   font-family: var(--serif-cn); font-style: normal; font-weight: 500;
-  color: var(--amber-soft, #f0c1ac); margin-right: 2px; opacity: .88;
+  color: var(--amber-soft); margin-right: 2px; opacity: .88;
 }
 `;
     const el = document.createElement("style");
@@ -380,9 +384,9 @@
       }
     });
 
-    // 极简：左侧状态串自驱，右侧仅 stage ii 保留兜底按钮（手动派生 KM）
+    // 极简：左侧状态串自驱，右侧仅 stage ii 保留手动重新同步兜底。
     const a2 = $('[data-actions="ii"]');
-    if (a2) a2.innerHTML = `<button class="pr-btn pr-btn-tiny" id="pr-km-rederive" title="重新派生关键时刻">↻ 关键时刻</button>`;
+    if (a2) a2.innerHTML = `<button class="pr-btn pr-btn-tiny" id="pr-km-rederive" title="录播会自动记录；点此可手动重新同步">↻ 重新同步记录</button>`;
     const km = $("#pr-km-rederive");
     if (km) km.onclick = deriveKeyMoments;
   }
@@ -441,15 +445,15 @@
 
   // 阶段化话题关键词（驱动 rules.speak_on 的 "话题:[...]" 匹配）
   function getCurrentTopic(t_sec) {
-    if (t_sec < 80)   return ["价格", "原研", "降价"];
-    if (t_sec < 132)  return ["原研", "仿制", "替代", "一致性评价", "依从性"];
-    if (t_sec < 145)  return ["立场冲突", "替代焦虑"];
-    if (t_sec < 440)  return ["分组讨论", "医保", "慢病", "依从性", "证据", "成本"];
-    if (t_sec < 900)  return ["小组汇报", "证据", "依从性", "政策"];
-    if (t_sec < 1500) return ["交叉质疑", "BE", "INR", "临床细节", "政策"];
-    if (t_sec < 1920) return ["药企", "创新", "C视角", "研发"];
-    if (t_sec < 2520) return ["反思", "被低估", "立场迁移", "依从性"];
-    return ["反思单", "收束", "立场"];
+    if (t_sec < 80)   return ["SWOT", "优势", "劣势", "机会", "威胁"];
+    if (t_sec < 132)  return ["内部能力", "外部环境", "分类", "证据"];
+    if (t_sec < 145)  return ["W/T 边界", "组织可控性", "外部趋势"];
+    if (t_sec < 440)  return ["分组讨论", "门店", "顾客", "政策", "市场", "证据"];
+    if (t_sec < 900)  return ["小组汇报", "SWOT", "边界", "证据"];
+    if (t_sec < 1500) return ["交叉质疑", "内部", "外部", "可控性", "趋势", "数据"];
+    if (t_sec < 1920) return ["TOWS", "SO", "WO", "ST", "WT", "产业", "竞争"];
+    if (t_sec < 2520) return ["反思", "边界", "证据", "策略可行性"];
+    return ["反思单", "收束", "SWOT", "TOWS"];
   }
 
   // 判断 agent.rules 数组是否匹配当前 context
@@ -692,15 +696,15 @@
     const added = [];
     // v0.2: blueprint 只保留 marker + teacher + agentDetect；student 行由 agents 决定
     const blueprint = [
-      { tSec: 145, role: "marker", text: "▾ 分组讨论中 · A/B 组并行" },
-      { tSec: 285, role: "T", text: '"我注意到 B 组提到了<span class="em">回款周期</span>——这是 plan 里没设的维度。"', flags: { unplanned: true } },
-      { tSec: 360, role: "A", kind: "agentDetect", text: '⚠ 检测到 <b>2 名学生主动引入 plan.md 未设维度</b>——建议在下次写回时把"回款周期"加入节点 8 协作任务选项。' },
+      { tSec: 145, role: "marker", text: "▾ SWOT 归类复核 · A/B 组并行" },
+      { tSec: 285, role: "T", text: '"我注意到 B 组把<span class="em">药师不足</span>拆成内部排班与外部人才供给——请分别判断 W 与 T。"', flags: { unplanned: true } },
+      { tSec: 360, role: "A", kind: "agentDetect", text: '⚠ 检测到 <b>2 名学生对同一现象作出 W/T 拆分</b>——建议把“组织可控性 + 外部趋势证据”补入问题链。' },
       { tSec: 405, role: "marker", text: "▾ 回归全班 · 各组汇报" },
-      { tSec: 475, role: "T", text: '"很好。下一题——谁来从临床安全角度补充？"', flags: { teacherOpenQ: true } },
+      { tSec: 475, role: "T", text: '"很好。下一题——如何把 S 与 O 组合成一条可执行的 SO 策略？"', flags: { teacherOpenQ: true } },
       { tSec: 520, role: "marker", text: "▾ 沉默拉长" },
-      { tSec: 900, role: "marker", text: "▾ 交叉质疑" },
-      { tSec: 1500, role: "T", text: '"现在我想听听 C 组的视角——有谁愿意从药企角度来说？"', flags: { teacherCallC: true } },
-      { tSec: 1920, role: "T", text: '"我们快结束了——有没有被低估的视角？"', flags: { teacherReflectPrompt: true, teacherOpenQ: true } },
+      { tSec: 900, role: "marker", text: "▾ TOWS 交叉质疑" },
+      { tSec: 1500, role: "T", text: '"现在我想听听有产业或门店实习经历的同学——竞争威胁要用什么外部证据判断？"', flags: { teacherCallC: true } },
+      { tSec: 1920, role: "T", text: '"我们快结束了——哪条 SWOT 判断最容易混淆内部与外部？"', flags: { teacherReflectPrompt: true, teacherOpenQ: true } },
       { tSec: 2520, role: "marker", text: "▾ 反思单分发" },
     ];
     blueprint.forEach((b) => {
@@ -924,10 +928,7 @@
     ingestExistingBeats();
     renderKeyMoments();
     (state.expertCards || []).forEach((entry) => {
-      entry.evidenceLinks = [];
-      entry.evidenceTouched = false;
-      if (entry.decision !== "insufficient") entry.decision = "pending";
-      entry.writtenBack = false;
+      resetReviewBeforeEvidence(entry);
       saveExpertReview(wizSelection.chapter, entry);
     });
     refreshAllReviewEvidence();
@@ -960,10 +961,12 @@
     // 限制 3-5 个，按优先级
     state.keyMoments.sort((a, b) => a.priority - b.priority);
     state.keyMoments = state.keyMoments.slice(0, 5);
+    metaverseMomentSignature = keyMomentSignature(state.keyMoments);
     saveKeyMoments(wizSelection.chapter, state.keyMoments);
     renderKeyMoments();
     refreshAllReviewEvidence({ autoLink: true });
     composeAssets();
+    updateBottomAdoptBar();
     if (state.keyMoments.length) {
       setStageStatus("ii", `已读取 ${state.keyMoments.length} 条已发生仿真记录`, false, true);
     } else {
@@ -972,14 +975,63 @@
     }
   }
 
-  function readMetaverseKeyMoments() {
+  function readMetaverseKeyMoments(capturedUntilOverride) {
     const mv = window.PharmacoPilotMV;
     if (!(mv && typeof mv.getT === "function" && typeof mv.keyMoments === "function")) return null;
-    const capturedUntil = Number(mv.getT()) || 0;
+    const capturedUntil = Number.isFinite(Number(capturedUntilOverride))
+      ? Math.max(0, Number(capturedUntilOverride))
+      : Number(mv.getT()) || 0;
     const records = mv.keyMoments()
       .filter((record) => Number(record?.t) > 0 && Number(record.t) <= capturedUntil)
       .sort((a, b) => Number(a.t) - Number(b.t));
     return records.map((record, index) => packMetaverseMoment(record, index));
+  }
+
+  function keyMomentSignature(moments) {
+    return (moments || []).map((moment) => moment.id).join("|");
+  }
+
+  function syncKeyMomentsFromPlayback(tSec, { force = false } = {}) {
+    const moments = readMetaverseKeyMoments(tSec);
+    if (!Array.isArray(moments)) return false;
+    moments.sort((a, b) => a.priority - b.priority);
+    const next = moments.slice(0, 5);
+    const nextSignature = keyMomentSignature(next);
+    if (!force && nextSignature === metaverseMomentSignature) return false;
+    metaverseMomentSignature = nextSignature;
+    state.keyMoments = next;
+    saveKeyMoments(wizSelection.chapter, state.keyMoments);
+    renderKeyMoments();
+    refreshAllReviewEvidence({ autoLink: true });
+    composeAssets();
+    updateBottomAdoptBar();
+    setStageStatus(
+      "ii",
+      state.keyMoments.length
+        ? `已自动记录 ${state.keyMoments.length} 条已发生仿真记录`
+        : "尚无已发生仿真记录 · 请继续播放或拖动录播",
+      false,
+      state.keyMoments.length > 0,
+    );
+    return true;
+  }
+
+  function registerMetaverseMomentSync() {
+    const mv = global.PharmacoPilotMV;
+    if (!(mv && typeof mv.onTime === "function" && typeof mv.keyMoments === "function")) return false;
+    if (activeMetaverseMomentSource === mv) return true;
+    activeMetaverseMomentSource = mv;
+    metaverseMomentLastT = null;
+    metaverseMomentSignature = keyMomentSignature(state.keyMoments);
+    mv.onTime((rawT) => {
+      const tSec = Math.max(0, Number(rawT) || 0);
+      const isInitialCallback = metaverseMomentLastT === null;
+      metaverseMomentLastT = tSec;
+      // 页面重载时播放器从 0 初始化，不应因这次初始回调擦掉已保存的试教证据和候选。
+      if (isInitialCallback && tSec <= 0 && state.keyMoments.length) return;
+      syncKeyMomentsFromPlayback(tSec);
+    });
+    return true;
   }
 
   function packMetaverseMoment(record, index) {
@@ -988,31 +1040,35 @@
     let typeId = "simulation-signal";
     let cn = "虚拟班关键信号";
     let suggestSlot = "pulseRule.ifThen";
-    let copyTemplate = "将这条仿真记录与相关修订候选并列呈现，等待教师判断。";
+    let copyTemplate = "将这条仿真记录与相关修订建议并列呈现，供教师决定如何处理。";
     let priority = 3;
 
     if (record?.type === "silence" || /沉默|未发声/.test(text)) {
       typeId = "silence-cliff";
-      cn = "仿真中出现沉默或未发声信号";
+      cn = /T 维|竞争威胁|竞品/.test(text) ? "威胁（T）类证据讨论中出现集体沉默" : "讨论中出现集体沉默信号";
       suggestSlot = "timeline.scaffoldInsertion";
-      copyTemplate = "将这段沉默保留为调控信号，由教师判断是否需要新增支架。";
+      copyTemplate = /T 维|竞争威胁|竞品/.test(text)
+        ? "将这段沉默与外部环境证据的追问关联，供教师决定是否新增竞店、人才或区域市场数据支架。"
+        : "将这段沉默保留为调控信号，供教师决定是否新增支架。";
       priority = 2;
     } else if (/结构性|对立|分歧/.test(text) && record?.type !== "marker") {
       typeId = "structural-conflict";
-      cn = "仿真中出现结构性分歧";
+      cn = /SWOT|W\s*vs\s*T|内外部/.test(text) ? "SWOT 内外部边界出现结构性分歧" : "仿真中出现结构性分歧";
       suggestSlot = "questionChain.divergenceAnchor";
-      copyTemplate = "将这段结构性分歧与修订候选关联，由教师判断是否需要新增分歧锚点。";
+      copyTemplate = /SWOT|W\s*vs\s*T|内外部/.test(text)
+        ? "将这段 W/T 边界分歧与修订建议关联，供教师决定是否新增“组织可控性 + 外部趋势”判据。"
+        : "将这段结构性分歧与修订建议关联，供教师决定是否新增分歧锚点。";
       priority = 1;
     } else if (/反思|复盘|被低估/.test(text)) {
       typeId = "reflection-signal";
       cn = "仿真进入反思与复盘节点";
       suggestSlot = "retro.agendaFulfillment";
-      copyTemplate = "将这条反思记录与复盘候选关联，由教师判断是否写回。";
+      copyTemplate = "将这条反思记录与复盘建议关联，供教师决定是否写回。";
     } else if (record?.type === "marker" || /问题链|锚点|第\s*\d+\s*题/.test(text)) {
       typeId = "question-chain-marker";
       cn = text || "问题链进入新节点";
       suggestSlot = /分歧|对立/.test(text) ? "questionChain.divergenceAnchor" : "questionChain.openerTemplate";
-      copyTemplate = "将该问题链节点与修订候选关联，由教师判断是否调整问句或节奏。";
+      copyTemplate = "将该问题链节点与修订建议关联，供教师决定是否调整问句或节奏。";
     }
 
     return {
@@ -1117,7 +1173,7 @@
         <div class="km-quote">"${km.quote}"</div>
         <p>${km.copyTemplate.replace(/{[^}]+}/g, "—")}</p>
         <div class="km-tag">
-          <span class="pill pill-amber">相关环节 · ${envLabels || "待教师判断"}</span>
+          <span class="pill pill-amber">相关环节 · ${envLabels || "待处理"}</span>
           <span class="pill pill-sage">可关联修订候选</span>
         </div>
         <div class="km-meta">
@@ -1129,11 +1185,15 @@
       setTimeout(() => card.classList.remove("is-new"), 2400);
     });
     if (!state.keyMoments.length) {
-      grid.innerHTML = `<div class="decision-empty">尚无已发生仿真记录 · 请先播放或拖动上方录播，再点击“关键时刻”</div>`;
+      grid.innerHTML = `<div class="decision-empty">尚无已发生仿真记录 · 播放或拖动上方录播后将自动记录</div>`;
     }
     // 同步 hero meta 已识别关键时刻
     const moments = $('[data-field="moments"]');
     if (moments) moments.innerHTML = `${state.keyMoments.length} 处 · 待教师关联与判断`;
+    // 页面录播控制器需在 innerHTML 重绘后重新绑定新卡片，避免新节点永久停在待捕获淡色态。
+    window.dispatchEvent(new CustomEvent("practice:keymoments-rendered", {
+      detail: { count: state.keyMoments.length },
+    }));
   }
 
   // ──────────────────────────────────────────────────────────────
@@ -1148,17 +1208,27 @@
   // 适配层只负责把“这条审校意见影响哪个当前环节”翻译成可复用资产 slot，
   // UI 永远展示 envKey 语义，不把旧 stationId 冒充当前九环节编号。
   const PRACTICE_ENV_META = Object.freeze([
-    { key: "env01", no: "01", label: "学情诊断", short: "学情" },
-    { key: "env02", no: "02", label: "目标与量规", short: "目标" },
-    { key: "env03", no: "03", label: "知识与误区", short: "误区" },
-    { key: "env04", no: "04", label: "案例与证据", short: "证据" },
-    { key: "env05", no: "05", label: "任务链设计", short: "任务链" },
-    { key: "env06", no: "06", label: "课中调控", short: "调控" },
-    { key: "env07", no: "07", label: "评价与画像", short: "评价" },
-    { key: "env08", no: "08", label: "复盘与决策", short: "复盘" },
-    { key: "env09", no: "09", label: "资产沉淀", short: "沉淀" },
+    { key: "env01", no: "01", label: "学习者与教学情境分析", short: "学习者与教学情境分析" },
+    { key: "env02", no: "02", label: "预期学习结果与评价证据设计", short: "预期学习结果与评价证据设计" },
+    { key: "env03", no: "03", label: "教学内容结构化与前概念诊断", short: "教学内容结构化与前概念诊断" },
+    { key: "env04", no: "04", label: "真实性学习情境与资源设计", short: "真实性学习情境与资源设计" },
+    { key: "env05", no: "05", label: "学习活动与教学支架设计", short: "学习活动与教学支架设计" },
+    { key: "env06", no: "06", label: "形成性评价与适应性调控", short: "形成性评价与适应性调控" },
+    { key: "env07", no: "07", label: "表现性评价与学习成效诊断", short: "表现性评价与学习成效诊断" },
+    { key: "env08", no: "08", label: "反思性实践与教学改进", short: "反思性实践与教学改进" },
+    { key: "env09", no: "09", label: "教学知识建构与专业共享", short: "教学知识建构与专业共享" },
   ]);
   const PRACTICE_ENV_BY_KEY = Object.freeze(Object.fromEntries(PRACTICE_ENV_META.map((env) => [env.key, env])));
+  const {
+    normalizeLiveReview,
+    normalizeUnlocatedReview,
+    liveReviewSourceText,
+    liveReviewBodyMarkup,
+    seedReviewBodyMarkup,
+    liveReviewAnchorCopy,
+    liveReviewTargetKeys,
+    liveReviewFailureCopy,
+  } = Review.createHelpers({ envByKey: PRACTICE_ENV_BY_KEY, escapeHtml });
   const SLOT_TO_ENV_KEYS = Object.freeze({
     "positioning.spiralCorrection": ["env01"],
     "goal.observableCriterion": ["env02"],
@@ -1178,12 +1248,12 @@
   function slotForReviewTarget(envKey, text) {
     const body = String(text || "");
     if (envKey === "env01") return "positioning.spiralCorrection";
-    if (envKey === "env02") return /量规|评价|评分|锚点/.test(body) ? "evidence.rubricRowAdd" : "goal.observableCriterion";
+    if (envKey === "env02") return /评价标准|评价|评分|锚点/.test(body) ? "evidence.rubricRowAdd" : "goal.observableCriterion";
     if (envKey === "env03") return "questionChain.divergenceAnchor";
     if (envKey === "env04") return "case.evidenceForAgenda";
     if (envKey === "env05") return /分歧|对立|锚点|博弈/.test(body) ? "questionChain.divergenceAnchor" : "questionChain.openerTemplate";
     if (envKey === "env06") return /如果|则|触发|监测|信号/.test(body) ? "pulseRule.ifThen" : "timeline.scaffoldInsertion";
-    if (envKey === "env07") return /量规|评分|评价|画像/.test(body) ? "evidence.rubricRowAdd" : "pulseRule.ifThen";
+    if (envKey === "env07") return /评价标准|评分|评价|画像/.test(body) ? "evidence.rubricRowAdd" : "pulseRule.ifThen";
     if (envKey === "env08") return "retro.consensusPull";
     if (envKey === "env09") return "retro.consensusPull";
     return null;
@@ -1198,12 +1268,12 @@
     const hits = [];
     const add = (key) => { if (!hits.includes(key)) hits.push(key); };
     if (/学情|先验|前经验|认知起点/.test(body)) add("env01");
-    if (/目标|量规|评价标准|可观测|可观察/.test(body)) add("env02");
+    if (/目标|评价标准|可观测|可观察/.test(body)) add("env02");
     if (/概念|误区|混淆|机制/.test(body)) add("env03");
     if (/证据|案例|政策|法规|文号|数据|报告|引用|病例|通告|RWE|数据库/.test(body)) add("env04");
     if (/问题链|任务|角色|情境|场景|分歧|博弈|课题|锚点/.test(body)) add("env05");
     if (/分组|分钟|时间|沉默|干预|追问|节奏|触发/.test(body)) add("env06");
-    if (/画像|立场迁移|评价维度|评分|量规/.test(body)) add("env07");
+    if (/画像|立场迁移|评价维度|评分|评价标准/.test(body)) add("env07");
     if (/复盘|原因|下一轮|改进决策/.test(body)) add("env08");
     if (/沉淀|模板|复用|知识库/.test(body)) add("env09");
     return hits.length ? hits.slice(0, 3) : ["env08"];
@@ -1340,6 +1410,7 @@
   function deriveTemplateType(chapter) {
     if (!chapter) return "T-通用类";
     const id = chapter.id || "";
+    if (id.includes("mp-ch3"))                         return "T-SWOT/TOWS 环境分析类";
     if (id.includes("procurement") || id.includes("payment")) return "T-集采/支付类";
     if (id.includes("gmp") || id.includes("gsp"))             return "T-质量体系类";
     if (id.includes("supervision") || id.includes("pv"))      return "T-监管/警戒类";
@@ -1541,10 +1612,10 @@
       if (!reviewIds.has(entry.expertId) || entry.writtenBack) return;
       entry.targetEnvKeys.forEach((envKey) => {
         const body = document.querySelector(`.pack-preview [data-pack-field="${envKey}"]`);
-        const current = body?.textContent?.trim() || loadPackEdits(chapterId)[envKey] || "";
+        const current = body?.textContent?.trim() || loadGeneratedPack(chapterId)?.[envKey] || "";
         const addition = `修订：${entry.draftText}`;
         const next = current.includes(addition) ? current : [current, addition].filter(Boolean).join(" · ");
-        savePackEdit(chapterId, envKey, next);
+        saveGeneratedSection(chapterId, envKey, next);
         if (body) body.textContent = next;
       });
       entry.writtenBack = true;
@@ -1616,7 +1687,7 @@
       case "timeline.scaffoldInsertion":
         return { label: "支架插入点", tRange: a.km ? `${fmtTime(a.km.tSec)}–${fmtTime(a.km.tSec + 60)}` : "待教师编排", scaffold: reviewText };
       case "case.evidenceForAgenda":
-        return { label: "案例与证据修订", evidenceRow: reviewText };
+        return { label: "真实性学习情境与资源设计修订", evidenceRow: reviewText };
       case "goal.observableCriterion":
         return { label: "可观察目标改写", criterion: reviewText };
       case "evidence.rubricRowAdd":
@@ -1639,9 +1710,27 @@
   // Path A: wire 页内主按钮到已有的 runtime 函数
   // ──────────────────────────────────────────────────────────────
   function wireInlineControls() {
-    // Stage i — 调用本机模型生成九环节实践包；不可用时保留当前模板
+    // Stage i — 设计摘要 → 本机模型完整实践包 → 分环节重生成 / 四格式下载
     const gen = $("#inline-generate-pack");
     if (gen) gen.addEventListener("click", () => generatePracticePackWithLocalModel(gen));
+    document.querySelectorAll("[data-pack-edit-briefs]").forEach((button) => {
+      button.addEventListener("click", () => transitionPackWorkspace("briefs", { focus: true }));
+    });
+    document.querySelectorAll("[data-pack-return-output]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!validGeneratedPack(loadGeneratedPack(wizSelection.chapter))) {
+          toast("当前章节还没有完整课堂实践包");
+          return;
+        }
+        transitionPackWorkspace("output", { focus: true });
+      });
+    });
+    document.querySelectorAll("[data-pack-regenerate]").forEach((button) => {
+      button.addEventListener("click", () => regeneratePracticeSection(button));
+    });
+    document.querySelectorAll("[data-pack-export]").forEach((button) => {
+      button.addEventListener("click", () => exportPracticePack(button));
+    });
 
     // Stage ii — sim-controls 三按钮（▶ 运行模拟 / ⟲ 重置 / ▷ 步进）
     const run = $("#inline-sim-run");
@@ -1681,34 +1770,91 @@
   // 选择是 canonical source；hero meta 与 pack-preview 由它驱动
   // ============================================================
   const WIZ_STORE_KEY = "pp.practice.wizardSelection";
+  const WIZ_DEFAULT_VERSION_KEY = "pp.practice.wizardSelection.defaultVersion";
+  const WIZ_DEFAULT_VERSION = "management-swot-v1";
+  const WIZ_DEFAULT_SELECTION = Object.freeze({
+    course: "management-principles",
+    class: "2025-pm-1",
+    session: "mp-w05",
+    chapter: "mp-ch3-environment",
+  });
 
-  // 课程→班级、章节 的依赖映射
+  const SEMESTER_WEEKS = 18;
+  const PHARMACY_MANAGEMENT_COHORTS = Object.freeze({
+    "2023": Object.freeze([
+      { id: "2023-pm-1", title: "2023 级药事管理 1 班", n: 31 },
+      { id: "2023-pm-2", title: "2023 级药事管理 2 班", n: 30 },
+    ]),
+    "2024": Object.freeze([
+      { id: "2024-pm-1", title: "2024 级药事管理 1 班", n: 34 },
+      { id: "2024-pm-2", title: "2024 级药事管理 2 班", n: 32 },
+    ]),
+    "2025": Object.freeze([
+      { id: "2025-pm-1", title: "2025 级药事管理 1 班", n: 33 },
+      { id: "2025-pm-2", title: "2025 级药事管理 2 班", n: 31 },
+    ]),
+  });
+
+  function buildSemesterSessions({ prefix, weekday, periods, min, chapterIds }) {
+    const plan = chapterIds.flatMap((chapterId) => [chapterId, chapterId]);
+    if (plan.length !== SEMESTER_WEEKS) throw new Error(`${prefix} 课程必须配置 9 个双周教学单元`);
+    return Array.from({ length: SEMESTER_WEEKS }, (_, index) => {
+      const week = index + 1;
+      const finalMark = week === SEMESTER_WEEKS ? "（期末周）" : "";
+      return {
+        id: `${prefix}-w${String(week).padStart(2, "0")}`,
+        title: `第 ${week} 周${finalMark} · ${weekday} ${periods} 节`,
+        min,
+        week,
+        chapterId: plan[index],
+      };
+    });
+  }
+
+  // 课程→班级、课时、章节 的依赖映射
   const WIZ_DATA = {
     courses: [
-      { id: "pharm-admin",     title: "《药事管理学》本",  level: "本科" },
-      { id: "clinical-pharm",  title: "《临床药学》本",    level: "本科" },
-      { id: "pharm-regulation",title: "《药事法规与监管》研", level: "研究生" },
+      { id: "pharm-admin",           title: "《药事管理学》",     level: "本科",     cohort: "2024 级" },
+      { id: "clinical-pharm",        title: "《临床药学》",       level: "本科",     cohort: "2023 级" },
+      { id: "pharm-regulation",      title: "《药事法规与监管》", level: "本科",     cohort: "2024 级" },
+      { id: "management-principles", title: "《管理学原理》",     level: "本科",     cohort: "2025 级" },
+      { id: "pharmacy-retail",       title: "《药店经营管理》",   level: "本科",     cohort: "2023 级" },
+      { id: "gxp-practicum",         title: "《GXP实训》",        level: "本科实训", cohort: "2023 级" },
     ],
     classesByCourse: {
-      "pharm-admin": [
-        { id: "2025-pa-1", title: "2025 级药管 1 班", n: 34 },
-        { id: "2026-pa-1", title: "2026 级药管 1 班", n: 32 },
-        { id: "2026-pa-2", title: "2026 级药管 2 班", n: 30 },
-      ],
-      "clinical-pharm": [
-        { id: "2025-cp-1", title: "2025 级临药 1 班", n: 28 },
-        { id: "2026-cp-1", title: "2026 级临药 1 班", n: 30 },
-      ],
-      "pharm-regulation": [
-        { id: "g2025-reg",  title: "2025 级研究生小班", n: 18 },
-      ],
+      "pharm-admin": PHARMACY_MANAGEMENT_COHORTS["2024"],
+      "clinical-pharm": PHARMACY_MANAGEMENT_COHORTS["2023"],
+      "pharm-regulation": PHARMACY_MANAGEMENT_COHORTS["2024"],
+      "management-principles": PHARMACY_MANAGEMENT_COHORTS["2025"],
+      "pharmacy-retail": PHARMACY_MANAGEMENT_COHORTS["2023"],
+      "gxp-practicum": PHARMACY_MANAGEMENT_COHORTS["2023"],
     },
-    sessions: [
-      { id: "w5-wed-34",  title: "第 5 周 · 周三 3-4 节", min: 90 },
-      { id: "w6-mon-12",  title: "第 6 周 · 周一 1-2 节", min: 90 },
-      { id: "w7-wed-34",  title: "第 7 周 · 周三 3-4 节", min: 45 },
-      { id: "w8-fri-56",  title: "第 8 周 · 周五 5-6 节", min: 45 },
-    ],
+    sessionsByCourse: {
+      "pharm-admin": buildSemesterSessions({
+        prefix: "pa", weekday: "周三", periods: "3-4", min: 90,
+        chapterIds: ["ch1-overview", "ch2-rd", "ch3-registration", "ch4-gmp", "ch5-procurement", "ch6-supervision", "ch7-distribution", "ch8-payment", "ch9-summary"],
+      }),
+      "clinical-pharm": buildSemesterSessions({
+        prefix: "cp", weekday: "周二", periods: "1-2", min: 90,
+        chapterIds: ["cl-ch1-intro", "cl-ch2-amr", "cl-ch3-tdm", "cl-ch4-interaction", "cl-ch5-doseopt", "cl-ch6-special", "cl-ch7-adr", "cl-ch8-service", "cl-ch9-summary"],
+      }),
+      "pharm-regulation": buildSemesterSessions({
+        prefix: "rg", weekday: "周五", periods: "5-6", min: 90,
+        chapterIds: ["rg-ch1-system", "rg-ch2-registration", "rg-ch3-newdrug", "rg-ch4-gmp-gsp", "rg-ch5-safety", "rg-ch6-pv", "rg-ch7-postmarket", "rg-ch8-science", "rg-ch9-summary"],
+      }),
+      "management-principles": buildSemesterSessions({
+        prefix: "mp", weekday: "周一", periods: "1-2", min: 90,
+        chapterIds: ["mp-ch1-intro", "mp-ch2-theory", "mp-ch3-environment", "mp-ch4-decision", "mp-ch5-planning", "mp-ch6-organization", "mp-ch7-staffing", "mp-ch8-leadership", "mp-ch9-control-innovation"],
+      }),
+      "pharmacy-retail": buildSemesterSessions({
+        prefix: "rm", weekday: "周四", periods: "1-2", min: 90,
+        chapterIds: ["rm-ch1-format", "rm-ch2-location", "rm-ch3-category", "rm-ch4-inventory", "rm-ch5-service", "rm-ch6-chronic", "rm-ch7-compliance", "rm-ch8-performance", "rm-ch9-summary"],
+      }),
+      "gxp-practicum": buildSemesterSessions({
+        prefix: "gxp", weekday: "周四", periods: "1-4", min: 180,
+        chapterIds: ["gxp-ch1-system", "gxp-ch2-doc", "gxp-ch3-first", "gxp-ch4-accept", "gxp-ch5-cold", "gxp-ch6-sales", "gxp-ch7-capa", "gxp-ch8-inspection", "gxp-ch9-summary"],
+      }),
+    },
     chaptersByCourse: {
       "pharm-admin": [
         { id: "ch1-overview",    title: "第 1 章 · 总论",         topic: "药事管理学科定位" },
@@ -1719,6 +1865,7 @@
         { id: "ch6-supervision", title: "第 6 章 · 药品监管",      topic: "上市后再评价" },
         { id: "ch7-distribution",title: "第 7 章 · 药品流通管理",  topic: "GSP 与冷链追溯" },
         { id: "ch8-payment",     title: "第 8 章 · 医保支付",      topic: "DRG/DIP 与处方行为" },
+        { id: "ch9-summary",     title: "课程总结 · 综合案例",     topic: "药事管理综合决策与期末考核" },
       ],
       "clinical-pharm": [
         { id: "cl-ch1-intro",    title: "第 1 章 · 临床药学概论",  topic: "学科与角色定位" },
@@ -1729,6 +1876,7 @@
         { id: "cl-ch6-special",  title: "第 6 章 · 特殊人群用药",  topic: "妊娠/儿童/老年用药" },
         { id: "cl-ch7-adr",      title: "第 7 章 · 药物不良反应",  topic: "ADR 监测与上报" },
         { id: "cl-ch8-service",  title: "第 8 章 · 药学服务",      topic: "MTM 与患者教育" },
+        { id: "cl-ch9-summary",  title: "课程总结 · 综合病例",     topic: "药学服务方案与期末考核" },
       ],
       "pharm-regulation": [
         { id: "rg-ch1-system",   title: "第 1 章 · 法规体系总论",  topic: "药事法规框架" },
@@ -1739,6 +1887,40 @@
         { id: "rg-ch6-pv",       title: "第 6 章 · 药物警戒",      topic: "PV 体系构建" },
         { id: "rg-ch7-postmarket", title: "第 7 章 · 上市后再评价", topic: "真实世界证据" },
         { id: "rg-ch8-science",  title: "第 8 章 · 监管科学方法",  topic: "监管科学前沿" },
+        { id: "rg-ch9-summary",  title: "课程总结 · 综合监管案例", topic: "法规检索、适用与期末考核" },
+      ],
+      "management-principles": [
+        { id: "mp-ch1-intro",              title: "第 1 章 · 管理与管理学",             topic: "管理的内涵、职能与管理者技能" },
+        { id: "mp-ch2-theory",             title: "第 2 章 · 管理理论的产生与发展",     topic: "古典、行为科学与现代管理理论" },
+        { id: "mp-ch3-environment",        title: "第 3 章 · 管理环境与战略分析",       topic: "医药组织环境分析与 SWOT/TOWS" },
+        { id: "mp-ch4-decision",           title: "第 4 章 · 决策",                     topic: "决策过程、有限理性与决策方法" },
+        { id: "mp-ch5-planning",           title: "第 5 章 · 计划",                     topic: "计划编制、目标管理与实施" },
+        { id: "mp-ch6-organization",       title: "第 6 章 · 组织设计与组织变革",       topic: "医药组织结构、权责配置与变革" },
+        { id: "mp-ch7-staffing",           title: "第 7 章 · 人员配备与人力资源管理",   topic: "医药岗位配置、培训与绩效评价" },
+        { id: "mp-ch8-leadership",         title: "第 8 章 · 领导、激励与沟通",         topic: "情境领导、激励机制与跨部门沟通" },
+        { id: "mp-ch9-control-innovation", title: "第 9 章 · 控制、风险与创新",         topic: "质量控制、合规风险与组织创新" },
+      ],
+      "pharmacy-retail": [
+        { id: "rm-ch1-format",      title: "第 1 章 · 药店业态与定位", topic: "零售药店经营模式" },
+        { id: "rm-ch2-location",    title: "第 2 章 · 选址与商圈",     topic: "商圈评估与门店选址" },
+        { id: "rm-ch3-category",    title: "第 3 章 · 品类与采购",     topic: "品类结构与供应商管理" },
+        { id: "rm-ch4-inventory",   title: "第 4 章 · 陈列与库存",     topic: "陈列优化与库存周转" },
+        { id: "rm-ch5-service",     title: "第 5 章 · 销售与顾客服务", topic: "合理用药咨询与服务转化" },
+        { id: "rm-ch6-chronic",     title: "第 6 章 · 慢病与会员管理", topic: "慢病随访与会员分层" },
+        { id: "rm-ch7-compliance",  title: "第 7 章 · 质量与合规经营", topic: "处方药销售与 GSP 合规" },
+        { id: "rm-ch8-performance", title: "第 8 章 · 财务与绩效",     topic: "毛利率、周转率与服务质量平衡" },
+        { id: "rm-ch9-summary",     title: "课程总结 · 门店经营方案", topic: "药店经营综合决策与期末考核" },
+      ],
+      "gxp-practicum": [
+        { id: "gxp-ch1-system",     title: "项目 1 · GXP 体系与实训安全", topic: "GXP 规范边界与岗位职责" },
+        { id: "gxp-ch2-doc",        title: "项目 2 · GMP 文件管理",      topic: "SOP 审核与批记录填写" },
+        { id: "gxp-ch3-first",      title: "项目 3 · GSP 首营审核",      topic: "首营企业与品种资质审核" },
+        { id: "gxp-ch4-accept",     title: "项目 4 · 收货验收与储存",    topic: "验收、拒收与分区管理" },
+        { id: "gxp-ch5-cold",       title: "项目 5 · 冷链与温湿度",      topic: "冷链偏差识别与处置" },
+        { id: "gxp-ch6-sales",      title: "项目 6 · 销售与处方审核",    topic: "处方药销售合规" },
+        { id: "gxp-ch7-capa",       title: "项目 7 · 偏差与 CAPA",       topic: "根因分析与 CAPA 闭环" },
+        { id: "gxp-ch8-inspection", title: "项目 8 · 综合飞检模拟",      topic: "飞检缺陷判定与整改" },
+        { id: "gxp-ch9-summary",    title: "项目 9 · 综合实训考核",      topic: "GXP 全流程操作与期末考核" },
       ],
     },
   };
@@ -1747,12 +1929,42 @@
 
   function loadWizSelection() {
     try {
+      if (localStorage.getItem(WIZ_DEFAULT_VERSION_KEY) !== WIZ_DEFAULT_VERSION) {
+        wizSelection = { ...wizSelection, ...WIZ_DEFAULT_SELECTION };
+        return;
+      }
       const s = JSON.parse(localStorage.getItem(WIZ_STORE_KEY) || "{}");
       if (s && typeof s === "object") wizSelection = { ...wizSelection, ...s };
     } catch {}
   }
   function saveWizSelection() {
-    try { localStorage.setItem(WIZ_STORE_KEY, JSON.stringify(wizSelection)); } catch {}
+    try {
+      localStorage.setItem(WIZ_STORE_KEY, JSON.stringify(wizSelection));
+      localStorage.setItem(WIZ_DEFAULT_VERSION_KEY, WIZ_DEFAULT_VERSION);
+    } catch {}
+  }
+
+  function chaptersForSession(courseId, sessionId) {
+    const chapters = WIZ_DATA.chaptersByCourse[courseId] || [];
+    const session = (WIZ_DATA.sessionsByCourse[courseId] || []).find((item) => item.id === sessionId);
+    if (!session?.chapterId) return [];
+    const chapter = chapters.find((item) => item.id === session.chapterId);
+    return chapter ? [chapter] : [];
+  }
+
+  function ensureWizardDependents(courseId, preferred = {}) {
+    const classes = WIZ_DATA.classesByCourse[courseId] || [];
+    const sessions = WIZ_DATA.sessionsByCourse[courseId] || [];
+    if (!classes.find((item) => item.id === wizSelection.class)) {
+      wizSelection.class = classes.find((item) => item.id === preferred.class)?.id || classes[0]?.id || null;
+    }
+    if (!sessions.find((item) => item.id === wizSelection.session)) {
+      wizSelection.session = sessions.find((item) => item.id === preferred.session)?.id || sessions[0]?.id || null;
+    }
+    const chapters = chaptersForSession(courseId, wizSelection.session);
+    if (!chapters.find((item) => item.id === wizSelection.chapter)) {
+      wizSelection.chapter = chapters[0]?.id || null;
+    }
   }
 
   function mountPackWizard() {
@@ -1771,52 +1983,72 @@
       if (!root) return;
       root.innerHTML = "";
       if (!items.length) {
-        root.innerHTML = `<span class="wiz-chip is-disabled" aria-disabled="true">（请先选课程）</span>`;
+        root.innerHTML = `<span class="wiz-chip is-disabled" aria-disabled="true">（${opts.emptyLabel || "请先选课程"}）</span>`;
         return;
       }
       items.forEach((it) => {
         const chip = document.createElement("span");
         const active = wizSelection[group] === it.id;
-        chip.className = "wiz-chip" + (active ? " is-active" : "");
+        const disabled = !!(opts.disabledOf && opts.disabledOf(it));
+        chip.className = "wiz-chip" + (active ? " is-active" : "") + (disabled ? " is-locked" : "");
         chip.dataset.val = it.id;
-        chip.setAttribute("role", "button");
-        chip.tabIndex = 0;
-        chip.setAttribute("aria-pressed", String(active));
         const meta = opts.metaOf ? opts.metaOf(it) : "";
-        chip.innerHTML = it.title + (meta ? ` <small>${meta}</small>` : "");
-        chip.addEventListener("click", () => onPick(group, it.id));
-        chip.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); onPick(group, it.id); }
-        });
+        chip.innerHTML = `<span class="wiz-chip-main">${it.title}</span>` + (meta ? ` <small>${meta}</small>` : "");
+        chip.setAttribute("role", "button");
+        if (disabled) {
+          chip.tabIndex = -1;
+          chip.setAttribute("aria-disabled", "true");
+          chip.setAttribute("aria-label", `${it.title}：非本课时章节，已锁定`);
+        } else {
+          chip.tabIndex = 0;
+          chip.setAttribute("aria-pressed", String(active));
+          chip.addEventListener("click", () => onPick(group, it.id));
+          chip.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); onPick(group, it.id); }
+          });
+        }
         root.appendChild(chip);
+      });
+    }
+
+    function renderChapterChoices(courseId) {
+      const allChapters = WIZ_DATA.chaptersByCourse[courseId] || [];
+      const availableChapterIds = new Set(chaptersForSession(courseId, wizSelection.session).map((item) => item.id));
+      renderChips("chapter", allChapters, {
+        emptyLabel: "请先选课时",
+        disabledOf: (item) => !availableChapterIds.has(item.id),
+        metaOf: (item) => availableChapterIds.has(item.id) ? "本课时" : "锁定",
       });
     }
 
     function refreshDependent() {
       const c = wizSelection.course;
       renderChips("class", c ? (WIZ_DATA.classesByCourse[c] || []) : [], { metaOf: (it) => `${it.n} 人` });
-      renderChips("chapter", c ? (WIZ_DATA.chaptersByCourse[c] || []) : []);
+      renderChips("session", c ? (WIZ_DATA.sessionsByCourse[c] || []) : [], { metaOf: (it) => `${it.min} min` });
+      if (c) renderChapterChoices(c);
+      else renderChips("chapter", [], { emptyLabel: "请先选课时" });
     }
 
     function onPick(group, id) {
       wizSelection[group] = id;
-      // 切换课程时若新课程没有原班级 / 章节，自动补选第一个保持 demo 连贯
+      // 切换课程时同步校验班级 / 课时 / 章节，避免跨课程残留不相干选项
       if (group === "course") {
-        const newClasses = WIZ_DATA.classesByCourse[id] || [];
-        if (!newClasses.find((x) => x.id === wizSelection.class)) {
-          wizSelection.class = newClasses[0]?.id || null;
-        }
-        const newChapters = WIZ_DATA.chaptersByCourse[id] || [];
-        if (!newChapters.find((x) => x.id === wizSelection.chapter)) {
-          wizSelection.chapter = newChapters[0]?.id || null;
-        }
+        ensureWizardDependents(id);
         refreshDependent();
         // refreshDependent 后重新打高亮
-        ["class", "chapter"].forEach((g) => {
+        ["class", "session", "chapter"].forEach((g) => {
           const r = chipsOf(g);
           if (r) r.querySelectorAll(".wiz-chip").forEach((el) => {
             setChipActive(el, el.dataset.val === wizSelection[g]);
           });
+        });
+      } else if (group === "session") {
+        const chapters = chaptersForSession(wizSelection.course, id);
+        wizSelection.chapter = chapters[0]?.id || null;
+        renderChapterChoices(wizSelection.course);
+        const chapterRoot = chipsOf("chapter");
+        if (chapterRoot) chapterRoot.querySelectorAll(".wiz-chip").forEach((el) => {
+          setChipActive(el, el.dataset.val === wizSelection.chapter);
         });
       }
       saveWizSelection();
@@ -1829,29 +2061,19 @@
     }
 
     // 初始绘制
-    renderChips("course", WIZ_DATA.courses, { metaOf: (it) => it.level });
-    renderChips("session", WIZ_DATA.sessions, { metaOf: (it) => `${it.min} min` });
-    refreshDependent();
+    renderChips("course", WIZ_DATA.courses, { metaOf: (it) => `${it.level} · ${it.cohort}` });
 
-    // 默认选中（首次访问时给个完整 demo 状态）
-    if (!wizSelection.course)  { wizSelection.course = "pharm-admin"; }
-    if (!wizSelection.class)   { wizSelection.class  = "2026-pa-1"; }
-    if (!wizSelection.session) { wizSelection.session = "w7-wed-34"; }
-    if (!wizSelection.chapter) { wizSelection.chapter = "ch5-procurement"; }
+    // 默认选中；同时清理旧版本遗留的跨课程选择值
+    if (!WIZ_DATA.courses.find((x) => x.id === wizSelection.course)) wizSelection.course = WIZ_DEFAULT_SELECTION.course;
+    const defaults = { class: WIZ_DEFAULT_SELECTION.class, session: WIZ_DEFAULT_SELECTION.session };
+    ensureWizardDependents(wizSelection.course, defaults);
+    refreshDependent();
     saveWizSelection();
     // 同步默认高亮
     ["course", "class", "session", "chapter"].forEach((g) => {
       const r = chipsOf(g);
       if (r) r.querySelectorAll(".wiz-chip").forEach((el) => {
-        el.classList.toggle("is-active", el.dataset.val === wizSelection[g]);
-      });
-    });
-    refreshDependent();
-    // refreshDependent 重画后再次同步选中态
-    ["class", "chapter"].forEach((g) => {
-      const r = chipsOf(g);
-      if (r) r.querySelectorAll(".wiz-chip").forEach((el) => {
-        el.classList.toggle("is-active", el.dataset.val === wizSelection[g]);
+        setChipActive(el, el.dataset.val === wizSelection[g]);
       });
     });
     syncToHeroAndPreview();
@@ -1861,16 +2083,17 @@
     const id = wizSelection[group];
     if (!id) return null;
     if (group === "course")  return WIZ_DATA.courses.find((x) => x.id === id);
-    if (group === "session") return WIZ_DATA.sessions.find((x) => x.id === id);
+    if (group === "session") return (WIZ_DATA.sessionsByCourse[wizSelection.course] || []).find((x) => x.id === id);
     if (group === "class")   return (WIZ_DATA.classesByCourse[wizSelection.course] || []).find((x) => x.id === id);
-    if (group === "chapter") return (WIZ_DATA.chaptersByCourse[wizSelection.course] || []).find((x) => x.id === id);
+    if (group === "chapter") return chaptersForSession(wizSelection.course, wizSelection.session).find((x) => x.id === id);
     return null;
   }
 
   // ============================================================
-  // 实践包内容编辑：按 chapter.id 分别持久化到 localStorage
+  // 设计摘要与完整实践包分层持久化：摘要是生成输入，完整实践包是模型产物。
   // ============================================================
   const PACK_EDITS_KEY = "pp.practice.packEdits";
+  const PACK_OUTPUTS_KEY = "pp.practice.generatedPacks.v1";
   const PACK_GENERATION_META_KEY = "pp.practice.packGenerationMeta";
   const PACK_REVISION_KEY = "pp.practice.packRevision.v1";
   const PACK_KEYS = Object.freeze(["env01","env02","env03","env04","env05","env06","env07","env08","env09"]);
@@ -1909,10 +2132,27 @@
     try { localStorage.setItem(PACK_EDITS_KEY, JSON.stringify(all)); } catch {}
     if (bump) bumpPackRevision(chapterId);
   }
+  function loadAllGeneratedPacks() {
+    try {
+      const value = JSON.parse(localStorage.getItem(PACK_OUTPUTS_KEY) || "{}");
+      return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    } catch { return {}; }
+  }
+  function loadGeneratedPack(chapterId) {
+    return loadAllGeneratedPacks()[chapterId] || null;
+  }
+  function saveGeneratedSection(chapterId, fieldKey, text, { bump = true } = {}) {
+    if (!chapterId || !PACK_KEYS.includes(fieldKey)) return;
+    const all = loadAllGeneratedPacks();
+    if (!all[chapterId]) all[chapterId] = {};
+    all[chapterId][fieldKey] = String(text || "").trim();
+    try { localStorage.setItem(PACK_OUTPUTS_KEY, JSON.stringify(all)); } catch {}
+    if (bump) bumpPackRevision(chapterId);
+  }
   function saveGeneratedPack(chapterId, pack, metadata, previousPack = null) {
-    const all = loadAllPackEdits();
+    const all = loadAllGeneratedPacks();
     all[chapterId] = Object.fromEntries(PACK_KEYS.map((key) => [key, String(pack[key] || "").trim()]));
-    try { localStorage.setItem(PACK_EDITS_KEY, JSON.stringify(all)); } catch {}
+    try { localStorage.setItem(PACK_OUTPUTS_KEY, JSON.stringify(all)); } catch {}
     try {
       const allMeta = JSON.parse(localStorage.getItem(PACK_GENERATION_META_KEY) || "{}");
       allMeta[chapterId] = metadata;
@@ -1939,8 +2179,79 @@
     }
     return pack;
   }
+  function currentDesignBriefs() {
+    const summary = document.querySelector(".design-summary");
+    if (!summary) return null;
+    const briefs = {};
+    for (const key of PACK_KEYS) {
+      const body = summary.querySelector(`[data-brief-field="${key}"]`);
+      const value = body?.textContent?.trim() || "";
+      if (!value) return null;
+      briefs[key] = value;
+    }
+    return briefs;
+  }
   function validGeneratedPack(pack) {
     return !!pack && PACK_KEYS.every((key) => typeof pack[key] === "string" && pack[key].trim());
+  }
+  function refreshPackWorkspaceControls() {
+    const chapterId = wizSelection.chapter;
+    const hasOutput = !!chapterId && validGeneratedPack(loadGeneratedPack(chapterId));
+    const returnButton = document.querySelector("[data-pack-return-output]");
+    const generateButton = document.getElementById("inline-generate-pack");
+    if (returnButton) returnButton.hidden = !hasOutput;
+    if (generateButton && generateButton.dataset.generating !== "1") {
+      generateButton.textContent = hasOutput ? "根据修改重新生成 ↓" : "生成完整实践包 ↓";
+    }
+  }
+  function applyPackWorkspaceView(view) {
+    const workspace = document.querySelector("[data-pack-workspace]");
+    if (!workspace || !["briefs", "generating", "output"].includes(view)) return;
+    workspace.dataset.packView = view;
+    workspace.setAttribute("aria-busy", view === "generating" ? "true" : "false");
+    workspace.querySelectorAll("[data-pack-panel]").forEach((panel) => {
+      const active = panel.dataset.packPanel === view;
+      panel.hidden = !active;
+      panel.inert = !active;
+      panel.setAttribute("aria-hidden", active ? "false" : "true");
+    });
+    refreshPackWorkspaceControls();
+  }
+  function transitionPackWorkspace(view, { focus = false } = {}) {
+    const workspace = document.querySelector("[data-pack-workspace]");
+    if (!workspace) return Promise.resolve();
+    const targetPanel = workspace.querySelector(`[data-pack-panel="${view}"]`);
+    const focusTarget = targetPanel?.querySelector("h4");
+    if (workspace.dataset.packView === view && !targetPanel?.hidden) {
+      refreshPackWorkspaceControls();
+      if (focus) focusTarget?.focus({ preventScroll: true });
+      return Promise.resolve();
+    }
+
+    const reduceMotion = global.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const commit = () => applyPackWorkspaceView(view);
+    let transition = null;
+    let fallbackAnimated = false;
+    workspace.classList.add("is-switching");
+    if (!reduceMotion && typeof document.startViewTransition === "function") {
+      try { transition = document.startViewTransition(commit); }
+      catch { commit(); }
+    } else {
+      commit();
+      if (!reduceMotion && targetPanel) {
+        targetPanel.classList.remove("is-entering");
+        void targetPanel.offsetWidth;
+        targetPanel.classList.add("is-entering");
+        fallbackAnimated = true;
+      }
+    }
+    const finished = transition?.finished
+      || (fallbackAnimated ? new Promise((resolve) => global.setTimeout(resolve, 400)) : Promise.resolve());
+    return finished.catch(() => {}).then(() => {
+      workspace.classList.remove("is-switching");
+      targetPanel?.classList.remove("is-entering");
+      if (focus) focusTarget?.focus({ preventScroll: true });
+    });
   }
   async function generatePracticePackWithLocalModel(button) {
     if (button.dataset.generating === "1") return;
@@ -1948,24 +2259,30 @@
     const klass = getSelected("class");
     const session = getSelected("session");
     const chapter = getSelected("chapter");
-    const currentPack = currentPackFromPreview();
-    if (!course || !klass || !session || !chapter || !currentPack) {
+    const designBriefs = currentDesignBriefs();
+    if (!course || !klass || !session || !chapter || !designBriefs) {
       toast("请先完成课程、班级、课时和章节选择");
       return;
     }
     if (!global.PharmacoBackend?.generatePracticePack) {
-      toast("本地后端未连接 · 已保留当前模板实践包");
+      toast("本地后端未连接 · 设计摘要已保留");
       return;
     }
 
-    const originalText = button.textContent;
     const requestedChapterId = chapter.id;
     button.dataset.generating = "1";
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
     button.textContent = "本机 Qwen 生成中…";
-    setStageStatus("i", "本机 Qwen 正在生成九环节实践包", true, false);
-    toast("已提交本机 Qwen · 正在生成九个教学环节");
+    const workspace = document.querySelector("[data-pack-workspace]");
+    if (workspace) workspace.dataset.packChapter = requestedChapterId;
+    const generationContext = document.querySelector("[data-pack-generation-context]");
+    if (generationContext) {
+      generationContext.textContent = `${chapter.title} · ${chapter.topic} · 九环节结构生成中；摘要已保留。`;
+    }
+    transitionPackWorkspace("generating", { focus: true });
+    setStageStatus("i", "本机 Qwen 正在展开完整课堂实践包", true, false);
+    toast("已提交本机 Qwen · 正在把九项设计摘要展开为完整实践包");
 
     try {
       const result = await global.PharmacoBackend.generatePracticePack({
@@ -1980,39 +2297,145 @@
           chapterTitle: chapter.title,
           topic: chapter.topic,
         },
-        currentPack,
+        designBriefs,
       });
       if (!validGeneratedPack(result?.pack)) throw new Error("本地模型返回的实践包不完整");
       saveGeneratedPack(requestedChapterId, result.pack, {
         source: "local-model",
         model: result.model || "Qwen3.5-9B-4bit",
         generatedAt: result.generatedAt || new Date().toISOString(),
-      }, currentPack);
+      }, loadGeneratedPack(requestedChapterId));
 
       if (wizSelection.chapter === requestedChapterId) {
-        syncToHeroAndPreview();
+        syncToHeroAndPreview({ packView: "output" });
         setStageStatus("i", "本机 Qwen 实践包已生成", false, true);
-        toast("本机 Qwen 已生成九环节实践包 · 可逐环节编辑后进入 ii 段试错");
-        // v5:实践包独占下一栏 —— 滚到生成结果本身,而不是越过它直奔 stage-ii
-        (document.querySelector(".pack-result") || document.querySelector("#stage-ii"))
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        toast("完整课堂实践包已生成 · 可编辑、下载或进入 ii 段试错");
       } else {
         setStageStatus("i", "实践包已保存到原章节", false, true);
         toast(`实践包已保存到「${chapter.title}」· 当前章节未被覆盖`);
       }
     } catch (error) {
       console.warn("[practice-runtime] 本地模型生成失败", error);
-      setStageStatus("i", "本地模型不可用 · 当前模板已保留", false, true);
+      setStageStatus("i", "本地模型不可用 · 设计摘要已保留", false, true);
       const detail = error?.code === "MODEL_OUTPUT_INVALID"
         ? "模型输出未通过九环节校验"
         : "本地后端或模型尚未就绪";
-      toast(`${detail} · 已保留当前模板实践包`);
+      toast(`${detail} · 已保留当前设计摘要`);
+      if (wizSelection.chapter === requestedChapterId) transitionPackWorkspace("briefs", { focus: true });
     } finally {
       button.dataset.generating = "0";
       button.disabled = false;
       button.removeAttribute("aria-busy");
+      refreshPackWorkspaceControls();
+    }
+  }
+  function selectedPracticeContext() {
+    const course = getSelected("course");
+    const klass = getSelected("class");
+    const session = getSelected("session");
+    const chapter = getSelected("chapter");
+    if (!course || !klass || !session || !chapter) return null;
+    return {
+      chapterId: chapter.id,
+      courseTitle: course.title,
+      courseLevel: course.level || "",
+      classTitle: klass.title,
+      studentCount: klass.n,
+      sessionTitle: session.title,
+      durationMinutes: session.min,
+      chapterTitle: chapter.title,
+      topic: chapter.topic,
+    };
+  }
+  async function regeneratePracticeSection(button) {
+    if (button.dataset.generating === "1") return;
+    const targetEnv = button.dataset.packRegenerate;
+    const context = selectedPracticeContext();
+    const designBriefs = currentDesignBriefs();
+    const generatedPack = currentPackFromPreview();
+    if (!PACK_KEYS.includes(targetEnv) || !context || !designBriefs || !generatedPack) {
+      toast("当前完整实践包不完整，无法单独重新生成");
+      return;
+    }
+    if (!global.PharmacoBackend?.generatePracticePack) {
+      toast("本地后端未连接 · 当前实践包未改变");
+      return;
+    }
+    const originalText = button.textContent;
+    button.dataset.generating = "1";
+    button.disabled = true;
+    button.textContent = "生成中…";
+    setStageStatus("i", `${PRACTICE_ENV_BY_KEY[targetEnv]?.short || targetEnv}正在重新生成`, true, false);
+    try {
+      const result = await global.PharmacoBackend.generatePracticePack({ context, designBriefs, generatedPack, targetEnv });
+      const section = result?.pack?.[targetEnv];
+      if (typeof section !== "string" || !section.trim()) throw new Error("本地模型没有返回指定环节");
+      const merged = { ...generatedPack, [targetEnv]: section.trim() };
+      saveGeneratedPack(context.chapterId, merged, {
+        source: "local-model",
+        model: result.model || "Qwen3.5-9B-4bit",
+        generatedAt: result.generatedAt || new Date().toISOString(),
+        lastRegeneratedEnv: targetEnv,
+      }, generatedPack);
+      syncToHeroAndPreview();
+      setStageStatus("i", `${PRACTICE_ENV_BY_KEY[targetEnv]?.short || targetEnv}已重新生成`, false, true);
+      toast(`${PRACTICE_ENV_BY_KEY[targetEnv]?.short || targetEnv}已重新生成 · 其余环节保持不变`);
+    } catch (error) {
+      console.warn("[practice-runtime] 单环节重新生成失败", error);
+      setStageStatus("i", "单环节生成失败 · 当前版本已保留", false, true);
+      toast("单环节重新生成失败 · 当前实践包未改变");
+    } finally {
+      button.dataset.generating = "0";
+      button.disabled = false;
       button.textContent = originalText;
     }
+  }
+  async function exportPracticePack(button) {
+    const format = button.dataset.packExport;
+    const context = selectedPracticeContext();
+    const pack = currentPackFromPreview();
+    const metadata = context ? loadPackGenerationMeta(context.chapterId) : null;
+    const status = document.querySelector(".pack-preview .pack-export-status");
+    if (!context || !pack || !validGeneratedPack(pack)) {
+      toast("请先生成完整课堂实践包");
+      return;
+    }
+    const buttons = Array.from(document.querySelectorAll("[data-pack-export]"));
+    buttons.forEach((item) => { item.disabled = true; });
+    if (status) status.textContent = "正在准备下载…";
+    try {
+      await ensurePracticeExportModule();
+      const filename = await global.PharmacoPracticeExport.exportFormat(format, { context, pack, metadata }, (text) => {
+        if (status) status.textContent = text;
+      });
+      if (status) status.textContent = `已生成 ${filename}`;
+      toast(`实践包已下载 · ${String(format).toUpperCase()}`);
+    } catch (error) {
+      console.error("[practice-runtime] 实践包导出失败", error);
+      if (status) status.textContent = "导出失败 · 当前实践包未改变";
+      toast("实践包导出失败，请重试");
+    } finally {
+      buttons.forEach((item) => { item.disabled = false; });
+    }
+  }
+  let practiceExportLoadPromise = null;
+  function ensurePracticeExportModule() {
+    if (global.PharmacoPracticeExport?.exportFormat) return Promise.resolve(global.PharmacoPracticeExport);
+    if (practiceExportLoadPromise) return practiceExportLoadPromise;
+    practiceExportLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "./dist/practice-export.bundle.js?v=3-pdf-pagination";
+      script.async = true;
+      script.onload = () => global.PharmacoPracticeExport?.exportFormat
+        ? resolve(global.PharmacoPracticeExport)
+        : reject(new Error("实践包下载模块未初始化"));
+      script.onerror = () => reject(new Error("实践包下载模块加载失败"));
+      document.head.appendChild(script);
+    }).catch((error) => {
+      practiceExportLoadPromise = null;
+      throw error;
+    });
+    return practiceExportLoadPromise;
   }
   function wirePackEdits(previewRoot, chapterId) {
     previewRoot.querySelectorAll(".pack-item .body[contenteditable=true]").forEach((el) => {
@@ -2027,7 +2450,7 @@
         if (!curChapter) return;
         const txt = el.innerHTML.trim();
         const changed = txt !== (el.dataset.packOriginalHtml ?? txt);
-        savePackEdit(curChapter, field, txt, { bump: changed });
+        saveGeneratedSection(curChapter, field, txt, { bump: changed });
         el.dataset.packOriginalHtml = txt;
         // blur 后重新计数（按 · 分割）
         const n = el.textContent.split(/[·；;]/).map((s) => s.trim()).filter(Boolean).length;
@@ -2043,188 +2466,76 @@
       });
     });
   }
+  function wireDesignBriefEdits(summaryRoot) {
+    summaryRoot.querySelectorAll("[data-brief-field]").forEach((el) => {
+      if (el.dataset.briefBound === "1") return;
+      el.dataset.briefBound = "1";
+      el.setAttribute("contenteditable", "true");
+      el.addEventListener("focus", () => { el.dataset.briefOriginal = el.textContent.trim(); });
+      el.addEventListener("blur", () => {
+        const chapterId = wizSelection.chapter;
+        const field = el.dataset.briefField;
+        const text = el.textContent.trim();
+        if (!chapterId || !field || !text) return;
+        const changed = text !== (el.dataset.briefOriginal || "");
+        savePackEdit(chapterId, field, text, { bump: false });
+        if (changed) toast(`设计摘要已保存 · ${PRACTICE_ENV_BY_KEY[field]?.short || field}`);
+      });
+      el.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && event.ctrlKey) { event.preventDefault(); el.blur(); }
+      });
+    });
+  }
 
   // ============================================================
-  // 9-env pack content builder
-  // 根据章节信息 + raw mock 数据，推导 9 个教学环节的简要说明
+  // 九环节设计摘要 builder：这些文本是给本地模型的可编辑生成要求，不是实践包成品。
   // ============================================================
   function buildEnvPackContent(chapter, mock) {
-    const t  = chapter.topic || chapter.title || "";
-    const tS = t.length > 12 ? t.slice(0, 12) + "…" : t;
+    // 主题属于实践包的关键信息，允许卡片自然换行，不在内容层提前截断。
+    const topic = String(chapter.topic || chapter.title || "").trim() || "本章主题";
     const sp = (str) => (str || "").split(/[·；;]/).map((s) => s.trim()).filter(Boolean);
     const tasks  = sp(mock.tasks);
     const roles  = sp(mock.roles);
     const rubric = sp(mock.rubric);
     const cites  = sp(mock.citations);
-    const t1 = tasks[0]  ? tasks[0].slice(0, 18)  : tS;
-    const r1 = roles[0]  ? roles[0].slice(0, 8)   : "教师";
+    const taskSeed = tasks.slice(0, 3).join("；") || `围绕「${topic}」形成递进任务`;
+    const roleSeed = roles.slice(0, 4).join("、") || "教师、学生与真实利益相关者";
+    const rubricSeed = rubric.slice(0, 4).join("、") || "概念准确、证据引用、论证质量与反思迁移";
+    const sourceSeed = cites.slice(0, 5).join("、") || "教材本章、教师提供的政策原文与案例材料";
     return {
-      env01: `诊断学生对「${tS}」的先验认知 · 探查常见误解 · 记录认知起点`,
-      env02: `目标：运用${tS}框架分析真实案例 · 量规核心：${rubric.slice(0,2).join(" · ")}`,
-      env03: `核心概念：${tS}关键机制 · 待破解误区：混淆监管逻辑与商业逻辑`,
-      env04: cites.slice(0, 3).join(" · ") || "教材本章 · 政策原文 · 行业指南",
-      env05: tasks.slice(0, 3).join(" · ") || `${tS}递进问题链 · 分歧锚点 · 可评价产出`,
-      env06: `分组立场分化监控 · 沉默干预节点 · 追问：「你的依据是什么？」`,
-      env07: `量规 ${rubric.length || 6} 维：${rubric.slice(0,3).join(" · ")} … · 识别高递进学生`,
-      env08: `复盘：${tS}中被低估的视角 · 非专业影响因素 · 2–3 个核心复盘提问`,
-      env09: `任务题库（${t1.slice(0,16)}…）· ${r1}角色卡 · 匿名案例数据包`,
+      env01: `分析本班学生对「${topic}」的先验认知、常见误解与学习起点；给出可在课前或课堂开场完成的诊断方式，不虚构学生表现。`,
+      env02: `围绕「${topic}」生成 2–3 个可观察学习结果；为每项结果匹配课堂产出、评价证据与判定标准。评价重点参考：${rubricSeed}。`,
+      env03: `梳理「${topic}」的核心概念、概念关系与边界；指出学生容易混淆的前概念，并设计用于暴露误区的诊断问题。`,
+      env04: `仅使用下列教师已提供材料构建真实性学习情境与资源清单：${sourceSeed}。不得新增政策、法规或案例来源；信息不足时标注“待核实来源”。`,
+      env05: `把以下任务素材组织为递进问题链、分歧锚点、学生任务和教学支架：${taskSeed}。角色可参考：${roleSeed}。明确教师动作、学生协作方式、时间与可评价产出。`,
+      env06: `为「${topic}」设置课中形成性检查、分组监控和沉默学生干预节点；给出依据学生回答调整追问、分组或支架的可执行规则。`,
+      env07: `生成可直接使用的表现性评价标准；维度参考：${rubricSeed}。每个维度需有可观察指标与等级锚点，并说明如何诊断学习成效。`,
+      env08: `设计教师和学生的课后复盘；区分课堂事实、可能原因和改进假设，加入 2–3 个核心复盘问题及下一轮可验证调整。`,
+      env09: `从本课「${topic}」产物中整理可复用的任务、问题、角色卡、评价标准和案例材料；标注适用情境、版本、共享方式与使用前需要核验的内容。`,
     };
   }
 
   // ============================================================
-  // Stage 2 模板：五路学科审校 / 剧本 beats / 风险 / 量规 / 画像
+  // Stage 2 模板：五路学科审校 / 剧本 beats / 风险 / 评价标准 / 画像
   // 5 路审校视角固定，内容按 chapter 模板化
   // ============================================================
-  // 5 路学科审校（按学科出处分，每张卡 3 个数据来源位）
-  const EXPERTS = [
-    {
-      id: "expert-pharm",   ec: "is-pharm",   av: "药",
-      role: "药学情境审校",
-      func: "把课题锚定到真实临床 / 药学决策场景",
-      persona: "临床药学",
-      reviewerId: "pharmacy-context",
-      scopeCopy: "只审校案例证据与任务链两个主责环节",
-      target: 5,
-      inject: {
-        upload:  "上传匿名病例 PDF / 临床指南",
-        link:    "链接院内临床案例库 / 药典数据库",
-        distill: "蒸馏某位临床药学学者风格",
-      },
-    },
-    {
-      id: "expert-mgmt",    ec: "is-design",  av: "经",
-      role: "管理决策审校",
-      func: "审视医院管理 / 药事经济 / 政策路径",
-      persona: "药事管理与卫生经济",
-      reviewerId: "management-tradeoff",
-      scopeCopy: "只审校目标量规与复盘决策两个主责环节",
-      target: 4,
-      inject: {
-        upload:  "上传医院年报 / 政策分析报告",
-        link:    "链接科室 BI / 经管知识库",
-        distill: "蒸馏药事经济 / 卫生经济学者风格",
-      },
-    },
-    {
-      id: "expert-law",     ec: "is-law",     av: "法",
-      role: "法规合规审校",
-      func: "校验法规引用 · 文号 · 年份 · 时效",
-      persona: "药事法规与监管",
-      reviewerId: "regulatory-citation",
-      scopeCopy: "只审校知识误区与案例证据两个主责环节",
-      target: 6,
-      inject: {
-        upload:  "上传法规 PDF / 飞检通告汇编",
-        link:    "链接 NMPA / 国家医保局公开库",
-        distill: "蒸馏某位药事法规学者风格",
-      },
-    },
-    {
-      id: "expert-edu",     ec: "is-eval",    av: "教",
-      role: "教学设计审校",
-      func: "审视问题链 · 目标对齐 · 量规设计",
-      persona: "课程与评价",
-      reviewerId: "instructional-design",
-      scopeCopy: "只审校目标、误区与任务链三个主责环节",
-      target: 4,
-      inject: {
-        upload:  "上传课程论文 / 评价范式材料",
-        link:    "链接学校教学评价数据库",
-        distill: "蒸馏 Bloom / Biggs / Wiggins / Stiggins 范式",
-      },
-    },
-    {
-      id: "expert-data",    ec: "is-reflect", av: "数",
-      role: "数据循证审校",
-      func: "提供 RWE / 监测数据 / 循证支撑",
-      persona: "数据科学与真实世界证据",
-      reviewerId: "evidence-metrics",
-      scopeCopy: "只审校案例证据与评价画像两个主责环节",
-      target: 9,
-      inject: {
-        upload:  "上传 CSV / 监测报表 / 真实世界数据",
-        link:    "链接 CHINET / FAERS / 院内 HIS 脱敏库",
-        distill: "蒸馏某位数据科学学者风格",
-      },
-    },
-  ];
-
-  // 章节 → 5 路审校建议，按学科顺序：药学 / 经管 / 法学 / 教育学 / 数据
-  const EXPERT_CHAPTER_COMMENTS = {
-    "ch5-procurement": [
-      { anchor: "⌗ 药学 · 患者代表",       body: '"集采替代"应聚焦<b>慢性病长期处方</b>（如高血压、糖尿病）——建议把患者代表设为<b>已用原研 2 年</b>的慢病患者，使分歧更贴近临床真实。' },
-      { anchor: "⌗ 经管 · 多方博弈",       body: '集采决策涉及<b>医院药事委员会 × 医保局 × 药企</b>三方博弈——建议把课题拓展到"医院如何在 DRG / 集采双轨下博弈"，让管理决策的权衡显化。' },
-      { anchor: "⌗ 法学 · 文号引用",       body: '引用文件应标明<b>发文机关 + 年份 + 文号</b>。"国家医保局〔2024〕XX号文"占位需替换为正式文号；建议补<b>《国办发〔2019〕2号》</b>。' },
-      { anchor: "⌗ 教育 · 问题链 + 量规",  body: '问题链第 1 题<b>"你最直觉的判断"</b>过于宽泛，建议改为<b>"先注意到药价 / 厂家 / 患者反应中哪一个？"</b>；同时"立场迁移度"维度需<b>3 级可观测量规</b>。' },
-      { anchor: "⌗ 数据 · RWE 证据",       body: '建议接入<b>本院集采前后处方数据对比（脱敏 RWE）</b>，让讨论从理论转到证据；可用 2024Q3 至 2025Q3 数据。' },
-    ],
-    "ch4-gmp": [
-      { anchor: "⌗ 药学 · 现场场景",     body: 'GMP 课题最好<b>放到具体车间</b>（固体制剂线 / 无菌灌装线）——建议把任务背景设为<b>「某辅料替代后偏差处置」</b>，让学生看到偏差的物理位置。' },
-      { anchor: "⌗ 经管 · 合规成本",     body: 'GMP 不只是合规——建议引入<b>"偏差处置对生产成本与上市时间的影响"</b>，让学生看到管理决策权衡，而非纯技术执行。' },
-      { anchor: "⌗ 法学 · 通告引用",     body: '引用应明确<b>年份 + 通告编号</b>；建议补<b>近 12 个月飞检通告（公开汇编）</b>与<b>GMP 通则 + 附录 7</b>，让讨论有真实法规坐标。' },
-      { anchor: "⌗ 教育 · 锚点 + 量规",  body: '"找 3 个偏差"过于开放，建议加锚点：<b>"在 6 张拍照中，先看哪 1 张？依据什么？"</b>；CAPA 闭环性需<b>3 级量规</b>（是否给验证措施 / 是否标责任人与时限）。' },
-      { anchor: "⌗ 数据 · 偏差分布",     body: '建议接入<b>历年飞检通告统计 + 行业偏差分类公开报告</b>，让学生看到"偏差类型"的真实分布，比抽象列举更有说服力。' },
-    ],
-    "ch6-supervision": [
-      { anchor: "⌗ 药学 · 信号场景",      body: '上市后场景应锚定<b>具体药品 + 真实信号</b>——建议把 4 份 PSUR 摘要改为<b>一个药品 4 个时段</b>的纵向数据，更接近临床真实研判。' },
-      { anchor: "⌗ 经管 · 召回决策",      body: '上市后再评价的核心管理问题是<b>召回成本 vs 品牌信任</b>——建议把任务扩到"企业如何决策是否主动召回"，让管理博弈显化。' },
-      { anchor: "⌗ 法学 · 病例合规",      body: '院方匿名病例需<b>去标识 + 标注时间窗口</b>，避免学生误以为是当前事件；建议补<b>《药品上市后变更管理办法》《ADR 监测办法》</b>。' },
-      { anchor: "⌗ 教育 · 锚点 + 量规",   body: '"先看哪份摘要"过于平铺，建议加锚点：<b>"先看安全性还是先看疗效？"</b>；因果评估需<b>3 级量规</b>（是否使用 WHO-UMC / Naranjo 量表）。' },
-      { anchor: "⌗ 数据 · 真实样本",      body: '建议接入<b>FAERS 或国家 ADR 监测库（公开版）</b>的真实信号检测数据，让讨论有量化背景，而非纸面假设。' },
-    ],
-    "ch8-payment": [
-      { anchor: "⌗ 药学 · 临床路径",    body: 'DRG/DIP 涉及<b>具体临床路径</b>——建议把课题设为"某常见病种 DRG 入组与处方调整"，让学生看到从医嘱到付费的完整链条。' },
-      { anchor: "⌗ 经管 · 产业博弈",    body: '支付改革是<b>产业链管理大变革</b>——建议把课题分两侧看："医院侧药占比" + "药企侧市场准入"，让完整博弈显化。' },
-      { anchor: "⌗ 法学 · 数据合规",    body: '建议<b>引用国家医保局已公开的 DRG 权重表 + 试点方案</b>，避免使用未脱敏院内数据；引用须标年份与文号。' },
-      { anchor: "⌗ 教育 · 锚点 + 量规", body: '入组路径推演如果只给学生"分类码"过于技术化，建议加情境锚点：<b>"你是医保科长，先按什么标准入组？"</b>；"处方合理性"需<b>3 级量规</b>。' },
-      { anchor: "⌗ 数据 · 公开统计",    body: '建议接入<b>医保局公开的"DRG 试点报告" + 真实付费率分布</b>，让学生看到真实数据，而非概念推演。' },
-    ],
-    "cl-ch2-amr": [
-      { anchor: "⌗ 药学 · 真实病房",    body: '抗菌药物分级管理应放到<b>具体科室</b>（ICU / 呼吸科 / 感染科）——建议把任务背景设为<b>"某 ICU 多重耐药菌爆发"</b>。' },
-      { anchor: "⌗ 经管 · AMS 制度",     body: '抗菌药物管理涉及<b>医院 AMS 制度与处方激励</b>——建议引入"医院如何设计 AMS 考核"，让学生看到制度如何反向影响处方行为。' },
-      { anchor: "⌗ 法学 · 统计合规",    body: '院内统计应<b>明确数据时段 + 样本量</b>，避免以偏概全；建议补<b>《抗菌药物临床应用管理办法》 + 卫健委分级文件</b>。' },
-      { anchor: "⌗ 教育 · 锚点 + 量规", body: '"越级处方"如果只给定义过于抽象，建议加情境锚点：<b>"凌晨 3 点，怀疑革兰阴性脑膜炎，你怎么决定？"</b>；微生物匹配需<b>3 级量规</b>（是否核对培养 / MIC）。' },
-      { anchor: "⌗ 数据 · 耐药趋势",    body: '建议接入<b>CHINET 数据库 + 本院微生物耐药趋势图</b>，让分级讨论基于真实数据，而非教材一般规律。' },
-    ],
-    "cl-ch5-doseopt": [
-      { anchor: "⌗ 药学 · TDM 情境",     body: '个体化给药应锚定<b>具体药物 + 患者画像</b>——建议把任务设为<b>"老年肾功能不全患者万古霉素剂量调整"</b>，让 PK 参数有真实落点。' },
-      { anchor: "⌗ 经管 · 服务成本",     body: 'TDM 服务成本较高——建议引入<b>"医院如何评估 TDM 项目的投入产出"</b>，让学生看到临床服务背后的经管决策。' },
-      { anchor: "⌗ 法学 · 报告合规",     body: 'TDM 报告作为临床决策依据需符合<b>《医疗器械临床使用管理办法》 + ISO 15189</b>——建议补充检验质量管理相关引用。' },
-      { anchor: "⌗ 教育 · 锚点 + 量规",  body: '稳态前 / 稳态后 / 谷值三选一可加情境锚点：<b>"第 3 天是否还要测？"</b>；调整合理性需<b>3 级量规</b>（是否用 PK 参数 / 是否算 CrCl）。' },
-      { anchor: "⌗ 数据 · 真实关联",     body: '建议接入<b>本院历年 TDM 数据 + 治疗结局关联分析</b>，让学生看到"调整 → 结局"的真实相关性。' },
-    ],
-    "rg-ch3-newdrug": [
-      { anchor: "⌗ 药学 · 临床证据",    body: '新药审评应基于<b>真实公开报告</b>——建议从 CDE 公开审评报告中抽 1 个产品做完整推演，让学生看到从 IND 到 NDA 的临床证据链。' },
-      { anchor: "⌗ 经管 · 路径成本",    body: '审评路径选择牵动<b>企业研发投入与上市时间</b>——建议把课题扩到"路径选择对企业现金流的影响"，让学生看到管理决策权衡。' },
-      { anchor: "⌗ 法学 · 资料时效",    body: '审评报告应<b>注明年份 + 受理号</b>，避免学生用过期资料推断现行政策；引用须符合<b>《药品注册管理办法》(2020)</b>。' },
-      { anchor: "⌗ 教育 · 锚点 + 量规", body: '"突破 / 优先 / 附条件 / 常规"四选一可加锚点：<b>"如果该药是肿瘤靶向药，你会争取哪条路径？"</b>；风险/效益评估需<b>3 级量规</b>。' },
-      { anchor: "⌗ 数据 · 试验信息",    body: '建议接入<b>ClinicalTrials.gov + 国家临床试验登记平台</b>，让学生看到该产品的真实试验设计与终点。' },
-    ],
-    "rg-ch6-pv": [
-      { anchor: "⌗ 药学 · 信号场景",     body: 'PV 体系搭建应基于<b>真实企业规模</b>——建议把情境设为<b>"刚获批 1 个 NDA 的中型创新药企"</b>，让组织决策与药品风险特征匹配。' },
-      { anchor: "⌗ 经管 · 投资定位",     body: 'PV 体系是<b>合规成本中心 还是 品牌信任来源</b>——建议引入"PV 投资如何反哺品牌"，让学生看到 PV 的经管价值。' },
-      { anchor: "⌗ 法学 · 规范引用",     body: '建议明确引用<b>ICH E2E + 《药物警戒质量管理规范》</b>，避免仅靠英文规范；规范年份与版本须明确。' },
-      { anchor: "⌗ 教育 · 锚点 + 量规",  body: '"PV 主管 vs 临床医师"职责边界可加锚点：<b>"严重 ADR 上报应由谁起草？"</b>；信号管理需<b>3 级量规</b>（是否用 PRR / ROR 定量方法）。' },
-      { anchor: "⌗ 数据 · 公开数据库",   body: '建议接入<b>VigiBase 或国家 ADR 监测系统公开数据</b>，让信号检测教学有真实样本，提升数据敏感度。' },
-    ],
-  };
-
-  function getExpertCommentsForChapter(chapter) {
-    if (!chapter) return null;
-    const named = EXPERT_CHAPTER_COMMENTS[chapter.id];
-    if (named) return named;
-    // 通用模板兜底（5 学科顺序：药学 / 经管 / 法学 / 教育学 / 数据）
-    return [
-      { anchor: `⌗ 药学 · ${chapter.title.split("·")[1]?.trim() || "情境"}`, body: `「${chapter.topic}」应锚定到<b>真实临床 / 药学决策场景</b>——建议把任务背景写得更具体，让学生进入真实角色。` },
-      { anchor: `⌗ 经管 · 管理权衡`,     body: `「${chapter.topic}」涉及的<b>管理权衡</b>值得拆开看——建议引入决策方之间的成本 / 利益博弈，让经管层面显化。` },
-      { anchor: `⌗ 法学 · 规范引用`,     body: `引用应标明<b>发文机关 + 年份 + 文号</b>；建议补一份<b>${chapter.topic}</b> 相关公开规范，避免占位文本。` },
-      { anchor: `⌗ 教育 · 锚点 + 量规`,  body: `问题链 / 评价量规需给出<b>可观测行为锚点</b>——建议提供 3 级量规，避免主观评分。` },
-      { anchor: `⌗ 数据 · RWE 证据`,     body: `建议接入<b>${chapter.topic}</b> 相关的 RWE / 监测 / 公开统计数据，让讨论从理论转到证据。` },
-    ];
-  }
+  const { EXPERTS, getExpertCommentsForChapter } = Review;
 
   // 章节 → 剧本 beats（精简 6-8 拍）
   const SCRIPT_BY_CHAPTER = {
+    "mp-ch3-environment": [
+      { kind: "marker", text: "▾ 问题链 · 第 1 题 — S / W / O / T 初步归类" },
+      { ts: "00:00", role: "T", text: '"华康连锁拟在 <span class="em">20 家社区门店</span>开展慢病药学服务——先把案例信息归入 S、W、O、T。"' },
+      { ts: "00:18", role: "A", text: '已附 <span class="em">会员复购、药师排班、门诊统筹与竞店服务</span>四类资料。' },
+      { ts: "00:35", role: "T", text: '"每项判断都要回答：它来自组织内部还是外部环境？证据是什么？"' },
+      { ts: "00:48", role: "S", who: "学生 12", text: '"门诊统筹扩大是<span class="em">机会 O</span>，因为它来自外部政策变化。"' },
+      { kind: "marker", text: "▾ 问题链 · 第 3 题 — W / T 边界与 TOWS 转化" },
+      { ts: "01:24", role: "T", text: '"执业药师不足应归为 W 还是 T？请先说明分析层级。"' },
+      { ts: "01:38", role: "S", who: "学生 A", text: '"门店现有排班与培训能力不足，是组织可控的<span class="em">劣势 W</span>。"' },
+      { ts: "01:48", role: "S", who: "学生 B", text: '"行业人才供给趋紧来自外部，是<span class="em">威胁 T</span>。"' },
+      { ts: "02:05", role: "A", text: '⚠ 检测到同一现象的 W / T 边界分歧——建议拆为<b>“内部能力条件 + 外部趋势证据”</b>两条判断。', note: true },
+      { ts: "02:12", role: "T", text: '"好——完成拆分后，再把 SWOT 组合成 SO、WO、ST、WT 四类策略。"' },
+    ],
     "ch5-procurement": [
       { kind: "marker", text: "▾ 问题链 · 第 1 题 — 开放" },
       { ts: "00:00", role: "T", text: '"先看这张图——<span class="em">集采第 9 批</span>，原研降价 87%、仿制药 6 家中标。"' },
@@ -2287,6 +2598,11 @@
 
   // 章节 → 风险信号
   const RISKS_BY_CHAPTER = {
+    "mp-ch3-environment": [
+      { sev: "h", lab: "内外部边界混淆", body: '学生把“门店排班不足”与“行业人才供给趋紧”合并为同一条判断' },
+      { sev: "m", lab: "环境证据断点", body: 'T 维判断尚未引用竞店、行业人才或区域市场数据' },
+      { sev: "l", lab: "TOWS 转化不足", body: 'SWOT 已完成分类，但部分小组仍未形成可执行的策略组合' },
+    ],
     "ch5-procurement": [
       { sev: "h", lab: "立场失衡", body: '4 位"药企背景"学生未发声，可能放大集采替代倾向' },
       { sev: "m", lab: "政策引用断点", body: 'B 组讨论尚未引用任何法规条款' },
@@ -2312,68 +2628,14 @@
     ];
   }
 
-  function normalizeLiveReview(raw) {
-    if (!raw || typeof raw !== "object" || raw.status !== "anchored") return null;
-    const annotation = raw.annotation;
-    const sourceRevision = Number(raw.sourceRevision);
-    if (!annotation || typeof annotation !== "object"
-      || !Number.isInteger(sourceRevision) || sourceRevision < 0
-      || !PRACTICE_ENV_BY_KEY[annotation.targetEnv]
-      || typeof annotation.issue !== "string" || !annotation.issue.trim()
-      || typeof annotation.suggestion !== "string" || !annotation.suggestion.trim()
-      || typeof annotation.sourceExcerpt !== "string" || !annotation.sourceExcerpt.trim()) return null;
-    return {
-      status: "anchored",
-      sourceRevision,
-      manuscriptHash: typeof raw.manuscriptHash === "string" ? raw.manuscriptHash : "",
-      model: typeof raw.model === "string" ? raw.model : "本机 Qwen",
-      promptVersion: typeof raw.promptVersion === "string" ? raw.promptVersion : "",
-      generatedAt: typeof raw.generatedAt === "string" ? raw.generatedAt : "",
-      attempts: Number.isInteger(Number(raw.attempts)) ? Number(raw.attempts) : 1,
-      annotation: {
-        targetEnv: annotation.targetEnv,
-        segmentKey: typeof annotation.segmentKey === "string" ? annotation.segmentKey : "",
-        sourceExcerpt: annotation.sourceExcerpt.trim(),
-        sourceHash: typeof annotation.sourceHash === "string" ? annotation.sourceHash : "",
-        anchorMethod: typeof annotation.anchorMethod === "string" ? annotation.anchorMethod : "",
-        issue: annotation.issue.trim(),
-        suggestion: annotation.suggestion.trim(),
-        crossReferences: Array.isArray(annotation.crossReferences)
-          ? annotation.crossReferences.filter((ref) => ref?.ok === true && PRACTICE_ENV_BY_KEY[ref.targetEnv])
-            .map((ref) => ({
-              ok: true,
-              targetEnv: ref.targetEnv,
-              segmentKey: typeof ref.segmentKey === "string" ? ref.segmentKey : "",
-              sourceExcerpt: typeof ref.sourceExcerpt === "string" ? ref.sourceExcerpt : "",
-              sourceHash: typeof ref.sourceHash === "string" ? ref.sourceHash : "",
-              anchorMethod: typeof ref.anchorMethod === "string" ? ref.anchorMethod : "",
-            }))
-          : [],
-      },
-    };
-  }
-  function liveReviewSourceText(liveReview) {
-    return `问题：${liveReview.annotation.issue}\n建议：${liveReview.annotation.suggestion}`;
-  }
-  function liveReviewBodyMarkup(liveReview) {
-    return `<span class="ec-review-line"><b>问题</b>${escapeHtml(liveReview.annotation.issue)}</span><span class="ec-review-line"><b>建议</b>${escapeHtml(liveReview.annotation.suggestion)}</span>`;
-  }
-  function liveReviewAnchorCopy(liveReview) {
-    const env = PRACTICE_ENV_BY_KEY[liveReview.annotation.targetEnv];
-    const segment = liveReview.annotation.segmentKey ? ` · ${liveReview.annotation.segmentKey}` : "";
-    return `⌗ ${env?.no || liveReview.annotation.targetEnv} ${env?.short || ""}${segment}`;
-  }
-  function liveReviewTargetKeys(liveReview) {
-    return [...new Set([
-      liveReview.annotation.targetEnv,
-      ...liveReview.annotation.crossReferences.map((ref) => ref.targetEnv),
-    ].filter((key) => PRACTICE_ENV_BY_KEY[key]))];
-  }
-
-  // 章节 → 量规歧义
+  // 章节 → 评价标准歧义
   const FLAGS_BY_CHAPTER = {
+    "mp-ch3-environment": [
+      { fid: "R-04", body: '<b>内外部边界判断</b>缺少可观测锚点；建议加入“组织可控性 + 外部趋势来源”两项判据' },
+      { fid: "R-06", body: '<b>策略可行性</b>与“证据充分性”存在交叠，需明确 TOWS 组合与证据质量分别计分' },
+    ],
     "ch5-procurement": [
-      { fid: "R-04", body: '<b>立场迁移度</b>缺少可观测锚点；建议补 3 级量规（已被教学设计审校提出）' },
+      { fid: "R-04", body: '<b>立场迁移度</b>缺少可观测锚点；建议补 3 级评价标准（已被教学设计审校提出）' },
       { fid: "R-06", body: '<b>反思深度</b>与"政策引用"维度有交叠，可能双计分' },
     ],
     "ch4-gmp": [
@@ -2388,129 +2650,434 @@
   function getFlagsForChapter(chapter) {
     if (!chapter) return FLAGS_BY_CHAPTER["ch5-procurement"];
     return FLAGS_BY_CHAPTER[chapter.id] || [
-      { fid: "R-0X", body: `<b>${chapter.topic} 立场迁移度</b>缺少可观测锚点；建议补 3 级量规` },
+      { fid: "R-0X", body: `<b>${chapter.topic} 立场迁移度</b>缺少可观测锚点；建议补 3 级评价标准` },
       { fid: "R-0Y", body: '部分评价维度可能交叠，建议复核以免双计分' },
     ];
   }
 
-  function renderExpertCards(chapter) {
-    const grid = document.querySelector('#stage-ii [data-ec-role="grid"]');
-    if (!grid) return;
-    const comments = getExpertCommentsForChapter(chapter);
-    if (!comments) return;
-    const savedReviews = loadExpertAdoptions(chapter?.id);
-    grid.innerHTML = "";
-    state.expertCards = [];
-    EXPERTS.forEach((e, i) => {
-      const c = comments[i] || comments[0];
-      const savedRecord = savedReviews[e.id];
-      const liveReview = normalizeLiveReview(savedRecord?.liveReview);
-      const seedSourceText = stripHtml(c.body).trim();
-      const sourceText = liveReview ? liveReviewSourceText(liveReview) : seedSourceText;
-      const defaultTargets = liveReview ? liveReviewTargetKeys(liveReview) : inferReviewTargetEnvKeys(sourceText);
-      const record = normalizeReviewRecord(savedRecord, sourceText, defaultTargets);
-      record.liveReview = liveReview;
-      const card = document.createElement("div");
-      card.className = `expert-card ${e.ec}`;
-      card.dataset.expertId = e.id;
-      const targetOptions = PRACTICE_ENV_META.map((env) => `
-        <label class="ec-target-chip">
-          <input type="checkbox" data-ec-role="target-input" value="${env.key}" ${record.targetEnvKeys.includes(env.key) ? "checked" : ""}/>
-          <span>${env.no} ${env.short}</span>
-        </label>
-      `).join("");
-      card.innerHTML = `
-        <div class="ec-head">
-          <div class="ec-av">${e.av}</div>
-          <div class="ec-who">${e.role} <span class="ec-demo">审校视角</span><small>${e.persona}</small></div>
+  const REVIEW_VIEW_STORE = "pp.practice.reviewView.v1";
+  let reviewViewMode = (() => {
+    try { return localStorage.getItem(REVIEW_VIEW_STORE) === "discipline" ? "discipline" : "env"; }
+    catch { return "env"; }
+  })();
+  const reviewDossierRenderer = Review.createDossierRenderer({ envMeta: PRACTICE_ENV_META, escapeHtml });
+
+  function hasTrialEvidence() {
+    return Array.isArray(state.keyMoments) && state.keyMoments.length > 0;
+  }
+
+  function reviewVerdictIsResolved(entry) {
+    return entry.state === "rejected" || (entry.state === "candidate" && entry.decision !== "pending");
+  }
+
+  function reviewVerdictStatus(entry) {
+    if (entry.state === "rejected") return "暂不修改";
+    if (entry.decision === "insufficient") return "证据不足";
+    if (entry.state === "candidate" && entry.decision === "supported") {
+      return entry.candidateMode === "modified" ? "调整后修改" : "按建议修改";
+    }
+    return "待处理";
+  }
+
+  function reviewVerdictEvidenceCount(entry) {
+    return entry.evidenceTouched ? entry.evidenceLinks.length : suggestedEvidenceIdsForEntry(entry).length;
+  }
+
+  function reviewVerdictIssue(entry) {
+    if (entry.liveReview?.annotation?.issue) return entry.liveReview.annotation.issue;
+    return stripHtml(entry.seedComment?.body || entry.sourceText)
+      .replace(/[“”"]/g, "")
+      .split(/[。；]/)[0]
+      .trim() || "查看本路审校建议";
+  }
+
+  function reviewVerdictPriority(entry, index) {
+    return (reviewVerdictIsResolved(entry) ? 0 : 100)
+      + Math.min(reviewVerdictEvidenceCount(entry), 5) * 10
+      + (entry.liveReview && !isLiveReviewStale(entry) ? 5 : 0)
+      - index / 100;
+  }
+
+  function syncReviewWorkspaceSummary() {
+    const root = document.querySelector('#stage-ii [data-ec-role="verdict-list"]');
+    const entries = state.expertCards || [];
+    if (!root || !entries.length) return;
+    const resolved = entries.filter(reviewVerdictIsResolved).length;
+    const evidenced = entries.filter((entry) => reviewVerdictEvidenceCount(entry) > 0).length;
+    const resolvedNode = root.querySelector('[data-review-summary="resolved"]');
+    const evidenceNode = root.querySelector('[data-review-summary="evidenced"]');
+    if (resolvedNode) resolvedNode.textContent = String(resolved);
+    if (evidenceNode) evidenceNode.textContent = String(evidenced);
+  }
+
+  function syncReviewVerdictIndex(entry) {
+    const root = document.querySelector('#stage-ii [data-ec-role="verdict-list"]');
+    const button = root?.querySelector(`[data-review-select="${entry.expertId}"]`);
+    if (!button) return;
+    button.classList.toggle("is-resolved", reviewVerdictIsResolved(entry));
+    const status = button.querySelector("[data-review-index-status]");
+    const evidence = button.querySelector(`[data-review-index-evidence="${entry.expertId}"]`);
+    if (status) status.textContent = reviewVerdictStatus(entry);
+    if (evidence) evidence.textContent = `${reviewVerdictEvidenceCount(entry)} 条证据`;
+    syncReviewWorkspaceSummary();
+  }
+
+  function renderReviewVerdictBand() {
+    const list = document.querySelector('#stage-ii [data-ec-role="verdict-list"]');
+    if (!list) return;
+    (state.expertCards || []).forEach((entry) => { entry.verdict = null; });
+    if (!hasTrialEvidence()) {
+      list.innerHTML = '<p class="posttrial-wait">尚无仿真证据 · 先运行虚拟班并读取关键时刻；证据出现前只能阅读审校与标记观察点。</p>';
+      return;
+    }
+    const entries = state.expertCards || [];
+    const preferred = entries
+      .map((entry, index) => ({ entry, score:reviewVerdictPriority(entry, index) }))
+      .sort((a, b) => b.score - a.score)[0]?.entry;
+    if (!entries.some((entry) => entry.expertId === state.activeVerdictExpertId)) {
+      state.activeVerdictExpertId = preferred?.expertId || entries[0]?.expertId || "";
+    }
+    const resolvedCount = entries.filter(reviewVerdictIsResolved).length;
+    const evidencedCount = entries.filter((entry) => reviewVerdictEvidenceCount(entry) > 0).length;
+    list.classList.add("review-verdict-list");
+    const indexMarkup = entries.map((entry, index) => {
+      const active = entry.expertId === state.activeVerdictExpertId;
+      const evidenceCount = reviewVerdictEvidenceCount(entry);
+      const targets = entry.targetEnvKeys.map((key) => PRACTICE_ENV_BY_KEY[key]?.no).filter(Boolean).join(" / ");
+      return `<button type="button" class="review-verdict-index-item${active ? " is-active" : ""}${reviewVerdictIsResolved(entry) ? " is-resolved" : ""}" data-review-select="${escapeHtml(entry.expertId)}" aria-pressed="${active}" aria-controls="review-verdict-${escapeHtml(entry.expertId)}">
+        <span class="review-verdict-index-top"><i>${String(index + 1).padStart(2, "0")}</i><b>${escapeHtml(entry.expert.role)}</b><em data-review-index-status>${escapeHtml(reviewVerdictStatus(entry))}</em></span>
+        <span class="review-verdict-index-issue">${escapeHtml(reviewVerdictIssue(entry))}</span>
+        <span class="review-verdict-index-meta"><small>环节 ${targets || "未选择"}</small><small data-review-index-evidence="${escapeHtml(entry.expertId)}">${evidenceCount} 条证据</small></span>
+      </button>`;
+    }).join("");
+    const detailMarkup = entries.map((entry) => {
+      const targets = entry.targetEnvKeys.map((key) => PRACTICE_ENV_BY_KEY[key]?.no).filter(Boolean).join(" / ");
+      const active = entry.expertId === state.activeVerdictExpertId;
+      return `<article id="review-verdict-${escapeHtml(entry.expertId)}" class="review-verdict-row is-posttrial${active ? " is-active" : ""}" data-review-verdict="${escapeHtml(entry.expertId)}"${active ? "" : " hidden"}>
+        <div class="review-detail-kicker"><span>当前聚焦</span><small>其余审校保留在左侧索引</small></div>
+        <div class="posttrial-head"><div><b>${escapeHtml(entry.expert.role)}</b><small>${escapeHtml(entry.expert.persona)} · 观察环节 ${targets || "未选择"}</small></div><span class="pill pill-sage" data-ec-role="posttrial-status">${escapeHtml(reviewVerdictStatus(entry))}</span></div>
+        <div class="posttrial-source" data-ec-role="posttrial-source">
+          <span class="posttrial-source-label">建议要点</span>
+          <div class="posttrial-source-copy${entry.liveReview ? " is-structured" : ""}" data-ec-role="posttrial-body"></div>
+          <button type="button" class="posttrial-source-toggle" data-source-act="toggle" aria-expanded="false">展开全文</button>
         </div>
-        <div class="ec-func">职能 · ${e.func}</div>
-        <div class="ec-live-review" data-ec-role="live-review" data-state="seed">
-          <span class="ec-live-status" data-ec-role="live-status">固定审校种子</span>
-          <button type="button" data-review-act="live">用本机 Qwen 审校</button>
-          <span class="ec-live-error" data-ec-role="live-error" role="alert" hidden></span>
+        <div class="posttrial-flow">
+          <section class="ec-evidence">
+            <div class="ec-evidence-summary"><span class="ec-evidence-label">试教证据</span><span data-ec-role="evidence-summary">正在匹配相关记录</span><button type="button" data-evidence-act="toggle" aria-expanded="false">查看</button></div>
+            <span data-ec-role="evidence-count" hidden>系统正在匹配相关记录</span>
+            <div class="ec-evidence-list" data-ec-role="evidence-list" hidden></div>
+          </section>
+          <section data-ec-role="resolution" class="ec-resolution">
+            <span class="ec-section-lbl"><b>你的处理</b><small>选择一次</small></span>
+            <div class="ec-resolution-picker" data-ec-role="resolution-picker">
+              <button type="button" data-review-choice="original" aria-pressed="false">按建议修改</button>
+              <button type="button" data-review-choice="modified" aria-pressed="false">调整后修改</button>
+              <button type="button" data-review-choice="rejected" aria-pressed="false">暂不修改</button>
+            </div>
+            <span class="ec-inline-error ec-candidate-error" data-ec-role="candidate-error" role="alert" hidden></span>
+            <div class="ec-resolution-summary" data-ec-role="resolution-summary" hidden><span class="ec-resolution-copy"></span><span class="ec-resolution-actions"><button type="button" data-note-act="toggle" aria-expanded="false" hidden>补充说明</button><button type="button" data-review-act="revise">改判</button></span></div>
+            <div class="ec-edit-panel" data-ec-role="edit-panel" hidden><label>修改后意见<textarea rows="4" maxlength="480"></textarea></label><span class="ec-inline-error" data-ec-role="edit-error" role="alert" hidden></span><div><button type="button" data-edit-act="save">保存候选</button><button type="button" data-edit-act="cancel">取消</button></div></div>
+            <div class="ec-reject-panel" data-ec-role="reject-panel" hidden><label>暂不修改的原因<select data-ec-role="defer-kind"><option value="insufficient">本次试教证据不足</option><option value="not-applicable">建议不适用于本课</option><option value="defer">本轮暂缓处理</option></select></label><label>补充说明（可选）<input maxlength="160" placeholder="用于保留教师决策痕迹"/></label><span class="ec-inline-error" data-ec-role="reject-error" role="alert" hidden></span><div><button type="button" data-reject-act="confirm">确认暂不修改</button><button type="button" data-reject-act="cancel">取消</button></div></div>
+            <label class="ec-decision-note-field" data-ec-role="decision-note-field" hidden><span>补充说明（可选）</span><input class="ec-decision-note" data-ec-role="decision-note" maxlength="120" placeholder="例如：下一轮重点观察什么"/></label>
+          </section>
         </div>
-        <span class="ec-anchor" title="${liveReview ? escapeHtml(liveReview.annotation.sourceExcerpt) : ""}">${liveReview ? escapeHtml(liveReviewAnchorCopy(liveReview)) : c.anchor}</span>
-        <div class="ec-body" data-ec-role="body"></div>
-        <div class="ec-edit-panel" data-ec-role="edit-panel" hidden>
-          <label>修改后意见<textarea maxlength="1200"></textarea></label>
-          <span class="ec-inline-error" data-ec-role="edit-error" role="alert" hidden></span>
-          <div><button type="button" data-edit-act="save">保存修订</button><button type="button" data-edit-act="cancel">取消</button></div>
-        </div>
-        <details class="ec-target-picker">
-          <summary>目标环节 · <span class="ec-target-summary" data-ec-role="target-summary"></span></summary>
-          <div class="ec-target-grid">${targetOptions}</div>
-        </details>
-        <div class="ec-evidence">
-          <span class="ec-section-lbl">仿真证据关联 <small>系统只建议，教师可调整</small></span>
-          <div class="ec-evidence-list" data-ec-role="evidence-list"><span class="ec-empty">运行虚拟班后显示可关联记录</span></div>
-        </div>
-        <div class="ec-decision">
-          <span class="ec-section-lbl">教师判断</span>
-          <div class="ec-decision-acts">
-            <button type="button" data-decision="supported">支持</button>
-            <button type="button" data-decision="unsupported">不支持</button>
-            <button type="button" data-decision="insufficient">证据不足</button>
-          </div>
-          <input class="ec-decision-note" data-ec-role="decision-note" maxlength="120" placeholder="判断依据（建议填写）"/>
-        </div>
-        <div class="ec-inject">
-          <span class="ec-inject-lbl">⌕ 自定义数据源</span>
-          <div class="ec-inject-acts">
-            <button type="button" class="ec-inject-btn" data-act="upload"  title="${e.inject.upload}">📎 上传</button>
-            <button type="button" class="ec-inject-btn" data-act="link"    title="${e.inject.link}">🔗 链接</button>
-            <button type="button" class="ec-inject-btn" data-act="distill" title="${e.inject.distill}">✨ 蒸馏</button>
-          </div>
-        </div>
-        <div class="ec-resolution" data-ec-role="resolution">
-          <span class="ec-resolution-label">候选处理</span>
-          <div class="ec-resolution-picker" data-ec-role="resolution-picker" role="group" aria-label="候选处理">
-            <button type="button" data-review-choice="original">原意见入候选</button>
-            <button type="button" data-review-choice="modified">修改后入候选</button>
-            <button type="button" data-review-choice="rejected">不采用</button>
-          </div>
-          <div class="ec-resolution-summary" data-ec-role="resolution-summary" data-state="pending" hidden>
-            <span class="ec-resolution-mark" aria-hidden="true">✓</span>
-            <span class="ec-resolution-copy"></span>
-            <button type="button" data-review-act="revise">改判</button>
-          </div>
-        </div>
-        <div class="ec-reject-panel" data-ec-role="reject-panel" hidden>
-          <label>不采用原因<input maxlength="120" placeholder="请留下一句教师决策理由"/></label>
-          <span class="ec-inline-error" data-ec-role="reject-error" role="alert" hidden></span>
-          <div><button type="button" data-reject-act="confirm">确认不采用</button><button type="button" data-reject-act="cancel">取消</button></div>
-        </div>
-      `;
-      const body = card.querySelector('[data-ec-role="body"]');
-      if (record.draftText === sourceText) body.innerHTML = liveReview ? liveReviewBodyMarkup(liveReview) : c.body;
-      else body.textContent = record.draftText;
-      grid.appendChild(card);
-      const sourceComment = liveReview ? { anchor: liveReviewAnchorCopy(liveReview), body: liveReviewBodyMarkup(liveReview) } : c;
-      const entry = {
-        ...record,
-        card,
-        expertId: e.id,
-        chapterId: chapter?.id || "",
-        expert: e,
-        sourceComment,
-        seedComment: c,
-        seedSourceText,
-        sourceText,
-        liveReview,
-        liveReviewPhase: "idle",
-        liveReviewError: "",
-        isRevising: false,
-      };
-      state.expertCards.push(entry);
-      if (entry.state === "candidate") {
-        captureOriginalEnvContent(entry);
+      </article>`;
+    }).join("");
+    list.innerHTML = `<div class="review-verdict-workspace">
+      <aside class="review-verdict-index" aria-label="五路审校索引">
+        <header><span>审校索引</span><strong>${entries.length} 路意见</strong></header>
+        <div class="review-verdict-summary"><span><b data-review-summary="evidenced">${evidencedCount}</b> 路已有证据</span><span><b data-review-summary="resolved">${resolvedCount}</b> 路已处理</span></div>
+        <nav>${indexMarkup}</nav>
+      </aside>
+      <div class="review-verdict-detail-stack" aria-live="polite">${detailMarkup}</div>
+    </div>`;
+    entries.forEach((entry) => { entry.verdict = list.querySelector(`[data-review-verdict="${entry.expertId}"]`); });
+    list.querySelectorAll("[data-review-select]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const nextId = button.dataset.reviewSelect;
+        if (!nextId || nextId === state.activeVerdictExpertId) return;
+        state.activeVerdictExpertId = nextId;
+        list.querySelectorAll("[data-review-select]").forEach((candidate) => {
+          const selected = candidate.dataset.reviewSelect === nextId;
+          candidate.classList.toggle("is-active", selected);
+          candidate.setAttribute("aria-pressed", String(selected));
+        });
+        list.querySelectorAll("[data-review-verdict]").forEach((detail) => {
+          const selected = detail.dataset.reviewVerdict === nextId;
+          detail.hidden = !selected;
+          detail.classList.toggle("is-active", selected);
+        });
+      });
+    });
+  }
+
+  // 环节热点投影：聚类键只用 envId。只有实时完成且逐字锚定的意见（ready）
+  // 进入“跨学科关注热点”计数；种子、进行中、过期与降级内容不进入热点数
+  // 与完成数，只作为观察重点单独呈现。
+  function liveReviewState(entry) {
+    if (entry.liveReviewPhase === "loading") return "loading";
+    if (entry.liveReviewPhase === "error") return "error";
+    if (isLiveReviewStale(entry)) return "stale";
+    return entry.liveReview ? "ready" : "seed";
+  }
+  function buildEnvReviewProjection(entries) {
+    const projection = { total: entries.length, readyReviewCount: 0, loadingCount: 0, degradedCount: 0, seedCount: 0, staleCount: 0, byEnv: new Map(), hotEnvCount: 0, maxEnvShare: 0 };
+    entries.forEach((entry) => {
+      const reviewState = liveReviewState(entry);
+      if (reviewState === "ready") {
+        projection.readyReviewCount += 1;
+        const envKey = entry.liveReview.annotation.targetEnv;
+        if (PRACTICE_ENV_BY_KEY[envKey]) {
+          const bucket = projection.byEnv.get(envKey) || [];
+          bucket.push(entry);
+          projection.byEnv.set(envKey, bucket);
+        }
+      } else if (reviewState === "loading") projection.loadingCount += 1;
+      else if (reviewState === "error") projection.degradedCount += 1;
+      else if (reviewState === "stale") projection.staleCount += 1;
+      else projection.seedCount += 1;
+    });
+    const sizes = [...projection.byEnv.values()].map((bucket) => bucket.length);
+    projection.maxEnvShare = projection.total ? Math.max(0, ...sizes) / projection.total : 0;
+    projection.hotEnvCount = sizes.filter((count) => count >= 2).length;
+    return projection;
+  }
+
+  function renderReviewFocusSummary() {
+    const entries = state.expertCards || [];
+    const list = document.querySelector('#stage-ii [data-review-role="focus-list"]');
+    const gate = document.querySelector('#stage-ii [data-review-role="focus-gate"]');
+    if (!entries.length || !list || !gate) return;
+    const projection = buildEnvReviewProjection(entries);
+    const { total, readyReviewCount, loadingCount, degradedCount, seedCount, staleCount, hotEnvCount } = projection;
+
+    // —— 摘要行：全部完成有热点 / 全部完成无热点 / 部分完成（含降级与进行中） ——
+    let gateCopy = "固定种子 · 等待五路实时审校";
+    if (readyReviewCount > 0 || loadingCount > 0 || degradedCount > 0) {
+      if (readyReviewCount === total) {
+        gateCopy = hotEnvCount > 0
+          ? `五路审校完成 · ${hotEnvCount} 个跨学科关注热点 · ${readyReviewCount} 条意见均逐字锚定`
+          : `五路审校完成 · 各学科关注点分布在不同环节 · ${readyReviewCount} 条意见均逐字锚定`;
+      } else {
+        const parts = [`已完成 ${readyReviewCount}/${total} 路实时审校`];
+        if (hotEnvCount > 0) parts.push(`${hotEnvCount} 个跨学科关注热点`);
+        if (degradedCount > 0) parts.push(`${degradedCount} 路显示预置观察重点`);
+        if (loadingCount > 0) parts.push(`${loadingCount} 路审校进行中`);
+        parts.push(`${readyReviewCount} 条意见已逐字锚定`);
+        gateCopy = parts.join(" · ");
+      }
+    }
+    gate.textContent = gateCopy;
+    gate.classList.toggle("is-anchored", total > 0 && readyReviewCount === total);
+
+    const roleOf = (entry) => (entry.expert?.role || "学科").replace("审校", "");
+    if (readyReviewCount === 0) {
+      // 纯种子态：保留“带着问题看试教”的预置观察重点，不计入任何完成数。
+      const grouped = new Map();
+      entries.forEach((entry) => {
+        const key = entry.seedComment?.primaryEnvKey || entry.targetEnvKeys?.[0];
+        if (!PRACTICE_ENV_BY_KEY[key]) return;
+        const issue = stripHtml(entry.seedComment?.body || entry.sourceText).replace(/["“”]/g, "").split(/[。；]/)[0];
+        const bucket = grouped.get(key) || { key, entries:[], issues:[] };
+        bucket.entries.push(entry);
+        if (issue) bucket.issues.push(issue);
+        grouped.set(key, bucket);
+      });
+      const focuses = [...grouped.values()]
+        .sort((a, b) => b.entries.length - a.entries.length || PRACTICE_ENV_BY_KEY[a.key].no.localeCompare(PRACTICE_ENV_BY_KEY[b.key].no))
+        .slice(0, 3);
+      list.innerHTML = focuses.map((focus) => {
+        const env = PRACTICE_ENV_BY_KEY[focus.key];
+        const roles = focus.entries.map((entry) => roleOf(entry)).join(" × ");
+        return `<article><b>${escapeHtml(env.no)}</b><span>${escapeHtml(focus.issues[0] || `${env.short}需在试教中重点观察`)}</span><small>${escapeHtml(roles)}</small></article>`;
+      }).join("");
+      return;
+    }
+
+    // 热点列表：ready 意见按环节聚类，≥2 路同环节即“跨学科关注热点”。
+    // 只投影原始意见（学科/问题/建议/摘录/版本），不生成任何综合文本。
+    const envGroups = [...projection.byEnv.entries()]
+      .map(([key, bucket]) => ({ key, entries: bucket, env: PRACTICE_ENV_BY_KEY[key] }))
+      .sort((a, b) => b.entries.length - a.entries.length || a.env.no.localeCompare(b.env.no));
+    const hotspotMarkup = envGroups.map((group) => {
+      const shared = group.entries.length >= 2;
+      const roles = group.entries.map((entry) => roleOf(entry)).join("｜");
+      const heading = shared ? `${group.entries.length} 路共同关注` : "1 路关注";
+      const note = shared ? `${group.entries.length} 个不同专业问题，均已逐字定位本环节` : "已逐字定位本环节";
+      const items = group.entries.map((entry) => {
+        const annotation = entry.liveReview.annotation;
+        return `<li><b>${escapeHtml(roleOf(entry))}</b><p><i>问题</i>${escapeHtml(annotation.issue)}</p><p><i>建议</i>${escapeHtml(annotation.suggestion)}</p><p class="review-focus-excerpt"><i>摘录</i>「${escapeHtml(annotation.sourceExcerpt)}」</p><small>本机 Qwen · 已锚定 · 第 ${entry.liveReview.sourceRevision} 版</small></li>`;
+      }).join("");
+      return `<details class="review-focus-env"><summary><b>${escapeHtml(group.env.no)}</b><span>${escapeHtml(heading)}</span><small>${escapeHtml(roles)} · ${escapeHtml(note)}</small></summary><ul>${items}</ul></details>`;
+    }).join("");
+    const pending = [];
+    if (seedCount > 0) pending.push(`${seedCount} 路使用固定审校种子`);
+    if (loadingCount > 0) pending.push(`${loadingCount} 路审校进行中`);
+    if (degradedCount > 0) pending.push(`${degradedCount} 路降级为预置观察重点`);
+    if (staleCount > 0) pending.push(`${staleCount} 路批注待按当前版复审`);
+    const pendingMarkup = pending.length
+      ? `<p class="review-focus-pending">观察重点 · ${escapeHtml(pending.join("；"))}</p>` : "";
+    list.innerHTML = `${hotspotMarkup}${pendingMarkup}`;
+  }
+
+  function renderUnlocatedBasket(chapter) {
+    const basket = document.querySelector('#stage-ii [data-ec-role="unlocated-basket"]');
+    const list = basket?.querySelector('[data-ec-role="unlocated-list"]');
+    if (!basket || !list) return;
+    const active = (state.expertCards || []).filter((entry) => entry.unlocatedReview && entry.unlocatedReview.state !== "dismissed");
+    const count = basket.querySelector("summary b");
+    if (count) count.textContent = String(active.length);
+    if (!active.length) {
+      list.innerHTML = '<p>当前没有未定位意见。门禁失败的内容不会出现在任何环节，也不能进入修订候选。</p>';
+      basket.open = false;
+      return;
+    }
+    list.innerHTML = active.map((entry) => {
+      const item = entry.unlocatedReview;
+      const claimed = PRACTICE_ENV_BY_KEY[item.claimedTargetEnv];
+      return `<section class="review-unlocated-item" data-unlocated-expert="${escapeHtml(entry.expertId)}"><h6>${escapeHtml(entry.expert.role)} · 未定位建议</h6><small>门禁：${escapeHtml(item.gateReason)} · 声称落点 ${escapeHtml(claimed?.no || item.claimedTargetEnv || "未知")}</small><p><b>问题</b> ${escapeHtml(item.issue)}</p><p><b>建议</b> ${escapeHtml(item.suggestion)}</p>${item.claimedSourceExcerpt ? `<p><b>模型声称摘录</b>「${escapeHtml(item.claimedSourceExcerpt)}」</p>` : ""}<label>归档原因 <input maxlength="120" data-unlocated-reason placeholder="必须留下教师原因"/></label><button type="button" data-unlocated-act="dismiss">归档未定位意见</button></section>`;
+    }).join("");
+    basket.open = true;
+    list.querySelectorAll('[data-unlocated-act="dismiss"]').forEach((button) => {
+      button.addEventListener("click", () => {
+        const itemEl = button.closest("[data-unlocated-expert]");
+        const entry = (state.expertCards || []).find((candidate) => candidate.expertId === itemEl?.dataset.unlocatedExpert);
+        const reason = itemEl?.querySelector("[data-unlocated-reason]")?.value.trim() || "";
+        if (!entry?.unlocatedReview || !reason) { toast("请先填写归档原因，保留教师决策痕迹"); return; }
+        entry.unlocatedReview.state = "dismissed";
+        entry.unlocatedReview.dismissReason = reason;
         saveExpertReview(chapter?.id, entry);
+        renderUnlocatedBasket(chapter);
+      });
+    });
+  }
+
+  function renderReviewSurfaces(chapter, { autoLink = true } = {}) {
+    const root = document.querySelector('#stage-ii [data-ec-role="grid"]');
+    const indexRoot = document.querySelector('#stage-ii [data-ec-role="env-index"]');
+    if (!root) return;
+    reviewDossierRenderer.render({ root, indexRoot, entries: state.expertCards || [], pack: currentPackFromPreview() || {}, mode: reviewViewMode });
+    renderReviewVerdictBand();
+    (state.expertCards || []).forEach((entry) => {
+      const body = entry.card?.querySelector('[data-ec-role="body"]');
+      if (body) {
+        if (entry.draftText === entry.sourceText) body.innerHTML = entry.sourceComment.body;
+        else body.textContent = entry.draftText;
       }
       wireReviewCard(entry, chapter);
       syncReviewCardVisual(entry);
       syncLiveReviewVisual(entry);
-      renderReviewEvidence(entry, { autoLink: true });
+      renderReviewEvidence(entry, { autoLink });
     });
+    indexRoot?.querySelectorAll("[data-review-env]").forEach((button) => {
+      button.addEventListener("click", () => {
+        indexRoot.querySelectorAll("[data-review-env]").forEach((candidate) => candidate.classList.toggle("is-active", candidate === button));
+        document.getElementById(`review-env-${button.dataset.reviewEnv}`)?.scrollIntoView({ behavior:"smooth", block:"start" });
+      });
+    });
+    renderUnlocatedBasket(chapter);
+    renderReviewFocusSummary();
+  }
+
+  function wireReviewSurfaceControls() {
+    const drawer = document.querySelector('#stage-ii [data-review-surface="drawer"]');
+    const scrim = document.querySelector('#stage-ii .review-drawer-scrim');
+    const openDrawer = () => {
+      if (!drawer || !scrim) return;
+      document.documentElement.classList.add("review-drawer-open");
+      drawer.setAttribute("aria-hidden", "false");
+      drawer.removeAttribute("inert");
+      scrim.hidden = false;
+      drawer.querySelector('[data-review-act="close-drawer"]')?.focus();
+    };
+    const closeDrawer = () => {
+      if (!drawer || !scrim) return;
+      document.documentElement.classList.remove("review-drawer-open");
+      drawer.setAttribute("aria-hidden", "true");
+      drawer.setAttribute("inert", "");
+      scrim.hidden = true;
+      document.querySelector('#stage-ii [data-review-act="open-drawer"]')?.focus();
+    };
+    document.querySelectorAll('#stage-ii [data-review-act="open-drawer"]').forEach((button) => {
+      if (button.dataset.wired === "1") return;
+      button.dataset.wired = "1";
+      button.addEventListener("click", openDrawer);
+    });
+    document.querySelectorAll('#stage-ii [data-review-act="close-drawer"]').forEach((button) => {
+      if (button.dataset.wired === "1") return;
+      button.dataset.wired = "1";
+      button.addEventListener("click", closeDrawer);
+    });
+    if (!document.documentElement.dataset.reviewDrawerEscape) {
+      document.documentElement.dataset.reviewDrawerEscape = "1";
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && drawer?.getAttribute("aria-hidden") === "false") closeDrawer();
+      });
+    }
+    document.querySelectorAll('#stage-ii [data-review-view]').forEach((button) => {
+      if (button.dataset.wired === "1") return;
+      button.dataset.wired = "1";
+      button.addEventListener("click", () => {
+        reviewViewMode = button.dataset.reviewView === "discipline" ? "discipline" : "env";
+        try { localStorage.setItem(REVIEW_VIEW_STORE, reviewViewMode); } catch {}
+        document.querySelectorAll('#stage-ii [data-review-view]').forEach((candidate) => {
+          const active = candidate.dataset.reviewView === reviewViewMode;
+          candidate.classList.toggle("is-active", active);
+          candidate.setAttribute("aria-selected", String(active));
+        });
+        renderReviewSurfaces(getSelected("chapter"), { autoLink:false });
+      });
+    });
+    const editButton = document.querySelector('#stage-ii [data-review-act="edit-pack"]');
+    const warning = document.querySelector('#stage-ii [data-ec-role="edit-warning"]');
+    if (editButton && editButton.dataset.wired !== "1") {
+      editButton.dataset.wired = "1";
+      editButton.addEventListener("click", () => {
+        const armed = editButton.dataset.armed === "1";
+        if (!armed) {
+          editButton.dataset.armed = "1";
+          editButton.textContent = "确认回 Stage I 编辑";
+          if (warning) warning.hidden = false;
+          return;
+        }
+        editButton.dataset.armed = "0";
+        editButton.textContent = "回 Stage I 编辑实践包";
+        document.querySelector("#stage-i .pack-result")?.scrollIntoView({ behavior:"smooth", block:"start" });
+      });
+    }
+    document.querySelectorAll('#stage-ii [data-review-view]').forEach((button) => {
+      const active = button.dataset.reviewView === reviewViewMode;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-selected", String(active));
+    });
+  }
+
+  function renderExpertDossier(chapter) {
+    const root = document.querySelector('#stage-ii [data-ec-role="grid"]');
+    if (!root) return;
+    const comments = getExpertCommentsForChapter(chapter);
+    if (!comments) return;
+    const savedReviews = loadExpertAdoptions(chapter?.id);
+    state.expertCards = EXPERTS.map((e, i) => {
+      const c = comments[i] || comments[0];
+      const savedRecord = savedReviews[e.id];
+      const liveReview = normalizeLiveReview(savedRecord?.liveReview);
+      const unlocatedReview = normalizeUnlocatedReview(savedRecord?.unlocatedReview);
+      const seedSourceText = stripHtml(c.body).trim();
+      const sourceText = liveReview ? liveReviewSourceText(liveReview) : seedSourceText;
+      const defaultTargets = liveReview ? liveReviewTargetKeys(liveReview) : [c.primaryEnvKey];
+      const record = normalizeReviewRecord(savedRecord, sourceText, defaultTargets);
+      return { ...record, card:null, verdict:null, expertId:e.id, chapterId:chapter?.id || "", expert:e,
+        sourceComment:liveReview ? { anchor:liveReviewAnchorCopy(liveReview), body:liveReviewBodyMarkup(liveReview) } : { ...c, body:seedReviewBodyMarkup(c.body) },
+        seedComment:c, seedSourceText, sourceText, liveReview, unlocatedReview, liveReviewPhase:"idle", liveReviewError:"", isRevising:false,
+        sourceExpanded:false, noteExpanded:false };
+    });
+    enforcePreEvidenceReadOnly(chapter?.id);
+    state.expertCards.forEach((entry) => {
+      if (entry.state === "candidate") { captureOriginalEnvContent(entry); saveExpertReview(chapter?.id, entry); }
+    });
+    wireReviewSurfaceControls();
+    renderReviewSurfaces(chapter);
     updateExpertAdoptBar();
     composeAssets();
     wireLiveReviewBatch();
@@ -2518,15 +3085,41 @@
   }
 
   const EXPERT_ADOPT_STORE = "pp.practice.expertAdoptions";
+  const REVIEW_CONTEXT_VERSION_KEY = "pp.practice.reviewContextVersion.mp-ch3-environment";
+  const REVIEW_CONTEXT_VERSION = "management-swot-review-v2";
   const KEY_MOMENT_STORE = "pp.practice.keyMoments.v1";
+  let pendingKeyMomentReplay = null;
+
+  function momentSearchText(item) {
+    return [item?.cn, item?.quote, item?.copyTemplate]
+      .concat(Array.isArray(item?.beats) ? item.beats.map((beat) => beat?.text) : [])
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  function isLegacyProcurementMomentSet(chapterId, moments) {
+    if (chapterId !== "mp-ch3-environment" || !Array.isArray(moments) || !moments.length) return false;
+    const text = moments.map(momentSearchText).join(" ");
+    return /原研|仿制|替代焦虑|患者连续性|成本可及|药企背景|议题二元对立/.test(text);
+  }
 
   function loadKeyMoments(chapterId) {
     if (!chapterId) return [];
     try {
       const all = JSON.parse(localStorage.getItem(KEY_MOMENT_STORE) || "{}");
-      return Array.isArray(all[chapterId])
+      const moments = Array.isArray(all[chapterId])
         ? all[chapterId].filter((item) => item && item.id && Number.isFinite(Number(item.tSec)))
         : [];
+      if (isLegacyProcurementMomentSet(chapterId, moments)) {
+        pendingKeyMomentReplay = {
+          chapterId,
+          captureUntil: Math.max(132, ...moments.map((item) => Number(item.tSec) || 0)),
+        };
+        all[chapterId] = [];
+        localStorage.setItem(KEY_MOMENT_STORE, JSON.stringify(all));
+        return [];
+      }
+      return moments;
     } catch { return []; }
   }
 
@@ -2539,13 +3132,34 @@
     } catch {}
   }
 
+  function replayMigratedKeyMoments() {
+    const pending = pendingKeyMomentReplay;
+    const mv = global.PharmacoPilotMV;
+    if (!pending || wizSelection.chapter !== pending.chapterId || !mv || typeof mv.seek !== "function") return;
+    pendingKeyMomentReplay = null;
+    mv.seek(pending.captureUntil);
+    deriveKeyMoments();
+    toast("旧集采仿真记录已失效 · 已按当前 SWOT/TOWS 场景重演到同一时间点");
+  }
+
   function loadAllExpertAdoptions() {
     try { return JSON.parse(localStorage.getItem(EXPERT_ADOPT_STORE) || "{}"); }
     catch { return {}; }
   }
   function loadExpertAdoptions(chapterId) {
     if (!chapterId) return {};
-    return (loadAllExpertAdoptions()[chapterId]) || {};
+    const all = loadAllExpertAdoptions();
+    let storedContextVersion = "";
+    try { storedContextVersion = localStorage.getItem(REVIEW_CONTEXT_VERSION_KEY) || ""; } catch {}
+    if (chapterId === "mp-ch3-environment" && storedContextVersion !== REVIEW_CONTEXT_VERSION) {
+      delete all[chapterId];
+      try {
+        localStorage.setItem(EXPERT_ADOPT_STORE, JSON.stringify(all));
+        localStorage.setItem(REVIEW_CONTEXT_VERSION_KEY, REVIEW_CONTEXT_VERSION);
+      } catch {}
+      return {};
+    }
+    return all[chapterId] || {};
   }
   function normalizeReviewRecord(raw, sourceText, defaultTargetEnvKeys) {
     const legacy = typeof raw === "string" ? raw : null;
@@ -2582,6 +3196,34 @@
       writtenBack: value.writtenBack === true,
     };
   }
+
+  function resetReviewBeforeEvidence(entry) {
+    if (!entry) return;
+    entry.state = "pending";
+    entry.candidateMode = null;
+    entry.draftText = entry.sourceText;
+    entry.evidenceLinks = [];
+    entry.evidenceTouched = false;
+    entry.decision = "pending";
+    entry.decisionNote = "";
+    entry.rejectionReason = "";
+    entry.writtenBack = false;
+    entry.isRevising = false;
+    entry.originalEnvContent = {};
+    entry.originalSnapshotVersion = 0;
+  }
+
+  function enforcePreEvidenceReadOnly(chapterId) {
+    if (hasTrialEvidence()) return;
+    (state.expertCards || []).forEach((entry) => {
+      const changed = entry.state !== "pending" || entry.candidateMode !== null
+        || entry.decision !== "pending" || entry.evidenceLinks.length
+        || entry.rejectionReason || entry.writtenBack;
+      if (!changed) return;
+      resetReviewBeforeEvidence(entry);
+      saveExpertReview(chapterId, entry);
+    });
+  }
   function saveExpertReview(chapterId, entry) {
     if (!chapterId || !entry) return;
     const all = loadAllExpertAdoptions();
@@ -2600,6 +3242,7 @@
       originalSnapshotVersion: entry.originalSnapshotVersion,
       writtenBack: entry.writtenBack,
       liveReview: entry.liveReview,
+      unlocatedReview: entry.unlocatedReview,
     };
     try { localStorage.setItem(EXPERT_ADOPT_STORE, JSON.stringify(all)); } catch {}
   }
@@ -2609,7 +3252,7 @@
     envKeys.forEach((envKey) => {
       if (Object.prototype.hasOwnProperty.call(entry.originalEnvContent, envKey)) return;
       const current = document.querySelector(`.pack-preview [data-pack-field="${envKey}"]`)?.textContent?.trim()
-        || loadPackEdits(wizSelection.chapter)[envKey]
+        || loadGeneratedPack(wizSelection.chapter)?.[envKey]
         || "当前环节暂无内容";
       const writtenSuffix = ` · 修订：${entry.draftText}`;
       entry.originalEnvContent[envKey] = entry.writtenBack && current.endsWith(writtenSuffix)
@@ -2637,23 +3280,50 @@
       entry.writtenBack = false;
       saveExpertReview(wizSelection.chapter, entry);
     }
-    const list = entry.card.querySelector('[data-ec-role="evidence-list"]');
+    const list = entry.verdict?.querySelector('[data-ec-role="evidence-list"]');
     if (!list) return;
     const suggestions = new Set(suggestedEvidenceIdsForEntry(entry));
+    const effectiveLinks = entry.evidenceTouched ? entry.evidenceLinks : [...suggestions];
+    const summary = entry.verdict?.querySelector('[data-ec-role="evidence-summary"]');
+    const count = entry.verdict?.querySelector('[data-ec-role="evidence-count"]');
+    const toggle = entry.verdict?.querySelector('[data-evidence-act="toggle"]');
     if (!state.keyMoments.length) {
       list.innerHTML = `<span class="ec-empty">运行虚拟班后显示可关联记录</span>`;
+      if (summary) summary.textContent = "尚无已发生的试教记录";
+      if (count) count.textContent = "先运行虚拟班";
+      if (toggle) toggle.hidden = true;
+      syncReviewVerdictIndex(entry);
       return;
     }
+    if (summary) summary.textContent = effectiveLinks.length
+      ? `自动关联 ${effectiveLinks.length} 条关键记录`
+      : "未匹配同环节记录";
+    if (count) count.textContent = effectiveLinks.length
+      ? `${effectiveLinks.length} 条相关记录 · 可调整`
+      : "0 条相关记录 · 可手动关联";
+    if (toggle) {
+      toggle.hidden = false;
+      if (toggle.dataset.bound !== "1") {
+        toggle.dataset.bound = "1";
+        toggle.addEventListener("click", () => {
+          list.hidden = !list.hidden;
+          toggle.setAttribute("aria-expanded", String(!list.hidden));
+          toggle.textContent = list.hidden ? "查看" : "收起";
+        });
+      }
+    }
     list.innerHTML = state.keyMoments.map((km, index) => {
-      const linked = entry.evidenceLinks.includes(km.id);
+      const linked = effectiveLinks.includes(km.id);
       const suggested = suggestions.has(km.id);
-      return `<button type="button" class="ec-evidence-chip${linked ? " is-linked" : ""}${suggested ? " is-suggested" : ""}" data-km-id="${escapeHtml(km.id)}" title="${escapeHtml(km.cn)}">
-        <b>KM-${String(index + 1).padStart(2, "0")}</b> ${fmtTime(km.tSec)}${suggested ? " · 系统建议" : ""}
+      return `<button type="button" class="ec-evidence-chip${linked ? " is-linked" : ""}${suggested ? " is-suggested" : ""}" data-km-id="${escapeHtml(km.id)}" aria-pressed="${linked}" title="${escapeHtml(km.quote || km.cn)}">
+        <span><b>${fmtTime(km.tSec)}</b> · ${escapeHtml(km.cn)}</span>
+        <small>${linked ? "已关联" : "未关联"} · 记录编号 KM-${String(index + 1).padStart(2, "0")}</small>
       </button>`;
     }).join("");
     list.querySelectorAll("[data-km-id]").forEach((button) => {
       button.addEventListener("click", () => {
         const id = button.dataset.kmId;
+        if (!entry.evidenceTouched) entry.evidenceLinks = [...suggestions];
         entry.evidenceTouched = true;
         entry.evidenceLinks = entry.evidenceLinks.includes(id)
           ? entry.evidenceLinks.filter((item) => item !== id)
@@ -2667,21 +3337,26 @@
         composeAssets();
       });
     });
+    syncReviewVerdictIndex(entry);
   }
 
   function refreshAllReviewEvidence({ autoLink = false } = {}) {
-    (state.expertCards || []).forEach((entry) => renderReviewEvidence(entry, { autoLink }));
+    const chapter = getSelected("chapter");
+    if (chapter && state.expertCards?.length) renderReviewSurfaces(chapter, { autoLink });
     renderStage3();
   }
 
   function syncReviewCardVisual(entry) {
     const card = entry.card;
+    if (!card) return;
     card.classList.toggle("is-candidate", entry.state === "candidate");
     card.classList.toggle("is-rejected", entry.state === "rejected");
     card.classList.toggle("is-resolved", entry.state !== "pending");
-    const picker = card.querySelector('[data-ec-role="resolution-picker"]');
-    const resolutionSummary = card.querySelector('[data-ec-role="resolution-summary"]');
-    const resolved = entry.state !== "pending";
+    const verdict = entry.verdict;
+    const picker = verdict?.querySelector('[data-ec-role="resolution-picker"]');
+    const resolutionSummary = verdict?.querySelector('[data-ec-role="resolution-summary"]');
+    const resolved = entry.state === "rejected"
+      || (entry.state === "candidate" && entry.decision !== "pending");
     if (picker) picker.hidden = resolved && !entry.isRevising;
     if (resolutionSummary) {
       resolutionSummary.hidden = !resolved || entry.isRevising;
@@ -2690,22 +3365,44 @@
       if (copy) {
         const targets = entry.targetEnvKeys.map((key) => PRACTICE_ENV_BY_KEY[key]?.no).filter(Boolean).join(" / ");
         copy.textContent = entry.state === "rejected"
-          ? `不采用 · ${entry.rejectionReason || "已保留教师理由"}`
-          : `${entry.candidateMode === "modified" ? "修改后意见" : "原意见"}已进入修订候选${targets ? ` · ${targets}` : ""}`;
+          ? `暂不修改 · ${entry.rejectionReason || "已保留教师理由"}`
+          : entry.decision === "insufficient"
+            ? `暂不修改 · ${entry.decisionNote || "本次试教证据不足"}`
+            : `${entry.candidateMode === "modified" ? "调整后修改" : "按建议修改"}${targets ? ` · 环节 ${targets}` : ""}`;
       }
     }
-    card.querySelectorAll("[data-review-choice]").forEach((button) => {
-      const activeChoice = entry.state === "rejected" ? "rejected" : entry.candidateMode;
+    verdict?.querySelectorAll("[data-review-choice]").forEach((button) => {
+      const activeChoice = entry.state === "rejected" || entry.decision === "insufficient" || entry.decision === "unsupported"
+        ? "rejected"
+        : entry.candidateMode;
       button.setAttribute("aria-pressed", String(resolved && button.dataset.reviewChoice === activeChoice));
     });
     const summary = card.querySelector('[data-ec-role="target-summary"]');
     if (summary) summary.textContent = entry.targetEnvKeys.map((key) => PRACTICE_ENV_BY_KEY[key]?.no).filter(Boolean).join(" / ") || "未选择";
-    card.querySelectorAll("[data-decision]").forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.decision === entry.decision);
-      button.disabled = entry.state !== "candidate";
-    });
-    const note = card.querySelector('[data-ec-role="decision-note"]');
+    verdict?.classList.toggle("is-candidate", entry.state === "candidate");
+    verdict?.classList.toggle("is-rejected", entry.state === "rejected");
+    const posttrialStatus = verdict?.querySelector('[data-ec-role="posttrial-status"]');
+    if (posttrialStatus) posttrialStatus.textContent = entry.state === "rejected"
+      ? "暂不修改"
+      : entry.decision === "insufficient"
+        ? "证据不足"
+        : entry.state === "candidate" && entry.decision === "supported"
+          ? (entry.candidateMode === "modified" ? "调整后修改" : "按建议修改")
+          : "待处理";
+    const noteField = verdict?.querySelector('[data-ec-role="decision-note-field"]');
+    const noteToggle = verdict?.querySelector('[data-note-act="toggle"]');
+    const noteAvailable = resolved && !entry.isRevising
+      && entry.state === "candidate" && ["supported", "unsupported"].includes(entry.decision);
+    const noteOpen = noteAvailable && (entry.noteExpanded || !!entry.decisionNote);
+    if (noteField) noteField.hidden = !noteOpen;
+    if (noteToggle) {
+      noteToggle.hidden = !noteAvailable;
+      noteToggle.setAttribute("aria-expanded", String(noteOpen));
+      noteToggle.textContent = noteOpen ? "收起说明" : "补充说明";
+    }
+    const note = verdict?.querySelector('[data-ec-role="decision-note"]');
     if (note && note.value !== entry.decisionNote) note.value = entry.decisionNote;
+    syncReviewVerdictIndex(entry);
     syncLiveReviewVisual(entry);
   }
 
@@ -2713,15 +3410,17 @@
     return !!entry.liveReview && entry.liveReview.sourceRevision !== getPackRevision(entry.chapterId || wizSelection.chapter);
   }
 
-  // 同段避让失败时不丢弃批注,而是标出"与××同段"——不同学科对同一段落
-  // 提出不同问题是真实情况,教师应看到并列意见而不是被系统裁剪。
+  // 同环节汇聚不丢弃批注,而是标出“与××共同关注 env0X”——不同学科对同一环节
+  // 提出不同问题是交叉验证,教师应看到并列意见而不是被系统裁剪。聚类键只用 envId。
   function liveReviewDupNote(entry) {
     if (!entry.liveReview) return "";
-    const dup = (state.expertCards || []).find((other) => other !== entry
-      && other.liveReview && !isLiveReviewStale(other)
-      && other.liveReview.annotation.targetEnv === entry.liveReview.annotation.targetEnv
-      && other.liveReview.annotation.segmentKey === entry.liveReview.annotation.segmentKey);
-    return dup ? ` · 与${dup.expert?.role || "另一路审校"}同段` : "";
+    const others = (state.expertCards || []).filter((other) => other !== entry
+      && liveReviewState(other) === "ready"
+      && other.liveReview.annotation.targetEnv === entry.liveReview.annotation.targetEnv);
+    if (!others.length) return "";
+    const envNo = PRACTICE_ENV_BY_KEY[entry.liveReview.annotation.targetEnv]?.no || entry.liveReview.annotation.targetEnv;
+    const roles = others.map((other) => (other.expert?.role || "另一路").replace("审校", "")).join("、");
+    return ` · 与${roles}共同关注 ${envNo}`;
   }
 
   function syncLiveReviewVisual(entry) {
@@ -2757,8 +3456,8 @@
       button.setAttribute("aria-busy", String(loading));
       button.title = entry.state !== "pending" ? "先改判回到待处理状态，才能重新审校" : (entry.expert?.scopeCopy || "只审校本学科主责环节");
     }
-    entry.card.querySelectorAll("[data-review-choice]").forEach((choice) => {
-      choice.disabled = stale;
+    entry.verdict?.querySelectorAll("[data-review-choice]").forEach((choice) => {
+      choice.disabled = stale || !hasTrialEvidence();
       choice.title = stale ? "稿件已修改，请先重新审校当前版本" : "";
     });
   }
@@ -2769,23 +3468,9 @@
       .forEach((entry) => syncLiveReviewVisual(entry));
   }
 
-  function liveReviewFailureCopy(reason, hasPriorReview = false) {
-    const copies = {
-      out_of_scope: "模型把意见落到了教学设计主责范围之外。",
-      wrong_env: "模型摘录来自另一个环节，未通过跨环节核对。",
-      ambiguous: "同一摘录在稿件中出现多次，无法确定唯一位置。",
-      ambiguous_env: "短摘录在多个环节重复出现，无法确定唯一位置。",
-      too_short: "模型摘录过短，不足以形成可靠锚点。",
-      not_found: "模型摘录未逐字命中当前稿件。",
-      cross_reference_unanchored: "交叉引用没有全部命中当前稿件。",
-    };
-    const base = copies[reason] || "模型输出未通过锚定门禁。";
-    return `${base}${hasPriorReview ? "现有批注未被替换；若其已过期，仍不能进入候选。" : "系统已保留固定审校种子。"}`;
-  }
-
-  // 同段避让：把其它卡已锚定且未过期的批注位置传给后端,提示模型优先另选段落。
-  // 只取主锚点、上限 8 条,与服务端校验一致;这是提示不是门禁,同段仍可能出现,
-  // 由 syncLiveReviewVisual 的"与××同段"标记诚实呈现。
+  // 段落避让提示：单卡重审读取其它卡当前锚点；批量审校只读取“批次开始前”已经
+  // 存在的锚点快照。它不是批内逐路避让，也不是门禁；同环节意见允许共存，并由
+  // syncLiveReviewVisual 的“与××共同关注 env0X”标记诚实呈现。
   function collectAvoidAnchors(excludeExpertId) {
     return (state.expertCards || [])
       .filter((other) => other.expertId !== excludeExpertId && other.liveReview && !isLiveReviewStale(other))
@@ -2794,6 +3479,20 @@
         sourceExcerpt: other.liveReview.annotation.sourceExcerpt,
       }))
       .slice(0, 8);
+  }
+
+  function reviewAlignmentError(chapterId, liveReview) {
+    if (chapterId !== "mp-ch3-environment" || !liveReview) return "";
+    const text = `${liveReview.annotation.issue} ${liveReview.annotation.suggestion}`;
+    // 换案例拦截：出现其它章节标志情境词即视为漂移（管理权衡提及成本/可及性不算漂移）。
+    if (/肿瘤|处方点评|创新药|DRG|集采|医院控费|药企利润|临床可及性|合理用药结构/.test(text)) {
+      return "模型擅自把 SWOT/TOWS 课堂换成了其它药学案例，已拦截并保留当前章节固定审校建议。";
+    }
+    // 回应校验：凝练批注不复述案例名，沾到本案词汇或审校动作词汇即算已回应。
+    if (!/SWOT|TOWS|S\/W\/O\/T|优势|劣势|机会|威胁|内部|外部|环境|门店|药店|药师|慢病|门诊统筹|复购|排班|竞店|策略|权衡|博弈|判定标准|评价标准|证据|分类|文号|发文机关|来源|数据|溯源/.test(text)) {
+      return "模型建议未直接回应当前 SWOT/TOWS 案例，已拦截并保留当前章节固定审校建议。";
+    }
+    return "";
   }
 
   async function runLiveReview(entry, chapter, { silent = false, avoidAnchors: presetAvoid = null } = {}) {
@@ -2813,6 +3512,7 @@
       entry.liveReviewPhase = "error";
       entry.liveReviewError = "本机后端未连接；当前仍显示固定审校种子。请用 npm start 打开页面。";
       syncLiveReviewVisual(entry);
+      renderReviewFocusSummary();
       return "error";
     }
 
@@ -2824,6 +3524,7 @@
     entry.liveReviewPhase = "loading";
     entry.liveReviewError = "";
     syncLiveReviewVisual(entry);
+    renderReviewFocusSummary();
     if (!silent) setStageStatus("ii", `${roleName}正在读取当前稿件`, true, false);
     try {
       const result = await global.PharmacoBackend.reviewPractice({
@@ -2844,33 +3545,44 @@
         ...(avoidAnchors.length ? { avoidAnchors } : {}),
       });
       if (result?.status !== "anchored") {
+        const unlocatedReview = normalizeUnlocatedReview(result?.unlocatedReview);
+        if (unlocatedReview) {
+          entry.unlocatedReview = unlocatedReview;
+          saveExpertReview(requestedChapterId, entry);
+        }
         entry.liveReviewPhase = "error";
         entry.liveReviewError = liveReviewFailureCopy(result?.gate?.reason, !!entry.liveReview);
         if (!silent) setStageStatus("ii", "本次审校未通过锚定门禁", false, true);
         syncLiveReviewVisual(entry);
+        renderReviewFocusSummary();
+        renderUnlocatedBasket(chapter);
         return "unanchored";
       }
       const liveReview = normalizeLiveReview(result);
       if (!liveReview) throw new Error("本地模型返回的审校记录不完整");
+      const alignmentError = reviewAlignmentError(requestedChapterId, liveReview);
+      if (alignmentError) {
+        entry.liveReview = null;
+        entry.unlocatedReview = null;
+        entry.liveReviewPhase = "error";
+        entry.liveReviewError = alignmentError;
+        saveExpertReview(requestedChapterId, entry);
+        syncLiveReviewVisual(entry);
+        renderReviewFocusSummary();
+        if (!silent) setStageStatus("ii", "本次审校偏离当前章节，已拦截", false, true);
+        return "misaligned";
+      }
 
       entry.liveReview = liveReview;
+      entry.unlocatedReview = null;
       entry.sourceText = liveReviewSourceText(liveReview);
       entry.draftText = entry.sourceText;
       entry.sourceComment = { anchor: liveReviewAnchorCopy(liveReview), body: liveReviewBodyMarkup(liveReview) };
       entry.targetEnvKeys = liveReviewTargetKeys(liveReview);
       entry.liveReviewPhase = "idle";
       entry.liveReviewError = "";
-      entry.card.querySelector('[data-ec-role="body"]').innerHTML = entry.sourceComment.body;
-      const anchor = entry.card.querySelector(".ec-anchor");
-      if (anchor) {
-        anchor.textContent = entry.sourceComment.anchor;
-        anchor.title = liveReview.annotation.sourceExcerpt;
-      }
-      entry.card.querySelectorAll('[data-ec-role="target-input"]').forEach((input) => {
-        input.checked = entry.targetEnvKeys.includes(input.value);
-      });
       saveExpertReview(requestedChapterId, entry);
-      syncReviewCardVisual(entry);
+      renderReviewSurfaces(chapter, { autoLink:false });
       refreshReviewFreshness(requestedChapterId);
       if (!silent) {
         setStageStatus("ii", `${roleName}已锚定到 ${PRACTICE_ENV_BY_KEY[liveReview.annotation.targetEnv]?.no || liveReview.annotation.targetEnv}`, false, true);
@@ -2888,6 +3600,7 @@
         : `本机后端或模型未完成审校；${preserved}`;
       if (!silent) setStageStatus("ii", "本机审校暂不可用", false, true);
       syncLiveReviewVisual(entry);
+      renderReviewFocusSummary();
       return "error";
     }
   }
@@ -2901,13 +3614,15 @@
     return {
       bar,
       button: bar?.querySelector('[data-review-act="run-all"]') || null,
-      status: bar?.querySelector('[data-ec-role="batch-status"]') || null,
+      status: bar?.querySelector('[data-ec-role="drawer-batch-status"]') || null,
     };
   }
 
   function setBatchStatus(text) {
     const { status } = batchBarEls();
     if (status) status.textContent = text;
+    const summaryStatus = document.querySelector('#stage-ii [data-review-role="focus-summary"] [data-ec-role="batch-status"]');
+    if (summaryStatus) summaryStatus.textContent = text;
   }
 
   function updateBatchIdleStatus() {
@@ -2918,17 +3633,17 @@
       : "本机后端未连接 · 当前显示固定审校种子");
   }
 
-  async function runAllLiveReviews() {
+  async function runAllLiveReviews({ automatic = false } = {}) {
     if (liveReviewBatchActive) return;
     const chapter = getSelected("chapter");
     if (!getSelected("course") || !getSelected("class") || !getSelected("session") || !chapter || !currentPackFromPreview()) {
-      toast("请先完成实践包四项选择，并确保九个环节都有内容");
+      if (!automatic) toast("请先完成实践包四项选择，并确保九个环节都有内容");
       return;
     }
     const phase = document.documentElement.dataset.backend;
     if (!global.PharmacoBackend?.reviewPractice || (phase !== "ready" && phase !== "conflict")) {
       setBatchStatus("本机后端未连接 · 请用 npm start 打开页面后重试");
-      toast("本机后端未连接 · 当前仍显示固定审校种子");
+      if (!automatic) toast("本机后端未连接 · 当前仍显示固定审校种子");
       return;
     }
     const entries = state.expertCards || [];
@@ -2946,7 +3661,8 @@
     setStageStatus("ii", "五路学科审校进行中", true, false);
     const chapterId = chapter.id;
     const queue = [...targets];
-    // 批次开始时快照避让列表(目标卡均为待审/过期,自身旧锚点不会混入)
+    // 只冻结批次开始前已存在的有效锚点。并发中的新结果不会追加到该列表，
+    // 因而同一批五路结果的差异来自职责 scope / prompt，而非完成顺序。
     const batchAvoid = collectAvoidAnchors(null);
     const tally = { anchored: 0, unanchored: 0, error: 0, skipped: 0 };
     let done = 0;
@@ -2969,8 +3685,41 @@
     if (tally.skipped) parts.push(`${tally.skipped} 因切换章节中止`);
     if (decided) parts.push(`跳过 ${decided} 张已判定卡`);
     setBatchStatus(`五路审校结束 · ${parts.join(" · ")}`);
+    renderReviewFocusSummary();
     setStageStatus("ii", "五路学科审校结束", false, true);
-    toast(`五路审校结束 · ${parts.join(" · ")}`);
+    if (!automatic) toast(`五路审校结束 · ${parts.join(" · ")}`);
+  }
+
+  let stageTwoEntered = false;
+  let autoReviewKey = "";
+
+  function maybeAutoRunLiveReviews() {
+    if (!stageTwoEntered || liveReviewBatchActive) return;
+    const phase = document.documentElement.dataset.backend;
+    const chapter = getSelected("chapter");
+    if (!chapter || !global.PharmacoBackend?.reviewPractice || (phase !== "ready" && phase !== "conflict")) return;
+    const key = `${chapter.id}@${getPackRevision(chapter.id)}`;
+    if (autoReviewKey === key) return;
+    autoReviewKey = key;
+    runAllLiveReviews({ automatic:true });
+  }
+
+  function wireStageTwoAutoReview() {
+    const stage = document.getElementById("stage-ii");
+    if (!stage || stage.dataset.autoReviewWired === "1") return;
+    stage.dataset.autoReviewWired = "1";
+    if (!("IntersectionObserver" in global)) {
+      stageTwoEntered = true;
+      maybeAutoRunLiveReviews();
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      stageTwoEntered = true;
+      observer.disconnect();
+      maybeAutoRunLiveReviews();
+    }, { rootMargin:"200px 0px" });
+    observer.observe(stage);
   }
 
   function wireLiveReviewBatch() {
@@ -2978,19 +3727,29 @@
     if (!bar || bar.dataset.wired === "1") return;
     bar.dataset.wired = "1";
     button?.addEventListener("click", () => { runAllLiveReviews(); });
-    global.addEventListener("pharmaco:backend-status", () => updateBatchIdleStatus());
+    global.addEventListener("pharmaco:backend-status", () => {
+      updateBatchIdleStatus();
+      maybeAutoRunLiveReviews();
+    });
     updateBatchIdleStatus();
+    wireStageTwoAutoReview();
+    maybeAutoRunLiveReviews();
   }
 
   function wireReviewCard(entry, chapter) {
     const card = entry.card;
+    if (!card) return;
+    const verdict = entry.verdict;
     const body = card.querySelector('[data-ec-role="body"]');
-    const editPanel = card.querySelector('[data-ec-role="edit-panel"]');
+    const posttrialBody = verdict?.querySelector('[data-ec-role="posttrial-body"]');
+    const editPanel = verdict?.querySelector('[data-ec-role="edit-panel"]');
     const textarea = editPanel?.querySelector("textarea");
     const editError = editPanel?.querySelector('[data-ec-role="edit-error"]');
-    const rejectPanel = card.querySelector('[data-ec-role="reject-panel"]');
+    const rejectPanel = verdict?.querySelector('[data-ec-role="reject-panel"]');
     const rejectInput = rejectPanel?.querySelector("input");
+    const rejectKind = rejectPanel?.querySelector('[data-ec-role="defer-kind"]');
     const rejectError = rejectPanel?.querySelector('[data-ec-role="reject-error"]');
+    const candidateError = verdict?.querySelector('[data-ec-role="candidate-error"]');
 
     const showInlineError = (element, message) => {
       if (!element) return;
@@ -2998,10 +3757,46 @@
       element.hidden = !message;
     };
     const renderEntryBody = () => {
-      if (entry.draftText === entry.sourceText) body.innerHTML = entry.sourceComment.body;
-      else body.textContent = entry.draftText;
+      [body, posttrialBody].filter(Boolean).forEach((target) => {
+        if (entry.draftText === entry.sourceText) target.innerHTML = entry.sourceComment.body;
+        else target.textContent = entry.draftText;
+      });
+    };
+    renderEntryBody();
+    const posttrialSource = verdict?.querySelector('[data-ec-role="posttrial-source"]');
+    const sourceToggle = verdict?.querySelector('[data-source-act="toggle"]');
+    const syncSourceDisclosure = () => {
+      if (!posttrialSource || !sourceToggle) return;
+      posttrialSource.classList.toggle("is-expanded", !!entry.sourceExpanded);
+      sourceToggle.setAttribute("aria-expanded", String(!!entry.sourceExpanded));
+      sourceToggle.textContent = entry.sourceExpanded ? "收起" : "展开全文";
+    };
+    sourceToggle?.addEventListener("click", () => {
+      entry.sourceExpanded = !entry.sourceExpanded;
+      syncSourceDisclosure();
+    });
+    syncSourceDisclosure();
+    const showEvidenceGate = (message) => {
+      showInlineError(candidateError, message);
+      const list = verdict?.querySelector('[data-ec-role="evidence-list"]');
+      const toggle = verdict?.querySelector('[data-evidence-act="toggle"]');
+      if (list) list.hidden = false;
+      if (toggle) {
+        toggle.hidden = false;
+        toggle.setAttribute("aria-expanded", "true");
+        toggle.textContent = "收起记录";
+      }
+      const firstEvidence = list?.querySelector("[data-km-id]");
+      if (firstEvidence) firstEvidence.focus({ preventScroll: true });
+      verdict?.querySelector(".ec-evidence")?.scrollIntoView({ behavior:"smooth", block:"nearest" });
     };
     const commitCandidate = (mode, text) => {
+      showInlineError(candidateError, "");
+      if (!hasTrialEvidence()) {
+        showEvidenceGate("尚无已发生的试教记录；请先播放或拖动录播。");
+        toast("证据出现前只能阅读审校与标记观察点");
+        return;
+      }
       if (isLiveReviewStale(entry)) {
         toast("该批注针对旧版稿件 · 请先重新审校当前版本");
         return;
@@ -3010,25 +3805,33 @@
         toast("请先为这条审校意见选择至少一个目标教学环节");
         return;
       }
+      const nextEvidenceLinks = entry.evidenceTouched
+        ? entry.evidenceLinks
+        : suggestedEvidenceIdsForEntry(entry);
+      if (!nextEvidenceLinks.length) {
+        showEvidenceGate("这条建议尚未关联到同环节记录；请在上方手动选择至少一条，再加入修订候选。");
+        toast("尚无可支撑修改的试教记录 · 请先查看并关联记录，或选择“暂不修改”");
+        return;
+      }
       captureOriginalEnvContent(entry);
       entry.state = "candidate";
       entry.candidateMode = mode;
       entry.draftText = text;
       entry.rejectionReason = "";
-      entry.evidenceTouched = false;
-      entry.evidenceLinks = suggestedEvidenceIdsForEntry(entry);
-      entry.decision = "pending";
+      entry.evidenceLinks = nextEvidenceLinks;
+      entry.decision = "supported";
       entry.decisionNote = "";
       entry.writtenBack = false;
       entry.isRevising = false;
-      editPanel.hidden = true;
-      rejectPanel.hidden = true;
+      entry.noteExpanded = false;
+      if (editPanel) editPanel.hidden = true;
+      if (rejectPanel) rejectPanel.hidden = true;
       showInlineError(editError, "");
       showInlineError(rejectError, "");
+      showInlineError(candidateError, "");
       renderEntryBody();
       saveExpertReview(chapter?.id, entry);
-      syncReviewCardVisual(entry);
-      renderReviewEvidence(entry);
+      renderReviewSurfaces(chapter);
       updateExpertAdoptBar();
       composeAssets();
     };
@@ -3037,12 +3840,14 @@
       runLiveReview(entry, chapter);
     });
 
-    card.querySelector('[data-review-choice="original"]')?.addEventListener("click", () => {
+    verdict?.querySelector('[data-review-choice="original"]')?.addEventListener("click", () => {
       commitCandidate("original", entry.sourceText);
     });
-    card.querySelector('[data-review-choice="modified"]')?.addEventListener("click", () => {
+    verdict?.querySelector('[data-review-choice="modified"]')?.addEventListener("click", () => {
+      if (!hasTrialEvidence()) { toast("证据出现前只能阅读审校与标记观察点"); return; }
+      showInlineError(candidateError, "");
       textarea.value = entry.candidateMode === "modified" ? entry.draftText : entry.sourceText;
-      rejectPanel.hidden = true;
+      if (rejectPanel) rejectPanel.hidden = true;
       showInlineError(editError, "");
       editPanel.hidden = false;
       textarea.focus();
@@ -3076,38 +3881,57 @@
         entry.decision = "pending";
         entry.writtenBack = false;
         saveExpertReview(chapter?.id, entry);
-        syncReviewCardVisual(entry);
-        renderReviewEvidence(entry);
+        renderReviewSurfaces(chapter, { autoLink:false });
         updateExpertAdoptBar();
         composeAssets();
       });
     });
 
-    card.querySelector('[data-review-choice="rejected"]')?.addEventListener("click", () => {
-      editPanel.hidden = true;
+    verdict?.querySelector('[data-review-choice="rejected"]')?.addEventListener("click", () => {
+      if (!hasTrialEvidence()) { toast("证据出现前只能阅读审校与标记观察点"); return; }
+      if (editPanel) editPanel.hidden = true;
       showInlineError(rejectError, "");
       rejectPanel.hidden = false;
-      rejectInput.value = entry.rejectionReason || "";
+      if (rejectKind) rejectKind.value = entry.decision === "insufficient" ? "insufficient" : "not-applicable";
+      rejectInput.value = entry.decision === "insufficient" ? "" : entry.rejectionReason || "";
       rejectInput.focus();
     });
     rejectPanel?.querySelector('[data-reject-act="confirm"]')?.addEventListener("click", () => {
+      if (!hasTrialEvidence()) { toast("证据出现前只能阅读审校与标记观察点"); return; }
+      const kind = rejectKind?.value || "insufficient";
       const reason = rejectInput.value.trim();
-      if (!reason) { showInlineError(rejectError, "请填写一句不采用原因，保留教师决策痕迹"); return; }
-      entry.state = "rejected";
-      entry.candidateMode = null;
-      entry.rejectionReason = reason;
-      entry.decision = "pending";
-      entry.decisionNote = "";
-      entry.evidenceLinks = [];
+      const reasonLabel = {
+        insufficient: "本次试教证据不足",
+        "not-applicable": "建议不适用于本课",
+        defer: "本轮暂缓处理",
+      }[kind] || "暂不修改";
+      if (kind === "insufficient") {
+        captureOriginalEnvContent(entry);
+        entry.state = "candidate";
+        entry.candidateMode = "original";
+        entry.draftText = entry.sourceText;
+        entry.rejectionReason = "";
+        if (!entry.evidenceTouched) entry.evidenceLinks = suggestedEvidenceIdsForEntry(entry);
+        entry.decision = "insufficient";
+        entry.decisionNote = reason || reasonLabel;
+      } else {
+        entry.state = "rejected";
+        entry.candidateMode = null;
+        entry.rejectionReason = reason ? `${reasonLabel}：${reason}` : reasonLabel;
+        entry.decision = "pending";
+        entry.decisionNote = "";
+        entry.evidenceLinks = [];
+      }
       entry.writtenBack = false;
       entry.isRevising = false;
+      entry.noteExpanded = false;
       rejectPanel.hidden = true;
       showInlineError(rejectError, "");
       saveExpertReview(chapter?.id, entry);
-      syncReviewCardVisual(entry);
-      renderReviewEvidence(entry);
+      renderReviewSurfaces(chapter, { autoLink:false });
       updateExpertAdoptBar();
       composeAssets();
+      toast(`${entry.expert.role} · 已记录“暂不修改”`);
     });
     rejectPanel?.querySelector('[data-reject-act="cancel"]')?.addEventListener("click", () => {
       rejectPanel.hidden = true;
@@ -3116,30 +3940,21 @@
       syncReviewCardVisual(entry);
     });
 
-    card.querySelector('[data-review-act="revise"]')?.addEventListener("click", () => {
+    verdict?.querySelector('[data-review-act="revise"]')?.addEventListener("click", () => {
       entry.isRevising = true;
-      editPanel.hidden = true;
-      rejectPanel.hidden = true;
+      entry.noteExpanded = false;
+      if (editPanel) editPanel.hidden = true;
+      if (rejectPanel) rejectPanel.hidden = true;
       syncReviewCardVisual(entry);
     });
 
-    card.querySelectorAll("[data-decision]").forEach((button) => {
-      button.addEventListener("click", () => {
-        if (entry.state !== "candidate") return;
-        const next = button.dataset.decision;
-        if (next !== "insufficient" && !entry.evidenceLinks.length) {
-          toast("“支持/不支持”必须关联至少一条仿真记录；否则请选择“证据不足”");
-          return;
-        }
-        entry.decision = next;
-        entry.writtenBack = false;
-        saveExpertReview(chapter?.id, entry);
-        syncReviewCardVisual(entry);
-        updateExpertAdoptBar();
-        composeAssets();
-      });
+    verdict?.querySelector('[data-note-act="toggle"]')?.addEventListener("click", () => {
+      entry.noteExpanded = !entry.noteExpanded;
+      syncReviewCardVisual(entry);
+      if (entry.noteExpanded) verdict.querySelector('[data-ec-role="decision-note"]')?.focus();
     });
-    card.querySelector('[data-ec-role="decision-note"]')?.addEventListener("blur", (event) => {
+
+    verdict?.querySelector('[data-ec-role="decision-note"]')?.addEventListener("blur", (event) => {
       entry.decisionNote = event.target.value.trim();
       saveExpertReview(chapter?.id, entry);
       renderMigrate();
@@ -3227,140 +4042,140 @@
 .pp-ai-overlay.is-open { display: flex; }
 .pp-ai-card {
   width: min(720px, 92vw); max-height: 86vh; overflow-y: auto;
-  background: var(--ivory, #fffdf7); color: var(--ink, #1a1a1a);
-  border: 1px solid var(--ink, #1a1a1a); border-radius: 14px;
-  box-shadow: 8px 8px 0 var(--ink, #1a1a1a);
+  background: var(--ivory); color: var(--ink);
+  border: 1px solid var(--ink); border-radius: 14px;
+  box-shadow: 8px 8px 0 var(--ink);
   padding: 24px 28px; position: relative;
   font-family: var(--serif-cn);
 }
 .pp-ai-close {
   position: absolute; top: 12px; right: 14px;
   width: 28px; height: 28px; border-radius: 50%;
-  background: var(--paper-2, #f3eedc); border: 1px solid var(--rule, #d8d2bf);
+  background: var(--paper-2); border: 1px solid var(--rule);
   cursor: pointer; font-size: var(--fs-md); line-height: 1;
   display: grid; place-items: center;
 }
-.pp-ai-close:hover { background: var(--amber-deep, #a8492a); color: var(--ivory, #fffdf7); }
+.pp-ai-close:hover { background: var(--amber-deep); color: var(--ivory); }
 .pp-ai-head {
   display: grid; grid-template-columns: auto 1fr auto; gap: 14px;
   align-items: center; padding-bottom: 14px;
-  border-bottom: 1px dashed var(--rule, #d8d2bf); margin-bottom: 14px;
+  border-bottom: 1px dashed var(--rule); margin-bottom: 14px;
 }
 .pp-ai-id {
   width: 48px; height: 48px; border-radius: 10px;
-  background: var(--ink, #1a1a1a); color: var(--ivory, #fffdf7);
+  background: var(--ink); color: var(--ivory);
   font-family: var(--serif-en); font-style: italic; font-size: var(--fs-xl); font-weight: 500;
   display: grid; place-items: center;
 }
 .pp-ai-who .pp-ai-alias { font-size: var(--fs-lg); font-weight: 600; }
-.pp-ai-who .pp-ai-demo { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #807a6c); margin-top: 2px; letter-spacing: .04em; }
+.pp-ai-who .pp-ai-demo { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); margin-top: 2px; letter-spacing: .04em; }
 .pp-ai-stance {
   padding: 6px 12px; border-radius: 999px;
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .04em;
-  background: var(--paper-2, #f3eedc); color: var(--ink, #1a1a1a);
+  background: var(--paper-2); color: var(--ink);
   display: flex; align-items: center; gap: 6px;
 }
 .pp-ai-stance small { font-size: var(--fs-2xs); opacity: .6; }
-.pp-ai-stance.s-a { background: rgba(217,119,87,.18); color: var(--amber-deep); }
+.pp-ai-stance.s-a { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber-deep); }
 .pp-ai-stance.s-b { background: rgba(77,98,87,.2); color: var(--sage); }
 .pp-ai-stance.s-c { background: rgba(112,82,168,.16); color: var(--violet); }
 .pp-ai-stance.s-d { background: rgba(100,100,100,.12); color: #555; }
 .pp-ai-row {
   font-size: var(--fs-sm); line-height: 1.65; margin-bottom: 8px;
-  padding: 8px 12px; background: var(--paper, #faf7f0); border-radius: 6px;
+  padding: 8px 12px; background: var(--paper); border-radius: 6px;
 }
 .pp-ai-row b {
   display: inline-block; min-width: 56px; margin-right: 8px;
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .08em; text-transform: uppercase;
-  color: var(--amber-deep, #a8492a); font-weight: 600; vertical-align: middle;
+  color: var(--amber-deep); font-weight: 600; vertical-align: middle;
 }
-.pp-ai-row.is-caveat { background: rgba(217,119,87,.06); border-left: 2px solid var(--amber-deep, #a8492a); }
-.pp-ai-row small { display: block; margin-left: 64px; margin-top: 4px; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #807a6c); }
+.pp-ai-row.is-caveat { background: color-mix(in srgb, var(--amber) 6%, transparent); border-left: 2px solid var(--amber-deep); }
+.pp-ai-row small { display: block; margin-left: 64px; margin-top: 4px; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); }
 .pp-ai-grid2 {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
   margin-top: 14px;
 }
 .pp-ai-grid2 > div {
-  background: var(--paper-2, #f3eedc); border-radius: 8px; padding: 12px 14px;
+  background: var(--paper-2); border-radius: 8px; padding: 12px 14px;
 }
 .pp-ai-grid2 h5 {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mute, #807a6c);
+  text-transform: uppercase; color: var(--mute);
   margin: 0 0 10px; padding-bottom: 6px;
-  border-bottom: 1px dashed var(--rule, #d8d2bf);
+  border-bottom: 1px dashed var(--rule);
 }
-.pp-ai-grid2 > div > div { font-size: var(--fs-xs); line-height: 1.6; margin-bottom: 6px; color: var(--ink-2, #2a2a2a); }
+.pp-ai-grid2 > div > div { font-size: var(--fs-xs); line-height: 1.6; margin-bottom: 6px; color: var(--ink-2); }
 .pp-ai-grid2 > div > div b {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .06em; text-transform: uppercase;
-  color: var(--amber-deep, #a8492a); margin-right: 6px; font-weight: 600;
+  color: var(--amber-deep); margin-right: 6px; font-weight: 600;
 }
 .pp-ai-meter {
   display: grid; grid-template-columns: 78px 1fr 36px; align-items: center;
   gap: 8px; margin-bottom: 6px;
   font-family: var(--mono); font-size: var(--fs-2xs);
 }
-.pp-ai-meter span { color: var(--mute, #807a6c); }
+.pp-ai-meter span { color: var(--mute); }
 .pp-ai-meter > div {
   height: 4px; background: rgba(0,0,0,.08); border-radius: 2px; overflow: hidden;
 }
 .pp-ai-meter > div i {
-  display: block; height: 100%; background: var(--amber-deep, #a8492a);
+  display: block; height: 100%; background: var(--amber-deep);
   transition: width .2s;
 }
-.pp-ai-meter b { text-align: right; color: var(--ink, #1a1a1a); position: relative; }
+.pp-ai-meter b { text-align: right; color: var(--ink); position: relative; }
 .pp-ai-meter b em {
   display: block; font-style: normal; font-size: var(--fs-2xs);
   font-family: var(--mono); letter-spacing: .04em;
   position: absolute; right: 0; top: 100%; margin-top: 1px;
   white-space: nowrap;
 }
-.pp-ai-meter b em.is-down { color: var(--amber-deep, #a8492a); }
+.pp-ai-meter b em.is-down { color: var(--amber-deep); }
 .pp-ai-meter b em.is-up { color: var(--sage); }
 .pp-ai-eventlog {
   margin-top: 14px; padding: 12px 14px;
-  background: var(--paper, #faf7f0); border: 1px dashed var(--rule, #d8d2bf); border-radius: 8px;
+  background: var(--paper); border: 1px dashed var(--rule); border-radius: 8px;
 }
 .pp-ai-eventlog h5 {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mute, #807a6c); margin: 0 0 8px;
+  text-transform: uppercase; color: var(--mute); margin: 0 0 8px;
 }
 .pp-ai-ev {
   display: grid; grid-template-columns: 50px 1fr auto; gap: 10px;
-  padding: 5px 0; border-bottom: 1px dotted var(--rule, #d8d2bf);
+  padding: 5px 0; border-bottom: 1px dotted var(--rule);
   font-size: var(--fs-2xs); align-items: center;
 }
 .pp-ai-ev:last-child { border-bottom: 0; }
 .pp-ai-ev-t {
-  font-family: var(--mono); color: var(--amber-deep, #a8492a);
+  font-family: var(--mono); color: var(--amber-deep);
   font-weight: 600; font-size: var(--fs-2xs);
 }
-.pp-ai-ev-why { color: var(--ink-2, #2a2a2a); font-family: var(--serif-cn); }
+.pp-ai-ev-why { color: var(--ink-2); font-family: var(--serif-cn); }
 .pp-ai-ev-fx { display: flex; gap: 6px; }
 .pp-ai-ev-fx span {
   font-family: var(--mono); font-size: var(--fs-2xs);
   padding: 1px 5px; border-radius: 3px;
 }
-.pp-ai-ev-fx span.is-down { background: rgba(217,119,87,.14); color: var(--amber-deep, #a8492a); }
+.pp-ai-ev-fx span.is-down { background: color-mix(in srgb, var(--amber) 14%, transparent); color: var(--amber-deep); }
 .pp-ai-ev-fx span.is-up { background: rgba(77,98,87,.14); color: var(--sage); }
 .pp-ai-resp {
-  padding: 6px 8px; margin-bottom: 5px; background: var(--ivory, #fffdf7);
-  border-left: 2px solid var(--amber-deep, #a8492a); border-radius: 4px;
+  padding: 6px 8px; margin-bottom: 5px; background: var(--ivory);
+  border-left: 2px solid var(--amber-deep); border-radius: 4px;
 }
 .pp-ai-rkey {
   display: block; font-family: var(--mono); font-size: var(--fs-2xs);
-  color: var(--mute, #807a6c); letter-spacing: .06em; margin-bottom: 3px;
+  color: var(--mute); letter-spacing: .06em; margin-bottom: 3px;
 }
 .pp-ai-resp > div {
-  font-family: var(--serif-cn); font-size: var(--fs-2xs); line-height: 1.55; color: var(--ink-2, #2a2a2a);
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); line-height: 1.55; color: var(--ink-2);
   font-style: italic;
 }
 .pp-ai-drama {
   margin-top: 14px; padding: 14px 16px;
-  background: var(--ink, #1a1a1a); color: var(--ivory, #fffdf7); border-radius: 10px;
+  background: var(--ink); color: var(--ivory); border-radius: 10px;
 }
 .pp-ai-drama h5 {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .14em;
-  text-transform: uppercase; color: rgba(217,119,87,.85);
+  text-transform: uppercase; color: color-mix(in srgb, var(--amber) 85%, transparent);
   margin: 0 0 10px;
 }
 .pp-ai-drama > div {
@@ -3369,28 +4184,28 @@
 }
 .pp-ai-drama > div b {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .08em; text-transform: uppercase;
-  color: rgba(217,119,87,.85); margin-right: 6px; font-weight: 500;
+  color: color-mix(in srgb, var(--amber) 85%, transparent); margin-right: 6px; font-weight: 500;
 }
 .pp-ai-rubric {
   margin-top: 14px; padding: 12px 14px;
-  background: var(--paper-2, #f3eedc); border-radius: 8px;
+  background: var(--paper-2); border-radius: 8px;
 }
 .pp-ai-rubric h5 {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mute, #807a6c);
+  text-transform: uppercase; color: var(--mute);
   margin: 0 0 8px;
 }
 .pp-ai-rubric-row {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
-  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink-2, #2a2a2a);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink-2);
 }
 .pp-ai-rubric-row span {
-  padding: 3px 6px; background: var(--ivory, #fffdf7); border-radius: 3px;
+  padding: 3px 6px; background: var(--ivory); border-radius: 3px;
   text-align: center;
 }
 .pp-ai-foot {
-  margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--rule, #d8d2bf);
-  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute, #807a6c);
+  margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--rule);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: .04em; display: flex; justify-content: space-between;
 }
 `;
@@ -3402,9 +4217,9 @@
 
   function stanceClassFor(stance) {
     if (!stance) return "";
-    if (stance.includes("医保")) return "s-a";
-    if (stance.includes("慢病")) return "s-b";
-    if (stance.includes("药企")) return "s-c";
+    if (stance.includes("医保") || stance.includes("政策") || stance.includes("市场")) return "s-a";
+    if (stance.includes("慢病") || stance.includes("门店") || stance.includes("顾客")) return "s-b";
+    if (stance.includes("药企") || stance.includes("产业") || stance.includes("竞争")) return "s-c";
     if (stance.includes("观望") || stance.includes("沉默")) return "s-d";
     return "";
   }
@@ -3496,7 +4311,7 @@
         </div>
 
         <div class="pp-ai-rubric">
-          <h5>量规初值（6 维 · 来源：${escapeHtml(ri._provenance_note || "designed")}）</h5>
+          <h5>评价维度初值（6 维 · 来源：${escapeHtml(ri._provenance_note || "designed")}）</h5>
           <div class="pp-ai-rubric-row">
             <span>政策引用 ${ri.policy_citation ?? "—"}/5</span>
             <span>立场迁移 ${ri.stance_shift ?? "—"}/5</span>
@@ -3572,19 +4387,19 @@
     }
     if (hdr) {
       hdr.innerHTML = [
-        `<div class="persona-type-tag ptt-a">医保视角 ×${rows}</div>`,
-        `<div class="persona-type-tag ptt-b">慢病家属 ×${rows}</div>`,
-        `<div class="persona-type-tag ptt-c">药企背景 ×${rows}</div>`,
-        `<div class="persona-type-tag ptt-d">沉默观望 ×${rows}</div>`,
+        `<div class="persona-type-tag ptt-a">政策/市场 ×${rows}</div>`,
+        `<div class="persona-type-tag ptt-b">门店/顾客 ×${rows}</div>`,
+        `<div class="persona-type-tag ptt-c">产业/竞争 ×${rows}</div>`,
+        `<div class="persona-type-tag ptt-d">观望/被动 ×${rows}</div>`,
       ].join("");
     }
 
     // 4 fixed columns — each column = one persona type
     const colDef = [
-      { type: "type-a", short: "医保", col: "A" },
-      { type: "type-b", short: "慢病", col: "B" },
-      { type: "type-c", short: "药企", col: "C" },
-      { type: "type-d", short: "沉默", col: "D" },
+      { type: "type-a", short: "政策", col: "A" },
+      { type: "type-b", short: "门店", col: "B" },
+      { type: "type-c", short: "产业", col: "C" },
+      { type: "type-d", short: "观望", col: "D" },
     ];
 
     grid.innerHTML = "";
@@ -3649,7 +4464,7 @@
       const active = grid.querySelectorAll(".is-active").length;
       const speaking = live + active;
       const proactive = initSim?.proactive_speakers?.length || live;
-      foot.innerHTML = `<span>已表态 <b>${speaking}</b>/${n}</span><span>C组 <b style="color:var(--amber-deep)">0</b> 未发声</span><span>主动 <b>${proactive}</b></span>`;
+      foot.innerHTML = `<span>已表态 <b>${speaking}</b>/${n}</span><span>威胁（T）类证据 <b style="color:var(--amber-deep)">待补</b></span><span>主动 <b>${proactive}</b></span>`;
     }
 
     // Sync h5 timestamp
@@ -3664,12 +4479,19 @@
     const risks = document.querySelectorAll("#stage-ii .risk-list .risk-item").length;
     const klass = getSelected("class");
     const n = klass?.n || 32;
-    const speaking = Math.max(0, Math.round(n * 0.44));
+    // 表态数取仿真事件流里的真实发言人数（与画像格联动同一口径），不再用固定比例推算
+    const spokenNames = new Set();
+    (state.eventStream || []).forEach((b) => {
+      if (b.role === "S") spokenNames.add(b.who || `S@${Math.floor(b.tSec || 0)}`);
+    });
+    const speaking = spokenNames.size;
     const conflict = (state.eventStream || []).filter((b) => b.flags?.conflict).length;
     const drift = (conflict * 0.35).toFixed(1);
     const left = bar.querySelector("span:first-child");
     if (left) {
-      left.innerHTML = `本轮试错 · 关键时刻 <b style="color:var(--ink)">${km}</b> 处 · 风险信号 <b style="color:var(--ink)">${risks}</b> 项 · 学生表态 <b style="color:var(--ink)">${speaking} / ${n}</b> · 立场迁移 <b style="color:var(--ink)">+${drift}</b>`;
+      const changeLabel = getSelected("chapter")?.id === "mp-ch3-environment" ? "分类修正" : "立场迁移";
+      const driftText = conflict > 0 ? `+${drift}` : "—";
+      left.innerHTML = `本轮试错 · 关键时刻 <b style="color:var(--ink)">${km}</b> 处 · 风险信号 <b style="color:var(--ink)">${risks}</b> 项 · 学生表态 <b style="color:var(--ink)">${speaking} / ${n}</b> · ${changeLabel} <b style="color:var(--ink)">${driftText}</b>`;
     }
   }
 
@@ -3735,6 +4557,7 @@
     state.reviewChapterId = chapter?.id || null;
     if (firstChapterLoad || chapterChanged) {
       state.keyMoments = loadKeyMoments(chapter?.id);
+      metaverseMomentSignature = keyMomentSignature(state.keyMoments);
       setStageStatus(
         "ii",
         state.keyMoments.length
@@ -3746,7 +4569,7 @@
     }
     renderKeyMoments();
     renderSceneBeats(chapter);
-    renderExpertCards(chapter);
+    renderExpertDossier(chapter);
     renderRiskAndFlag(chapter);
     renderPersonaGrid(getSelected("class"));
     updatePersonaLive();
@@ -3774,7 +4597,7 @@
     }
   }
 
-  function syncToHeroAndPreview() {
+  function syncToHeroAndPreview({ packView = "auto" } = {}) {
     updateWizFlow();
     const course = getSelected("course");
     const klass  = getSelected("class");
@@ -3793,15 +4616,23 @@
       if (session)             setField("plan",   `plan.md · v 0.4 · ${session.min} min`);
     }
 
-    // —— 2. 同步 pack-preview 内容（9 个教学环节卡随章节变化）
+    // —— 2. 同步“设计摘要”生成输入（不是完整实践包）
+    const summary = document.querySelector(".design-summary");
     const preview = document.querySelector(".pack-preview");
-    if (preview && chapter) {
-      const ttl = preview.querySelector(".pack-preview-h h4");
-      const pid = preview.querySelector(".pack-preview-h .pid");
-      if (ttl) ttl.innerHTML = `课堂实践包预览<small>章节：${chapter.title}（${chapter.topic}） · 由教师真实输入合成</small>`;
+    const workspace = document.querySelector("[data-pack-workspace]");
+    if (summary && chapter) {
+      const ttl = summary.querySelector(".pack-preview-h h4");
+      const pid = summary.querySelector(".pack-preview-h .pid");
+      if (ttl) ttl.innerHTML = `课堂教学设计摘要<small>章节：${chapter.title}（${chapter.topic}） · 九项生成要求均可编辑</small>`;
       if (pid) pid.textContent = `P-${chapter.id.toUpperCase().slice(0, 8)}`;
       // 用一段 mock 内容反映"章节驱动"；所有章节都按 4 任务/4 角色/6 评价/5 资料 配齐
       const mocks = {
+        "mp-ch3-environment": {
+          tasks:     "信息归类：将案例证据放入 S/W/O/T · 边界辨析：区分门店能力 W 与人才供给 T · 策略组合：形成 SO/WO/ST/WT · 决策输出：提交慢病药学服务行动备忘录",
+          roles:     "政策与市场分析员 · 门店运营负责人 · 顾客与服务代表 · 产业竞争观察员",
+          rubric:    "内外部边界 · 证据相关性 · SWOT 分类准确度 · TOWS 策略质量 · 可行性 · 反思深度",
+          citations: "案例会员复购数据 · 门店药师排班表 · 门诊统筹政策摘要 · 区域竞店服务记录 · 教材本章",
+        },
         "ch5-procurement": {
           tasks:     "起步问题：「价格、厂家、患者反应你最先看到哪一项？」 · 进阶问题：「集采替代下，药事委员会会如何排序？」 · 分歧锚点：医保支付方 vs 长期患者 · 总结性提问：写一份采购建议书 250 字",
           roles:     "医保局代表 · 医院药事委员会 · 慢病患者代表 · 药企代表",
@@ -3953,33 +4784,77 @@
         rubric:    `概念准确 · 证据引用 · 立场迁移 · 真实任务接口 · 论证质量 · 反思深度`,
         citations: `教材本章 · 国家相关政策原文 · 行业指南 · 公开案例 · 院内 / 班级匿名数据`,
       };
-      // 原始 mock → buildEnvPackContent → 教师编辑覆盖
+      // 原始课程素材 → 九环节生成要求 → 教师编辑覆盖
       const rawMock    = mocks[chapter.id] || fallback;
       const envContent = buildEnvPackContent(chapter, rawMock);
-      const edits      = loadPackEdits(chapter.id);
-      const merged     = { ...envContent, ...edits };
       const generation = loadPackGenerationMeta(chapter.id);
-      if (ttl && generation?.source === "local-model") {
-        ttl.innerHTML = `课堂实践包预览<small>章节：${chapter.title}（${chapter.topic}） · 本机 Qwen 生成 · 可继续编辑</small>`;
+      let edits = loadPackEdits(chapter.id);
+      let generated = loadGeneratedPack(chapter.id);
+      // v1 兼容：旧版本曾把模型产物写进 packEdits；只迁移一次，避免丢失既有实践包。
+      if (!generated && generation?.source === "local-model" && validGeneratedPack(edits)) {
+        const outputs = loadAllGeneratedPacks();
+        outputs[chapter.id] = { ...edits };
+        try { localStorage.setItem(PACK_OUTPUTS_KEY, JSON.stringify(outputs)); } catch {}
+        generated = { ...edits };
+        const allEdits = loadAllPackEdits();
+        delete allEdits[chapter.id];
+        try { localStorage.setItem(PACK_EDITS_KEY, JSON.stringify(allEdits)); } catch {}
+        edits = {};
       }
+      const merged = { ...envContent, ...edits };
 
-      // 填充 9 张环节卡
+      // 填充九张“生成要求”卡
       PACK_KEYS.forEach((key) => {
         const envNum = key.slice(3);                                  // "01".."09"
-        const card   = preview.querySelector(`.pack-item[data-env="${envNum}"]`);
+        const card   = summary.querySelector(`.pack-item[data-env="${envNum}"]`);
         if (!card) return;
-        const body = card.querySelector(".body");
+        const body = card.querySelector(`[data-brief-field="${key}"]`);
         if (!body) return;
         const content = merged[key] || "";
         body.textContent = content;
         body.setAttribute("contenteditable", "true");
-        body.dataset.packField = key;
-        // 动态计数
-        const n = content.split(/[·；;]/).map((s) => s.trim()).filter(Boolean).length;
+        const n = content.split(/[。；;\n]/).map((s) => s.trim()).filter(Boolean).length;
         const cnt = card.querySelector(".env-count");
-        if (cnt) cnt.textContent = n > 0 ? `${n} 条` : "";
+        if (cnt) cnt.textContent = n > 0 ? `${n} 项要求` : "";
       });
-      wirePackEdits(preview, chapter.id);
+      wireDesignBriefEdits(summary);
+
+      // —— 3. 只有模型产物完整时才显示完整实践包、下载与 Stage II 审校稿。
+      if (preview) {
+        const output = generated && validGeneratedPack(generated) ? generated : null;
+        if (output) {
+          const outputTitle = preview.querySelector(".pack-preview-h h4");
+          const outputPid = preview.querySelector(".pack-preview-h .pid");
+          if (outputTitle) outputTitle.innerHTML = `完整课堂实践包<small>章节：${chapter.title}（${chapter.topic}） · 本机 Qwen 生成 · 可编辑与下载</small>`;
+          if (outputPid) outputPid.textContent = `P-${chapter.id.toUpperCase().slice(0, 8)}`;
+          PACK_KEYS.forEach((key) => {
+            const body = preview.querySelector(`[data-pack-field="${key}"]`);
+            if (!body) return;
+            body.textContent = output[key];
+            body.setAttribute("contenteditable", "true");
+          });
+          wirePackEdits(preview, chapter.id);
+        } else {
+          PACK_KEYS.forEach((key) => {
+            const body = preview.querySelector(`[data-pack-field="${key}"]`);
+            if (body) body.textContent = "";
+          });
+        }
+
+        if (workspace) {
+          const chapterChanged = workspace.dataset.packChapter !== chapter.id;
+          const currentView = workspace.dataset.packView || "briefs";
+          workspace.dataset.packChapter = chapter.id;
+          let nextView = "briefs";
+          if (packView === "output" && output) nextView = "output";
+          else if (packView === "briefs") nextView = "briefs";
+          else if (packView === "generating") nextView = "generating";
+          else if (currentView === "generating" && !chapterChanged) nextView = "generating";
+          else if (output && (!chapterChanged && currentView === "briefs")) nextView = "briefs";
+          else if (output) nextView = "output";
+          transitionPackWorkspace(nextView);
+        }
+      }
     }
     // 实践包先就绪，再构建审校候选；加入候选时才能冻结真实原文快照。
     renderStage2(chapter);
@@ -3990,25 +4865,25 @@
   function updateExpertAdoptBar() {
     if (!state.expertCards) return;
     const total = state.expertCards.length;
-    let candidates = 0, rejected = 0, pending = 0, decided = 0;
+    let preparing = 0, deferred = 0, pending = 0;
     state.expertCards.forEach((entry) => {
-      if (entry.state === "candidate") candidates++;
-      else if (entry.state === "rejected") rejected++;
+      if (entry.state === "candidate" && entry.decision === "supported") preparing++;
+      else if (entry.state === "rejected" || entry.decision === "insufficient" || entry.decision === "unsupported") deferred++;
       else pending++;
-      if (entry.decision !== "pending") decided++;
     });
+    const decided = preparing + deferred;
     const candidateEntries = state.expertCards.filter((entry) => entry.state === "candidate");
     const linked = new Set(candidateEntries.flatMap((entry) => entry.evidenceLinks)).size;
-    const bar = document.querySelector('#stage-ii [data-substage="A"] .adopt-bar');
+    const bar = document.querySelector('#stage-ii [data-adopt-bar="review"]');
     if (bar) {
       const left = bar.querySelector("span:first-child");
-      if (left) left.innerHTML = `修订候选 · <span class="pct">${candidates} / ${total}</span> · 证据已关联 ${linked} · 教师已判断 ${decided} · 不采用 ${rejected} · 待处理 ${pending}`;
+      if (left) left.innerHTML = `建议 <span class="pct">${total}</span> 条 · 已处理 ${decided} · 准备修改 ${preparing} · 暂不修改 ${deferred} · 待处理 ${pending} · 已关联记录 ${linked}`;
     }
     // 同步页眉摘要卡，让候选/判断操作所见即所得
     const summary = document.querySelector('#practiceMeta [data-field="adoption"]')
                   || document.querySelector('[data-field="adoption"]');
     if (summary) {
-      summary.textContent = `${total} 路审校 · 候选 ${candidates} · 已判断 ${decided} · 待处理 ${pending}`;
+      summary.textContent = `${total} 条建议 · 准备修改 ${preparing} · 暂不修改 ${deferred} · 待处理 ${pending}`;
     }
   }
 
@@ -4017,6 +4892,9 @@
     ingestExistingBeats();
     syncDotKey();
     wireInlineControls();
+    global.addEventListener("mv:ready", replayMigratedKeyMoments);
+    global.addEventListener("mv:ready", registerMetaverseMomentSync);
+    registerMetaverseMomentSync();
     mountPackWizard();
     composeAssets(); // 初始时仅恢复“教师确认支持”的修订候选资产
     setStageStatus("i", `实践包就绪`, false, true);
@@ -4048,6 +4926,6 @@
   // 暴露给 console 调试
   global.PharmacoPilotPracticeRuntime = {
     state, startSim, pauseSim, stepSim, resetSim,
-    deriveKeyMoments, composeAssets, writeBackAllAssets,
+    deriveKeyMoments, syncKeyMomentsFromPlayback, composeAssets, writeBackAllAssets,
   };
 })(window);

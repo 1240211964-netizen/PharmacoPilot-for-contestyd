@@ -175,10 +175,10 @@
     s.textContent =
       '.theory-row.is-collapsed .theory-chip.thy-overflow{display:none;}' +
       '.theory-toggle{font-family:var(--mono);font-weight:500;letter-spacing:0.04em;' +
-      'cursor:pointer;border:1px dashed var(--line,#d8d2c4);' +
-      'background:transparent;color:var(--mute,#8a8478);border-radius:999px;' +
+      'cursor:pointer;border:1px dashed var(--rule-2);' +
+      'background:transparent;color:var(--mute);border-radius:999px;' +
       'padding:3px 10px;font-size: var(--fs-2xs);line-height:1.4;white-space:nowrap;}' +
-      '.theory-toggle:hover{color:var(--ink,#1a1714);border-color:var(--ink,#1a1714);}';
+      '.theory-toggle:hover{color:var(--ink);border-color:var(--ink);}';
     document.head.appendChild(s);
   }
   function setupCollapse(row, addBtn) {

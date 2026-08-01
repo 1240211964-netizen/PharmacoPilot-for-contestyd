@@ -16,20 +16,19 @@
 
   /* 9 个教学环节（顺序固定，不随时段变化） */
   const STATIONS = [
-    { num: '01', name: '学情诊断' },
-    { num: '02', name: '目标与量规' },
-    { num: '03', name: '知识与误区' },
-    { num: '04', name: '案例与证据' },
-    { num: '05', name: '任务链设计' },
-    { num: '06', name: '课中调控' },
-    { num: '07', name: '评价与画像' },
-    { num: '08', name: '复盘与决策' },
-    { num: '09', name: '资产沉淀' },
+    { num: '01', name: '学习者与教学情境分析' },
+    { num: '02', name: '预期学习结果与评价证据设计' },
+    { num: '03', name: '教学内容结构化与前概念诊断' },
+    { num: '04', name: '真实性学习情境与资源设计' },
+    { num: '05', name: '学习活动与教学支架设计' },
+    { num: '06', name: '形成性评价与适应性调控' },
+    { num: '07', name: '表现性评价与学习成效诊断' },
+    { num: '08', name: '反思性实践与教学改进' },
+    { num: '09', name: '教学知识建构与专业共享' },
   ];
 
-  /* 数据来源：完全交由 evaluation-framework.js 派生（framework-driven）。
-   * 三个时段的 9 个教学环节 lane 值与 coupling 均按 §4 矩阵 + §6 公式计算，
-   * 任何修改都从 framework 的 SAMPLE_*_DELTAS 与权重矩阵改起。 */
+  /* 能力 Δ 由 evaluation-framework.js 派生；COUPLING 只读
+   * evaluation-contract.js 经 framework.buildDataset() 生成的结果。 */
   const EF = window.PharmacoPilotEvaluationFramework;
   if (!EF) {
     console.warn('[data-render] evaluation-framework not loaded — falling back to last-known dataset');
@@ -47,22 +46,21 @@
   };
 
   function resolveCouplingArr(data, mode) {
-    if (data?.isLive) return data.coupling || [];
-    return window.PharmacoPilotEvaluationContract?.buildCouplingLane?.(mode) || data?.coupling || [];
+    return data?.coupling || [];
   }
 
   function resolveBridgeArr(data, mode) {
-    if (data?.isLive) return data.bridges || [];
-    return window.PharmacoPilotEvaluationContract?.buildBridgeCoupling?.(mode) || data?.bridges || [];
+    return data?.bridges || [];
   }
 
   /* 高度映射：把 cumulative 模式下的最大值锚定为 64%，
    * 其余时段按相同 scale 缩放——视觉上 weekly/single 自然变低，
    * 强化"切换时段后增量缩小"的体感。 */
   const TARGET_MAX_HEIGHT = 64; // %
-  const CUMULATIVE_MAX = Math.max(
-    ...DATA.cumulative.teacher,
-    ...DATA.cumulative.student
+  const CUMULATIVE_MAX = Math.max(1,
+    ...[...DATA.cumulative.teacher, ...DATA.cumulative.student]
+      .filter(v => typeof v === 'number' && Number.isFinite(v))
+      .map(Math.abs)
   );
   const HEIGHT_SCALE = TARGET_MAX_HEIGHT / CUMULATIVE_MAX;
 
@@ -77,16 +75,18 @@
     if (!laneEl) return;
     const gains = laneEl.querySelectorAll('.gain');
     gains.forEach((gain, i) => {
-      const v = values[i] ?? 0;
+      const v = values[i];
       const st = STATIONS[i];
-      const heightPct = Math.max(2, Math.min(100, v * HEIGHT_SCALE));
+      const isMeasured = typeof v === 'number' && Number.isFinite(v);
+      const heightPct = isMeasured ? Math.max(2, Math.min(100, Math.abs(v) * HEIGHT_SCALE)) : 0;
       const fill = gain.querySelector('.fill');
       const delta = gain.querySelector('.delta');
       if (fill) fill.style.height = heightPct + '%';
       if (delta) delta.textContent = fmtDelta(v);
       gain.title = `${st.num} ${st.name} · ${fmtDelta(v)}`;
-      // mark zero/near-zero so we can style them muted if desired
-      gain.classList.toggle('is-near-zero', v < 0.15);
+      gain.classList.toggle('is-unmeasured', !isMeasured);
+      gain.classList.toggle('is-negative', isMeasured && v < 0);
+      gain.classList.toggle('is-near-zero', isMeasured && Math.abs(v) < 0.15);
     });
   }
 
@@ -113,13 +113,18 @@
     if (!track) return;
     const svg = track.querySelector('svg');
     if (!svg) return;
-    // COUPLING 单一信源：LIVE 数据优先；未接入真实数据时才使用样本 X1-X5 量规。
+    // COUPLING 单一信源：只消费 buildDataset 已按统一契约生成的结果。
     // 样本契约只对有 Xi 耦合维度的环节(E03/E04/E06/E07/E08)产出连线，其余环节无"已测耦合"→不画，更诚实。
     const bridges = bridgeArr || resolveBridgeArr(data, mode);
-    if (!bridges.length) { svg.innerHTML = ''; return; }
+    if (!bridges.length) {
+      svg.innerHTML = '';
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', data?.couplingStatus?.reason || '当前未计算环节关联');
+      return;
+    }
 
     const envCount = EF.ENVIRONMENTS.length;       // 9
-    const W = 900, H = 88;                         // viewBox
+    const W = 900, H = 56;                         // viewBox · 轻量关联通道
     const colW = W / envCount;                     // 100
     const xOf = col => (col + 0.5) * colW;
     const maxStr = Math.max(...bridges.map(b => b.strength), 0.01);
@@ -178,8 +183,10 @@
         return `${EF.ENVIRONMENTS[b.envIndex]?.short || b.envId} → ${ev?.name || b.eventId}（强度 ${b.strength}）`;
       });
     svg.setAttribute('role', 'img');
+    const measuredEnvs = new Set(bridges.map(b => b.envId)).size;
+    const measuredEvents = new Set(bridges.map(b => b.eventId)).size;
     svg.setAttribute('aria-label',
-      `COUPLING 连线图：教师 9 个教学环节通过 ${bridges.length} 条连线连到学生 5 个产出节点。` +
+      `COUPLING 连线图：教师 9 个教学环节中 ${measuredEnvs} 个有局部评价指标的环节，通过 ${bridges.length} 条连线连接到 ${measuredEvents} 个当前可测学生节点；EV0 基线与 EV4 待接入节点不画线。` +
       (strongest.length ? `最强连线：${strongest.join('；')}。` : '') +
       `各连线强度见对应节点 tooltip。`);
   }
@@ -200,13 +207,16 @@
       const node = wrap.querySelector(`.event-node[data-event="${ev.id}"]`);
       if (!node) return;
 
-      // C 级证据 = 待真课接入 → 视为预测值：加 is-predicted 类，delta 前缀 ≈，避免"最大数字压过最弱证据"
-      const isPredicted = ev.evidence === 'C';
+      const isMissing = ev.measurementMode === 'missing';
+      const isPredicted = ev.measurementMode === 'model-derived';
       node.classList.toggle('is-predicted', isPredicted);
+      node.classList.toggle('is-missing', isMissing);
 
       const deltaEl = node.querySelector('.node-delta');
       if (deltaEl) {
-        if (ev.id === 'EV0') {
+        if (isMissing) {
+          deltaEl.textContent = '未测';
+        } else if (ev.id === 'EV0') {
           deltaEl.textContent = '基线';
         } else if (ev.delta != null) {
           deltaEl.textContent = (isPredicted ? '≈' : '') + fmtDelta(ev.delta);
@@ -219,13 +229,26 @@
       if (dimsEl) dimsEl.textContent = fmtNodeDims(ev);
 
       const evEl = node.querySelector('.node-evidence');
-      if (evEl && ev.evidence) {
+      if (evEl && isMissing) {
+        evEl.textContent = '—';
+        evEl.className = 'node-evidence lv-missing';
+        evEl.title = '该节点未导入观测，不使用样本进度曲线补值';
+        evEl.setAttribute('aria-label', '未测量');
+      } else if (evEl && ev.evidence) {
+        const evidenceMeta = EF.EVIDENCE_LEVELS?.[ev.evidence];
+        const evidenceLabel = evidenceMeta?.label || '未分级证据';
+        const evidenceDesc = evidenceMeta?.desc || '';
         evEl.textContent = ev.evidence;
         evEl.className = 'node-evidence lv-' + ev.evidence;
-        evEl.title = `证据等级 ${ev.evidence}` + (isPredicted ? '（待真课接入 · 当前为预测值）' : '');
+        evEl.title = `证据等级 ${ev.evidence} · ${evidenceLabel}` +
+          (evidenceDesc ? `：${evidenceDesc}` : '') +
+          (isPredicted ? '（虚拟演练模型推演，不是实测）' : '');
+        evEl.setAttribute('aria-label', `证据等级 ${ev.evidence}：${evidenceLabel}` +
+          (isPredicted ? '，虚拟演练模型推演' : ''));
       }
       const parts = [`${ev.num} ${ev.name}`];
       if (ev.whenLabel) parts.push(ev.whenLabel);
+      if (isMissing) parts.push('未导入节点观测');
       if (ev.composite != null) parts.push(`综合 ${ev.composite.toFixed(1)}/10`);
       if (ev.delta != null && ev.id !== 'EV0') parts.push(`Δ ${(isPredicted ? '≈' : '') + fmtDelta(ev.delta)}（测 ${fmtNodeDims(ev)}）`);
       node.title = parts.join(' · ');
@@ -234,13 +257,12 @@
 
   function renderTotals(data) {
     // 教师 lane 现在是 atlas-body 里唯一的 .lane
-    // 口径标注（#4）：teacher % = 8 维 Δ 等权均值/满分；student % = 7 维净增（≈E4 综合后测），
-    // 避免被误读为"相对提升"或与下方环节柱/节点逐个对应。
+    // 只呈现已测维度的平均绝对分差；缺失维度不按 0 计入分母。
     const teacherSmall = document.querySelector('.bi-atlas-body .lane .lane-id .ll small');
-    if (teacherSmall) teacherSmall.textContent = data.teacherTotal + ' · 8 维均值';
+    if (teacherSmall) teacherSmall.textContent = `${data.teacherTotal} · 已测 ${data.teacherMeasuredCount}/8`;
     // 学生轴改为 5 节点，总分挂在 .student-events 的 events-id 上
     const studentSmall = document.querySelector('.student-events .events-id .ll small');
-    if (studentSmall) studentSmall.textContent = data.studentTotal + ' · 7 维净增';
+    if (studentSmall) studentSmall.textContent = `${data.studentTotal} · 已测 ${data.studentMeasuredCount}/7`;
 
     const headSub = document.querySelector('.bi-atlas-head .title small');
     if (headSub) headSub.textContent = data.label;
@@ -261,10 +283,43 @@
 
   // Render data sources block (hero 下方一行 4 卡)
   // 已接入的数据源用普通卡；待接入的（暂无证据）渲染为虚线 CTA 卡
-  function renderDataSources() {
+  function renderDataSources(data) {
     const grid = document.getElementById('evidenceGrid');
     if (!grid || !EF || !EF.DATA_SOURCE_STATUS) return;
-    grid.innerHTML = EF.DATA_SOURCE_STATUS.map(src => {
+    const head = document.querySelector('#evidenceStrip .evidence-strip-head .lvl');
+    const level = data?.evidenceLevel || EF.CURRENT_EVIDENCE_LEVEL;
+    const levelMeta = EF.EVIDENCE_LEVELS?.[level];
+    let sources = EF.DATA_SOURCE_STATUS;
+    if (data?.isLive) {
+      const meta = data.measurementStatus?.meta || {};
+      const hasEvents = !!data.raw?.eventScores;
+      sources = [
+        {
+          id: 'live-measurement', label: '教师 / 学生前后测', status: '已接入', statusType: 'ok',
+          sampleCount: `N=${meta.sampleSize ?? '—'} · 缺失率 ${typeof meta.missingRate === 'number' ? `${(meta.missingRate * 100).toFixed(1)}%` : '—'} · 评分者 ${meta.raterCount ?? '—'}`,
+          evidenceLevel: level,
+        },
+        {
+          id: 'live-association', label: '环节关联评价指标',
+          status: data.couplingStatus?.available ? '已接入' : '未接入',
+          statusType: data.couplingStatus?.available ? 'ok' : 'pending',
+          sampleCount: data.couplingStatus?.available
+            ? `关联覆盖 ${data.associationSummary?.covered || 0}/${data.associationSummary?.total || 9}`
+            : (data.couplingStatus?.reason || '缺少 couplingRubric'),
+          evidenceLevel: data.couplingStatus?.available ? level : null,
+        },
+        {
+          id: 'live-events', label: '学生节点观测',
+          status: hasEvents ? '已接入' : '未接入', statusType: hasEvents ? 'ok' : 'pending',
+          sampleCount: hasEvents ? '按节点原始观测显示' : '保持未测，不以样本曲线补值',
+          evidenceLevel: hasEvents ? level : null,
+        },
+      ];
+      if (head) head.innerHTML = `<b>当前接入 ${escHtml(data.label || '真实课堂数据')}</b> · 证据等级 <span class="ev-badge">${escHtml(level)}</span> · ${escHtml(levelMeta?.label || '未分级')} · 前后测分差按绝对分派生，缺测不进分母 · <a href="#evaluationFramework" style="color:var(--amber-deep);text-decoration:underline dashed;text-underline-offset:3px;">查看完整评价框架 →</a>`;
+    } else if (head) {
+      head.innerHTML = `本页数字<b>源自 <span class="ev-badge">${escHtml(level)}</span> 级证据</b>（虚拟演练，非真实课堂）· 这是设计预演，<b>不是真实教学成效</b> · 环节关联按证据等级作置信折扣，能力分差按面值呈现 · <a href="#evaluationFramework" style="color:var(--amber-deep);text-decoration:underline dashed;text-underline-offset:3px;">查看完整评价框架 →</a>`;
+    }
+    grid.innerHTML = sources.map(src => {
       const isPlaceholder = !src.evidenceLevel;
       if (isPlaceholder) {
         // CTA 占位卡——虚线边框 + 加号 + 引导文案
@@ -294,7 +349,7 @@
   function render(mode) {
     const data = DATA[mode];
     if (!data) return;
-    // COUPLING 单一信源：LIVE 数据优先；未接入真实数据时才使用样本 X1-X5 量规。
+    // COUPLING 单一信源：只消费 buildDataset 已按统一契约生成的结果。
     // hot 标记 / KEEP·FIX 卡 / bridge 连线 全部读这一套，消除"同环节三个耦合值"的打架。
     const couplingArr = resolveCouplingArr(data, mode);
     const bridgeArr = resolveBridgeArr(data, mode);
@@ -311,6 +366,13 @@
     renderQueue(mode, data, couplingArr, bridgeArr);
     renderTrajectory(mode, data, couplingArr, bridgeArr);
     renderSummaryRow(mode, data, couplingArr);
+    renderDataSources(data);
+    const atlasIntro = document.querySelector('.atlas-section .atlas-intro');
+    if (atlasIntro) {
+      atlasIntro.textContent = data.isLive
+        ? '当前显示已接入的前后测分差与环节关联评价指标；缺失节点保持“未测”，不用样本轨迹补值。'
+        : '这是教学设计预演，不是真实学习成效测量。线越粗表示关联越强，虚线表示次要关联；数字仅作改进提示。';
+    }
   }
 
   /* ---------- 顶部三张卡（KEEP / FIX / NEXT）数据驱动 ----------
@@ -387,38 +449,22 @@
     let bestId = null, bestScore = -Infinity;
     for (const id in matrix) {
       const w = matrix[id];
-      const v = dimDeltas[id] ?? 0;
+      const v = dimDeltas[id];
+      if (typeof v !== 'number' || !Number.isFinite(v)) continue;
       const s = w * v;
       if (s > bestScore) { bestScore = s; bestId = id; }
     }
     if (!bestId) return null;
     const meta = dimsCatalog.find(d => d.id === bestId);
-    return { id: bestId, short: meta?.short || bestId, delta: dimDeltas[bestId] ?? 0 };
+    return { id: bestId, short: meta?.short || bestId, delta: dimDeltas[bestId] };
   }
 
-  function buildSparkPoints(envIdx, allValues, direction /* 'up' | 'down' */) {
-    // 把单 env 的当前增量值转成 7 周趋势的 11 个 polyline 点。
-    // 视觉对齐：与原硬编码同样的 viewBox 0 0 200 36，y 范围 6–30。
-    // 大小：取该 env 增量占全部 envs 最大值的比例，决定终点高度。
-    const v = Math.max(0, allValues[envIdx] ?? 0);
-    const maxV = Math.max(...allValues.filter(x => x != null), 0.1);
-    const ratio = Math.min(1, v / maxV);
-    // 起点固定 30（底）/ 终点按 ratio 抬到 6（顶）；FIX 卡反向：起点 6，终点 30。
-    const yStart = direction === 'down' ? 6  : 30 - 24 * ratio;
-    const yEnd   = direction === 'down' ? 6 + 24 * ratio : 30 - 24 * ratio - (24 * ratio === 0 ? 0 : 0);
-    // 实际上让趋势线"平滑上升/下降"：起点和终点跨度等于 24 * ratio
-    const yA = direction === 'down' ? 6 : 30;
-    const yB = direction === 'down' ? 6 + 24 * ratio : 30 - 24 * ratio;
-    const N = 11;
-    const xs = Array.from({ length: N }, (_, i) => i * 20);
-    const ys = xs.map((_, i) => {
-      const t = i / (N - 1);
-      // 轻微缓动，避免完全直线：0.85 t + 0.15 sin
-      const eased = 0.85 * t + 0.15 * Math.sin(t * Math.PI);
-      return yA + (yB - yA) * eased;
-    });
-    const linePts = xs.map((x, i) => `${x},${ys[i].toFixed(1)}`).join(' ');
-    const areaPts = `M${linePts.replace(/ /g, ' L')} L200,36 L0,36 Z`;
+  function buildSnapshotPoints(envIdx, allValues) {
+    // 单次评价只画 0–4 水平快照，不根据一个终点伪造 7 周走势。
+    const v = typeof allValues[envIdx] === 'number' ? Math.max(0, Math.min(4, allValues[envIdx])) : 0;
+    const y = 30 - 24 * (v / 4);
+    const linePts = `0,${y.toFixed(1)} 200,${y.toFixed(1)}`;
+    const areaPts = `M0,${y.toFixed(1)} L200,${y.toFixed(1)} L200,36 L0,36 Z`;
     return { linePts, areaPath: areaPts };
   }
 
@@ -475,6 +521,18 @@
     return ev ? `${ev.num} ${ev.name}` : bridge.eventId;
   }
 
+  function rubricEquation(bridge) {
+    if (!bridge?.dims?.length) return '缺少局部评价指标';
+    const dimExpr = bridge.dims.length === 1
+      ? `${bridge.dims[0]}=${Number(bridge.xiScores?.[bridge.dims[0]] ?? 0).toFixed(1)}`
+      : `mean(${bridge.dims.map(id => `${id}=${Number(bridge.xiScores?.[id] ?? 0).toFixed(1)}`).join(', ')})`;
+    const evidence = `${bridge.evidenceLevel || 'B'}=${Number(bridge.evidenceCoefficient ?? 0).toFixed(2)}`;
+    const x1 = `X1(${Number(bridge.x1Score ?? 0).toFixed(1)})=${Number(bridge.x1Coefficient ?? 0).toFixed(2)}`;
+    const stationValue = Number(bridge.stationStrength ?? 0);
+    const base = `${dimExpr} × 证据系数 ${evidence} × 全局系数 ${x1} = ${stationValue.toFixed(1)}`;
+    return bridge.isPrimary ? base : `${base}；次路径 ×0.5 = ${Number(bridge.strength).toFixed(1)}`;
+  }
+
   function renderLedeCards(mode, data, bridges) {
     if (!EF) return;
     const row = document.querySelector('.atlas-lede .lede-row');
@@ -483,8 +541,10 @@
     const hint = document.querySelector('.atlas-lede .lede-h .hint');
     if (tag) tag.textContent = `${modeLabel(mode)} · 三条值得关注的 COUPLING 连线`;
     if (hint) hint.textContent = data?.isLive
-      ? '当前为接入数据派生结果 · 建议优先核查强耦合或低证据链路'
-      : '下方图谱：教师 9 环节 → COUPLING → 学生 5 节点 · 建议先看这三条 ↓';
+      ? (data.couplingStatus?.available
+          ? '当前按接入的评价指标和统一契约计算 · 建议优先核查强耦合或低证据链路'
+          : data.couplingStatus?.reason || '当前接入数据未提供耦合评价指标')
+      : '下方图谱：5 个有评价指标的环节 → 3 个当前可测学生节点；基线与待接入迁移节点不画线 ↓';
 
     const top = (bridges || [])
       .filter(b => typeof b.strength === 'number' && b.strength > 0)
@@ -492,10 +552,13 @@
       .slice(0, 3);
 
     if (!top.length) {
+      const emptyReason = data?.couplingStatus?.available === false
+        ? data.couplingStatus.reason
+        : '当前数据没有形成可解释的师生耦合连线。';
       row.innerHTML = `
         <div class="lede-card is-empty">
           <div class="lc-h"><span class="num">—<span class="cn">暂无显著连线</span></span><span class="env">${escHtml(modeLabel(mode))}</span></div>
-          <div class="lc-b">当前数据没有形成可解释的师生耦合连线。请先核查导入数据是否覆盖教师 8 维、学生 7 维和三时段，或回到教学实践补采证据。</div>
+          <div class="lc-b">${escHtml(emptyReason)}。请核查三时段 X1/X2–X5 评价指标或回到教学实践补采证据。</div>
         </div>
       `;
       return;
@@ -516,9 +579,9 @@
             <span class="env">${arrow} ${escHtml(ev?.num || b.eventId)} · ${Number(b.strength).toFixed(1)}</span>
           </div>
           <div class="lc-b">
-            <span class="t-em">教师 ${escHtml(env?.short || '')} ${fmtDelta(tVal)}</span>
-            与 <span class="s-em">学生 ${escHtml(ev?.name || b.eventId)} ${fmtDelta(evDelta)}</span>
-            形成 ${b.isPrimary ? '主' : '次'}关联，COUPLING ${Number(b.strength).toFixed(1)}。${signal}。
+            同期观测（不作为公式输入）：<span class="t-em">教师 ${escHtml(env?.short || '')} ${fmtDelta(tVal)}</span>；
+            <span class="s-em">学生 ${escHtml(ev?.name || b.eventId)} ${fmtDelta(evDelta)}</span>。<br>
+            评价指标计算：${escHtml(rubricEquation(b))}，形成${b.isPrimary ? '主' : '次'}关联。${signal}。
           </div>
         </div>
       `;
@@ -551,10 +614,13 @@
       .slice(0, 4);
 
     if (!candidates.length) {
+      const emptyReason = data?.couplingStatus?.available === false
+        ? data.couplingStatus.reason
+        : `当前 ${dataLabel(data, mode)} 未检测到正向 COUPLING`;
       list.innerHTML = `
         <div class="queue-empty">
           <div class="qe-tag">暂无待写回建议</div>
-          <div class="qe-body">当前 ${escHtml(dataLabel(data, mode))} 未检测到正向 COUPLING。先核查数据源、补齐课堂证据，或回到教学实践重跑关键环节。</div>
+          <div class="qe-body">${escHtml(emptyReason)}。先核查评价标准、补齐课堂证据，或回到教学实践重跑关键环节。</div>
         </div>
       `;
       return;
@@ -564,10 +630,10 @@
       const p = queuePriority(item.coupling, item.hasFixSignal);
       const wb = item.evidence.writeback?.[0];
       const action = item.hasFixSignal
-        ? '修正量规或证据锚点，并重新跑评价'
+        ? '修正评价标准或证据锚点，并重新跑评价'
         : (wb?.note || '把当前有效做法写回本课实践包');
       const evName = item.bridge ? bridgeTargetName(item.bridge) : '学生证据';
-      const source = item.hasFixSignal ? '量规/证据链风险' : '强耦合改进信号';
+      const source = item.hasFixSignal ? '评价标准/证据链风险' : '强耦合改进信号';
       return `
         <div class="queue-item${p.label === 'P1' ? ' is-priority' : ''}" data-env="${escHtml(item.env.num)}" data-env-id="${escHtml(item.env.id)}">
           <span class="queue-prio ${p.cls}">${p.label}</span>
@@ -577,7 +643,7 @@
           </div>
           <div class="queue-field">
             <span class="lbl">证据 · EVIDENCE</span>
-            <span class="v">教师 ${escHtml(item.env.short)} ${fmtDelta(data.teacher?.[item.idx])}；${escHtml(evName)} ${fmtDelta(item.evData?.delta)}；COUPLING <b>${item.coupling.toFixed(1)}</b>。${data.isLive ? '源自当前接入数据。' : '源自虚拟演练样本。'}</span>
+            <span class="v">同期观测：教师 ${escHtml(item.env.short)} ${fmtDelta(data.teacher?.[item.idx])}；${escHtml(evName)} ${fmtDelta(item.evData?.delta)}。评价指标 COUPLING <b>${item.coupling.toFixed(1)}</b>。${data.isLive ? '源自当前接入数据。' : '源自虚拟演练样本。'}</span>
           </div>
           <div class="queue-field">
             <span class="lbl">建议动作 · ACTION</span>
@@ -603,64 +669,63 @@
     }).join('');
   }
 
-  function parsePercent(text) {
-    const m = String(text || '').match(/[-+]?\d+(?:\.\d+)?/);
-    return m ? Number(m[0]) : 0;
-  }
-
-  function scaledY(percent, base, span) {
-    const p = Math.max(0, Math.min(100, percent));
-    return +(base - p / 100 * span).toFixed(1);
-  }
-
   function renderTrajectory(mode, data, couplingArr, bridges) {
-    const teacherPct = parsePercent(data.teacherTotal);
-    const studentPct = parsePercent(data.studentTotal);
-    const couplingIndex = (couplingArr || []).reduce((sum, v) => sum + (typeof v === 'number' ? v : 0), 0);
-    const strongCount = (bridges || []).filter(b => b.strength >= 1.5).length;
+    const summary = data?.associationSummary || {};
+    const couplingAvailable = summary.available && data?.couplingStatus?.available !== false;
+    const associationText = couplingAvailable
+      ? `${summary.mean.toFixed(1)} / ${summary.scaleMax || 4}`
+      : '未计算';
     const meta = document.querySelector('.traj-head-row .meta');
     if (meta) {
-      meta.innerHTML = `COUPLING INDEX <b>+${couplingIndex.toFixed(1)}</b> · ${escHtml(dataLabel(data, mode))} · ${strongCount} 个关注环节`;
+      meta.innerHTML = couplingAvailable
+        ? `环节—证据关联均值 <b>${associationText}</b> · 覆盖 <b>${summary.covered}/${summary.total}</b> 环节 · ${escHtml(dataLabel(data, mode))}`
+        : `环节—证据关联 <b>未计算</b> · 覆盖 0/${summary.total || 9} 环节 · ${escHtml(dataLabel(data, mode))}`;
     }
 
     const paragraph = document.querySelector('.traj-section .data-section-h p');
     if (paragraph) {
       paragraph.innerHTML = data.isLive
-        ? `<b>这是当前接入数据的快照，不是样本轨迹。</b>${escHtml(modeLabel(mode))} 下，教师 8 维均值 ${data.teacherTotal}，学生 7 维净增 ${data.studentTotal}，COUPLING INDEX +${couplingIndex.toFixed(1)}。若要恢复 7 周曲线，请导入带周序列的真实课堂数据。`
-        : `<b>这是 17 轮演练叠出的预期轨迹（非真实课堂）。</b>当前 ${escHtml(modeLabel(mode))} 的教师均值 ${data.teacherTotal}、学生净增 ${data.studentTotal}、COUPLING INDEX +${couplingIndex.toFixed(1)}。这一关联<b>建议</b>到真实课堂（泛雅）验证。`;
+        ? `<b>这是同一测量窗口的前后测快照，不是连续时间序列。</b>${escHtml(modeLabel(mode))}：教师已测维度平均分差 ${data.teacherTotal}，学生已测维度平均分差 ${data.studentTotal}；${couplingAvailable ? `环节关联强度均值 ${associationText}，覆盖 ${summary.covered}/${summary.total}` : escHtml(data.couplingStatus?.reason || '关联评价指标未计算')}。`
+        : `<b>这是虚拟演练推演快照，不是真实课堂轨迹。</b>${escHtml(modeLabel(mode))}：教师已测维度平均分差 ${data.teacherTotal}，学生已测维度平均分差 ${data.studentTotal}；环节关联强度均值 ${associationText}，覆盖 ${summary.covered}/${summary.total}。`;
     }
 
     const legend = document.querySelector('.traj-legend');
     if (legend) {
       legend.innerHTML = `
-        <span class="l-t"><i></i>新教师教学能力 ${escHtml(data.teacherTotal)}</span>
-        <span class="l-s"><i></i>药事管理决策能力 ${escHtml(data.studentTotal)}</span>
-        <span class="l-x"><i></i>师生能力耦合 COUPLING +${couplingIndex.toFixed(1)}</span>
+        <span class="l-t"><i></i>教师已测维度平均分差 ${escHtml(data.teacherTotal)}</span>
+        <span class="l-s"><i></i>学生已测维度平均分差 ${escHtml(data.studentTotal)}</span>
+        <span class="l-x"><i></i>环节—证据关联 ${couplingAvailable ? `${associationText} · 覆盖 ${summary.covered}/${summary.total}` : '未计算'}</span>
       `;
     }
 
     const svg = document.querySelector('.traj-chart svg');
     if (!svg) return;
-    const tEnd = scaledY(teacherPct, 160, 120);
-    const sEnd = scaledY(studentPct, 170, 110);
-    const cEnd = scaledY(Math.min(100, couplingIndex * 10), 180, 130);
-    const tPts = `0,160 196,${(160+tEnd*5)/6} 392,${(160+tEnd*4)/5} 590,${(160+tEnd*3)/4} 786,${(160+tEnd*2)/3} 984,${(160+tEnd)/2} 1180,${tEnd}`;
-    const sPts = `0,170 196,${(170+sEnd*5)/6} 392,${(170+sEnd*4)/5} 590,${(170+sEnd*3)/4} 786,${(170+sEnd*2)/3} 984,${(170+sEnd)/2} 1180,${sEnd}`;
-    const cPts = `0,180 196,${(180+cEnd*5)/6} 392,${(180+cEnd*4)/5} 590,${(180+cEnd*3)/4} 786,${(180+cEnd*2)/3} 984,${(180+cEnd)/2} 1180,${cEnd}`;
-    svg.setAttribute('aria-label', `${data.isLive ? 'LIVE 快照' : '设计预演'}：教师 ${data.teacherTotal}，学生 ${data.studentTotal}，师生耦合 +${couplingIndex.toFixed(1)}`);
+    const signedBar = (value, y, color) => {
+      const safe = typeof value === 'number' && Number.isFinite(value) ? Math.max(-10, Math.min(10, value)) : 0;
+      const width = Math.abs(safe) / 10 * 400;
+      const x = safe >= 0 ? 660 : 660 - width;
+      return `<rect x="${x.toFixed(1)}" y="${y}" width="${width.toFixed(1)}" height="18" rx="4" fill="${color}"/>`;
+    };
+    const associationWidth = couplingAvailable ? Math.max(0, Math.min(4, summary.mean)) / 4 * 800 : 0;
+    svg.setAttribute('viewBox', '0 0 1180 220');
+    svg.setAttribute('aria-label', `${data.isLive ? '真实前后测' : '虚拟演练推演'}快照：教师平均分差 ${data.teacherTotal}，学生平均分差 ${data.studentTotal}，环节关联${couplingAvailable ? `${associationText}，覆盖 ${summary.covered}/${summary.total}` : '未计算'}`);
     svg.innerHTML = `
-      <title>${data.isLive ? 'LIVE 数据快照' : '师生双向能力 · 预演轨迹'}</title>
-      <g stroke="rgba(255,255,255,0.08)" stroke-dasharray="2,4">
-        <line x1="0" y1="50" x2="1180" y2="50"/><line x1="0" y1="100" x2="1180" y2="100"/><line x1="0" y1="150" x2="1180" y2="150"/>
+      <title>${data.isLive ? '真实课堂前后测快照' : '虚拟演练推演快照'}</title>
+      <g fill="var(--ivory)" opacity=".45" font-family="ui-monospace" font-size="12">
+        <text x="260" y="18">−10</text><text x="654" y="18">0</text><text x="1045" y="18">+10</text>
+        <text x="20" y="51">教师平均分差</text><text x="20" y="111">学生平均分差</text><text x="20" y="171">关联均值 / 4</text>
       </g>
-      <polyline points="${tPts}" fill="none" stroke="#e8a070" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
-      <polyline points="${sPts}" fill="none" stroke="#94b0a2" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
-      <polyline points="${cPts}" fill="none" stroke="#fffdf7" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
-      <g fill="rgba(255,253,247,0.4)" font-family="ui-monospace" font-size="12">
-        <text x="0" y="193">start</text><text x="540" y="193">${escHtml(modeLabel(mode))}</text><text x="1120" y="193">now</text>
+      <g fill="var(--ivory)" opacity=".08">
+        <rect x="260" y="36" width="800" height="18" rx="4"/><rect x="260" y="96" width="800" height="18" rx="4"/><rect x="260" y="156" width="800" height="18" rx="4"/>
       </g>
-      ${data.isLive ? `<text x="738" y="24" font-family="ui-monospace" font-size="12" fill="#f1cdb9" letter-spacing="0.05em">LIVE · ${escHtml(data.label || '真实课堂数据')}</text>` : ''}
-      <circle cx="1180" cy="${cEnd}" r="5" fill="#fffdf7"/><circle cx="1180" cy="${cEnd}" r="11" fill="#fffdf7" fill-opacity="0.18"/>
+      <line x1="660" y1="30" x2="660" y2="120" stroke="var(--ivory)" opacity=".42" stroke-width="1"/>
+      ${signedBar(data.teacherMeanDelta, 36, 'var(--amber-soft)')}
+      ${signedBar(data.studentMeanDelta, 96, 'var(--sage)')}
+      ${couplingAvailable ? `<rect x="260" y="156" width="${associationWidth.toFixed(1)}" height="18" rx="4" fill="var(--ivory)"/>` : ''}
+      <g fill="var(--ivory)" font-family="ui-monospace" font-size="14" font-weight="700">
+        <text x="1080" y="51">${escHtml(data.teacherTotal)}</text><text x="1080" y="111">${escHtml(data.studentTotal)}</text><text x="1080" y="171">${escHtml(associationText)}</text>
+      </g>
+      <text x="260" y="207" font-family="ui-monospace" font-size="12" fill="var(--ivory)" opacity=".45">${escHtml(data.measurementStatus?.label || '')} · ${escHtml(modeLabel(mode))}${couplingAvailable ? ` · 关联覆盖 ${summary.covered}/${summary.total}` : ''}</text>
     `;
   }
 
@@ -672,8 +737,8 @@
     // 用 active getter 取数（LIVE 覆盖 SAMPLE），而不是直接读 SAMPLE
     const teacherDeltas = EF.getActiveTeacherDeltas?.(mode) || EF.SAMPLE_TEACHER_DELTAS[mode] || {};
     const studentDeltas = EF.getActiveStudentDeltas?.(mode) || EF.SAMPLE_STUDENT_DELTAS[mode] || {};
-    // COUPLING 单一信源：用 render() 传入的 active 数组（LIVE 数据优先，样本契约兜底），
-    // 与 hot 标记、bridge、KEEP/FIX 卡保持同源。
+    // COUPLING 单一信源：用 render() 传入的契约结果，与 hot 标记、bridge、
+    // KEEP/FIX 卡保持同源；LIVE 缺评价指标时该数组仅含 null。
     const couplingArr = couplingArrIn || data.coupling || [];
 
     // KEEP — 师生共在 (co) 池
@@ -685,22 +750,22 @@
       const sTop = topDimContribution(studentDeltas, EF.STUDENT_MATRIX[env.id], EF.STUDENT_DIMS);
       setSlot(keepRoot, 'num', env.num);
       setSlot(keepRoot, 'name', env.short);
-      const tBit = tTop ? `教师 ${tTop.id} ↑${tTop.delta.toFixed(1)}` : null;
-      const sBit = sTop ? `学生 ${sTop.id} ↑${sTop.delta.toFixed(1)}` : null;
-      const desc = [tBit, sBit].filter(Boolean).join(' · ') + ` · COUPLING ${couplingArr[keepIdx].toFixed(1)} 师生共在`;
+      const tBit = tTop ? `教师 ${tTop.id} Δ${fmtDelta(tTop.delta)}` : null;
+      const sBit = sTop ? `学生 ${sTop.id} Δ${fmtDelta(sTop.delta)}` : null;
+      const desc = `同期观测：${[tBit, sBit].filter(Boolean).join(' · ')}；评价指标 COUPLING ${couplingArr[keepIdx].toFixed(1)}`;
       setSlot(keepRoot, 'desc', desc);
-      const sp = buildSparkPoints(keepIdx, couplingArr, 'up');
-      setSpark(keepRoot, sp.linePts, sp.areaPath, `7 周趋势：${env.num} ${env.short} · 第 7 周 COUPLING ${couplingArr[keepIdx].toFixed(1)} ↑ 持续上扬（师生共在 · 数字仅作提示）`);
+      const sp = buildSnapshotPoints(keepIdx, couplingArr);
+      setSpark(keepRoot, sp.linePts, sp.areaPath, `当前快照：${env.num} ${env.short} · 环节关联 ${couplingArr[keepIdx].toFixed(1)} / 4（无连续时间序列）`);
       const chips = [];
       if (tTop) chips.push(`<span class="basis-chip">${tTop.short} <small>${tTop.id} 教师维度</small></span>`);
       if (sTop) chips.push(`<span class="basis-chip">${sTop.short} <small>${sTop.id} 学生维度</small></span>`);
-      chips.push(`<span class="basis-chip is-coupling">COUPLING ${couplingArr[keepIdx].toFixed(1)} <small>师生共在 · ${data.label || mode}</small></span>`);
+      chips.push(`<span class="basis-chip is-coupling">COUPLING ${couplingArr[keepIdx].toFixed(1)} <small>评价指标计算 · ${data.label || mode}</small></span>`);
       // 副信号：教师独立改动里最值得保留的（solo 池 teacher delta top）
       const soloIdx = pickSoloDesignBest(data.teacher, true);
       if (soloIdx != null) {
         const soloEnv = envs[soloIdx];
         const soloVal = data.teacher[soloIdx];
-        chips.push(`<span class="basis-chip is-solo-aside">同期教师独立 · <b>${soloEnv.num} ${soloEnv.short}</b> ↑${soloVal.toFixed(1)} <small>延迟相关</small></span>`);
+        chips.push(`<span class="basis-chip is-solo-aside">同期教师独立 · <b>${soloEnv.num} ${soloEnv.short}</b> Δ${fmtDelta(soloVal)} <small>延迟相关</small></span>`);
       }
       setChips(keepRoot, chips);
     } else if (keepRoot) {
@@ -708,6 +773,7 @@
       setSlot(keepRoot, 'name', '暂无可保留项');
       setSlot(keepRoot, 'desc', '当前数据未形成正向师生共在耦合。');
       setChips(keepRoot, ['<span class="basis-chip">先补齐课堂证据 <small>LIVE 数据</small></span>']);
+      setSpark(keepRoot, '0,30 200,30', 'M0,30 L200,30 L200,36 L0,36 Z', '当前未计算环节关联');
     }
 
     // FIX — 师生共在 (co) 池
@@ -720,24 +786,24 @@
       setSlot(fixRoot, 'num', env.num);
       setSlot(fixRoot, 'name', env.short);
       const issueBits = [];
-      if (tTop) issueBits.push(`${tTop.short}虽 ↑${tTop.delta.toFixed(1)}`);
-      if (sTop) issueBits.push(`${sTop.short} ${sTop.id} 增幅可能被遮蔽`);
-      issueBits.push(`COUPLING ${couplingArr[fixIdx].toFixed(1)} 本轮最强但量规存在歧义`);
+      if (tTop) issueBits.push(`${tTop.short}分差 ${fmtDelta(tTop.delta)}`);
+      if (sTop) issueBits.push(`${sTop.short} ${sTop.id} 分差可能被遮蔽`);
+      issueBits.push(`COUPLING ${couplingArr[fixIdx].toFixed(1)} 本轮最强但评价标准存在歧义`);
       setSlot(fixRoot, 'desc', issueBits.join(' · '));
-      const sp = buildSparkPoints(fixIdx, couplingArr, 'down');
-      setSpark(fixRoot, sp.linePts, sp.areaPath, `7 周趋势：${env.num} ${env.short} · 第 7 周 COUPLING ${couplingArr[fixIdx].toFixed(1)} 量规歧义未解（师生共在 · 数字仅作提示）`);
+      const sp = buildSnapshotPoints(fixIdx, couplingArr);
+      setSpark(fixRoot, sp.linePts, sp.areaPath, `当前快照：${env.num} ${env.short} · 环节关联 ${couplingArr[fixIdx].toFixed(1)} / 4，局部评价标准歧义未解`);
       const chips = [];
       if (tTop) chips.push(`<span class="basis-chip">${tTop.short} <small>${tTop.id} 教师维度</small></span>`);
       if (sTop) chips.push(`<span class="basis-chip">${sTop.short} <small>${sTop.id} 学生维度</small></span>`);
-      chips.push(`<span class="basis-chip is-coupling">COUPLING ${couplingArr[fixIdx].toFixed(1)} <small>师生共在 · 量规歧义</small></span>`);
-      // 副信号：教师独立带 FIX 信号的环节（如 E08 复盘量规）
+      chips.push(`<span class="basis-chip is-coupling">COUPLING ${couplingArr[fixIdx].toFixed(1)} <small>评价指标计算 · 歧义待修</small></span>`);
+      // 副信号：教师独立带 FIX 信号的环节（如 E08 复盘评价标准）
       const soloFixIdx = pickSoloFixBest(data.teacher);
       if (soloFixIdx != null) {
         const sEnv = envs[soloFixIdx];
         const sVal = data.teacher[soloFixIdx];
-        chips.push(`<span class="basis-chip is-solo-aside">同期教师独立 · <b>${sEnv.num} ${sEnv.short}</b> ↑${sVal.toFixed(1)} <small>延迟相关 · FIX</small></span>`);
+        chips.push(`<span class="basis-chip is-solo-aside">同期教师独立 · <b>${sEnv.num} ${sEnv.short}</b> Δ${fmtDelta(sVal)} <small>延迟相关 · FIX</small></span>`);
       } else {
-        chips.push(`<span class="basis-chip">量规歧义建议修正 <small>Biggs 1996</small></span>`);
+        chips.push(`<span class="basis-chip">评价标准歧义建议修正 <small>Biggs 1996</small></span>`);
       }
       setChips(fixRoot, chips);
     } else if (fixRoot) {
@@ -745,6 +811,7 @@
       setSlot(fixRoot, 'name', '暂无高风险项');
       setSlot(fixRoot, 'desc', '当前数据未检测到需要优先修正的师生共在耦合。');
       setChips(fixRoot, ['<span class="basis-chip">持续观察 <small>无 FIX 信号</small></span>']);
+      setSpark(fixRoot, '0,30 200,30', 'M0,30 L200,30 L200,36 L0,36 Z', '当前未计算环节关联');
     }
 
     // NEXT — 由 .queue-item 实际数量驱动；desc 列出 KEEP/FIX 涉及的 env
@@ -829,11 +896,16 @@
       const dim = [...EF.TEACHER_DIMS, ...EF.STUDENT_DIMS].find(d => d.id === dimId);
       return `<li><b>${escHtml(dimId)}</b>${escHtml(dim ? dim.short : dimId)} ← ${escHtml(sources.join(' · '))}</li>`;
     }).join('');
+    const crosswalk = EF.RUBRIC_CROSSWALK;
+    const crosswalkTypeLabel = { direct: '可重编码', supporting: '仅旁证', 'task-only': '仅任务级' };
+    const crosswalkRows = (crosswalk?.mappings || []).map(row =>
+      `<tr><td>${escHtml(row.source)}</td><td>${escHtml(row.target || '不进入能力分')}</td><td>${escHtml(crosswalkTypeLabel[row.mappingType] || row.mappingType)}</td><td>${escHtml(row.note)}</td></tr>`
+    ).join('');
     host.innerHTML = `
       <div class="fp-section">
         <h5>§ 1 量程 · SCALE<small>${escHtml(EF.SCALE.name)}</small></h5>
         <p>每维度 <code>0–${EF.SCALE.perDimension.max}</code> 分；维度 Δ 如 <b>+5.7</b> = 该维度从基线到当前涨了 5.7 分。环节 Δ 如 <b>+4.7</b> = 该环节涉及的多维加权平均（见 §4）。</p>
-        <p style="margin-top:6px;"><b>两个 headline 百分比的口径（注意与明细的关系）</b>：<br>· <b>教师 +X%</b> = 教师 <b>8 维 Δ 等权平均</b> / 满分 × 100%（≈ 9 环节柱的均值，但**不是**逐柱加权值）；<br>· <b>学生 +X%</b> = 学生 <b>7 维净增</b>均值 / 满分 × 100%（≈ <b>E4 综合后测</b>相对 E0 的净增；**不是** 5 个节点数字的简单相加——各节点测不同维度，见 §3B）。<br>两者都是<b>占满分百分点</b>，<b>非</b>"比之前提升 X%"的相对值。</p>
+        <p style="margin-top:6px;"><b>总览口径</b>：教师与学生都显示<b>已测维度的平均绝对分差 / 10</b>；缺失维度不按 0 计入分母，负向变化保留负号。分差既不是相对提升百分比，也不能直接换算为标准化效应量。</p>
         ${refsHtml(EF.SCALE.refs)}
       </div>
 
@@ -847,24 +919,32 @@
 
       <div class="fp-section is-full">
         <h5>§ 6 COUPLING 公式 · 双时间轴版</h5>
-        <p><span class="fp-formula">COUPLING(env<sub>i</sub> → event<sub>j</sub>) = √(T<sub>Δ</sub> × Event<sub>Δ</sub>) × pathStrength(i,j) × decay(Δt) × syncCoef</span></p>
-        <p>不再是"同列同步耦合"，而是 <b>N 条 COUPLING 连线</b>：每个教师环节通过 <code>ENV_TO_EVENT</code> 表里的关联路径连到一个学生节点（主路径）+ 可选次路径。<b>pathStrength</b> = 环节-节点的语义距离先验；<b>decay</b> = 教师行为到学生证据出现的时间衰减。例：教师 03 知识设计 → 学生 E1 课中表现（主）+ E2 评价画像（次）。</p>
-        <p style="margin-top:6px;">量规侧（X1-X5）的等价计算：<span class="fp-formula">COUPLING(env) = mean(Xi) × evidenceCoef × x1GlobalCoef</span>，X1 全局折扣（目标—任务—评价一致性，0→0.50 / 4→1.00）。阈值 ≥ <b>1.5</b> 视为显著耦合（连线加粗）。</p>
+        <p><span class="fp-formula">COUPLING(env) = mean(applicable X2–X5 rubric) × evidenceCoef × x1GlobalCoef</span></p>
+        <p>样本与 LIVE 使用同一份 <code>evaluation-contract.js</code>。LIVE 必须导入绝对 <code>baseline / current</code>，系统再派生 Δ；缺少学生节点观测时显示“未测”，不套用样本进度曲线。必须同时提供三时段 <code>couplingRubric</code> 才计算环节关联。</p>
+        <p style="margin-top:6px;"><b>T2 与 X1 的双重角色已显式区分</b>：T2 是教师能力维度，进入教师 lane；X1 是目标—任务—评价一致性的全局可信度折扣，只进入 COUPLING，且不在抽屉逐环节重复计分。两者同时偏低会分别影响能力画像和耦合置信度，这是有意的双层呈现，不是同一公式内的重复扣分。</p>
+        <p style="margin-top:6px;">X1 映射为 0→0.50 / 1→0.70 / 2→0.85 / 3→0.95 / 4→1.00；单环节关联 ≥ <b>1.5</b> 仅标记“建议优先验证”，不宣称因果。跨环节总览报告<b>已测环节均值 + 覆盖率</b>，不再求和。</p>
         ${refsHtml(EF.COUPLING_REFS)}
       </div>
 
       <div class="fp-section is-full">
         <h5>§ 4 教学环节 × 维度 加权矩阵<small>列 = 9 个教学环节，行 = 教师 8 维 / 学生 7 维</small></h5>
         <p><b>权重</b>：1.0 = 主驱动维度（×）/ 0.4 = 次要参与维度（·）/ 0 = 该环节不评估该维度。</p>
-        <p style="margin-top:6px;"><b>读法举例</b>：教师在 04 案例与证据 的得分 = (1.0 × T3 情境转译 Δ + 0.4 × T4 问题链设计 Δ) / 1.4，归一化到 10 分制。学生 7 维则按 5 节点的实测分数聚合（不再按环节切片）。</p>
+        <p style="margin-top:6px;"><b>读法举例</b>：教师在 04 真实性学习情境与资源设计 的得分 = (1.0 × T3 情境转译 Δ + 0.4 × T4 问题链设计 Δ) / 1.4，归一化到 10 分制。学生 7 维则按 5 节点的实测分数聚合（不再按环节切片）。</p>
         <p style="margin-top:6px;font-size: var(--fs-2xs);color:var(--mute);"><b>教师 8 维</b>：${tDimsTxt}</p>
         <p style="font-size: var(--fs-2xs);color:var(--mute);"><b>学生 7 维</b>：${sDimsTxt}</p>
         ${refsHtml(EF.MATRIX_REFS)}
       </div>
 
       <div class="fp-section is-full">
-        <h5>§ 8 数据来源 · DATA SOURCE<small>12 维各自的原始信号</small></h5>
+        <h5>§ 8 数据来源 · DATA SOURCE<small>15 维各自的原始信号</small></h5>
+        <p style="margin-bottom:8px;"><b>编码边界</b>：S3 与 S6 可来自同一段讨论录音，但必须分别使用“利益相关者实体/关系”和“论证结构/轮次质量”两张独立编码表，禁止一次编码两次计分。AI 采纳率、退回次数已移出 T8，只作为工具使用过程指标。</p>
         <ul class="fp-sources">${sourcesHtml}</ul>
+      </div>
+
+      <div class="fp-section is-full">
+        <h5>§ 8B 三套评分体系 CROSSWALK<small>${escHtml(crosswalk?.version || '未定义')}</small></h5>
+        <p>${escHtml(crosswalk?.rule || '')}</p>
+        <div style="overflow-x:auto;margin-top:8px;"><table class="fp-crosswalk"><thead><tr><th>来源指标</th><th>目标维度</th><th>关系</th><th>使用边界</th></tr></thead><tbody>${crosswalkRows}</tbody></table></div>
       </div>
 
       <div class="fp-section is-full">
@@ -877,6 +957,108 @@
   }
 
   /* ---------- Environment Evidence Drawer ---------- */
+  function hydrateEvidenceText(text, data, couplingValue) {
+    const teacherDims = data?.raw?.teacherDims || {};
+    const studentDims = data?.raw?.studentDims || {};
+    const baselineScores = data?.raw?.eventScores?.EV0 || {};
+    const numericBaseline = Object.entries(baselineScores)
+      .filter(([key, value]) => /^S\d+$/.test(key) && typeof value === 'number')
+      .map(([, value]) => value);
+    const baselineMean = numericBaseline.length
+      ? numericBaseline.reduce((a, b) => a + b, 0) / numericBaseline.length
+      : null;
+    const dimToken = (id, source) => `${id}↑${Number(source[id] ?? 0).toFixed(1)}`;
+    const rankedTeacher = Object.entries(teacherDims)
+      .filter(([, value]) => typeof value === 'number')
+      .sort((a, b) => b[1] - a[1]);
+    const t7Rank = Math.max(0, rankedTeacher.findIndex(([id]) => id === 'T7')) + 1;
+    const t7Max = rankedTeacher[0];
+    const replacements = {
+      '{{BASELINE_MEAN}}': baselineMean == null ? '—' : baselineMean.toFixed(1),
+      '{{COUPLING}}': couplingValue == null
+        ? '<b>COUPLING —（未配置或缺少局部评价指标）</b>'
+        : `<b>COUPLING ${Number(couplingValue).toFixed(1)}</b> · 证据等级 <b>${escHtml(data?.evidenceLevel || '—')}</b>`,
+      '{{T6}}': dimToken('T6', teacherDims),
+      '{{T7}}': dimToken('T7', teacherDims),
+      '{{S2}}': dimToken('S2', studentDims),
+      '{{S6}}': dimToken('S6', studentDims),
+      '{{T7_RANK}}': t7Max
+        ? `${dimToken('T7', teacherDims)}（本时段教师维度第 ${t7Rank}；最高为 ${t7Max[0]}↑${Number(t7Max[1]).toFixed(1)}）`
+        : 'T7 证据反馈暂无读数',
+    };
+    return Object.entries(replacements).reduce(
+      (out, [token, value]) => out.split(token).join(value),
+      String(text ?? '')
+    );
+  }
+
+  function scoreRangeLabel(band) {
+    const level = EF?.SCALE?.levels?.find(item => item.code === band);
+    if (!level) return '';
+    const [min, max] = level.range;
+    return `${min} ≤ 分数 ${level.upperInclusive ? '≤' : '<'} ${max}`;
+  }
+
+  function renderDimensionRubric(dimId, weight, role) {
+    const dims = role === 'teacher' ? EF.TEACHER_DIMS : EF.STUDENT_DIMS;
+    const dim = dims.find(item => item.id === dimId);
+    if (!dim) return '';
+    const roleLabel = role === 'teacher' ? '教师' : '学生';
+    const weightLabel = weight >= 1 ? '主驱动' : '次要参与';
+    const deferredReason = EF.DIM_RUBRICS_DEFERRED?.[dimId];
+
+    if (deferredReason) {
+      return `
+        <details class="ed-rubric is-${role} is-deferred">
+          <summary class="ed-rubric-summary">
+            <span class="ed-rubric-title"><b>${escHtml(dimId)}</b>${escHtml(dim.name)}<small>${roleLabel} · ${weightLabel}</small></span>
+            <span class="ed-rubric-status">暂缓立锚 · 查看原因</span>
+            <span class="ed-rubric-caret" aria-hidden="true">⌄</span>
+          </summary>
+          <div class="ed-rubric-body">
+            <p class="ed-rubric-deferred">${escHtml(deferredReason)}</p>
+          </div>
+        </details>
+      `;
+    }
+
+    const rubric = EF.DIM_RUBRICS?.[dimId];
+    if (!rubric) return '';
+    const isProvisional = rubric.status === 'provisional';
+    const statusLabel = isProvisional ? '暂行锚点 · 混合构念待拆' : '草案 · 未经 κ 检验';
+    const levelsHtml = rubric.levels.map(level => `
+      <div class="ed-rubric-level">
+        <span class="ed-rubric-band">${escHtml(level.band)}<small>${escHtml(scoreRangeLabel(level.band))}</small></span>
+        <span class="ed-rubric-anchor"><b>${escHtml(level.label)}</b>${escHtml(level.desc)}</span>
+      </div>
+    `).join('');
+
+    return `
+      <details class="ed-rubric is-${role}${isProvisional ? ' is-provisional' : ''}">
+        <summary class="ed-rubric-summary">
+          <span class="ed-rubric-title"><b>${escHtml(dimId)}</b>${escHtml(dim.name)}<small>${roleLabel} · ${weightLabel}</small></span>
+          <span class="ed-rubric-status">${statusLabel} · 展开 L0–L4</span>
+          <span class="ed-rubric-caret" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="ed-rubric-body">
+          <p class="ed-rubric-signals"><b>可观察信号</b>${escHtml(rubric.signals)}</p>
+          ${rubric.codingNote ? `<p class="ed-rubric-coding"><b>编码边界</b>${escHtml(rubric.codingNote)}</p>` : ''}
+          <div class="ed-rubric-levels">${levelsHtml}</div>
+        </div>
+      </details>
+    `;
+  }
+
+  function renderEnvRubrics(envId) {
+    const teacher = Object.entries(EF.TEACHER_MATRIX?.[envId] || {})
+      .filter(([, weight]) => weight > 0)
+      .map(([dimId, weight]) => renderDimensionRubric(dimId, weight, 'teacher'));
+    const student = Object.entries(EF.STUDENT_MATRIX?.[envId] || {})
+      .filter(([, weight]) => weight > 0)
+      .map(([dimId, weight]) => renderDimensionRubric(dimId, weight, 'student'));
+    return [...teacher, ...student].filter(Boolean).join('');
+  }
+
   // a11y：记录打开抽屉前的触发元素，关闭时把焦点还回去
   let envDrawerTrigger = null;
   // 点击 atlas 任意列元素 → 右侧滑出该环节的证据抽屉
@@ -913,8 +1095,9 @@
       titleEl.innerHTML = `<span class="num">${env.num}</span>${env.name}`;
     }
     if (couplingEl) {
-      const couplingTxt = cVal == null ? '— · 无显著耦合'
-        : (cVal >= 1.5 ? `★ COUPLING ${cVal} · 显著耦合` : `COUPLING ${cVal}`);
+      const couplingTxt = cVal == null
+        ? (data?.couplingStatus?.available === false ? 'COUPLING — · 未计算' : 'COUPLING — · 本环节无局部评价指标')
+        : (cVal >= 1.5 ? `★ COUPLING ${cVal} · 建议优先验证` : `COUPLING ${cVal}`);
       couplingEl.textContent = couplingTxt;
     }
 
@@ -941,35 +1124,41 @@
       actionEl.setAttribute('href', `./practice-detail.html#stage-iii?${params}`);
     }
     if (bodyEl) {
+      const hydrate = (text) => hydrateEvidenceText(text, data, cVal);
       const formatBullets = (arr) => arr && arr.length
-        ? `<ul>${arr.map(t => `<li>${t}</li>`).join('')}</ul>`
+        ? `<ul>${arr.map(t => `<li>${hydrate(t)}</li>`).join('')}</ul>`
         : '<p style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--mute);">（暂无）</p>';
       const writebackHtml = evidence?.writeback?.length
         ? evidence.writeback.map(w =>
             `<div class="ed-writeback-item"><span class="wb-tag">${w.env}</span><span>${w.note}</span></div>`
           ).join('')
         : '<p style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--mute);">（暂无）</p>';
+      const rubricPanelHtml = renderEnvRubrics(env.id);
       const dataSnippet = `
         <div class="ed-section">
           <h4>本环节数据 · ${activeMode === 'cumulative' ? '7 周累计' : activeMode === 'weekly' ? '第 7 周' : '本节课'}</h4>
           <div style="display:flex;gap:18px;font-family:var(--mono);font-size: var(--fs-2xs);color:var(--ink-soft);">
             <span>教师 <b style="color:var(--amber-deep);font-family:var(--serif-en);font-style:italic;">${tVal != null ? '+' + tVal : '—'}</b></span>
             <span>学生 <b style="color:var(--sage);font-family:var(--serif-en);font-style:italic;">${sVal != null ? '+' + sVal : '—'}</b></span>
-            <span style="margin-left:auto;color:var(--mute);">证据等级 · <b style="color:var(--amber-deep);">${EF.CURRENT_EVIDENCE_LEVEL}</b></span>
+            <span style="margin-left:auto;color:var(--mute);">证据等级 · <b style="color:var(--amber-deep);">${escHtml(data?.evidenceLevel || '—')}</b></span>
           </div>
         </div>
       `;
-      // X1-X5 五维耦合分解
-      const xVals = EF.ENV_COUPLING_X?.[env.id];
-      const xMax = 3; // 0-3 量程
-      const xBreakdownHtml = xVals
-        ? EF.COUPLING_DIMS.map(dim => {
-            const v = xVals[dim.id] ?? 0;
+      // X1 是全局系数；抽屉只展示该环节实际适用的 X2-X5 局部评价指标。
+      const contract = window.PharmacoPilotEvaluationContract;
+      const localDims = contract?.STATION_COUPLING_DIMS?.[env.id] || null;
+      const rubric = data?.couplingRubric;
+      const xVals = rubric?.perEnv?.[env.id] || null;
+      const xMax = 4;
+      const xBreakdownHtml = localDims?.length && xVals
+        ? localDims.map(dimId => {
+            const dim = EF.COUPLING_DIMS.find(item => item.id === dimId) || { id: dimId, short: dimId };
+            const v = xVals[dimId] ?? 0;
             const pct = Math.min(100, (v / xMax) * 100).toFixed(1);
             const isStrong = v >= 1.5;
             return `
               <div class="ed-x-row${isStrong ? ' is-strong' : ''}${v < 0.1 ? ' is-zero' : ''}">
-                <span class="ed-x-id">${dim.id}</span>
+                <span class="ed-x-id">${dimId}</span>
                 <span class="ed-x-name">${dim.short}</span>
                 <span class="ed-x-bar"><i style="width:${pct}%"></i></span>
                 <span class="ed-x-val">${v.toFixed(1)}${isStrong ? ' ★' : ''}</span>
@@ -980,6 +1169,11 @@
 
       bodyEl.innerHTML = `
         ${dataSnippet}
+        <div class="ed-section is-rubric">
+          <h4>评分锚点 · SCORING ANCHORS</h4>
+          <p class="ed-rubric-intro">仅列出本环节加权矩阵涉及的维度，默认收起。锚点用于绝对能力评分，不能用页面上的增量 Δ 直接反推当前档位。</p>
+          <div class="ed-rubric-list">${rubricPanelHtml}</div>
+        </div>
         <div class="ed-section is-teacher">
           <h4>教师证据 · TEACHER</h4>
           ${formatBullets(evidence?.teacher)}
@@ -991,11 +1185,11 @@
         <div class="ed-section is-coupling">
           <h4>耦合解释 · COUPLING</h4>
           ${evidence?.coupling
-            ? `<div class="ed-coupling-text">${evidence.coupling}</div>`
+            ? `<div class="ed-coupling-text">${hydrate(evidence.coupling)}</div>`
             : '<p style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--mute);">（暂无）</p>'}
           ${xBreakdownHtml ? `
             <div class="ed-x-breakdown">
-              <div class="ed-x-head">5 维耦合分解 · 0–3 量程<small> · ★ ≥ 1.5 显著</small></div>
+              <div class="ed-x-head">局部耦合评价指标 · 0–4<small> · X1=${Number(rubric.x1).toFixed(1)} 为全局系数，不作为本环节局部行重复展示</small></div>
               ${xBreakdownHtml}
             </div>
           ` : ''}
@@ -1014,15 +1208,15 @@
           <div class="ed-academic-body">
             <div class="ed-academic-block is-obs">
               <h5>① 观测摘要 · OBSERVATION</h5>
-              <p>${evidence.academic.observation}</p>
+              <p>${hydrate(evidence.academic.observation)}</p>
             </div>
             <div class="ed-academic-block is-hypo">
               <h5>② 机制假设 · HYPOTHESIS</h5>
-              <p>${evidence.academic.hypothesis}</p>
+              <p>${hydrate(evidence.academic.hypothesis)}</p>
             </div>
             <div class="ed-academic-block is-rival">
               <h5>③ 竞争解释 · RIVAL EXPLANATIONS</h5>
-              <p>${evidence.academic.rival}</p>
+              <p>${hydrate(evidence.academic.rival)}</p>
             </div>
           </div>
         </details>
@@ -1188,17 +1382,120 @@
   function attachAbChipTooltips() {
     if (!EF) return;
     const allDims = [...EF.TEACHER_DIMS, ...EF.STUDENT_DIMS];
-    document.querySelectorAll('.ability-row .ab-chip.is-dim-tag').forEach(chip => {
-      // chip 内文形如 "T1 学情解释"，取 T1 / S2 作为 id 查 framework
-      const text = chip.textContent.trim();
-      const match = text.match(/^([TS]\d+)\s+(.+)$/);
-      if (!match) return;
-      const dim = allDims.find(d => d.id === match[1]);
+    document.querySelectorAll('.ability-row .ab-chip.is-dim-tag[data-dim]').forEach(chip => {
+      const dim = allDims.find(d => d.id === chip.dataset.dim);
       if (!dim) return;
-      chip.title = `${dim.id} · ${dim.name}`;
+      chip.title = `${dim.id} · ${dim.name} — 点击查看评分锚点`;
       // 加 aria-label 给屏幕阅读器
-      chip.setAttribute('aria-label', `${dim.id} ${dim.short}（${dim.name}）`);
+      chip.setAttribute('aria-label', `${dim.id} ${dim.short}（${dim.name}），点击查看评分锚点`);
     });
+  }
+
+  /* ---------- 维度评分锚点 popover（framework §8C · 点击 chip 弹出） ---------- */
+  const DIM_STATUS_META = {
+    draft:       { label: '草案 · 未经信度检验', cls: 'is-draft' },
+    provisional: { label: '临时 · 构念待拆分',   cls: 'is-provisional' },
+  };
+  let dimPopoverTrigger = null;
+
+  function buildDimPopoverContent(dimId) {
+    const dim = [...(EF.TEACHER_DIMS || []), ...(EF.STUDENT_DIMS || [])].find(d => d.id === dimId);
+    if (!dim) return '';
+    const rubric = EF.DIM_RUBRICS?.[dimId];
+    const deferredReason = EF.DIM_RUBRICS_DEFERRED?.[dimId];
+    const kindCls = dimId.startsWith('T') ? 'is-teacher' : 'is-student';
+    const kind = dimId.startsWith('T') ? '教师维度' : '学生维度';
+    const status = rubric
+      ? (DIM_STATUS_META[rubric.status] || DIM_STATUS_META.draft)
+      : { label: '暂缓立锚', cls: 'is-deferred' };
+    const signals = rubric?.signals || (EF.DATA_SOURCES?.[dimId] || []).join(' · ');
+    const ranges = (EF.SCALE?.levels || []).map(l => l.range.join('–'));
+    const levelsHtml = rubric
+      ? `<ol class="dp-levels">
+          ${rubric.levels.map((lv, i) => `
+            <li>
+              <span class="dp-band">${lv.band}</span>
+              <span class="dp-range">${ranges[i] || ''}</span>
+              <b>${escHtml(lv.label)}</b>
+              <p>${escHtml(lv.desc)}</p>
+            </li>`).join('')}
+        </ol>`
+      : `<p class="dp-deferred">${escHtml(deferredReason || '该维度暂未建立评分锚点。')}</p>`;
+    return `
+      <div class="dp-head">
+        <span class="dp-id ${kindCls}">${dim.id}</span>
+        <h3 id="dimPopoverTitle">${escHtml(dim.name)}</h3>
+        <button type="button" class="dp-close" id="dimPopoverClose" aria-label="关闭维度说明">×</button>
+      </div>
+      <div class="dp-sub">${kind} · 评分锚点（0–10）<span class="dp-status ${status.cls}">${status.label}</span></div>
+      ${signals ? `<p class="dp-signals"><b>信号</b>${escHtml(signals)}</p>` : ''}
+      ${rubric?.codingNote ? `<p class="dp-note">${escHtml(rubric.codingNote)}</p>` : ''}
+      ${levelsHtml}
+      ${(dim.refs || []).length ? `<p class="dp-refs">参考：${dim.refs.map(escHtml).join(' · ')}</p>` : ''}
+    `;
+  }
+
+  function openDimPopover(dimId, chip) {
+    const pop = document.getElementById('dimPopover');
+    if (!pop || !EF) return;
+    const html = buildDimPopoverContent(dimId);
+    if (!html) return;
+    dimPopoverTrigger = chip;
+    pop.innerHTML = html;
+    pop.hidden = false;
+    document.querySelectorAll('.ab-chip.is-dim-tag[aria-expanded="true"]')
+      .forEach(c => c.setAttribute('aria-expanded', 'false'));
+    chip.setAttribute('aria-expanded', 'true');
+    // 定位：优先 chip 正下方、水平居中于 chip，贴近视口边缘；下方放不下则翻到上方
+    const rect = chip.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth;
+    const vh = document.documentElement.clientHeight;
+    const w = pop.offsetWidth;
+    const left = Math.min(Math.max(16, rect.left + rect.width / 2 - w / 2), vw - w - 16);
+    const h = pop.offsetHeight;
+    let top = rect.bottom + 10;
+    if (top + h > vh - 16) top = Math.max(16, rect.top - h - 10);
+    pop.style.left = `${left}px`;
+    pop.style.top = `${top}px`;
+    const closeBtn = pop.querySelector('#dimPopoverClose');
+    closeBtn?.addEventListener('click', closeDimPopover);
+    closeBtn?.focus();
+  }
+
+  function closeDimPopover() {
+    const pop = document.getElementById('dimPopover');
+    if (!pop || pop.hidden) return;
+    pop.hidden = true;
+    pop.innerHTML = '';
+    dimPopoverTrigger?.setAttribute('aria-expanded', 'false');
+    const trigger = dimPopoverTrigger;
+    dimPopoverTrigger = null;
+    // a11y：焦点还给打开 popover 的 chip
+    if (trigger && document.contains(trigger)) trigger.focus();
+  }
+
+  function bindDimRubricPopovers() {
+    if (!EF) return;
+    document.querySelectorAll('.ability-row .ab-chip.is-dim-tag[data-dim]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const pop = document.getElementById('dimPopover');
+        const sameOpen = pop && !pop.hidden && dimPopoverTrigger === chip;
+        if (sameOpen) closeDimPopover();
+        else openDimPopover(chip.dataset.dim, chip);
+      });
+    });
+    document.addEventListener('click', (e) => {
+      const pop = document.getElementById('dimPopover');
+      if (!pop || pop.hidden) return;
+      if (pop.contains(e.target)) return;
+      if (e.target.closest('.ab-chip.is-dim-tag[data-dim]')) return;
+      closeDimPopover();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDimPopover();
+    });
+    window.addEventListener('resize', closeDimPopover);
+    window.addEventListener('scroll', closeDimPopover, true);
   }
 
   /* ---------- Cross-band hover 联动 ---------- */
@@ -1290,8 +1587,8 @@
     bindEnvDrawer();
     bindQueueActions();
     attachAbChipTooltips();
+    bindDimRubricPopovers();
     renderFrameworkPanel();
-    renderDataSources();
 
     // LIVE 数据接入：当数据源切换（loadDataset / clearDataset）时，
     // 重建 DATA 缓存并按当前激活模式重渲染。

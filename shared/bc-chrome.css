@@ -10,7 +10,10 @@ body {
   font-feature-settings: "ss01", "cv11", "tnum";
   margin: 0;
 }
-.wrap { max-width: 1280px; margin: 0 auto; padding: 0 48px; }
+/* v5: 工作台内容区 1280 → 1540（对齐 output/design-drafts 样张）。
+   顶栏 .masthead-inner 本就通栏、不走 .wrap，因此加宽不会让页头错位。
+   index.html 有自己的内联 .wrap 覆盖，故概览页仍保持 1280。 */
+.wrap { max-width: 1540px; margin: 0 auto; padding: 0 48px; }
 
 /* ===== Issue strip ===== */
 .issue-strip {
@@ -24,7 +27,7 @@ body {
   width: 4px; height: 4px; border-radius: 50%; background: var(--amber);
   display: inline-block; margin: 0 6px; vertical-align: middle;
 }
-.issue-strip .sep { color: rgba(255,253,247,.3); }
+.issue-strip .sep { color: color-mix(in srgb, var(--ivory) 30%, transparent); }
 .issue-strip .pulse {
   width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
   animation: pulse 1.6s infinite ease-in-out;
@@ -277,7 +280,7 @@ body {
   opacity: 0.7; pointer-events: auto;
 }
 .theory-chip .x:hover {
-  opacity: 1; color: var(--amber-deep); background: var(--amber-wash, #fbeee4);
+  opacity: 1; color: var(--amber-deep); background: var(--amber-wash);
 }
   background: var(--paper-2); border: 1px solid var(--rule);
   color: var(--ink); display: inline-flex; align-items: center; gap: 6px;
@@ -292,7 +295,7 @@ body {
 
 /* User-added literature chips */
 .theory-chip.is-custom {
-  background: var(--amber-wash, #fbeee4);
+  background: var(--amber-wash);
   border-color: color-mix(in oklab, var(--amber-deep) 35%, transparent);
   padding-right: 22px;
 }
@@ -300,7 +303,7 @@ body {
 .theory-chip.is-custom .x {
   opacity: 0.6; color: var(--amber-deep); pointer-events: auto;
 }
-.theory-chip.is-custom:hover .x { opacity: 1; background: var(--amber-soft, #f5cbb0); }
+.theory-chip.is-custom:hover .x { opacity: 1; background: var(--amber-soft); }
 
 /* Add-literature button + inline panel */
 .theory-add {
@@ -324,13 +327,13 @@ body {
 .theory-add.is-open {
   border-color: var(--amber-deep); border-style: solid;
   color: var(--amber-deep);
-  background: var(--amber-wash, #fbeee4);
+  background: var(--amber-wash);
 }
 .section.dark .theory-add {
   color: rgba(255,255,255,.55);
   border-color: rgba(255,255,255,.2);
 }
-.section.dark .theory-add:hover { color: var(--amber-soft); border-color: var(--amber-soft); background: rgba(217,119,87,.12); }
+.section.dark .theory-add:hover { color: var(--amber-soft); border-color: var(--amber-soft); background: color-mix(in srgb, var(--amber) 12%, transparent); }
 
 .theory-add-panel {
   flex-basis: 100%;
@@ -523,25 +526,25 @@ html[data-theme="dark"] { --mute: #98938b; --mute-2: #8a857c; }
 /* Issue strip — 本来就是 dark on ink，主题切换后微调 */
 html[data-theme="dark"] .issue-strip {
   background: #0e0d0c;
-  border-bottom: 1px solid rgba(255,253,247,.06);
+  border-bottom: 1px solid color-mix(in srgb, var(--ivory) 6%, transparent);
 }
 
 /* Masthead */
 html[data-theme="dark"] .masthead {
   background: #211f1d;
-  border-bottom-color: rgba(255,253,247,.12);
+  border-bottom-color: color-mix(in srgb, var(--ivory) 12%, transparent);
 }
 html[data-theme="dark"] .mast-brand .logo { color: var(--ivory); }
 html[data-theme="dark"] .mast-brand .logo .it { color: var(--amber-soft); }
 html[data-theme="dark"] .mast-brand .ed {
   color: var(--mute-2);
-  border-left-color: rgba(255,253,247,.16);
+  border-left-color: color-mix(in srgb, var(--ivory) 16%, transparent);
 }
 
 /* App tabs */
 html[data-theme="dark"] .app-tabs {
-  background: rgba(255,253,247,.05);
-  border-color: rgba(255,253,247,.10);
+  background: color-mix(in srgb, var(--ivory) 5%, transparent);
+  border-color: var(--on-dark-veil);
 }
 html[data-theme="dark"] .app-tabs a { color: var(--mute-2); }
 html[data-theme="dark"] .app-tabs a:hover { color: var(--ivory); }
@@ -550,49 +553,49 @@ html[data-theme="dark"] .app-tabs a.is-active {
   box-shadow: 0 1px 2px rgba(0,0,0,.4);
 }
 html[data-theme="dark"] .app-tabs a kbd {
-  background: rgba(255,253,247,.08); color: var(--mute-2);
+  background: color-mix(in srgb, var(--ivory) 8%, transparent); color: var(--mute-2);
 }
 
 /* Cmdbar */
 html[data-theme="dark"] .cmdbar {
-  background: rgba(255,253,247,.05);
-  border-color: rgba(255,253,247,.12);
+  background: color-mix(in srgb, var(--ivory) 5%, transparent);
+  border-color: color-mix(in srgb, var(--ivory) 12%, transparent);
   color: var(--mute-2);
 }
 html[data-theme="dark"] .cmdbar:hover {
-  border-color: rgba(217,119,87,.5);
-  background: rgba(255,253,247,.08);
+  border-color: color-mix(in srgb, var(--amber) 50%, transparent);
+  background: color-mix(in srgb, var(--ivory) 8%, transparent);
 }
 html[data-theme="dark"] .cmdbar:focus-within {
   border-color: var(--amber);
-  background: rgba(255,253,247,.08);
-  box-shadow: 0 0 0 3px rgba(217,119,87,.18);
+  background: color-mix(in srgb, var(--ivory) 8%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 18%, transparent);
 }
 html[data-theme="dark"] .cmdbar kbd {
-  background: rgba(255,253,247,.08); color: var(--on-dark-mute);
-  border-color: rgba(255,253,247,.14);
+  background: color-mix(in srgb, var(--ivory) 8%, transparent); color: var(--on-dark-mute);
+  border-color: color-mix(in srgb, var(--ivory) 14%, transparent);
 }
 html[data-theme="dark"] .cmdbar-input { color: var(--ivory); }
 html[data-theme="dark"] .cmdbar-input::placeholder { color: var(--mute-2); }
 
 /* Buttons */
 html[data-theme="dark"] .pill-cap.ghost {
-  border-color: rgba(255,253,247,.4); color: var(--ivory);
+  border-color: color-mix(in srgb, var(--ivory) 40%, transparent); color: var(--ivory);
 }
 html[data-theme="dark"] .pill-cap.ghost:hover {
-  background: rgba(255,253,247,.10); color: var(--ivory);
+  background: var(--on-dark-veil); color: var(--ivory);
 }
 /* .pill-cap.fill (amber) 颜色对比度仍可，保持 */
 
 html[data-theme="dark"] .btn-s {
-  border-color: rgba(255,253,247,.16); color: var(--ivory);
+  border-color: color-mix(in srgb, var(--ivory) 16%, transparent); color: var(--ivory);
 }
 html[data-theme="dark"] .btn-s:hover {
-  background: rgba(255,253,247,.06);
+  background: color-mix(in srgb, var(--ivory) 6%, transparent);
 }
 html[data-theme="dark"] .btn-s.fill {
-  background: rgba(255,253,247,.10); color: var(--ivory);
-  border-color: rgba(255,253,247,.16);
+  background: var(--on-dark-veil); color: var(--ivory);
+  border-color: color-mix(in srgb, var(--ivory) 16%, transparent);
 }
 html[data-theme="dark"] .btn-s.fill:hover {
   background: var(--amber-deep); border-color: var(--amber-deep);
@@ -600,10 +603,10 @@ html[data-theme="dark"] .btn-s.fill:hover {
 
 /* Pills */
 html[data-theme="dark"] .pill-amber {
-  background: rgba(217,119,87,.18); color: var(--amber-soft);
+  background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber-soft);
 }
 html[data-theme="dark"] .pill-ink {
-  background: rgba(255,253,247,.10); color: var(--ivory);
+  background: var(--on-dark-veil); color: var(--ivory);
 }
 html[data-theme="dark"] .pill-sage {
   background: rgba(77,98,87,.22); color: #a9bfb4;
@@ -612,11 +615,11 @@ html[data-theme="dark"] .pill-indigo {
   background: rgba(58,75,107,.30); color: #b8c4dc;
 }
 html[data-theme="dark"] .pill-mute {
-  background: rgba(255,253,247,.06); color: var(--mute-2);
+  background: color-mix(in srgb, var(--ivory) 6%, transparent); color: var(--mute-2);
 }
 
 /* Section heads */
-html[data-theme="dark"] .sec-h { border-bottom-color: rgba(255,253,247,.10); }
+html[data-theme="dark"] .sec-h { border-bottom-color: var(--on-dark-veil); }
 html[data-theme="dark"] .sec-h .num { color: var(--amber-soft); }
 html[data-theme="dark"] .sec-h h3 { color: var(--ivory); }
 html[data-theme="dark"] .sec-h p { color: var(--on-dark-mute); }
@@ -629,10 +632,10 @@ html[data-theme="dark"] .colophon { background: #0e0d0c; }
 /* Page hero meta 卡片 */
 html[data-theme="dark"] .page-hero-meta {
   background: #211f1d;
-  border-color: rgba(255,253,247,.16);
+  border-color: color-mix(in srgb, var(--ivory) 16%, transparent);
 }
 html[data-theme="dark"] .page-hero-meta .row {
-  border-bottom-color: rgba(255,253,247,.08);
+  border-bottom-color: color-mix(in srgb, var(--ivory) 8%, transparent);
 }
 html[data-theme="dark"] .page-hero-meta .row dt { color: var(--mute-2); }
 html[data-theme="dark"] .page-hero-meta .row dd { color: var(--ivory); }

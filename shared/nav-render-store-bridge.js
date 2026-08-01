@@ -29,6 +29,9 @@
     const payloads = global.PharmacoPilotStationPayloads || {};
     if (!Store) { console.warn("[bridge] Store missing"); return; }
     if (!DB) { console.warn("[bridge] DecisionBank missing"); return; }
+    const stageShortLabel = (stage) => stage
+      ? (stage.title || stage.shortLabel || stage.displayName || stage.id)
+      : "";
 
     // -------- 1. 一次性 seed: 议程线 --------
     // 若有 station3 payload，优先从节点 3 mock 响应聚类作为 L2 源头种子；
@@ -172,7 +175,7 @@
       }
       Store.saveJudgment(staged.stationId, staged.key, staged.score, staged.label, subKey);
 
-      // v4 反向修订闭环：在 S7 节点 10-c（量规反向修订）保存判断时，同时向 S2 提交一条 pending revision
+      // v4 反向修订闭环：在 S7 节点 10-c（评价标准反向修订）保存判断时，同时向 S2 提交一条 pending revision
       // 通道由 contract.RUBRIC_REVISION 描述，S2·02-b 顶部待审条会自动亮起。
       let revisionToast = "";
       if (subKey === "10-c" && Store.proposeRubricRevision) {
@@ -225,11 +228,11 @@
 
     function refreshSidebarProgress() {
       const sp = getStageProgressV4();
-      // v4 进度计数器只有 #nodeListMeta 一处（"n / 9" 纯文本）；
+      // v4 进度计数器只有 #nodeListMeta 一处（"已完成 n / 9"）；
       // 历史上这里用 querySelectorAll("*") 全 DOM 扫描 + 文本正则猜测，会误伤任何形如 "n / 9" 的无关文本。
       // nav-render 重渲染时也会以会话口径写它（nav-render.js:1862），此处保持 Store 口径覆盖。
       const meta = document.getElementById("nodeListMeta");
-      if (meta && sp) meta.textContent = `${sp.done} / ${sp.total}`;
+      if (meta && sp) meta.textContent = `已完成 ${sp.done} / ${sp.total}`;
       Object.keys(Store.dump().judgments).forEach((sid) => {
         const tile = document.querySelector(`[data-st="${sid}"][role="button"]`);
         if (tile && !tile.classList.contains("is-active")) tile.classList.add("is-done");
@@ -251,6 +254,14 @@
     }
     Store.on("rubric:revisionProposed", refreshDetailAfterRevision);
     Store.on("rubric:revisionResolved", refreshDetailAfterRevision);
+    // v6.3: 产物卡改为状态化（判断已定 → 显示教师真实决策草稿）后，
+    // 判断/反思/产物落库都必须立刻重绘 detail，否则要切站回来才看得到变化。
+    // 用 setTimeout(0) 让 bridge 自身的按钮收尾（"已保存判断 ✓"）先完成再重绘。
+    // 不用 requestAnimationFrame：文档隐藏（后台标签页 / 嵌入式预览）时 rAF 不触发，
+    // 会导致"保存了但产物卡没更新，切回前台才变"——实测踩到过。
+    ["judgment:saved", "chain:reflectionSaved", "artifact:saved"].forEach((ev) => {
+      try { Store.on(ev, () => setTimeout(refreshDetailAfterRevision, 0)); } catch (e) {}
+    });
 
     // -------- 6. L2 议程横条（sticky 顶部）--------
     function ensureAgendaStripStyles() {
@@ -274,7 +285,7 @@
         }
         #ppl-settings-drawer.is-open { transform: translateX(0); }
         #ppl-settings-drawer .pst-head {
-          padding: 14px 18px; border-bottom: 1px solid rgba(168,73,42,.18);
+          padding: 14px 18px; border-bottom: 1px solid color-mix(in srgb, var(--amber-deep) 18%, transparent);
           display: flex; align-items: center; gap: 10px; flex-shrink: 0;
         }
         #ppl-settings-drawer .pst-head h3 {
@@ -287,7 +298,7 @@
           background: none; border: none;
         }
         #ppl-settings-drawer .pst-close:hover {
-          opacity: 1; background: rgba(168,73,42,.1);
+          opacity: 1; background: color-mix(in srgb, var(--amber-deep) 10%, transparent);
         }
         #ppl-settings-drawer .pst-body {
           flex: 1; overflow-y: auto; padding: 16px 18px 24px;
@@ -304,31 +315,31 @@
         #ppl-settings-drawer .pst-stat-row {
           display: flex; justify-content: space-between; align-items: baseline;
           padding: 5px 0; font-size: var(--fs-xs); color: var(--ink);
-          border-bottom: 1px dashed rgba(168,73,42,.12);
+          border-bottom: 1px dashed color-mix(in srgb, var(--amber-deep) 12%, transparent);
         }
         #ppl-settings-drawer .pst-stat-row:last-child { border-bottom: 0; }
         #ppl-settings-drawer .pst-stat-row .pst-k { color: #5a4a3a; }
         #ppl-settings-drawer .pst-stat-row .pst-v {
           font-family: var(--mono); font-size: var(--fs-2xs);
-          color: var(--amber-deep, #a8492a); font-weight: 600;
+          color: var(--amber-deep); font-weight: 600;
         }
         #ppl-settings-drawer .pst-btn {
           display: block; width: 100%; text-align: left;
           margin-bottom: 7px; padding: 9px 12px;
-          background: #fff; border: 1px solid rgba(168,73,42,.2);
+          background: #fff; border: 1px solid color-mix(in srgb, var(--amber-deep) 20%, transparent);
           border-radius: 7px; cursor: pointer;
           font-family: var(--serif-cn); font-size: var(--fs-xs);
           color: var(--ink); transition: all .15s;
         }
         #ppl-settings-drawer .pst-btn:hover {
-          background: #fff5ec; border-color: rgba(168,73,42,.4);
+          background: #fff5ec; border-color: color-mix(in srgb, var(--amber-deep) 40%, transparent);
           transform: translateX(2px);
         }
         #ppl-settings-drawer .pst-btn.is-danger {
-          color: var(--amber-deep); border-color: rgba(168,73,42,.3);
+          color: var(--amber-deep); border-color: color-mix(in srgb, var(--amber-deep) 30%, transparent);
         }
         #ppl-settings-drawer .pst-btn.is-danger:hover {
-          background: rgba(168,73,42,.08); color: #8a3a1f;
+          background: color-mix(in srgb, var(--amber-deep) 8%, transparent); color: #8a3a1f;
         }
         #ppl-settings-drawer .pst-btn small {
           display: block; font-family: var(--mono);
@@ -361,7 +372,7 @@
         #ppl-celebrate-overlay.is-open #ppl-celebrate-modal { transform: scale(1) translateY(0); }
         #ppl-celebrate-modal .pcl-banner {
           padding: 22px 28px 18px;
-          background: linear-gradient(135deg, var(--sage, #6a9a7b) 0%, #8eb89f 100%);
+          background: linear-gradient(135deg, var(--sage) 0%, #8eb89f 100%);
           color: #fff;
           position: relative; overflow: hidden;
         }
@@ -402,12 +413,12 @@
         #ppl-celebrate-modal .pcl-stage-row {
           display: grid; grid-template-columns: 28px 1fr auto;
           align-items: baseline; gap: 10px; padding: 5px 8px;
-          background: rgba(168,73,42,.04); border-radius: 6px;
+          background: color-mix(in srgb, var(--amber-deep) 4%, transparent); border-radius: 6px;
           font-size: var(--fs-xs); color: var(--ink);
         }
         #ppl-celebrate-modal .pcl-stage-row .pcl-sn {
           font-family: var(--mono); font-size: var(--fs-2xs);
-          color: var(--amber-deep, #a8492a); font-weight: 600;
+          color: var(--amber-deep); font-weight: 600;
         }
         #ppl-celebrate-modal .pcl-stage-row .pcl-cn { font-weight: 500; }
         #ppl-celebrate-modal .pcl-stage-row .pcl-jud {
@@ -418,7 +429,7 @@
           display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
         }
         #ppl-celebrate-modal .pcl-stat-card {
-          background: #fff; border: 1px solid rgba(168,73,42,.15);
+          background: #fff; border: 1px solid color-mix(in srgb, var(--amber-deep) 15%, transparent);
           border-radius: 8px; padding: 9px 12px;
         }
         #ppl-celebrate-modal .pcl-stat-card .pcl-stat-l {
@@ -427,29 +438,29 @@
         }
         #ppl-celebrate-modal .pcl-stat-card .pcl-stat-v {
           font-family: var(--serif-cn); font-size: var(--fs-md);
-          color: var(--amber-deep, #a8492a); font-weight: 500; margin-top: 2px;
+          color: var(--amber-deep); font-weight: 500; margin-top: 2px;
         }
         #ppl-celebrate-modal .pcl-stat-card .pcl-stat-v small {
           font-family: var(--mono); font-size: var(--fs-2xs);
           color: #998877; font-weight: 400; margin-left: 4px;
         }
         #ppl-celebrate-modal .pcl-foot {
-          padding: 14px 28px 20px; border-top: 1px solid rgba(168,73,42,.12);
+          padding: 14px 28px 20px; border-top: 1px solid color-mix(in srgb, var(--amber-deep) 12%, transparent);
           display: flex; gap: 8px; flex-wrap: wrap; flex-shrink: 0;
-          background: rgba(168,73,42,.03);
+          background: color-mix(in srgb, var(--amber-deep) 3%, transparent);
         }
         #ppl-celebrate-modal .pcl-foot button {
           flex: 1; min-width: 0;
           padding: 9px 14px; border-radius: 7px; cursor: pointer;
           font-family: var(--serif-cn); font-size: var(--fs-xs);
-          border: 1px solid rgba(168,73,42,.25); background: #fff;
+          border: 1px solid color-mix(in srgb, var(--amber-deep) 25%, transparent); background: #fff;
           color: var(--ink); transition: all .15s;
         }
         #ppl-celebrate-modal .pcl-foot button:hover {
           background: #fff5ec; transform: translateY(-1px);
         }
         #ppl-celebrate-modal .pcl-foot button.is-primary {
-          background: var(--amber-deep, #a8492a); color: #fff; border-color: var(--amber-deep, #a8492a);
+          background: var(--amber-deep); color: #fff; border-color: var(--amber-deep);
         }
         #ppl-celebrate-modal .pcl-foot button.is-primary:hover {
           background: #8a3a1f;
@@ -461,39 +472,39 @@
           background: linear-gradient(180deg, #211f1d 0%, #1a1916 100%);
           box-shadow: -8px 0 24px rgba(0,0,0,.5);
         }
-        html[data-theme="dark"] #ppl-settings-drawer .pst-head { border-bottom-color: rgba(255,253,247,.10); }
+        html[data-theme="dark"] #ppl-settings-drawer .pst-head { border-bottom-color: var(--on-dark-veil); }
         html[data-theme="dark"] #ppl-settings-drawer .pst-head h3 { color: var(--ivory); }
         html[data-theme="dark"] #ppl-settings-drawer .pst-close { color: var(--on-dark-mute); }
-        html[data-theme="dark"] #ppl-settings-drawer .pst-close:hover { background: rgba(255,253,247,.08); }
+        html[data-theme="dark"] #ppl-settings-drawer .pst-close:hover { background: color-mix(in srgb, var(--ivory) 8%, transparent); }
         html[data-theme="dark"] #ppl-settings-drawer .pst-section-h { color: var(--on-dark-mute); }
         html[data-theme="dark"] #ppl-settings-drawer .pst-stat-row {
-          color: var(--on-dark); border-bottom-color: rgba(255,253,247,.08);
+          color: var(--on-dark); border-bottom-color: color-mix(in srgb, var(--ivory) 8%, transparent);
         }
         html[data-theme="dark"] #ppl-settings-drawer .pst-stat-row .pst-k { color: var(--mute-2); }
-        html[data-theme="dark"] #ppl-settings-drawer .pst-stat-row .pst-v { color: var(--amber-soft, #f1cdb9); }
+        html[data-theme="dark"] #ppl-settings-drawer .pst-stat-row .pst-v { color: var(--amber-soft); }
         html[data-theme="dark"] #ppl-settings-drawer .pst-btn {
-          background: rgba(255,253,247,.06);
-          border-color: rgba(255,253,247,.12);
+          background: color-mix(in srgb, var(--ivory) 6%, transparent);
+          border-color: color-mix(in srgb, var(--ivory) 12%, transparent);
           color: var(--ivory);
         }
         html[data-theme="dark"] #ppl-settings-drawer .pst-btn:hover {
-          background: rgba(255,253,247,.10); border-color: rgba(217,119,87,.4);
+          background: var(--on-dark-veil); border-color: color-mix(in srgb, var(--amber) 40%, transparent);
         }
         html[data-theme="dark"] #ppl-settings-drawer .pst-btn small { color: var(--mute-2); }
-        html[data-theme="dark"] #ppl-settings-drawer .pst-btn.is-danger { color: var(--amber); border-color: rgba(217,119,87,.4); }
+        html[data-theme="dark"] #ppl-settings-drawer .pst-btn.is-danger { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 40%, transparent); }
         html[data-theme="dark"] #ppl-settings-drawer .pst-btn.is-danger:hover {
-          background: rgba(217,119,87,.15); color: var(--amber-soft);
+          background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber-soft);
         }
         html[data-theme="dark"] #ppl-settings-drawer .pst-code {
-          background: #0d0c0a; color: var(--amber-soft, #f1cdb9);
+          background: #0d0c0a; color: var(--amber-soft);
         }
 
         /* 主题切换器（segment control） */
         .pst-theme-row {
           display: flex; gap: 4px; padding: 3px;
-          background: rgba(168,73,42,.08); border-radius: 8px;
+          background: color-mix(in srgb, var(--amber-deep) 8%, transparent); border-radius: 8px;
         }
-        html[data-theme="dark"] .pst-theme-row { background: rgba(255,253,247,.06); }
+        html[data-theme="dark"] .pst-theme-row { background: color-mix(in srgb, var(--ivory) 6%, transparent); }
         .pst-theme-row button {
           flex: 1; padding: 6px 8px; font-size: var(--fs-2xs);
           background: transparent; border: 0; border-radius: 5px;
@@ -503,13 +514,13 @@
         }
         html[data-theme="dark"] .pst-theme-row button { color: var(--on-dark-mute); }
         .pst-theme-row button:hover { background: rgba(255,255,255,.5); }
-        html[data-theme="dark"] .pst-theme-row button:hover { background: rgba(255,253,247,.08); }
+        html[data-theme="dark"] .pst-theme-row button:hover { background: color-mix(in srgb, var(--ivory) 8%, transparent); }
         .pst-theme-row button.is-active {
-          background: #fff; color: var(--amber-deep, #a8492a);
+          background: #fff; color: var(--amber-deep);
           box-shadow: 0 1px 3px rgba(0,0,0,.1);
         }
         html[data-theme="dark"] .pst-theme-row button.is-active {
-          background: #2a2722; color: var(--amber-soft, #f1cdb9);
+          background: #2a2722; color: var(--amber-soft);
         }
 
         /* 庆祝面板 dark */
@@ -520,55 +531,55 @@
         html[data-theme="dark"] #ppl-celebrate-modal .pcl-body { color: var(--on-dark); }
         html[data-theme="dark"] #ppl-celebrate-modal .pcl-section-h { color: var(--on-dark-mute); }
         html[data-theme="dark"] #ppl-celebrate-modal .pcl-stage-row {
-          background: rgba(255,253,247,.04); color: var(--ivory);
+          background: color-mix(in srgb, var(--ivory) 4%, transparent); color: var(--ivory);
         }
         html[data-theme="dark"] #ppl-celebrate-modal .pcl-stage-row .pcl-jud { color: var(--mute-2); }
         html[data-theme="dark"] #ppl-celebrate-modal .pcl-stat-card {
-          background: rgba(255,253,247,.04); border-color: rgba(255,253,247,.10);
+          background: color-mix(in srgb, var(--ivory) 4%, transparent); border-color: var(--on-dark-veil);
         }
         html[data-theme="dark"] #ppl-celebrate-modal .pcl-stat-card .pcl-stat-l { color: var(--mute-2); }
-        html[data-theme="dark"] #ppl-celebrate-modal .pcl-stat-card .pcl-stat-v { color: var(--amber-soft, #f1cdb9); }
+        html[data-theme="dark"] #ppl-celebrate-modal .pcl-stat-card .pcl-stat-v { color: var(--amber-soft); }
         html[data-theme="dark"] #ppl-celebrate-modal .pcl-stat-card .pcl-stat-v small { color: var(--mute-2); }
         html[data-theme="dark"] #ppl-celebrate-modal .pcl-foot {
-          background: rgba(255,253,247,.03); border-top-color: rgba(255,253,247,.10);
+          background: color-mix(in srgb, var(--ivory) 3%, transparent); border-top-color: var(--on-dark-veil);
         }
         html[data-theme="dark"] #ppl-celebrate-modal .pcl-foot button {
-          background: rgba(255,253,247,.06); color: var(--ivory);
-          border-color: rgba(255,253,247,.14);
+          background: color-mix(in srgb, var(--ivory) 6%, transparent); color: var(--ivory);
+          border-color: color-mix(in srgb, var(--ivory) 14%, transparent);
         }
-        html[data-theme="dark"] #ppl-celebrate-modal .pcl-foot button:hover { background: rgba(255,253,247,.10); }
+        html[data-theme="dark"] #ppl-celebrate-modal .pcl-foot button:hover { background: var(--on-dark-veil); }
 
-        /* L2 议程横条 · 量规修订面板 · 产物按钮区 dark */
+        /* L2 议程横条 · 评价标准修订面板 · 产物按钮区 dark */
         html[data-theme="dark"] #ppl-agenda-strip {
-          background: linear-gradient(90deg, rgba(217,119,87,.12), rgba(217,119,87,.06));
-          border-bottom-color: rgba(217,119,87,.3);
+          background: linear-gradient(90deg, color-mix(in srgb, var(--amber) 12%, transparent), color-mix(in srgb, var(--amber) 6%, transparent));
+          border-bottom-color: color-mix(in srgb, var(--amber) 30%, transparent);
           color: var(--amber-soft);
         }
         html[data-theme="dark"] #ppl-agenda-strip a { color: var(--amber-soft); }
         html[data-theme="dark"] #ppl-agenda-strip .ppl-settings-btn { color: var(--amber-soft); }
-        html[data-theme="dark"] #ppl-agenda-strip .ppl-settings-btn:hover { background: rgba(217,119,87,.2); }
+        html[data-theme="dark"] #ppl-agenda-strip .ppl-settings-btn:hover { background: color-mix(in srgb, var(--amber) 20%, transparent); }
         html[data-theme="dark"] .ppl-artifact-zone {
-          background: rgba(255,253,247,.03); border-left-color: var(--amber);
+          background: color-mix(in srgb, var(--ivory) 3%, transparent); border-left-color: var(--amber);
         }
         html[data-theme="dark"] .ppl-artifact-zone .ppl-zone-title { color: var(--amber-soft); }
         html[data-theme="dark"] .ppl-revision-zone {
-          background: rgba(217,119,87,.08); border-left-color: var(--amber);
+          background: color-mix(in srgb, var(--amber) 8%, transparent); border-left-color: var(--amber);
         }
         html[data-theme="dark"] .ppl-revision-zone .ppl-rv-title { color: var(--amber-soft); }
         html[data-theme="dark"] .ppl-rv-form select,
         html[data-theme="dark"] .ppl-rv-form textarea {
-          background: rgba(255,253,247,.06); color: var(--ivory);
-          border-color: rgba(255,253,247,.14);
+          background: color-mix(in srgb, var(--ivory) 6%, transparent); color: var(--ivory);
+          border-color: color-mix(in srgb, var(--ivory) 14%, transparent);
         }
         html[data-theme="dark"] .ppl-rv-card {
-          background: rgba(255,253,247,.04); border-color: rgba(255,253,247,.10);
+          background: color-mix(in srgb, var(--ivory) 4%, transparent); border-color: var(--on-dark-veil);
           color: var(--on-dark);
         }
         html[data-theme="dark"] .ppl-rv-card .ppl-rv-dim { color: var(--amber-soft); }
         html[data-theme="dark"] .ppl-rv-card .ppl-rv-meta { color: var(--mute-2); }
         .ppl-artifact-zone {
           margin-top: 14px; padding: 12px 14px;
-          background: #faf6ee; border-left: 3px solid #a8492a;
+          background: #faf6ee; border-left: 3px solid var(--amber-deep);
           font-family: var(--serif-cn);
         }
         .ppl-artifact-zone .ppl-zone-title {
@@ -699,7 +710,7 @@
           setTimeout(() => global.__pharmaco && global.__pharmaco.openCelebrate && global.__pharmaco.openCelebrate(), 300);
         }
         else if (action === "reset") {
-          if (confirm("确认清空所有已保存的判断、产物、议程、量规修订数据吗？此操作不可撤销。")) {
+          if (confirm("确认清空所有已保存的判断、产物、议程、评价标准修订数据吗？此操作不可撤销。")) {
             Store.reset();
             location.reload();
           }
@@ -754,7 +765,7 @@
           <div class="pst-stat-row"><span class="pst-k">学生议程</span><span class="pst-v">${agendas} 条</span></div>
           <div class="pst-stat-row"><span class="pst-k">议程兑现轨迹</span><span class="pst-v">S2 ${fulfilled(4)} · S4 ${fulfilled(6)} · S5 ${fulfilled(8)} · S8 ${fulfilled(11)}</span></div>
           <div class="pst-stat-row"><span class="pst-k">学情校准点</span><span class="pst-v">${zpdAnchors} 个 · 规则 ${pulseRules} 条</span></div>
-          <div class="pst-stat-row"><span class="pst-k">量规反向修订</span><span class="pst-v">待审 ${pendingRev} · 已采纳 ${acceptedRev}</span></div>
+          <div class="pst-stat-row"><span class="pst-k">评价标准反向修订</span><span class="pst-v">待审 ${pendingRev} · 已采纳 ${acceptedRev}</span></div>
         </div>
 
         <div class="pst-section">
@@ -769,7 +780,7 @@
           </button>
           <button class="pst-btn is-danger" data-pst-action="reset">
             🗑 重置全部
-            <small>清空判断 / 产物 / 议程 / 量规修订（不可撤销）</small>
+            <small>清空判断 / 产物 / 议程 / 评价标准修订（不可撤销）</small>
           </button>
         </div>
 
@@ -779,7 +790,7 @@
           <div class="pst-stat-row"><span class="pst-k">教学环节数</span><span class="pst-v">${(C.NAV_STAGES || []).length}</span></div>
           <div class="pst-stat-row"><span class="pst-k">子节点数</span><span class="pst-v">${Object.keys(C.SUB_NODES || {}).length}</span></div>
           <div class="pst-stat-row"><span class="pst-k">横向机制</span><span class="pst-v">动态评估 · 议程贯通 · 产出链</span></div>
-          <div class="pst-stat-row"><span class="pst-k">量规反向修订通道</span><span class="pst-v">${C.RUBRIC_REVISION ? "S7 → S2" : "未启用"}</span></div>
+          <div class="pst-stat-row"><span class="pst-k">评价标准反向修订通道</span><span class="pst-v">${C.RUBRIC_REVISION ? "S7 → S2" : "未启用"}</span></div>
         </div>
 
         ${stageProgress && stageProgress.done === stageProgress.total ? `
@@ -888,7 +899,7 @@
         const shortJud = judText.length > 28 ? judText.slice(0, 28) + "…" : judText;
         return `<div class="pcl-stage-row">
           <span class="pcl-sn">${String(idx + 1).padStart(2, "0")}</span>
-          <span class="pcl-cn">${escapeHtml(g.tag || "")} · ${escapeHtml(g.displayName || g.title)}</span>
+          <span class="pcl-cn" title="${escapeHtml(g.title)}">${escapeHtml(g.tag || "")} · ${escapeHtml(stageShortLabel(g))}</span>
           <span class="pcl-jud" title="${escapeHtml(judText)}">${escapeHtml(shortJud)}</span>
         </div>`;
       }).join("");
@@ -923,7 +934,7 @@
                 <div class="pcl-stat-v">${zpdAnchors} 锚点<small>· ${pulseRules} 条规则</small></div>
               </div>
               <div class="pcl-stat-card">
-                <div class="pcl-stat-l">量规反向修订</div>
+                <div class="pcl-stat-l">评价标准反向修订</div>
                 <div class="pcl-stat-v">${acceptedRev}<small>· 已采纳${pendingRev ? " · 待审 " + pendingRev : ""}</small></div>
               </div>
               <div class="pcl-stat-card">
@@ -967,7 +978,7 @@
       md += `---\n\n## 9 个教学环节速览\n\n`;
 
       stages.forEach((g, idx) => {
-        md += `### ${String(idx + 1).padStart(2, "0")} ${g.tag} · ${g.displayName || g.title}\n\n`;
+        md += `### ${String(idx + 1).padStart(2, "0")} ${g.tag} · ${g.title}\n\n`;
         md += `**关键判断**：${g.keyDecision || "—"}\n\n`;
         const subs = (g.subNodeIds || []);
         subs.forEach((k) => {
@@ -1008,7 +1019,7 @@
         }
       });
 
-      md += `\n### 量规反向修订（S7 → S2）\n\n`;
+      md += `\n### 评价标准反向修订（S7 → S2）\n\n`;
       (dump.rubricRevisions || []).forEach((r) => {
         md += `- **${r.dim}** [${r.status}]\n`;
         md += `  - 问题：${r.reason}\n`;
@@ -1213,7 +1224,7 @@
     });
 
     // ===================================================================
-    // v4 · S7 → S2 量规反向修订通道
+    // v4 · S7 → S2 评价标准反向修订通道
     // ===================================================================
     function ensureRubricStyles() {
       if (document.getElementById("ppl-rubric-revision-styles")) return;
@@ -1222,7 +1233,7 @@
       st.textContent = `
         .ppl-revision-zone {
           margin-top: 14px; padding: 12px 14px;
-          background: #fff5ec; border-left: 3px solid #a8492a;
+          background: #fff5ec; border-left: 3px solid var(--amber-deep);
           font-family: var(--serif-cn);
         }
         .ppl-revision-zone .ppl-rv-title {
@@ -1230,19 +1241,19 @@
           display: flex; align-items: center; gap: 8px;
         }
         .ppl-revision-zone .ppl-rv-badge {
-          background: #a8492a; color: #fff; padding: 1px 7px; border-radius: 10px; font-size: var(--fs-2xs);
+          background: var(--amber-deep); color: #fff; padding: 1px 7px; border-radius: 10px; font-size: var(--fs-2xs);
         }
         .ppl-rv-form { display: grid; grid-template-columns: 160px 1fr 1fr auto; gap: 6px; align-items: start; }
         .ppl-rv-form select, .ppl-rv-form textarea {
           font-family: inherit; font-size: var(--fs-xs); padding: 6px 8px;
-          border: 1px solid rgba(168,73,42,.25); border-radius: 6px;
+          border: 1px solid color-mix(in srgb, var(--amber-deep) 25%, transparent); border-radius: 6px;
           background: #fff; color: var(--ink);
         }
         .ppl-rv-form textarea { min-height: 52px; resize: vertical; }
         .ppl-rv-form button { white-space: nowrap; }
         .ppl-rv-list { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
         .ppl-rv-card {
-          background: #fff; border: 1px solid rgba(168,73,42,.18); border-radius: 8px;
+          background: #fff; border: 1px solid color-mix(in srgb, var(--amber-deep) 18%, transparent); border-radius: 8px;
           padding: 10px 12px; font-size: var(--fs-xs);
         }
         .ppl-rv-card.is-resolved { opacity: .55; }
@@ -1250,7 +1261,7 @@
           display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
           font-family: var(--mono); font-size: var(--fs-2xs); color: var(--gold-deep);
         }
-        .ppl-rv-card .ppl-rv-dim { color: var(--amber-deep, #a8492a); font-weight: 600; }
+        .ppl-rv-card .ppl-rv-dim { color: var(--amber-deep); font-weight: 600; }
         .ppl-rv-card .ppl-rv-status { margin-left: auto; padding: 1px 6px; border-radius: 8px; font-size: var(--fs-2xs); }
         .ppl-rv-card .ppl-rv-status.s-pending  { background: #fef0d9; color: var(--amber-deep); }
         .ppl-rv-card .ppl-rv-status.s-accepted { background: #e3f0e3; color: var(--ok); }
@@ -1258,17 +1269,17 @@
         .ppl-rv-card .ppl-rv-actions { margin-top: 6px; display: flex; gap: 6px; }
         .ppl-rv-card .ppl-rv-actions button {
           font-size: var(--fs-2xs); padding: 3px 10px; border-radius: 4px;
-          border: 1px solid rgba(168,73,42,.3); background: #fff; cursor: pointer;
+          border: 1px solid color-mix(in srgb, var(--amber-deep) 30%, transparent); background: #fff; cursor: pointer;
         }
-        .ppl-rv-card .ppl-rv-actions button.accept { background: var(--sage, #6a9a7b); color: #fff; border-color: var(--sage, #6a9a7b); }
+        .ppl-rv-card .ppl-rv-actions button.accept { background: var(--sage); color: #fff; border-color: var(--sage); }
         .ppl-rv-card .ppl-rv-actions button.reject { color: #777; }
-        /* Chip 徽章：S2 待审修订 N 条 */
-        [data-stage="S2"] .stage-revision-badge {
-          position: absolute; top: 7px; left: 6px;
-          background: var(--amber-deep, #a8492a); color: #fff;
+        /* 主导航徽章：S2 待审修订 N 条 */
+        .node-item[data-stage="S2"] .stage-revision-badge {
+          display: inline-flex; align-items: center;
+          background: var(--amber-deep); color: #fff;
           font-family: var(--mono); font-size: var(--fs-2xs);
           padding: 1px 5px; border-radius: 8px;
-          box-shadow: 0 0 0 2px rgba(217,119,87,.25);
+          white-space: nowrap;
         }
       `;
       document.head.appendChild(st);
@@ -1277,11 +1288,11 @@
     function renderRubricRevisionPanel() {
       ensureRubricStyles();
       // S2 → 显示「待审修订」面板（在 currentStation === 4 时）
-      // S7 → 显示「向 S2 提出量规修订」面板（在 currentStation === 10 时）
+      // S7 → 显示「向 S2 提出评价标准修订」面板（在 currentStation === 10 时）
       if (currentStation === 4) injectS2ReviewPanel();
       else if (currentStation === 10) injectS7ProposePanel();
-      // chip 徽章每次都更新
-      updateChipRevisionBadge();
+      // 主导航徽章每次都更新
+      updateStageNavigationRevisionBadge();
     }
 
     function injectS7ProposePanel() {
@@ -1295,7 +1306,7 @@
       zone.className = "ppl-revision-zone";
       zone.innerHTML = `
         <div class="ppl-rv-title">
-          <span>S7 → S2 量规反向修订通道</span>
+          <span>S7 → S2 评价标准反向修订通道</span>
           ${myProposed.length ? `<span class="ppl-rv-badge">已提 ${myProposed.length} 条</span>` : ""}
         </div>
         <div class="ppl-rv-form">
@@ -1360,7 +1371,7 @@
       zone.className = "ppl-revision-zone";
       zone.innerHTML = `
         <div class="ppl-rv-title">
-          <span>来自 S7 的量规修订建议</span>
+          <span>来自 S7 的评价标准修订建议</span>
           ${pending.length ? `<span class="ppl-rv-badge">待审 ${pending.length} 条</span>` : `<span style="color:var(--ok)">✓ 全部处理完毕</span>`}
         </div>
         <div class="ppl-rv-list" id="ppl-rv-s2-list"></div>
@@ -1385,7 +1396,7 @@
             ${r.proposedChange ? `<div style="margin-top:4px;color:var(--gold-deep)">建议：${escapeHtml(r.proposedChange)}</div>` : ""}
             ${r.status === "pending" ? `
               <div class="ppl-rv-actions">
-                <button class="accept" data-rev-act="accepted">采纳并写入量规 v2</button>
+                <button class="accept" data-rev-act="accepted">采纳并写入评价标准 v2</button>
                 <button class="reject" data-rev-act="rejected">驳回（保留备注）</button>
               </div>` : ""}
           </div>
@@ -1403,34 +1414,35 @@
         const r = Store.resolveRubricRevision(revId, decision);
         if (r.ok) {
           if (global.showDemoToast) global.showDemoToast((decision === "accepted" ? "✓ 已采纳" : "✗ 已驳回") + " · " + r.revision.dim);
-          updateChipRevisionBadge();
+          updateStageNavigationRevisionBadge();
         }
       });
     }
 
-    function updateChipRevisionBadge() {
-      const chip = document.querySelector('[data-stage="S2"]');
-      if (!chip) return;
-      let badge = chip.querySelector(".stage-revision-badge");
+    function updateStageNavigationRevisionBadge() {
+      const item = document.querySelector('.node-item[data-stage="S2"]');
+      if (!item) return;
+      const slot = item.querySelector(".node-status") || item;
+      let badge = slot.querySelector(".stage-revision-badge");
       const pending = Store.getRubricRevisions("pending").length;
       if (!pending) { if (badge) badge.remove(); return; }
       if (!badge) {
         badge = document.createElement("span");
         badge.className = "stage-revision-badge";
-        chip.appendChild(badge);
+        slot.appendChild(badge);
       }
       badge.textContent = "修订 " + pending;
-      badge.title = `来自 S7 的待审量规修订 ${pending} 条`;
+      badge.title = `来自 S7 的待审评价标准修订 ${pending} 条`;
     }
 
     // 触发：每次切换节点 / 触发修订事件时重新注入
     setTimeout(renderRubricRevisionPanel, 140);
     Store.on("rubric:revisionProposed", () => setTimeout(renderRubricRevisionPanel, 60));
-    Store.on("rubric:revisionProposed", updateChipRevisionBadge);
+    Store.on("rubric:revisionProposed", updateStageNavigationRevisionBadge);
     Store.on("rubric:revisionResolved", () => setTimeout(renderRubricRevisionPanel, 60));
-    // chip 栏重渲染会清掉徽章——挂到 nav-render 暴露的重渲染钩子上补回（替代原来的 1.5s 永久轮询）
-    global.__navAfterStageChipsRender = updateChipRevisionBadge;
-    updateChipRevisionBadge();
+    // 主导航重绘会清掉徽章；由 renderer 的显式钩子补回，避免永久轮询。
+    global.__navAfterStageNavigationRender = updateStageNavigationRevisionBadge;
+    updateStageNavigationRevisionBadge();
     // 切换节点时重新决定显示哪个面板
     const origInject = injectArtifactsForCurrentStation;
     if (!origInject.__rubricPatched) {

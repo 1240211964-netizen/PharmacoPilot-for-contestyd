@@ -8,7 +8,7 @@
    Public API: window.PharmacoBackend
      · sync() / push() / pull({ force: true }) / health()
      · chat({ agentId, messages, ... })
-     · generatePracticePack({ context, currentPack })
+     · generatePracticePack({ context, designBriefs, generatedPack?, targetEnv? })
      · reviewPractice({ reviewerId, sourceRevision, context, currentPack })
      · getStatus()
    ============================================================ */
@@ -40,17 +40,17 @@
     style.id = "pharmaco-backend-status-style";
     style.textContent = `
 .backend-status-chip {
-  --backend-color: var(--mute, #807a6c);
+  --backend-color: var(--mute);
   display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto;
   min-height: 30px; padding: 5px 9px; border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--backend-color) 34%, transparent);
-  background: color-mix(in oklab, var(--backend-color) 8%, var(--ivory, #fffdf7));
+  background: color-mix(in oklab, var(--backend-color) 8%, var(--ivory));
   color: var(--backend-color); white-space: nowrap; cursor: default;
-  font: 500 var(--fs-2xs, 11px)/1 var(--mono, ui-monospace, monospace);
+  font: 500 var(--text-caption)/1 var(--mono);
   letter-spacing: .03em;
 }
-.backend-status-chip[data-phase="ready"] { --backend-color: var(--sage, #587464); }
-.backend-status-chip[data-phase="connecting"] { --backend-color: var(--amber-deep, #a8492a); }
+.backend-status-chip[data-phase="ready"] { --backend-color: var(--sage); }
+.backend-status-chip[data-phase="connecting"] { --backend-color: var(--amber-deep); }
 .backend-status-chip[data-phase="conflict"] { --backend-color: #a23f32; cursor: help; }
 .backend-status-chip[data-phase="browser"] { cursor: pointer; }
 .backend-status-chip[data-phase="unavailable"] { cursor: pointer; }

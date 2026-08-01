@@ -17,7 +17,7 @@
 .demo-toast {
   position: fixed; left: 50%; bottom: 32px;
   transform: translateX(-50%) translateY(20px);
-  background: var(--ink, #1a1714); color: var(--ivory, #fffdf7);
+  background: var(--ink); color: var(--ivory);
   padding: 11px 20px 11px 16px; border-radius: 999px;
   font-family: var(--serif-cn); font-size: var(--fs-sm);
   line-height: 1.2;
@@ -31,8 +31,8 @@
 .demo-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .demo-toast::before {
   content: ""; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--amber-deep, #a8492a);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--amber-deep, #a8492a) 28%, transparent);
+  background: var(--amber-deep);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--amber-deep) 28%, transparent);
   flex-shrink: 0;
 }
 `;

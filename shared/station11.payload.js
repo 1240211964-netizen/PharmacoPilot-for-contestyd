@@ -2,8 +2,8 @@
  * PharmacoPilot · Station 11 Payload · 复盘资产库
  * ------------------------------------------------------------
  * 议程贯通的第 4 回响点（闭环点）+ L1 学情触发摘要汇总。
- * 把学习者议程、案例证据兑现、协作角色匹配、课中调控学情触发规则
- * 与评价与画像环节 评分一并复盘，并把资产沉淀进教学资产库。
+ * 把学习者议程、情境资源兑现、活动角色匹配、形成性评价与适应性调控触发规则
+ * 与表现性评价与学习成效诊断环节评分一并复盘，并把资产沉淀进教学资产库。
  *
  * 注册到 window.PharmacoPilotStationPayloads[11]
  * ============================================================ */
@@ -15,7 +15,7 @@
   const payload = {
     id: STATION_ID,
     version: "phase11-v3",
-    // S8 复盘与决策在 v4 中被拆为两个子节点：11a (S8 复盘) + 11b (S9 资产沉淀)
+    // S8 反思性实践与教学改进、S9 教学知识建构与专业共享沿用两个 legacy 子节点：11a + 11b
     isSplit: true,
     parentStageId: ["S8", "S9"],
     subNodeKey: ["11a", "11b"],
@@ -31,11 +31,11 @@
       minimizedHeight: 32,
       inputsFrom: [
         { stationId: 3,  label: "议程协商", key: "议程列表 + 兑现轨迹",
-          snippet: "5 条议程 · 跨站兑现链：案例与证据环节 → 协作任务环节 → S8 复盘与决策" },
+          snippet: "5 条议程 · 跨站兑现链：真实性学习情境与资源设计环节 → 学习活动与教学支架设计环节 → S8 反思性实践与教学改进" },
         { stationId: 9,  label: "形成性评价", key: "学情触发规则 + 触发记录",
           snippet: "3 个 ZPD 锚点规则 + 课堂触发摘要" },
-        { stationId: 10, label: "表现性评价", key: "学生作品评分 + 低分维度",
-          snippet: "5 维量规 · Pareto 低分维度" },
+        { stationId: 10, label: "表现性评价与学习成效诊断", key: "学生作品评分 + 低分维度",
+          snippet: "5 维评价标准 · Pareto 低分维度" },
       ],
       outputsTo: [],
     },
@@ -61,7 +61,7 @@
 
       // 议程兑现追踪表（运行时从 Store.agendaFulfillment 渲染）
       // v4.2: 加"未兑现原因"列，从 Store.agendaUnfulfillmentNotes 读取（用户在 S8 figureStation11_S8 输入）
-      agendaTraceColumns: ["议程文本", "案例与证据环节 证据", "协作任务环节 角色", "S8 复盘与决策回顾", "本轮兑现度", "未兑现原因（如有）"],
+      agendaTraceColumns: ["议程文本", "真实性学习情境与资源设计环节 证据", "学习活动与教学支架设计环节 角色", "S8 反思性实践与教学改进回顾", "本轮兑现度", "未兑现原因（如有）"],
       agendaTraceFromStore: true,
       agendaUnfulfillmentInputEnabled: true,
       agendaUnfulfillmentNoteHint: "针对未兑现议程，记录原因（如「学生未在小组讨论中提及」、「证据材料不足」、「时间不够」），供下一轮迭代参考。",
@@ -78,7 +78,7 @@
       borderColor: "amber",
       source: "议程贯通闭环点 · 5 条议程的完整兑现轨迹",
       mode: "closure-review",
-      hint: "本节点把议程从「学习者议程 提出」→「案例与证据环节 证据」→「协作任务环节 角色」→「S8 复盘与决策」整条链路总结。生成复盘报告时所有议程被标记为「已回顾」。",
+      hint: "本节点把议程从「学习者议程 提出」→「真实性学习情境与资源设计环节 证据」→「学习活动与教学支架设计环节 角色」→「S8 反思性实践与教学改进」整条链路总结。生成复盘报告时所有议程被标记为「已回顾」。",
       writeback: {
         toStation: 11,
         toKey: "agendaFulfillment[11]",
@@ -92,7 +92,7 @@
         {
           key: "asset-with-agenda",
           label: "沉淀低分样例 + 反馈语 + 修订案例 + 议程闭环回顾",
-          rationale: "命中 议程贯通闭环约束。同时保留量规改进、案例 v2、议程兑现度三类资产。",
+          rationale: "命中 议程贯通闭环约束。同时保留评价标准改进、案例 v2、议程兑现度三类资产。",
           score: 3.9,
           meta: { recommended: true, lintTriggers: ["L2-closure-pending"], v3New: true },
         },
@@ -122,7 +122,7 @@
       "asset-with-agenda": {
         summary: "✓ 完成 议程贯通闭环",
         riskBadges: ["议程闭环", "高优先级"],
-        detail: "选择此项后，生成复盘报告时 5 条议程会被标记为「已回顾」。整条议程贯通从学习者议程走到 S8 复盘与决策，真正闭合。",
+        detail: "选择此项后，生成复盘报告时 5 条议程会被标记为「已回顾」。整条议程贯通从学习者议程走到 S8 反思性实践与教学改进，真正闭合。",
         nextStationHint: "本节课已无下游。资产将进入教学资产库，供下一轮调用。",
       },
       "asset": {
@@ -149,7 +149,7 @@
         outputTitle: "教学复盘报告 v1",
         outputCue: "把本次教学的议程链、学情触发链、评价链合成一份可迭代的复盘报告。",
         artifactLines: {
-          evidence: "议程链：案例与证据环节 兑现 5/5 · 协作任务环节 角色匹配 5/5。学情触发链：3 个 ZPD 锚点规则齐备。评价链：低分维度集中在「条目证据性」与「TOWS 可操作性」。",
+          evidence: "议程链：真实性学习情境与资源设计环节 兑现 5/5 · 学习活动与教学支架设计环节 角色匹配 5/5。学情触发链：3 个 ZPD 锚点规则齐备。评价链：低分维度集中在「条目证据性」与「TOWS 可操作性」。",
           action: "把以上三链汇总，生成《教学复盘报告 v1》，并把 5 条议程标记为「已回顾」。",
           constraints: [
             "复盘报告必须含议程兑现轨迹表",
@@ -180,7 +180,7 @@
           {
             id: "low-dimensions",
             title: "4. 低分维度诊断",
-            placeholder: "5 维量规中得分最低的 2-3 个维度；学生作品中最典型的错例；可能的根因。",
+            placeholder: "5 维评价标准中得分最低的 2-3 个维度；学生作品中最典型的错例；可能的根因。",
             requiredFields: ["lowDimList", "errorExamples", "rootCauseHypothesis"],
           },
           {
@@ -200,14 +200,14 @@
         outputCue: "把本轮低分维度转化为下一轮的设计动作。",
         artifactLines: {
           evidence: "本轮低分集中在：① 学生 SWOT 条目证据性 ② TOWS 策略可操作性 ③ Z2 推演分歧反馈过快。",
-          action: "下一轮在任务链环节 加 1 个「证据出处强制校验」锚点；案例与证据环节 案例 v2 补 2024 年后 W 维数据；课中调控环节 Z2 阈值由 15% 调到 20%。",
+          action: "下一轮在学习活动与教学支架设计环节加 1 个「证据出处强制校验」锚点；真实性学习情境与资源设计环节案例 v2 补 2024 年后 W 维数据；形成性评价与适应性调控环节 Z2 阈值由 15% 调到 20%。",
           constraints: [
             "改进项必须落到具体节点",
             "每项必须有可观察的成功指标",
             "≤ 3 项 · 不超过下一轮可处理的认知预算",
           ],
         },
-        // v4.2：法规版本记录（S9 资产沉淀的法规日志手动维护入口，对应 STAGE_CHAIN.S9.topCardToKeys[2] 法规日志）
+        // v4.2：法规版本记录（S9 教学知识建构与专业共享的法规日志手动维护入口，对应 STAGE_CHAIN.S9.topCardToKeys[2] 法规日志）
         regulationLog: {
           required: true,
           schema: [
@@ -225,7 +225,7 @@
     ],
 
     stateMachine: {
-      A: { id: "locked",       desc: "未进入 · 评价与画像环节 未生成评分" },
+      A: { id: "locked",       desc: "未进入 · 表现性评价与学习成效诊断环节 未生成评分" },
       B: { id: "entered",      desc: "已进入未判断" },
       C: { id: "selected",     desc: "已选未保存" },
       D: { id: "saved",        desc: "已保存判断" },

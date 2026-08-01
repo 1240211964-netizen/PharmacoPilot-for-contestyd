@@ -112,10 +112,10 @@
     },
 
     feedbackByKey: {
-      "evidence":      { summary: "✓ 命中最高风险维度",     riskBadges: ["前置训练", "高优先级"], detail: "选择此项后，建议在知识与误区环节 问题链第 3 题前加入「为本条 SWOT 配 1 条证据出处」即时训练。" },
-      "boundary":      { summary: "△ 第二优先级",          riskBadges: ["概念边界"],            detail: "建议案例与证据环节 案例材料显式标注「政策 / 数据 / 角色 / 风险边界」5 类标签。" },
+      "evidence":      { summary: "✓ 命中最高风险维度",     riskBadges: ["前置训练", "高优先级"], detail: "选择此项后，建议在教学内容结构化与前概念诊断环节 问题链第 3 题前加入「为本条 SWOT 配 1 条证据出处」即时训练。" },
+      "boundary":      { summary: "△ 第二优先级",          riskBadges: ["概念边界"],            detail: "建议真实性学习情境与资源设计环节 案例材料显式标注「政策 / 数据 / 角色 / 风险边界」5 类标签。" },
       "experience":    { summary: "✓ 经验入口缺口",     riskBadges: ["经验入口"],            detail: "为 12% 无药事接触学生提供「家人慢病情境锚」前置任务（约 15 分钟阅读）。" },
-      "participation": { summary: "△ 协作设计层面",        riskBadges: ["延后到协作任务环节"],          detail: "参与度问题属于协作设计范畴，建议在协作任务环节 协作任务里通过 4 角色分工解决。" },
+      "participation": { summary: "△ 协作设计层面",        riskBadges: ["延后到学习活动与教学支架设计环节"],          detail: "参与度问题属于协作设计范畴，建议在学习活动与教学支架设计环节 协作任务里通过 4 角色分工解决。" },
     },
 
     artifacts: [

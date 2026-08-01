@@ -18,10 +18,10 @@
   position: absolute; top: 8px; right: 8px;
   display: inline-flex; align-items: center; gap: 5px;
   padding: 3px 8px; border-radius: 999px;
-  background: var(--amber-deep, #a8492a); color: var(--ivory, #fffdf7);
+  background: var(--amber-deep); color: var(--ivory);
   font-family: var(--mono); font-size: var(--fs-2xs);
   letter-spacing: 0.06em; text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(168, 73, 42, .25);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--amber-deep) 25%, transparent);
   z-index: 5;
   animation: pr-fb-pulse 2s ease-in-out infinite;
 }
@@ -32,7 +32,7 @@
 .pr-feedback-toast {
   position: fixed; right: 24px; bottom: 24px; max-width: 360px;
   padding: 14px 16px;
-  background: var(--ink, #1b1916); color: var(--ivory, #fffdf7);
+  background: var(--ink); color: var(--ivory);
   border-radius: 10px; border: 1px solid rgba(255,255,255,.08);
   box-shadow: 0 12px 32px rgba(0,0,0,.25);
   font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.55;
@@ -43,11 +43,11 @@
 .pr-feedback-toast.show { opacity: 1; transform: translateY(0); }
 .pr-feedback-toast .lbl {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--amber, #d97757);
+  text-transform: uppercase; color: var(--amber);
   margin-bottom: 4px; display: block;
 }
 .pr-feedback-toast a {
-  color: var(--amber-soft, #f1cdb9); text-decoration: underline;
+  color: var(--amber-soft); text-decoration: underline;
   cursor: pointer;
 }
 `;

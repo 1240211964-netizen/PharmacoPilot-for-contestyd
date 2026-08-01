@@ -166,17 +166,44 @@ function validatePracticePackRequest(body) {
     topic: textField(context.topic, "context.topic"),
   };
 
-  const currentPack = body.currentPack;
+  const currentPack = body.designBriefs || body.currentPack;
   if (!currentPack || typeof currentPack !== "object" || Array.isArray(currentPack)) {
-    fail(400, "INVALID_PRACTICE_PACK", "currentPack 必须包含九个教学环节");
+    fail(400, "INVALID_PRACTICE_PACK", "designBriefs 必须包含九个教学环节");
   }
   const normalizedPack = {};
   let inputChars = JSON.stringify(normalizedContext).length;
   for (const key of PRACTICE_PACK_KEYS) {
-    normalizedPack[key] = textField(currentPack[key], `currentPack.${key}`, { max: 1_200 });
+    normalizedPack[key] = textField(currentPack[key], `designBriefs.${key}`, { max: 4_000 });
     inputChars += normalizedPack[key].length;
   }
-  return { context: normalizedContext, currentPack: normalizedPack, inputChars };
+  const targetEnv = body.targetEnv == null || body.targetEnv === ""
+    ? null
+    : textField(body.targetEnv, "targetEnv", { max: 5 });
+  if (targetEnv && !PRACTICE_PACK_KEYS.includes(targetEnv)) {
+    fail(400, "INVALID_TARGET_ENV", "targetEnv 必须是 env01–env09");
+  }
+  let generatedPack = null;
+  if (body.generatedPack != null) {
+    if (!body.generatedPack || typeof body.generatedPack !== "object" || Array.isArray(body.generatedPack)) {
+      fail(400, "INVALID_GENERATED_PACK", "generatedPack 必须包含九个教学环节");
+    }
+    generatedPack = {};
+    for (const key of PRACTICE_PACK_KEYS) {
+      generatedPack[key] = textField(body.generatedPack[key], `generatedPack.${key}`, { max: 4_000 });
+      inputChars += generatedPack[key].length;
+    }
+  }
+  if (targetEnv && !generatedPack) {
+    fail(400, "INVALID_GENERATED_PACK", "重新生成指定环节时必须提供当前 generatedPack");
+  }
+  return {
+    context: normalizedContext,
+    currentPack: normalizedPack,
+    designBriefs: normalizedPack,
+    generatedPack,
+    targetEnv,
+    inputChars,
+  };
 }
 
 function extractFirstJsonObject(content) {
@@ -204,23 +231,57 @@ function extractFirstJsonObject(content) {
   return null;
 }
 
-function parsePracticePackResponse(payload) {
+// 部分本地模型会把多行结构直接放进 JSON 字符串，形成未转义换行。
+// 只修复字符串内部的控制字符，不改键、括号、逗号或任何教学内容。
+function escapeControlCharsInsideJsonStrings(value) {
+  let output = "";
+  let inString = false;
+  let escaped = false;
+  for (const char of String(value || "")) {
+    if (escaped) {
+      output += char;
+      escaped = false;
+      continue;
+    }
+    if (char === "\\" && inString) {
+      output += char;
+      escaped = true;
+      continue;
+    }
+    if (char === '"') {
+      inString = !inString;
+      output += char;
+      continue;
+    }
+    if (inString && char === "\n") output += "\\n";
+    else if (inString && char === "\r") output += "\\r";
+    else if (inString && char === "\t") output += "\\t";
+    else output += char;
+  }
+  return output;
+}
+
+function parsePracticePackResponse(payload, targetEnv = null) {
   const content = payload?.choices?.[0]?.message?.content;
   const jsonText = extractFirstJsonObject(content);
   if (!jsonText) fail(502, "MODEL_OUTPUT_INVALID", "本地模型没有返回实践包 JSON");
   let parsed;
   try { parsed = JSON.parse(jsonText); }
-  catch { fail(502, "MODEL_OUTPUT_INVALID", "本地模型返回的实践包 JSON 无法解析"); }
+  catch {
+    try { parsed = JSON.parse(escapeControlCharsInsideJsonStrings(jsonText)); }
+    catch { fail(502, "MODEL_OUTPUT_INVALID", "本地模型返回的实践包 JSON 无法解析"); }
+  }
   if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     fail(502, "MODEL_OUTPUT_INVALID", "本地模型返回的实践包格式无效");
   }
   const pack = {};
-  for (const key of PRACTICE_PACK_KEYS) {
+  const expectedKeys = targetEnv ? [targetEnv] : PRACTICE_PACK_KEYS;
+  for (const key of expectedKeys) {
     if (typeof parsed[key] !== "string" || !parsed[key].trim()) {
       fail(502, "MODEL_OUTPUT_INVALID", `本地模型返回的 ${key} 为空`);
     }
     const value = parsed[key].trim();
-    if (value.length > 1_200) fail(502, "MODEL_OUTPUT_INVALID", `本地模型返回的 ${key} 过长`);
+    if (value.length > 4_000) fail(502, "MODEL_OUTPUT_INVALID", `本地模型返回的 ${key} 过长`);
     pack[key] = value;
   }
   return pack;
@@ -231,13 +292,19 @@ function buildPracticePackMessages(input) {
     { role: "system", content: PRACTICE_PACK_SYSTEM_PROMPT },
     {
       role: "user",
-      content: `请基于以下数据生成新的课堂实践包。\n<teaching_context>\n${JSON.stringify(input.context, null, 2)}\n</teaching_context>\n<current_pack>\n${JSON.stringify(input.currentPack, null, 2)}\n</current_pack>`,
+      content: `请基于以下数据生成课堂实践包。\n<requested_env>\n${input.targetEnv || ""}\n</requested_env>\n<teaching_context>\n${JSON.stringify(input.context, null, 2)}\n</teaching_context>\n<design_briefs>\n${JSON.stringify(input.designBriefs, null, 2)}\n</design_briefs>\n<current_generated_pack>\n${JSON.stringify(input.generatedPack || {}, null, 2)}\n</current_generated_pack>`,
     },
   ];
 }
 
 const PRACTICE_REVIEW_TEMPERATURE = 0.2;
 const PRACTICE_REVIEW_MAX_TOKENS = 900;
+// 凝练上限与审校 prompt 的表达规则一致；超长不进入锚定，交给修正环重写一次。
+const PRACTICE_REVIEW_ISSUE_MAX_CHARS = 60;
+const PRACTICE_REVIEW_SUGGESTION_MAX_CHARS = 70;
+// 进入缓存键，确保编排语义变化后不复用旧批次结果。当前版本只承诺：
+// 批量请求共享“批次开始前已存在的锚点快照”，不宣称批内完成顺序会驱动避让。
+const PRACTICE_REVIEW_ORCHESTRATION_VERSION = "preexisting-anchor-snapshot-v1";
 
 function validatePracticeReviewRequest(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
@@ -265,7 +332,11 @@ function validatePracticeReviewRequest(body) {
       avoidAnchors.push({ targetEnv, sourceExcerpt });
     }
   }
-  return { ...input, reviewer, sourceRevision, avoidAnchors };
+  const canonicalAvoidAnchors = [...new Map(avoidAnchors
+    .map((item) => [`${item.targetEnv}\u0000${item.sourceExcerpt}`, item])).values()]
+    .sort((left, right) => left.targetEnv.localeCompare(right.targetEnv)
+      || left.sourceExcerpt.localeCompare(right.sourceExcerpt));
+  return { ...input, reviewer, sourceRevision, avoidAnchors: canonicalAvoidAnchors };
 }
 
 function reviewText(value, name, { max = 1_200, required = true } = {}) {
@@ -325,6 +396,12 @@ function gatePracticeReview(parsed, input) {
   if (!input.reviewer.scope.includes(parsed.annotation.targetEnv)) {
     return { ok: false, reason: "out_of_scope", targetEnv: parsed.annotation.targetEnv };
   }
+  if (parsed.annotation.issue.length > PRACTICE_REVIEW_ISSUE_MAX_CHARS) {
+    return { ok: false, reason: "issue_too_long", chars: parsed.annotation.issue.length };
+  }
+  if (parsed.annotation.suggestion.length > PRACTICE_REVIEW_SUGGESTION_MAX_CHARS) {
+    return { ok: false, reason: "suggestion_too_long", chars: parsed.annotation.suggestion.length };
+  }
   const primary = anchorAnnotation(parsed.annotation, input.currentPack, input.sourceRevision);
   if (!primary.ok) return { ok: false, reason: primary.reason, primary };
   const cross = anchorCrossReferences(parsed.annotation.crossReferences, input.currentPack, input.sourceRevision);
@@ -351,7 +428,7 @@ function buildPracticeReviewMessages(input, correction = null) {
     { role: "assistant", content: correction.raw || "上一次输出未形成有效 JSON。" },
     {
       role: "user",
-      content: `上一次输出未通过机械门禁（${correction.reason}）。请重新输出完整 JSON。targetEnv 必须在 ${input.reviewer.scope.join("、")} 中；所有摘录必须逐字复制当前稿件，并优先复制完整分隔段。不要解释。`,
+      content: `上一次输出未通过机械门禁（${correction.reason}）。请重新输出完整 JSON。targetEnv 必须在 ${input.reviewer.scope.join("、")} 中；所有摘录必须逐字复制当前稿件，并优先复制完整分隔段。issue 不超过 60 字，suggestion 不超过 70 字。不要解释。`,
     },
   ];
 }
@@ -540,19 +617,20 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
           messages: buildPracticePackMessages(input),
           stream: false,
           temperature: 0.25,
-          maxTokens: 1_200,
+          maxTokens: 4_096,
           signal: abortController.signal,
         });
         let payload;
         try { payload = await upstream.json(); }
         catch { fail(502, "MODEL_OUTPUT_INVALID", "本地模型返回的响应不是有效 JSON"); }
-        const pack = parsePracticePackResponse(payload);
+        const pack = parsePracticePackResponse(payload, input.targetEnv);
         status = "ok";
         sendJson(res, 200, {
           source: "local-model",
           model: payload?.model || config.modelName,
           chapterId: input.context.chapterId,
           generatedAt: new Date().toISOString(),
+          targetEnv: input.targetEnv,
           pack,
         });
       } finally {
@@ -576,6 +654,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         sourceRevision: input.sourceRevision,
         reviewerId: input.reviewer.id,
         promptVersion: input.reviewer.promptVersion,
+        orchestrationVersion: PRACTICE_REVIEW_ORCHESTRATION_VERSION,
         avoidAnchors: input.avoidAnchors,
         model: config.modelName,
         temperature: PRACTICE_REVIEW_TEMPERATURE,
@@ -631,6 +710,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
               sourceRevision: input.sourceRevision,
               manuscriptHash,
               promptVersion: input.reviewer.promptVersion,
+              orchestrationVersion: PRACTICE_REVIEW_ORCHESTRATION_VERSION,
               attempts: attempt,
               cache: { hit: false, key: cacheKey.slice(0, 16) },
               annotation: {
@@ -676,12 +756,31 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
           sourceRevision: input.sourceRevision,
           manuscriptHash,
           promptVersion: input.reviewer.promptVersion,
+          orchestrationVersion: PRACTICE_REVIEW_ORCHESTRATION_VERSION,
           attempts: 2,
           cache: { hit: false, key: cacheKey.slice(0, 16) },
           gate: {
             reason: lastGate?.reason || lastParsed?.reason || "unknown_gate_failure",
             targetEnv: lastParsed?.annotation?.targetEnv || null,
           },
+          // 未定位意见与已锚定批注明确分轨。这里保留模型声称的正文，供教师在
+          // “未定位篮”中审阅；任何字段都不得被前端当作机械锚点或进入候选。
+          unlocatedReview: lastParsed?.ok ? {
+            reviewerId: input.reviewer.id,
+            expertId: input.reviewer.expertId,
+            issue: lastParsed.annotation.issue,
+            suggestion: lastParsed.annotation.suggestion,
+            claimedTargetEnv: lastParsed.annotation.targetEnv,
+            claimedSourceExcerpt: lastParsed.annotation.sourceExcerpt,
+            claimedCrossReferences: lastParsed.annotation.crossReferences,
+            gateReason: lastGate?.reason || "unknown_gate_failure",
+            sourceRevision: input.sourceRevision,
+            manuscriptHash,
+            model: lastModel,
+            promptVersion: input.reviewer.promptVersion,
+            orchestrationVersion: PRACTICE_REVIEW_ORCHESTRATION_VERSION,
+            generatedAt: new Date().toISOString(),
+          } : null,
         });
       } finally {
         database.recordInference({

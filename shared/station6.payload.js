@@ -5,7 +5,7 @@
  * 分析对象：华海药业 · 集采常态化情境
  *
  * 注册到 window.PharmacoPilotStationPayloads[6]
- * 由 nav-render.js 在渲染案例与证据环节 时读取。
+ * 由 nav-render.js 在渲染真实性学习情境与资源设计环节 时读取。
  *
  * 数据结构遵循 contract v3：
  *   - chainTopcard         · 学习产出链顶卡
@@ -132,7 +132,7 @@
           suggestAction: "补充：公司近年 CDMO 业务披露 / 行业 CDMO 龙头对照",
         },
       ],
-      hardConstraint: "议程进入目标与量规环节/6/8/11 时必须显式回应（可填可空，留空进入复盘风险列表）",
+      hardConstraint: "议程进入预期学习结果与评价证据设计环节/6/8/11 时必须显式回应（可填可空，留空进入复盘风险列表）",
       writeback: {
         toStation: 3,
         toKey: "agendaFulfillment[6]",
@@ -183,13 +183,13 @@
       "agenda-fill": {
         summary: "✓ 命中议程兑现度风险",
         riskBadges: ["议程兑现", "高优先级"],
-        detail: "选择此项后，请去学习者议程 议程列表标记「已被案例与证据环节 兑现」，并在产物生成中输出「议程—证据对照表」。",
-        nextStationHint: "完成后进入协作任务环节 时，议程角色匹配会自动加载这 5 条议程作为角色意愿候选。",
+        detail: "选择此项后，请去学习者议程 议程列表标记「已被真实性学习情境与资源设计环节 兑现」，并在产物生成中输出「议程—证据对照表」。",
+        nextStationHint: "完成后进入学习活动与教学支架设计环节 时，议程角色匹配会自动加载这 5 条议程作为角色意愿候选。",
       },
       "tag": {
         summary: "△ 方向正确但顺序不佳",
         riskBadges: ["建议次轮再做"],
-        detail: "标签化是高价值动作，但应在议程兑现之后。建议本节点先选 A，标签化在协作任务环节 协作任务单生成时一并完成。",
+        detail: "标签化是高价值动作，但应在议程兑现之后。建议本节点先选 A，标签化在学习活动与教学支架设计环节 协作任务单生成时一并完成。",
       },
       "more": {
         summary: "✕ 材料过载风险",
@@ -230,7 +230,7 @@
       {
         id: "agenda-evidence-map",
         buttonLabel: "⬇ 生成议程—证据对照表",
-        outputTitle: "议程兑现表 · 案例与证据环节 输出",
+        outputTitle: "议程兑现表 · 真实性学习情境与资源设计环节 输出",
         outputCue: "标记每条议程是否在材料中获得证据对应。",
         template: {
           columns: ["议程 key", "议程文本", "对应证据来源", "兑现状态", "教师批注"],
@@ -246,7 +246,7 @@
       B: { id: "entered",       desc: "已进入未判断",                  ui: "全显示 · 产物按钮 disabled" },
       C: { id: "selected",      desc: "已选未保存",                    ui: "反馈区展开 · 产物按钮 enabled · blockSave 时保存 disabled" },
       D: { id: "saved",         desc: "已保存判断",                    ui: "tile 变绿勾 · 滚到产物区" },
-      E: { id: "artifactDone",  desc: "已生成产物",                    ui: "按钮变「已生成 ✓」· 显示「前往协作任务环节」CTA" },
+      E: { id: "artifactDone",  desc: "已生成产物",                    ui: "按钮变「已生成 ✓」· 显示「前往学习活动与教学支架设计环节」CTA" },
     },
 
     // ── ⑨ Lint 规则 ─────────────────────────────────────────
@@ -278,7 +278,7 @@
         visible: true,
         writebackKey: "globalAgendaRisk",
         triggerStation11Risk: true,
-        topBarSyncText: "议程已加载 · {totalAgendas} 条 · 案例与证据环节 兑现 {coveredCount}/{totalAgendas}",
+        topBarSyncText: "议程已加载 · {totalAgendas} 条 · 真实性学习情境与资源设计环节 兑现 {coveredCount}/{totalAgendas}",
       },
       L3: {
         visible: true,

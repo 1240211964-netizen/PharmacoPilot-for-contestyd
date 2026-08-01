@@ -68,12 +68,12 @@ body.dx-mag .faq-a { font-size: var(--fs-md); }
   max-height: 86vh;
   background: var(--paper); color: var(--ink);
   border-radius: 14px;
-  box-shadow: 0 30px 80px -20px rgba(27, 25, 22, .45),
-              0 0 0 1px rgba(27, 25, 22, .06);
+  box-shadow: 0 30px 80px -20px color-mix(in srgb, var(--ink) 45%, transparent),
+              0 0 0 1px color-mix(in srgb, var(--ink) 6%, transparent);
   overflow: hidden;
 }
 .faq-dialog::backdrop {
-  background: rgba(27, 25, 22, .55);
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -164,7 +164,7 @@ body.dx-mag .faq-a { font-size: var(--fs-md); }
       <div class="faq-num">Q · 04</div>
       <details class="faq-block">
         <summary class="faq-q">数据从哪儿来？教学痕迹归谁？<span class="faq-toggle">＋</span></summary>
-        <div class="faq-a">学术语料对接<i>闻道·科学探索</i>，模拟课堂对接<i>泛雅</i>，叠加自有案例库与量规库。教学痕迹按"班级-教师"维度持久化于 Postgres + 向量库，所有权归学校。跨教师跨班级仅以 embedding 形态复用，不暴露原始痕迹。</div>
+        <div class="faq-a">学术语料对接<i>闻道·科学探索</i>，模拟课堂对接<i>泛雅</i>，叠加自有案例库与评价标准库。教学痕迹按"班级-教师"维度持久化于 Postgres + 向量库，所有权归学校。跨教师跨班级仅以 embedding 形态复用，不暴露原始痕迹。</div>
       </details>
     </div>
 

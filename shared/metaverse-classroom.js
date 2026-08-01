@@ -59,8 +59,9 @@
 
   function buildScene() {
     mount.innerHTML = "";
-    mount.classList.add("mv-root");
+    mount.className = "mv-root"; // context-loss 回退时清除残留的 .mv3-root / 座位模式类
     mount.dataset.view = "room"; // 教室视图：触发隐藏舞台 .mv-podium（房间已自带 #mv-podium-iso，避免双讲台）
+    const canRetry3D = window.__MV3D_STATUS === "fallback" && window.PharmacoPilotMV3DControl && typeof window.PharmacoPilotMV3DControl.retry === "function";
 
     // 头部:标题 + LIVE + 控件
     const head = el("div", "mv-head");
@@ -69,10 +70,13 @@
         <h4>虚拟班级试错 · 元宇宙教室<small>AI 虚拟班 32 人 · P-2024-Q3 v0.3 · 45 min</small></h4>
       </div>
       <div class="mv-head-r">
+        ${canRetry3D ? '<span class="mv-fallback-note">兼容模式</span><button type="button" class="mv-btn mv-btn-ghost" id="mv-retry-3d">重试 3D</button>' : ""}
         <span class="mv-live"><i></i>LIVE · <b class="mv-timer">02:12</b> / 45:00</span>
         <span class="mv-sess">会话 #3417</span>
       </div>`;
     mount.appendChild(head);
+    const retry3D = mount.querySelector("#mv-retry-3d");
+    if (retry3D) retry3D.addEventListener("click", () => window.PharmacoPilotMV3DControl.retry());
 
     // 控件条（录播播放器：播放/暂停 + 回到开头 + 图例）
     const ctrl = el("div", "mv-controls");
@@ -129,13 +133,13 @@
     sub.setAttribute("aria-label", "当前发言字幕");
     sub.innerHTML = `<span class="mv-sub-ts">02:12</span>
       <span class="mv-sub-role role-T">教师</span>
-      <span class="mv-sub-text">点击「▶ 运行模拟」,从 00:00 重演这堂集采替代讨论课。</span>`;
+      <span class="mv-sub-text">点击「▶ 运行模拟」，从 00:00 重演这堂 SWOT/TOWS 环境分析课。</span>`;
     stage.appendChild(sub);
     subtitleEl = sub;
 
     mount.appendChild(stage);
 
-    // 分析面板(原 sim-side 的画像统计 / 风险信号 / 量规歧义)
+    // 分析面板(原 sim-side 的画像统计 / 风险信号 / 评价标准歧义)
     mount.appendChild(buildAnalysis());
 
     // 收集引用 + 绑定
@@ -255,7 +259,7 @@
     for (let i = 1; i < 8; i++) { const gx = i / 8; grid += `<line x1="${X(gx,0)}" y1="${Y(0)}" x2="${X(gx,1)}" y2="${Y(1)}"/>`; }
     room.innerHTML = `
       <div class="mv-room-head">
-        <span class="mv-room-title">⌂ 立场教室 · 对「原研 → 仿制替代」的态度</span>
+        <span class="mv-room-title">⌂ 环境分析教室 · SWOT 内外部边界</span>
         <span class="mv-room-scene">近=前排讨论(投入) · 远=后排走神 · 左右=立场 · 被说服就走过去</span>
       </div>
       <div class="mv-groom-floor" id="mv-sstage">
@@ -288,8 +292,8 @@
           <polygon class="iso-zone-r" points="${zoneR}"/>
           <g class="iso-grid">${grid}</g>
         </svg>
-        <span class="mv-wall-lbl wl">◀ 反对替代</span>
-        <span class="mv-wall-lbl wr">支持替代 ▶</span>
+        <span class="mv-wall-lbl wl">◀ 内部能力 S / W</span>
+        <span class="mv-wall-lbl wr">外部环境 O / T ▶</span>
         <span class="mv-wall-lbl wc">骑墙 / 观望</span>
         <div class="mv-podium-iso" id="mv-podium-iso"><span class="mv-pf mv-pf-t" title="教师">师</span><span class="mv-pf mv-pf-ai" title="AI Agent">AI</span></div>
         <div class="mv-centroid" id="mv-centroid"><span class="mv-centroid-lbl">班级立场重心</span></div>
@@ -311,12 +315,12 @@
         <div class="mv-bubble"></div>
         <div class="mv-px"><svg class="fig" viewBox="0 0 40 54" aria-hidden="true">
           <ellipse class="fig-shadow" cx="20" cy="53" rx="13" ry="2.4"/>
-          <path class="fig-body" d="M3 54 C3 39 10.5 31 20 31 C29.5 31 37 39 37 54 Z" fill="var(--shirt,#b8b2a6)"/>
+          <path class="fig-body" d="M3 54 C3 39 10.5 31 20 31 C29.5 31 37 39 37 54 Z" fill="var(--shirt)"/>
           <path class="fig-body-sh" d="M20 31 C29.5 31 37 39 37 54 L20 54 Z" fill="rgba(0,0,0,.08)"/>
-          <rect class="fig-neck" x="16.4" y="24" width="7.2" height="10" rx="3.6" fill="var(--skin,#eac08c)"/>
-          <circle class="fig-head" cx="20" cy="15" r="11.6" fill="var(--skin,#eac08c)"/>
+          <rect class="fig-neck" x="16.4" y="24" width="7.2" height="10" rx="3.6" fill="var(--skin)"/>
+          <circle class="fig-head" cx="20" cy="15" r="11.6" fill="var(--skin)"/>
           <path class="fig-head-sh" d="M20 3.4 A11.6 11.6 0 0 1 20 26.6 Z" fill="rgba(0,0,0,.06)"/>
-          <path class="fig-hair" d="M8.3 15.5 C8.3 2.6 31.7 2.6 31.7 15.5 C31.7 8.8 27 5 20 5 C13 5 8.3 8.8 8.3 15.5 Z" fill="var(--hair,#3a2c20)"/>
+          <path class="fig-hair" d="M8.3 15.5 C8.3 2.6 31.7 2.6 31.7 15.5 C31.7 8.8 27 5 20 5 C13 5 8.3 8.8 8.3 15.5 Z" fill="var(--hair)"/>
           <ellipse class="fig-eye" cx="15.7" cy="15.6" rx="1.5" ry="1.9" fill="#3a2e28"/>
           <ellipse class="fig-eye" cx="24.3" cy="15.6" rx="1.5" ry="1.9" fill="#3a2e28"/>
         </svg></div>
@@ -339,7 +343,7 @@
 
   // 等距房间布局：参与度→纵深(近前排/远后排)、立场→横向；近大远小、按纵深 z-order；走动由 CSS 过渡完成
   /* ===== 持续环境仿真：力导向自组织（吸引/排斥/游走）→ 学生自己"走"出簇，无标签无指派 =====
-   * gx∈[0,1] 立场轴（0 反对替代 / 1 支持替代）、gy∈[0,1] 纵深（0 远·后排走神 / 1 近·前排投入）。
+   * gx∈[0,1] 分析轴（0 内部能力 S/W / 1 外部环境 O/T）、gy∈[0,1] 纵深（0 远·后排走神 / 1 近·前排投入）。
    * 每帧合力 = 个人归位(立场x+参与度纵深) + 同伴吸引(立场相近/私交盟友) + 近邻排斥(避让) + 个体游走噪声。
    * 全程确定性（噪声用时间正弦，非 Math.random），与"非 LLM 规则内核"卖点一致。 */
   const POS = {}; // id -> {gx,gy,vx,vy} 连续位置 + 速度
@@ -541,17 +545,17 @@
     const p2 = el("div", "mv-panel");
     p2.innerHTML = `
       <h5><b>教学风险信号</b><span class="ct">3 项</span></h5>
-      <div class="mv-risk"><span class="sev lvl-h">高</span><div><b>立场失衡</b>——8 位「药企背景」同学未发声,可能放大集采替代倾向</div></div>
-      <div class="mv-risk"><span class="sev lvl-m">中</span><div><b>政策引用断点</b>——B 组讨论引用率仅 1/17,量规未刺激政策引用</div></div>
+      <div class="mv-risk"><span class="sev lvl-h">高</span><div><b>威胁维度失声</b>——8 位产业/竞争视角学生未发声，T 维证据覆盖不足</div></div>
+      <div class="mv-risk"><span class="sev lvl-m">中</span><div><b>环境证据断点</b>——W/T 分类尚未引用人才供给与竞品数据</div></div>
       <div class="mv-risk"><span class="sev lvl-l">低</span><div><b>讨论时长偏紧</b>——5 分钟对「等机会型」「推举型」画像不友好</div></div>`;
     row.appendChild(p2);
 
-    // (3) 量规歧义
+    // (3) 评价标准歧义
     const p3 = el("div", "mv-panel");
     p3.innerHTML = `
-      <h5><b>量规歧义提示</b><span class="ct">2 处</span></h5>
-      <div class="mv-flag"><span class="fid">R-04</span><div><b>立场迁移度</b>缺可观测锚点;内在调整 / 同伴影响 / 教师触发难区分</div></div>
-      <div class="mv-flag"><span class="fid">R-06</span><div><b>反思深度</b>与「政策引用」维度交叠,可能双计分</div></div>`;
+      <h5><b>评价标准歧义提示</b><span class="ct">2 处</span></h5>
+      <div class="mv-flag"><span class="fid">R-04</span><div><b>内外部边界</b>缺可观测锚点；组织可控条件与环境趋势容易混分</div></div>
+      <div class="mv-flag"><span class="fid">R-06</span><div><b>策略可行性</b>与「证据充分性」维度交叠，可能双计分</div></div>`;
     row.appendChild(p3);
 
     return row;
@@ -906,8 +910,8 @@
         ${d.tension ? `<p><b>张力</b>${mvEsc(d.tension)}</p>` : ""}
         ${d.growth ? `<p><b>可能成长</b>${mvEsc(d.growth)}</p>` : ""}
         ${d.wont_change ? `<p><b>不会变</b>${mvEsc(d.wont_change)}</p>` : ""}</div>` : ""}
-      <div class="mv-insp-rubric"><h6>量规初值（6 维）</h6><div class="rr">
-        <span>政策引用 ${ri.policy_citation != null ? ri.policy_citation : "—"}</span><span>立场迁移 ${ri.stance_shift != null ? ri.stance_shift : "—"}</span><span>反思深度 ${ri.reflection != null ? ri.reflection : "—"}</span>
+      <div class="mv-insp-rubric"><h6>评价维度初值（6 维）</h6><div class="rr">
+        <span>环境证据 ${ri.policy_citation != null ? ri.policy_citation : "—"}</span><span>分类修正 ${ri.stance_shift != null ? ri.stance_shift : "—"}</span><span>反思深度 ${ri.reflection != null ? ri.reflection : "—"}</span>
         <span>团队贡献 ${ri.team_contrib != null ? ri.team_contrib : "—"}</span><span>证据使用 ${ri.evidence_use != null ? ri.evidence_use : "—"}</span><span>提问质量 ${ri.question_quality != null ? ri.question_quality : "—"}</span>
       </div></div>
       ${evs.length ? `<div class="mv-insp-evlog"><h6>近 5 次状态事件</h6>${evs.map((ev) => {
@@ -923,42 +927,42 @@
     const css = `
 .mv-seat { transition: opacity .4s ease, transform .2s ease; }
 .mv-seat.is-fading { filter: grayscale(.35); }
-.mv-seat.is-tired .mv-ava::after { content:"z"; position:absolute; top:-2px; right:-2px; font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); opacity:.7; }
+.mv-seat.is-tired .mv-ava::after { content:"z"; position:absolute; top:-2px; right:-2px; font:var(--fs-2xs) var(--mono); color:var(--mute); opacity:.7; }
 .mv-insp-overlay { position:fixed; inset:0; background:rgba(20,18,16,.5); display:none; align-items:center; justify-content:center; z-index:10000; backdrop-filter:blur(2px); }
 .mv-insp-overlay.is-open { display:flex; }
-.mv-insp-card { width:min(720px,93vw); max-height:88vh; overflow-y:auto; background:var(--ivory,#fffdf7); color:var(--ink,#1a1a1a); border:1px solid var(--ink,#1a1a1a); border-radius:14px; box-shadow:8px 8px 0 var(--ink,#1a1a1a); padding:22px 26px; position:relative; font-family:var(--serif-cn); border-top:4px solid var(--mute,#9a958c); }
+.mv-insp-card { width:min(720px,93vw); max-height:88vh; overflow-y:auto; background:var(--ivory); color:var(--ink); border:1px solid var(--ink); border-radius:14px; box-shadow:8px 8px 0 var(--ink); padding:22px 26px; position:relative; font-family:var(--serif-cn); border-top:4px solid var(--mute); }
 .mv-insp-card.tone-a { border-top-color:var(--amber); } .mv-insp-card.tone-b { border-top-color:#95bba4; } .mv-insp-card.tone-c { border-top-color:var(--violet-soft); } .mv-insp-card.tone-d { border-top-color:#9a958c; }
-.mv-insp-close { position:absolute; top:12px; right:14px; width:28px; height:28px; border-radius:50%; background:var(--paper-2,#f3eedc); border:1px solid var(--rule,#d8d2bf); cursor:pointer; font-size: var(--fs-md); }
-.mv-insp-head { display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center; padding-bottom:12px; border-bottom:1px dashed var(--rule,#d8d2bf); margin-bottom:12px; }
-.mv-insp-id { width:46px; height:46px; border-radius:10px; background:var(--ink,#1a1a1a); color:var(--ivory,#fffdf7); font:italic 600 var(--fs-xl) var(--serif-en); display:grid; place-items:center; }
-.mv-insp-who .nm { font-size: var(--fs-lg); font-weight:600; } .mv-insp-who .dm { font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); margin-top:2px; }
-.mv-insp-stance { padding:6px 12px; border-radius:999px; font:var(--fs-2xs) var(--mono); background:var(--paper-2,#f3eedc); }
-.mv-insp-row { font-size: var(--fs-sm); line-height:1.6; margin-bottom:7px; padding:8px 12px; background:var(--paper,#faf7f0); border-radius:6px; }
-.mv-insp-row b { display:inline-block; min-width:48px; margin-right:8px; font:600 var(--fs-2xs) var(--mono); letter-spacing:.06em; color:var(--amber-deep,#a8492a); vertical-align:middle; }
-.mv-insp-row.caveat { background:rgba(217,119,87,.06); border-left:2px solid var(--amber-deep,#a8492a); }
-.mv-insp-row small { display:block; margin-left:56px; margin-top:3px; font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); }
+.mv-insp-close { position:absolute; top:12px; right:14px; width:28px; height:28px; border-radius:50%; background:var(--paper-2); border:1px solid var(--rule); cursor:pointer; font-size: var(--fs-md); }
+.mv-insp-head { display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center; padding-bottom:12px; border-bottom:1px dashed var(--rule); margin-bottom:12px; }
+.mv-insp-id { width:46px; height:46px; border-radius:10px; background:var(--ink); color:var(--ivory); font:italic 600 var(--fs-xl) var(--serif-en); display:grid; place-items:center; }
+.mv-insp-who .nm { font-size: var(--fs-lg); font-weight:600; } .mv-insp-who .dm { font:var(--fs-2xs) var(--mono); color:var(--mute); margin-top:2px; }
+.mv-insp-stance { padding:6px 12px; border-radius:999px; font:var(--fs-2xs) var(--mono); background:var(--paper-2); }
+.mv-insp-row { font-size: var(--fs-sm); line-height:1.6; margin-bottom:7px; padding:8px 12px; background:var(--paper); border-radius:6px; }
+.mv-insp-row b { display:inline-block; min-width:48px; margin-right:8px; font:600 var(--fs-2xs) var(--mono); letter-spacing:.06em; color:var(--amber-deep); vertical-align:middle; }
+.mv-insp-row.caveat { background:rgba(217,119,87,.06); border-left:2px solid var(--amber-deep); }
+.mv-insp-row small { display:block; margin-left:56px; margin-top:3px; font:var(--fs-2xs) var(--mono); color:var(--mute); }
 .mv-insp-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
-.mv-insp-grid > div { background:var(--paper-2,#f3eedc); border-radius:8px; padding:11px 13px; }
-.mv-insp-grid h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute,#807a6c); margin:0 0 9px; padding-bottom:5px; border-bottom:1px dashed var(--rule,#d8d2bf); }
-.mv-insp-grid p { font-size: var(--fs-xs); line-height:1.55; margin:0 0 5px; color:var(--ink-2,#2a2a2a); }
-.mv-insp-grid p b { font:600 var(--fs-2xs) var(--mono); color:var(--amber-deep,#a8492a); margin-right:5px; }
+.mv-insp-grid > div { background:var(--paper-2); border-radius:8px; padding:11px 13px; }
+.mv-insp-grid h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute); margin:0 0 9px; padding-bottom:5px; border-bottom:1px dashed var(--rule); }
+.mv-insp-grid p { font-size: var(--fs-xs); line-height:1.55; margin:0 0 5px; color:var(--ink-2); }
+.mv-insp-grid p b { font:600 var(--fs-2xs) var(--mono); color:var(--amber-deep); margin-right:5px; }
 .mv-insp-meter { display:grid; grid-template-columns:74px 1fr 38px; align-items:center; gap:7px; margin-bottom:7px; font:var(--fs-2xs) var(--mono); }
-.mv-insp-meter span { color:var(--mute,#807a6c); } .mv-insp-meter > div { height:4px; background:rgba(0,0,0,.08); border-radius:2px; overflow:hidden; } .mv-insp-meter > div i { display:block; height:100%; background:var(--amber-deep,#a8492a); }
+.mv-insp-meter span { color:var(--mute); } .mv-insp-meter > div { height:4px; background:rgba(0,0,0,.08); border-radius:2px; overflow:hidden; } .mv-insp-meter > div i { display:block; height:100%; background:var(--amber-deep); }
 .mv-insp-meter b { text-align:right; position:relative; } .mv-insp-meter b em { display:block; font:var(--fs-2xs) var(--mono); position:absolute; right:0; top:100%; } .mv-insp-meter b em.down { color:var(--amber-deep); } .mv-insp-meter b em.up { color:var(--sage); }
-.mv-insp-resp { padding:6px 8px; margin-bottom:5px; background:var(--ivory,#fffdf7); border-left:2px solid var(--amber-deep,#a8492a); border-radius:4px; }
-.mv-insp-resp span { display:block; font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); margin-bottom:2px; } .mv-insp-resp p { font:italic var(--fs-2xs) var(--serif-cn); margin:0; color:var(--ink-2,#2a2a2a); }
-.mv-insp-drama { margin-top:12px; padding:13px 15px; background:var(--ink,#1a1a1a); color:var(--ivory,#fffdf7); border-radius:10px; }
+.mv-insp-resp { padding:6px 8px; margin-bottom:5px; background:var(--ivory); border-left:2px solid var(--amber-deep); border-radius:4px; }
+.mv-insp-resp span { display:block; font:var(--fs-2xs) var(--mono); color:var(--mute); margin-bottom:2px; } .mv-insp-resp p { font:italic var(--fs-2xs) var(--serif-cn); margin:0; color:var(--ink-2); }
+.mv-insp-drama { margin-top:12px; padding:13px 15px; background:var(--ink); color:var(--ivory); border-radius:10px; }
 .mv-insp-drama h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.14em; text-transform:uppercase; color:rgba(217,119,87,.85); margin:0 0 8px; }
 .mv-insp-drama p { font-size: var(--fs-xs); line-height:1.55; margin:0 0 5px; } .mv-insp-drama p b { font:500 var(--fs-2xs) var(--mono); color:rgba(217,119,87,.85); margin-right:5px; }
-.mv-insp-rubric { margin-top:12px; padding:11px 13px; background:var(--paper-2,#f3eedc); border-radius:8px; }
-.mv-insp-rubric h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute,#807a6c); margin:0 0 8px; }
-.mv-insp-rubric .rr { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; font:var(--fs-2xs) var(--mono); } .mv-insp-rubric .rr span { padding:3px 6px; background:var(--ivory,#fffdf7); border-radius:3px; text-align:center; }
-.mv-insp-evlog { margin-top:12px; padding:11px 13px; background:var(--paper,#faf7f0); border:1px dashed var(--rule,#d8d2bf); border-radius:8px; }
-.mv-insp-evlog h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute,#807a6c); margin:0 0 7px; }
-.mv-insp-ev { display:grid; grid-template-columns:48px 1fr auto; gap:9px; align-items:center; padding:4px 0; border-bottom:1px dotted var(--rule,#d8d2bf); font-size: var(--fs-2xs); }
-.mv-insp-ev:last-child { border-bottom:0; } .mv-insp-ev .t { font:600 var(--fs-2xs) var(--mono); color:var(--amber-deep,#a8492a); } .mv-insp-ev .w { font-family:var(--serif-cn); color:var(--ink-2,#2a2a2a); }
+.mv-insp-rubric { margin-top:12px; padding:11px 13px; background:var(--paper-2); border-radius:8px; }
+.mv-insp-rubric h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute); margin:0 0 8px; }
+.mv-insp-rubric .rr { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; font:var(--fs-2xs) var(--mono); } .mv-insp-rubric .rr span { padding:3px 6px; background:var(--ivory); border-radius:3px; text-align:center; }
+.mv-insp-evlog { margin-top:12px; padding:11px 13px; background:var(--paper); border:1px dashed var(--rule); border-radius:8px; }
+.mv-insp-evlog h6 { font:var(--fs-2xs) var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute); margin:0 0 7px; }
+.mv-insp-ev { display:grid; grid-template-columns:48px 1fr auto; gap:9px; align-items:center; padding:4px 0; border-bottom:1px dotted var(--rule); font-size: var(--fs-2xs); }
+.mv-insp-ev:last-child { border-bottom:0; } .mv-insp-ev .t { font:600 var(--fs-2xs) var(--mono); color:var(--amber-deep); } .mv-insp-ev .w { font-family:var(--serif-cn); color:var(--ink-2); }
 .mv-insp-ev .fx { display:flex; gap:5px; } .mv-insp-ev .fx span { font:var(--fs-2xs) var(--mono); padding:1px 5px; border-radius:3px; } .mv-insp-ev .fx span.down { background:rgba(217,119,87,.14); color:var(--amber-deep); } .mv-insp-ev .fx span.up { background:rgba(77,98,87,.14); color:var(--sage); }
-.mv-insp-foot { margin-top:12px; padding-top:10px; border-top:1px dashed var(--rule,#d8d2bf); display:flex; justify-content:space-between; font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); }
+.mv-insp-foot { margin-top:12px; padding-top:10px; border-top:1px dashed var(--rule); display:flex; justify-content:space-between; font:var(--fs-2xs) var(--mono); color:var(--mute); }
 `;
     const e2 = document.createElement("style"); e2.id = "mv-insp-style"; e2.textContent = css; document.head.appendChild(e2);
   }
@@ -1006,43 +1010,44 @@
 .mv-root[data-view="room"] .mv-podium { display:none; } /* 教室视图用 room 自带讲台，隐藏舞台 podium */
 /* —— 录播进度条 —— */
 .mv-scrub { display:flex; align-items:center; gap:12px; margin:0 0 6px; }
-.mv-scrub-time { font:var(--fs-2xs,11px) var(--mono,monospace); color:var(--mute,#807a6c); white-space:nowrap; flex-shrink:0; letter-spacing:.02em; }
-.mv-scrub-time b { color:var(--ink,#1a1a1a); font-weight:600; }
+.mv-scrub-time { font:var(--text-caption) var(--mono); color:var(--mute); white-space:nowrap; flex-shrink:0; letter-spacing:.02em; }
+.mv-scrub-time b { color:var(--ink); font-weight:600; }
 .mv-scrub-track { position:relative; flex:1; height:20px; cursor:pointer; display:flex; align-items:center; touch-action:none; outline:none; }
-.mv-scrub-track::before { content:""; position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); height:5px; border-radius:3px; background:var(--rule-2,rgba(27,25,22,.16)); }
-.mv-scrub-track:focus-visible::before { box-shadow:0 0 0 2px var(--amber-deep,#a8492a); }
-.mv-scrub-fill { position:absolute; left:0; top:50%; transform:translateY(-50%); height:5px; border-radius:3px; background:var(--amber-deep,#a8492a); width:0; pointer-events:none; }
+.mv-scrub-track::before { content:""; position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); height:5px; border-radius:3px; background:var(--rule-2); }
+.mv-scrub-track:focus-visible::before { box-shadow:0 0 0 2px var(--amber-deep); }
+.mv-scrub-fill { position:absolute; left:0; top:50%; transform:translateY(-50%); height:5px; border-radius:3px; background:var(--amber-deep); width:0; pointer-events:none; }
 .mv-scrub-ticks { position:absolute; inset:0; pointer-events:none; }
-.mv-scrub-tick { position:absolute; top:50%; transform:translate(-50%,-50%); width:2px; height:10px; border-radius:1px; background:var(--mute,#807a6c); opacity:.5; }
-.mv-scrub-tick.t-q { background:var(--amber-deep,#a8492a); opacity:.85; height:13px; width:2.5px; }
+.mv-scrub-tick { position:absolute; top:50%; transform:translate(-50%,-50%); width:2px; height:10px; border-radius:1px; background:var(--mute); opacity:.5; }
+.mv-scrub-tick.t-q { background:var(--amber-deep); opacity:.85; height:13px; width:2.5px; }
 .mv-scrub-tick.t-km { background:#b5852a; opacity:.8; }
-.mv-scrub-tick.t-silence { background:var(--violet-soft,#8a78b8); opacity:.8; }
+.mv-scrub-tick.t-silence { background:var(--violet-soft); opacity:.8; }
 .mv-scrub-tick.t-call { background:#7a9b6a; opacity:.75; }
 .mv-scrub-tick.t-reflect { background:#6a93a8; opacity:.75; }
-.mv-scrub-head { position:absolute; left:0; top:50%; transform:translate(-50%,-50%); width:13px; height:13px; border-radius:50%; background:var(--amber-deep,#a8492a); border:2px solid var(--paper,#faf7f0); box-shadow:0 1px 4px rgba(0,0,0,.32); pointer-events:none; z-index:2; }
+.mv-scrub-head { position:absolute; left:0; top:50%; transform:translate(-50%,-50%); width:13px; height:13px; border-radius:50%; background:var(--amber-deep); border:2px solid var(--paper); box-shadow:0 1px 4px rgba(0,0,0,.32); pointer-events:none; z-index:2; }
 .mv-scrub-track:hover .mv-scrub-head, .mv-scrub-track.is-scrubbing .mv-scrub-head { transform:translate(-50%,-50%) scale(1.22); }
-.mv-scrub-tip { position:absolute; bottom:130%; left:0; transform:translateX(-50%); background:var(--ink,#1a1a1a); color:#fff; font:var(--fs-2xs,10px) var(--mono,monospace); padding:3px 7px; border-radius:5px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .12s; z-index:30; max-width:240px; overflow:hidden; text-overflow:ellipsis; }
+.mv-scrub-tip { position:absolute; bottom:130%; left:0; transform:translateX(-50%); background:var(--ink); color:#fff; font:var(--text-caption) var(--mono); padding:4px 8px; border-radius:5px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .12s; z-index:30; max-width:240px; overflow:hidden; text-overflow:ellipsis; }
 .mv-scrub-track:hover .mv-scrub-tip, .mv-scrub-track.is-scrubbing .mv-scrub-tip { opacity:1; }
 /* 立场教室是单个全宽 diorama：覆盖宿主页面把 .mv-floor 当 2×2 网格的旧样式，否则房间只占半幅、右侧留黑 */
 #mv-floor-host { display:block; grid-template-columns:none; gap:0; padding:0; }
 #mv-floor-host .mv-groom { width:100%; }
 .mv-room-head { display:flex; justify-content:space-between; align-items:baseline; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
-.mv-room-title { font:600 var(--fs-xs) var(--serif-cn); color:var(--ink,#1a1a1a); }
-.mv-room-scene { font:var(--fs-2xs) var(--mono); color:var(--mute,#807a6c); letter-spacing:.02em; }
-.mv-char-name { font:var(--fs-2xs) var(--serif-cn); color:var(--ink,#1a1a1a); white-space:nowrap; line-height:1.1; }
+.mv-room-title { font:600 var(--fs-xs) var(--serif-cn); color:var(--ink); }
+.mv-room-scene { font:var(--fs-2xs) var(--mono); color:var(--mute); letter-spacing:.02em; }
+.mv-char { --shirt:var(--mute-2); --skin:var(--amber-soft); --hair:var(--ink-2); }
+.mv-char-name { font:var(--fs-2xs) var(--serif-cn); color:var(--ink); white-space:nowrap; line-height:1.1; }
 .mv-char.is-quiet, .mv-char.is-neutral { opacity:.6; }
 .mv-char.is-silent, .mv-char.is-csilent { opacity:.5; }
 .mv-char.is-csilent::after { content:"🤐"; position:absolute; top:-3px; right:3px; font-size: var(--fs-2xs); z-index:6; }
 .mv-char.is-quiet::after { content:"💤"; position:absolute; top:-3px; right:3px; font-size: var(--fs-2xs); opacity:.7; z-index:6; }
 .mv-char.is-fading { animation:mvDrift 3.4s ease-in-out infinite; }
 @keyframes mvDrift { 0%,100% { opacity:.5; } 50% { opacity:.28; } }
-.mv-char .mv-bubble { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:3px; background:var(--ink,#1a1a1a); color:#fff; font:var(--fs-2xs) var(--serif-cn); padding:3px 7px; border-radius:7px 7px 7px 2px; white-space:nowrap; max-width:150px; overflow:hidden; text-overflow:ellipsis; opacity:0; pointer-events:none; transition:opacity .2s; z-index:20; }
+.mv-char .mv-bubble { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:3px; background:var(--ink); color:#fff; font:var(--fs-2xs) var(--serif-cn); padding:3px 7px; border-radius:7px 7px 7px 2px; white-space:nowrap; max-width:150px; overflow:hidden; text-overflow:ellipsis; opacity:0; pointer-events:none; transition:opacity .2s; z-index:20; }
 .mv-char .mv-bubble.is-on { opacity:1; }
 .mv-char .mv-think { position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:5px; width:104px; z-index:25; background:rgba(247,244,237,.97); color:#8a8178; font:italic var(--fs-2xs) var(--serif-cn); line-height:1.4; padding:4px 8px; border:1px dashed #cfc8b8; border-radius:10px; text-align:center; opacity:0; pointer-events:none; transition:opacity .35s; }
 .mv-char .mv-think.is-on { opacity:.95; }
 .mv-char .mv-think::before { content:"💭 "; }
 /* —— 立场教室 · 2.5D 等距 diorama（横轴=立场，纵深=参与度；近大远小） —— */
-.mv-groom { background:var(--paper,#faf7f0); border:1px solid var(--rule,#d8d2bf); border-radius:16px; padding:14px 16px 10px; box-shadow:0 2px 12px rgba(120,90,40,.07); }
+.mv-groom { background:var(--paper); border:1px solid var(--rule); border-radius:16px; padding:14px 16px 10px; box-shadow:0 2px 12px rgba(120,90,40,.07); }
 .mv-groom-floor { position:relative; height:430px; margin:12px 0 2px; border-radius:12px; overflow:hidden; background:linear-gradient(180deg, #c8b89a 0%, #d4c4a0 28%, #e2d0a8 100%); }
 .mv-iso-bg { position:absolute; inset:0; width:100%; height:100%; z-index:0; }
 /* M2 · 研讨室空间感：暖木地板 + 立体墙面 + 极淡立场渐变（替换生硬色块） */
@@ -1056,22 +1061,22 @@
 /* 地板木纹渐变 & 墙面渐变（SVG defs，由 buildStanceRoom 写入 SVG） */
 /* 讲台(投影到远端) */
 .mv-podium-iso { position:absolute; transform-origin:50% 100%; display:flex; gap:5px; z-index:150; }
-.mv-pf { width:24px; height:24px; border-radius:6px; display:grid; place-items:center; font:600 11px var(--serif-cn,serif); color:#fff; box-shadow:0 3px 0 rgba(0,0,0,.18); }
-.mv-pf-t { background:var(--amber-deep,#a8492a); } .mv-pf-ai { background:var(--ink,#1a1a1a); font-size:10px; }
+.mv-pf { width:28px; height:28px; border-radius:6px; display:grid; place-items:center; font:600 var(--text-micro) var(--serif-cn); color:#fff; box-shadow:0 3px 0 rgba(0,0,0,.18); }
+.mv-pf-t { background:var(--amber-deep); } .mv-pf-ai { background:var(--ink); font-size:var(--text-micro); }
 /* 墙上标语 */
-.mv-wall-lbl { position:absolute; font:9.5px var(--mono,monospace); color:var(--mute,#807a6c); z-index:1; white-space:nowrap; }
-.mv-wall-lbl.wl { top:78px; left:4%; color:var(--sage,#4d6257); }
-.mv-wall-lbl.wr { top:78px; right:4%; color:var(--amber-deep,#a8492a); }
+.mv-wall-lbl { position:absolute; font:var(--text-micro) var(--mono); color:var(--mute); z-index:1; white-space:nowrap; }
+.mv-wall-lbl.wl { top:78px; left:4%; color:var(--sage); }
+.mv-wall-lbl.wr { top:78px; right:4%; color:var(--amber-deep); }
 .mv-wall-lbl.wc { top:60px; left:50%; transform:translateX(-50%); }
 /* 班级立场重心：地板小旗 */
 .mv-centroid { position:absolute; transform-origin:50% 100%; z-index:140; transition:left .6s cubic-bezier(.22,1,.36,1), top .6s; }
-.mv-centroid::before { content:""; position:absolute; left:50%; bottom:0; width:0; height:24px; border-left:2px dashed var(--ink,#1a1a1a); transform:translateX(-50%); opacity:.5; }
-.mv-centroid-lbl { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); font:8.5px var(--mono,monospace); color:var(--ink,#1a1a1a); white-space:nowrap; background:rgba(247,240,225,.9); padding:1px 5px; border-radius:3px; }
-.mv-datasrc-notice { position:absolute; top:6px; left:50%; transform:translateX(-50%); z-index:60; font:var(--fs-2xs,10px) var(--mono,monospace); color:var(--amber-deep,#a8492a); background:rgba(217,119,87,.12); border:1px solid rgba(217,119,87,.4); border-radius:6px; padding:3px 10px; max-width:92%; text-align:center; }
+.mv-centroid::before { content:""; position:absolute; left:50%; bottom:0; width:0; height:24px; border-left:2px dashed var(--ink); transform:translateX(-50%); opacity:.5; }
+.mv-centroid-lbl { position:absolute; bottom:24px; left:50%; transform:translateX(-50%); font:var(--text-micro) var(--mono); color:var(--ink); white-space:nowrap; background:rgba(247,240,225,.9); padding:2px 6px; border-radius:3px; }
+.mv-datasrc-notice { position:absolute; top:6px; left:50%; transform:translateX(-50%); z-index:60; font:var(--text-caption) var(--mono); color:var(--amber-deep); background:rgba(217,119,87,.12); border:1px solid rgba(217,119,87,.4); border-radius:6px; padding:4px 10px; max-width:92%; text-align:center; }
 /* 角色：等距投影定位（left/top + scale 由 JS 内联），近大远小，纵深决定 z-order */
 /* 位置/缩放由 rAF 环境仿真每帧驱动（见 ambientTick），不再用 CSS 过渡（否则与逐帧位移叠加成橡皮筋滞后）；仅保留透明度过渡 */
 .mv-groom-floor .mv-char { position:absolute; width:40px; display:flex; flex-direction:column; align-items:center; gap:1px; transform-origin:50% 100%; transition:opacity .4s; cursor:pointer; will-change:left,top,transform; }
-.mv-groom-floor .mv-char-name { font:9px var(--mono,monospace); color:var(--ink,#1a1a1a); white-space:nowrap; line-height:1; text-shadow:0 1px 2px rgba(247,240,225,.9); }
+.mv-groom-floor .mv-char-name { font:var(--text-micro) var(--mono); color:var(--ink); white-space:nowrap; line-height:1; text-shadow:0 1px 2px rgba(247,240,225,.9); }
 .mv-groom-floor .mv-char:hover { z-index:400 !important; }
 /* 像素小人 + 脚下投影 */
 /* M1 · 插画人物（SVG 头+发+躯干，个体肤/发/衣色；比像素更大更可读，体态承载状态） */
@@ -1088,10 +1093,10 @@
 /* 发言高亮 */
 .mv-char.is-live .mv-px { animation:pxbob 0.9s ease-in-out infinite; }
 .mv-char.is-live .mv-px .fig { filter:drop-shadow(0 0 5px rgba(217,119,87,.7)); }
-.mv-char.is-live .mv-char-name { color:var(--amber-deep,#a8492a); font-weight:700; }
+.mv-char.is-live .mv-char-name { color:var(--amber-deep); font-weight:700; }
 .mv-char.is-fading { opacity:.4; }
-.mv-char .mv-tip-why { display:block; margin-top:3px; color:rgba(255,255,255,.62); font-size:8.5px; font-style:italic; line-height:1.4; }
-.mv-char .mv-tip { position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:5px; width:148px; background:var(--ink,#1a1a1a); color:#fff; font:var(--fs-2xs) var(--serif-cn); line-height:1.45; padding:6px 8px; border-radius:7px; opacity:0; pointer-events:none; transition:opacity .15s; z-index:40; }
+.mv-char .mv-tip-why { display:block; margin-top:3px; color:rgba(255,255,255,.62); font-size:var(--text-micro); font-style:italic; line-height:var(--lh-ui); }
+.mv-char .mv-tip { position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:5px; width:148px; background:var(--ink); color:#fff; font:var(--fs-2xs) var(--serif-cn); line-height:1.45; padding:6px 8px; border-radius:7px; opacity:0; pointer-events:none; transition:opacity .15s; z-index:40; }
 .mv-char .mv-tip span { color:rgba(255,255,255,.72); font-size: var(--fs-2xs); }
 .mv-char:hover .mv-tip { opacity:1; }
 /* ③ iso 像素小人：侧头倾听 / 走神低头（作用在 .mv-px，停 idle 踏步避免与 transform 冲突；置于 bob 规则之后才生效） */
@@ -1101,7 +1106,7 @@
 /* 交流：两两交头接耳——面向对方轻转 + 轻语小气泡 */
 .mv-char.chat-r .mv-px { animation:none; transform:rotate(7deg); }
 .mv-char.chat-l .mv-px { animation:none; transform:rotate(-7deg); }
-.mv-char .mv-bubble.is-whisper { background:rgba(74,67,57,.92); color:#f3efe6; font-size:9px; padding:2px 6px; border-radius:6px 6px 6px 2px; opacity:.9; box-shadow:none; }
+.mv-char .mv-bubble.is-whisper { background:rgba(74,67,57,.92); color:#f3efe6; font-size:var(--text-micro); padding:3px 7px; border-radius:6px 6px 6px 2px; opacity:.9; box-shadow:none; }
 .mv-char.is-csilent .fig .fig-head { fill-opacity:.8; }
 `;
     const e = document.createElement("style"); e.id = "mv-room-style"; e.textContent = css; document.head.appendChild(e);

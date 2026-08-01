@@ -6,8 +6,8 @@
 <title>PharmacoPilot · 教学导航 · 3D 路书（实验）</title>
 <meta name="description" content="教学导航的 3D 路书模式：沿一条盘山公路行进 9 个教学环节，站点完成状态实时同步工作台进度，点击站牌即可进入对应环节。实验性游戏化导航层。" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23a8492a'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' font-family='Georgia' font-style='italic' fill='%23fffdf7'%3EP%3C/text%3E%3C/svg%3E" />
-<link rel="stylesheet" href="./shared/tokens.css?v=4" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=4" />
+<link rel="stylesheet" href="./shared/tokens.css?v=6-readability-floor" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=9-neutral-color" />
 <!-- Three.js 本地自托管(与 3D 教室同一份 vendor,零外部依赖) -->
 <script type="importmap">
 {
@@ -18,21 +18,21 @@
 }
 </script>
 <style>
-  body { margin: 0; background: var(--paper, #faf7f0); color: var(--ink, #1f1b16); }
+  body { margin: 0; background: var(--paper); color: var(--ink); }
   .n3-bar {
     display: flex; align-items: center; gap: 14px; padding: 10px 18px;
-    border-bottom: 1px solid var(--rule, #d8d2bf); font-family: var(--mono, monospace);
-    font-size: var(--fs-xs, 13px); flex-wrap: wrap;
+    border-bottom: 1px solid var(--rule); font-family: var(--mono);
+    font-size: var(--text-control); flex-wrap: wrap;
   }
-  .n3-bar b { font-family: var(--serif-en, Georgia); font-size: 16px; }
+  .n3-bar b { font-family: var(--serif-en); font-size: var(--text-body); }
   .n3-bar .sp { flex: 1; }
   .n3-bar a, .n3-bar button {
-    font: inherit; color: var(--ink-soft, #4a4339); background: none; cursor: pointer;
-    border: 1px solid var(--rule-2, #c9c1ab); border-radius: 999px; padding: 4px 12px;
+    font: inherit; color: var(--ink-soft); background: none; cursor: pointer;
+    border: 1px solid var(--rule-2); border-radius: 999px; padding: 4px 12px;
     text-decoration: none;
   }
-  .n3-bar a:hover, .n3-bar button:hover { border-color: var(--amber-deep, #a8492a); color: var(--amber-deep, #a8492a); }
-  .n3-exp { color: var(--amber-deep, #a8492a); border: 1px dashed var(--amber-deep, #a8492a); border-radius: 999px; padding: 2px 10px; }
+  .n3-bar a:hover, .n3-bar button:hover { border-color: var(--amber-deep); color: var(--amber-deep); }
+  .n3-exp { color: var(--amber-deep); border: 1px dashed var(--amber-deep); border-radius: 999px; padding: 2px 10px; }
 
   #nav3d-wrap { position: relative; height: calc(100vh - 53px); min-height: 480px; }
   #nav3d-mount { position: absolute; inset: 0; overflow: hidden; }
@@ -40,94 +40,94 @@
 
   #nav3d-hud {
     position: absolute; left: 16px; top: 14px; z-index: 8; pointer-events: none;
-    display: flex; flex-direction: column; gap: 6px; font-family: var(--mono, monospace);
+    display: flex; flex-direction: column; gap: 6px; font-family: var(--mono);
   }
   #nav3d-hud .n3-card {
-    pointer-events: auto; background: rgba(255, 253, 247, .92); border: 1px solid var(--rule-2, #c9c1ab);
-    border-radius: 10px; padding: 7px 12px; font-size: var(--fs-2xs, 12px); box-shadow: 0 2px 10px rgba(120,90,40,.10);
+    pointer-events: auto; background: color-mix(in srgb, var(--ivory) 92%, transparent); border: 1px solid var(--rule-2);
+    border-radius: 10px; padding: 7px 12px; font-size: var(--text-caption); box-shadow: var(--shadow-1);
   }
   #n3-stage { font-weight: 600; }
-  #n3-hint { color: var(--amber-deep, #a8492a); font-weight: 600; }
-  .n3-keys { color: var(--mute, #8a8272); }
+  #n3-hint { color: var(--amber-deep); font-weight: 600; }
+  .n3-keys { color: var(--mute); }
 
   .n3-tag {
-    font: 600 12px var(--mono, monospace); color: var(--ink, #1f1b16);
-    background: rgba(255, 253, 247, .93); border: 1px solid var(--rule-2, #c9c1ab);
+    font: 600 var(--text-caption) var(--mono); color: var(--ink);
+    background: color-mix(in srgb, var(--ivory) 93%, transparent); border: 1px solid var(--rule-2);
     border-radius: 999px; padding: 3px 10px; cursor: pointer; white-space: nowrap;
-    display: inline-flex; gap: 6px; align-items: baseline; box-shadow: 0 2px 8px rgba(60,40,20,.14);
+    display: inline-flex; gap: 6px; align-items: baseline; box-shadow: var(--shadow-1);
   }
-  .n3-tag b { color: var(--amber-deep, #a8492a); }
-  .n3-tag[data-phase="in"] b { color: #3a8a4e; }
-  .n3-tag[data-phase="post"] b { color: #5a7090; }
-  .n3-tag.is-done { border-color: #3a8a4e; }
-  .n3-tag.is-done span { color: #3a8a4e; }
+  .n3-tag b { color: var(--amber-deep); }
+  .n3-tag[data-phase="in"] b { color: var(--ok); }
+  .n3-tag[data-phase="post"] b { color: var(--indigo); }
+  .n3-tag.is-done { border-color: var(--ok); }
+  .n3-tag.is-done span { color: var(--ok); }
 
   #n3-panel {
     position: absolute; right: 16px; top: 14px; z-index: 9; width: min(330px, calc(100vw - 32px));
-    background: rgba(255, 253, 247, .97); border: 1px solid var(--rule-2, #c9c1ab); border-radius: 14px;
-    padding: 16px; box-shadow: 0 10px 30px rgba(60, 40, 20, .18);
+    background: color-mix(in srgb, var(--ivory) 97%, transparent); border: 1px solid var(--rule-2); border-radius: 14px;
+    padding: 16px; box-shadow: var(--shadow-2);
   }
-  #n3-panel h2 { margin: 6px 0 10px; font: 600 17px var(--serif-cn, serif); line-height: 1.35; }
-  #n3-panel .n3-x { position: absolute; top: 6px; right: 10px; border: none; background: none; font-size: 20px; cursor: pointer; color: var(--mute, #8a8272); }
-  .n3-phase { font: 600 11px var(--mono, monospace); color: #fff; background: #a8492a; border-radius: 999px; padding: 2px 9px; }
-  .n3-phase[data-phase="in"] { background: #3a8a4e; }
-  .n3-phase[data-phase="post"] { background: #5a7090; }
+  #n3-panel h2 { margin: 6px 0 10px; font: 600 var(--text-body-strong) var(--serif-cn); line-height: 1.35; }
+  #n3-panel .n3-x { position: absolute; top: 6px; right: 10px; border: none; background: none; font-size: 20px; cursor: pointer; color: var(--mute); }
+  .n3-phase { font: 600 var(--text-caption) var(--mono); color: var(--ivory); background: var(--amber-deep); border-radius: 999px; padding: 3px 9px; }
+  .n3-phase[data-phase="in"] { background: var(--ok); }
+  .n3-phase[data-phase="post"] { background: var(--indigo); }
   .n3-subs { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 14px; }
   .n3-sub {
-    display: flex; gap: 8px; align-items: baseline; font: var(--fs-xs, 13px) var(--serif-cn, serif);
-    color: var(--ink-soft, #4a4339); text-decoration: none; border: 1px solid var(--rule, #d8d2bf);
+    display: flex; gap: 8px; align-items: baseline; font: var(--text-control) var(--serif-cn);
+    color: var(--ink-soft); text-decoration: none; border: 1px solid var(--rule);
     border-radius: 9px; padding: 6px 10px;
   }
-  .n3-sub:hover { border-color: var(--amber-deep, #a8492a); }
-  .n3-sub i { font-style: normal; font-family: var(--mono, monospace); font-size: 11px; color: var(--mute, #8a8272); }
-  .n3-sub.is-done i { color: #3a8a4e; }
+  .n3-sub:hover { border-color: var(--amber-deep); }
+  .n3-sub i { font-style: normal; font-family: var(--mono); font-size: var(--text-caption); color: var(--mute); }
+  .n3-sub.is-done i { color: var(--ok); }
   .n3-go {
-    display: block; text-align: center; font: 600 var(--fs-sm, 14px) var(--mono, monospace);
-    color: #fffdf7; background: var(--amber-deep, #a8492a); border-radius: 999px; padding: 9px 14px; text-decoration: none;
+    display: block; text-align: center; font: 600 var(--text-body) var(--mono);
+    color: var(--ivory); background: var(--amber-deep); border-radius: 999px; padding: 9px 14px; text-decoration: none;
   }
 
   /* 产出展卡:车开近才浮现的路边叙事卡 */
   .n3-story {
-    max-width: 210px; background: rgba(255, 253, 247, .95); border: 1px solid var(--rule-2, #c9c1ab);
-    border-left: 3px solid var(--amber-deep, #a8492a); border-radius: 10px; padding: 8px 11px;
-    box-shadow: 0 4px 14px rgba(60, 40, 20, .16); cursor: pointer;
+    max-width: 210px; background: color-mix(in srgb, var(--ivory) 95%, transparent); border: 1px solid var(--rule-2);
+    border-left: 3px solid var(--amber-deep); border-radius: 10px; padding: 8px 11px;
+    box-shadow: var(--shadow-1); cursor: pointer;
     opacity: 0; transform: translateY(6px); transition: opacity .35s, transform .35s;
   }
   .n3-story.is-show { opacity: 1; transform: none; }
-  .n3-story[data-phase="in"] { border-left-color: #3a8a4e; }
-  .n3-story[data-phase="post"] { border-left-color: #5a7090; }
-  .n3-story em { font: 600 10px var(--mono, monospace); font-style: normal; color: var(--mute, #8a8272); letter-spacing: .05em; }
+  .n3-story[data-phase="in"] { border-left-color: var(--ok); }
+  .n3-story[data-phase="post"] { border-left-color: var(--indigo); }
+  .n3-story em { font: 600 var(--text-caption) var(--mono); font-style: normal; color: var(--mute); letter-spacing: .02em; }
   .n3-story-outs { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0 6px; }
   .n3-story-outs i {
-    font: 11px var(--serif-cn, serif); font-style: normal; color: var(--ink-soft, #4a4339);
-    border: 1px solid var(--rule, #d8d2bf); border-radius: 999px; padding: 1px 8px; background: #fff;
+    font: var(--text-caption) var(--serif-cn); font-style: normal; color: var(--ink-soft);
+    border: 1px solid var(--rule); border-radius: 999px; padding: 1px 8px; background: var(--ivory);
   }
-  .n3-story-live { font: 600 10px var(--mono, monospace); color: var(--mute, #8a8272); }
-  .n3-story.is-done .n3-story-live { color: #3a8a4e; }
+  .n3-story-live { font: 600 var(--text-caption) var(--mono); color: var(--mute); }
+  .n3-story.is-done .n3-story-live { color: var(--ok); }
 
   /* 巡游字幕条 */
   #n3-caption {
     position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 9;
     width: min(680px, calc(100vw - 40px)); text-align: left;
-    background: linear-gradient(to top, rgba(22, 20, 17, .88), rgba(22, 20, 17, .72));
-    color: #f6f1e7; border-radius: 12px; padding: 12px 18px;
-    font: var(--fs-sm, 14px) var(--serif-cn, serif); line-height: 1.55;
-    box-shadow: 0 8px 26px rgba(20, 12, 4, .3);
+    background: linear-gradient(to top, color-mix(in srgb, var(--ink) 88%, transparent), color-mix(in srgb, var(--ink) 72%, transparent));
+    color: var(--paper-2); border-radius: 12px; padding: 12px 18px;
+    font: var(--text-body) var(--serif-cn); line-height: var(--lh-body);
+    box-shadow: var(--shadow-3);
   }
-  #n3-caption b { font-family: var(--mono, monospace); color: #e8c9a0; margin-right: 8px; }
+  #n3-caption b { font-family: var(--mono); color: var(--amber-soft); margin-right: 8px; }
 
   #nav3d-fallback { max-width: 760px; margin: 40px auto; padding: 0 20px; }
   #nav3d-fallback ol { display: flex; flex-direction: column; gap: 8px; padding-left: 22px; }
-  #nav3d-fallback a { color: var(--amber-deep, #a8492a); }
+  #nav3d-fallback a { color: var(--amber-deep); }
   #n3-loading {
     position: absolute; inset: 0; display: grid; place-items: center; z-index: 5;
-    font-family: var(--mono, monospace); color: var(--mute, #8a8272); pointer-events: none;
+    font-family: var(--mono); color: var(--mute); pointer-events: none;
   }
 </style>
 </head>
-<body>
+<body class="is-readable-detail">
   <div class="n3-bar">
-    <b>Pharmaco<i style="color:var(--amber-deep,#a8492a)">Pilot</i></b>
+    <b>Pharmaco<i style="color:var(--amber-deep)">Pilot</i></b>
     <span>教学导航 · 3D 路书</span>
     <span class="n3-exp">实验模式 · EXPERIMENTAL</span>
     <span class="sp"></span>
@@ -161,15 +161,15 @@
       </div>
       <p>以下 9 环节清单等价可用(可直接进入 2D 工作台):</p>
       <ol>
-        <li><a href="./nav-detail.html#go=1.1">S1 · 课程定位 · 学情诊断 · 学习者议程协商</a></li>
-        <li><a href="./nav-detail.html#go=4.4-a">S2 · 学习目标—评价证据—量规对齐</a></li>
-        <li><a href="./nav-detail.html#go=5.5">S3 · 知识结构与关键误区定位</a></li>
-        <li><a href="./nav-detail.html#go=6.6">S4 · 真实药事管理案例与证据包</a></li>
-        <li><a href="./nav-detail.html#go=7.7">S5 · 课堂任务链与支架设计</a></li>
-        <li><a href="./nav-detail.html#go=9.9-z1">S6 · 课中学情捕捉与即时干预</a></li>
-        <li><a href="./nav-detail.html#go=10.10-a">S7 · 表现性评价与学生能力画像</a></li>
-        <li><a href="./nav-detail.html#go=11.11a">S8 · 教师教学复盘与改进决策</a></li>
-        <li><a href="./nav-detail.html#go=11.11b">S9 · 课例资产沉淀与知识库更新</a></li>
+        <li><a href="./nav-detail.html#go=1.1">S1 · 学习者与教学情境分析</a></li>
+        <li><a href="./nav-detail.html#go=4.4-a">S2 · 预期学习结果与评价证据设计</a></li>
+        <li><a href="./nav-detail.html#go=5.5">S3 · 教学内容结构化与前概念诊断</a></li>
+        <li><a href="./nav-detail.html#go=6.6">S4 · 真实性学习情境与资源设计</a></li>
+        <li><a href="./nav-detail.html#go=7.7">S5 · 学习活动与教学支架设计</a></li>
+        <li><a href="./nav-detail.html#go=9.9-z1">S6 · 形成性评价与适应性调控</a></li>
+        <li><a href="./nav-detail.html#go=10.10-a">S7 · 表现性评价与学习成效诊断</a></li>
+        <li><a href="./nav-detail.html#go=11.11a">S8 · 反思性实践与教学改进</a></li>
+        <li><a href="./nav-detail.html#go=11.11b">S9 · 教学知识建构与专业共享</a></li>
       </ol>
     </div>
   </div>
@@ -191,7 +191,7 @@
   <!-- 契约 + Store(经典脚本,与工作台同源同序) -->
   <script src="./shared/nav-stations-contract.js?v=31"></script>
   <script src="./shared/pharmaco-store.js?v=31"></script>
-  <script src="./shared/backend-client.js?v=3-status"></script>
-  <script type="module" src="./shared/nav-map-3d.js?v=6"></script>
+  <script src="./shared/backend-client.js?v=6-color-token"></script>
+  <script type="module" src="./shared/nav-map-3d.js?v=7-css-token-bridge"></script>
 </body>
 </html>

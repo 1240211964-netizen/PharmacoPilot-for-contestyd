@@ -12,11 +12,17 @@
     "start": "node --disable-warning=ExperimentalWarning server/index.mjs",
     "dev": "node --disable-warning=ExperimentalWarning --watch server/index.mjs",
     "test": "npm run test:frontend && npm run test:backend",
-    "test:frontend": "node tools/verify-data-detail.mjs && node tools/verify-payloads.mjs && node tools/verify-practice-review.mjs && node tools/verify-anchor-gate.mjs",
+    "test:frontend": "node tools/verify-style-tokens.mjs && node tools/verify-color-tokens.mjs && node tools/verify-terminology.mjs && node tools/verify-stage-names.mjs && node tools/verify-data-detail.mjs && node tools/verify-payloads.mjs && node tools/verify-practice-catalog.mjs && node tools/verify-practice-review.mjs && node tools/verify-anchor-gate.mjs",
     "test:backend": "node --disable-warning=ExperimentalWarning --test server/*.test.mjs",
     "check": "node build.mjs --check && npm test"
   },
   "devDependencies": {
     "esbuild": "^0.24.2"
+  },
+  "dependencies": {
+    "docx": "^9.7.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "jszip": "^3.10.1"
   }
 }

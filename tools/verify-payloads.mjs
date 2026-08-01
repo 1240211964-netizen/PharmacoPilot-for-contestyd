@@ -63,6 +63,7 @@ try {
   const ids = Array.from({ length: 11 }, (_, i) => i + 1);
   const stageIds = new Set(contract.NAV_STAGES.map((s) => s.id));
   const subNodeKeys = new Set(Object.keys(contract.SUB_NODES));
+  const visibleSubNodeKeys = contract.NAV_STAGES.flatMap((stage) => stage.subNodeIds.map(String));
 
   // (a) 恰好注册 station 1-11
   const registered = Object.keys(payloads).map(Number).sort((x, y) => x - y);
@@ -100,6 +101,51 @@ try {
       assert(subNodeKeys.has(String(subId)), `NAV_STAGES ${stage.id} 的 subNodeId "${subId}" 在 SUB_NODES 反查不到`);
     }
   }
+
+  // (d2) 前台当前可见的每个子步骤都必须有独立 SWOT 操作说明。
+  // 主视图只读 good/how；why 保留为默认折叠的设计依据。
+  assert(contract.SWOT_NODE_GUIDES, 'SWOT_NODE_GUIDES 未导出');
+  assert(
+    Object.keys(contract.SWOT_NODE_GUIDES).length === visibleSubNodeKeys.length,
+    `SWOT_NODE_GUIDES 应覆盖 ${visibleSubNodeKeys.length} 个可见子步骤`
+  );
+  for (const subKey of visibleSubNodeKeys) {
+    const guide = contract.SWOT_NODE_GUIDES[subKey];
+    assert(guide, `可见子步骤 ${subKey} 缺少 SWOT_NODE_GUIDES`);
+    for (const key of ['good', 'how', 'why']) {
+      assert(typeof guide[key] === 'string' && guide[key].length >= 20, `子步骤 ${subKey}.${key} 过短或缺失`);
+    }
+    const joined = `${guide.good} ${guide.how}`;
+    assert(
+      /SWOT|TOWS|华海药业|集采/.test(joined),
+      `子步骤 ${subKey} 说明未落到当前 SWOT 贯穿案例`
+    );
+  }
+
+  const navRender = read('shared/nav-render.js');
+  const navHtml = read('nav-detail.html');
+  assert(
+    /C\.SWOT_NODE_GUIDES\?\.\[String\(subKey\)\]/.test(navRender) &&
+      /function stationGuide\(s\)/.test(navRender) &&
+      /做好是什么样/.test(navRender) &&
+      /怎么做好/.test(navRender),
+    '节点说明必须消费子步骤指南并优先呈现两个核心问题'
+  );
+  assert(
+    /class="intro-rationale"/.test(navRender) &&
+      /设计依据 · 为什么这样做/.test(navRender) &&
+      /\.station-intro\s*\{[^}]*repeat\(2,/s.test(navHtml) &&
+      /nav-detail\.bundle\.js\?v=21-swot-guide-dedupe/.test(navHtml),
+    '为什么应降级为折叠设计依据，两张主卡应保持两列并刷新缓存版本'
+  );
+  assert(
+    /const guide = stationGuide\(s\);[\s\S]*## 做好是什么样[\s\S]*esc\(guide\.good\)[\s\S]*## 怎么做好[\s\S]*esc\(guide\.how\)/.test(navRender),
+    '待生成产物模板也必须与主视图共用同一份 SWOT 子步骤指南'
+  );
+  assert(
+    /function renderStationIntro\(s\)\s*\{[\s\S]*if \(_suppressDetailHead\) return "";/.test(navRender),
+    '合并子步骤 2-3 的追加段不得重复渲染同一组节点说明'
+  );
 
   // (e) STAGE_CHAIN 的 inputsFrom/outputsTo 引用的 stage id 均存在
   for (const [stageId, chain] of Object.entries(contract.STAGE_CHAIN)) {

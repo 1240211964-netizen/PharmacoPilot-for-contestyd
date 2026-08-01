@@ -56,7 +56,7 @@
       ],
       outputsTo: [
         { stationId: 9, label: "形成性评价", outKey: "探究产出 → 学情触发反馈规则" },
-        { stationId: 10, label: "表现性评价", outKey: "学生作品 → 量规评分" },
+        { stationId: 10, label: "表现性评价与学习成效诊断", outKey: "学生作品 → 评价结果" },
       ],
       drawerFullContent: true,
     },
@@ -115,7 +115,7 @@
     agendaEchoCard: {
       layerId: "L2",
       borderColor: "amber",
-      source: "来自学习者议程 · 议程意愿 · 已被案例与证据环节 兑现 3/5",
+      source: "来自学习者议程 · 议程意愿 · 已被真实性学习情境与资源设计环节 兑现 3/5",
       mode: "role-mapping",
       hint: "本节点把议程映射到 4 个协作角色。点击「生成协作任务单」后，所有 5 条议程会被标记为'角色匹配完成'。",
       writeback: {
@@ -168,8 +168,8 @@
       "agenda-role-match": {
         summary: "✓ 命中 议程贯通的第 3 回响点",
         riskBadges: ["议程闭环", "高优先级"],
-        detail: "选择此项后，议程—角色匹配矩阵将被写入协作任务单。下游 S8 复盘与决策会显示该议程的最终落点。",
-        nextStationHint: "进入课中调控环节 时，3 个 ZPD 锚点的学情触发规则会针对 4 个角色分别设计。",
+        detail: "选择此项后，议程—角色匹配矩阵将被写入协作任务单。下游 S8 反思性实践与教学改进会显示该议程的最终落点。",
+        nextStationHint: "进入形成性评价与适应性调控环节时，3 个 ZPD 锚点的学情触发规则会针对 4 个角色分别设计。",
       },
       "roles": {
         summary: "△ 方向正确但缺议程闭环",
@@ -219,7 +219,7 @@
           constraints: [
             "追问必须指向证据而非观点",
             "追问必须覆盖每组每角色至少 1 次",
-            "追问要为课中调控环节 学情触发采集留接口",
+            "追问要为形成性评价与适应性调控环节 学情触发采集留接口",
           ],
         },
         writeback: { to: "artifactLibrary" },
@@ -228,7 +228,7 @@
 
     // ── ⑧ 状态机 ────────────────────────────────────────────
     stateMachine: {
-      A: { id: "locked",       desc: "未进入 · 案例与证据环节/7 判断未保存" },
+      A: { id: "locked",       desc: "未进入 · 真实性学习情境与资源设计环节/7 判断未保存" },
       B: { id: "entered",      desc: "已进入未判断" },
       C: { id: "selected",     desc: "已选未保存" },
       D: { id: "saved",        desc: "已保存判断" },
@@ -253,11 +253,11 @@
 
     // ── ⑩ 横向层钩子 ────────────────────────────────────────
     horizontalLayerHooks: {
-      L1: { visible: false, reason: "锚点在任务链环节 定义、课中调控环节 编辑规则；协作任务环节 是学情触发面" },
+      L1: { visible: false, reason: "锚点在学习活动与教学支架设计环节 定义、形成性评价与适应性调控环节 编辑规则；学习活动与教学支架设计环节 是学情触发面" },
       L2: {
         visible: true,
         echoMode: "role-mapping",
-        topBarSyncText: "议程已加载 · {totalAgendas} 条 · 案例与证据环节 兑现 {fulfilledAt6}/{totalAgendas} · 协作任务环节 待匹配 {pendingAt8}",
+        topBarSyncText: "议程已加载 · {totalAgendas} 条 · 真实性学习情境与资源设计环节 兑现 {fulfilledAt6}/{totalAgendas} · 学习活动与教学支架设计环节 待匹配 {pendingAt8}",
       },
       L3: {
         visible: true,

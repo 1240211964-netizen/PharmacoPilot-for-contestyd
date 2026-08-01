@@ -51,7 +51,7 @@
       // L1 动态学情触发线
       zpdAnchors: [],   // [{ id, t, label, definedAt }]
       pulseRules: {},   // { [anchorId]: { ifCond, thenAct, microFormat, savedAt } }
-      // v4: S7 → S2 量规反向修订通道
+      // v4: S7 → S2 评价标准反向修订通道
       rubricRevisions: [],  // [{ id, dim, reason, proposedChange, status: "pending"|"accepted"|"rejected", proposedAt, resolvedAt?, resolutionNote? }]
       // v5: 苏格拉底题链 — 埋点 / 迁移题 / 同意状态
       observationLog: {},          // { [stationId]: { [step]: [{ ts, firstChoice, finalChoice, hintsUsed, dwellMs }] } }
@@ -198,7 +198,7 @@
   function getPulseRule(anchorId) { return state.pulseRules[anchorId] || null; }
   function getAllPulseRules() { return Object.assign({}, state.pulseRules); }
 
-  // ── v4 · S7 → S2 量规反向修订通道 ───────────────────────────
+  // ── v4 · S7 → S2 评价标准反向修订通道 ───────────────────────────
   function proposeRubricRevision({ dim, reason, proposedChange, evidenceArtifactId }) {
     if (!dim || !reason) return { ok: false, error: "dim 和 reason 必填" };
     const rev = {

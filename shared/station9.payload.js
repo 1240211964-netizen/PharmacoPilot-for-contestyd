@@ -1,7 +1,7 @@
 /*
  * PharmacoPilot · Station 09 Payload · 动态学情触发台
  * ------------------------------------------------------------
- * L1 动态学情触发线的核心站：为任务链环节 定义的 3 个 学情校准点
+ * L1 动态学情触发线的核心站：为学习活动与教学支架设计环节 定义的 3 个 学情校准点
  * 编写「如果 X 则 Y」反馈—调节规则。
  *
  * 硬约束：每个锚点必须有规则；否则本节点不允许通过。
@@ -36,7 +36,7 @@
     },
 
     narrative: {
-      what: "为任务链环节 时间线上的 3 个 学情校准点设计微评估格式（≤ 3 min），并为每个锚点写一条「如果 X 则 Y」的反馈—调节规则。",
+      what: "为学习活动与教学支架设计环节 时间线上的 3 个 学情校准点设计微评估格式（≤ 3 min），并为每个锚点写一条「如果 X 则 Y」的反馈—调节规则。",
       why:  "光设触发点不够——每个校准点必须有可执行的决策规则，教师才能在 1 分钟内判断「继续/暂停/重启」。",
       how:  "查看 3 个锚点位置 + 微评估格式，为每个锚点编辑一条「如果 X 则 Y」规则，生成学情触发规则表。",
     },
@@ -118,7 +118,7 @@
       "z1-concept":      { summary: "✓ 最高 ROI 选择",        riskBadges: ["关键学情锚"],     detail: "Z1 是误区扩散的最后防线。建议规则阈值 70%。" },
       "z2-controversy":  { summary: "△ 价值高但顺序不佳",     riskBadges: ["建议先 Z1"],     detail: "推演分歧需要建立在条文理解之上才有教学价值。" },
       "z3-closure":      { summary: "△ 终结性价值有限",       riskBadges: ["反馈过晚"],     detail: "Z3 仅能为下一节课提供改进信号，对本节学习已无救治空间。" },
-      "none":            { summary: "✕ 违反 学情触发硬约束",   riskBadges: ["禁条触发"],     detail: "每个学情校准点必须有「如果 X 则 Y」规则（来自 contract.HORIZONTAL_LAYERS.L1.hardConstraint），否则课中调控环节不允许通过。", blockSave: true },
+      "none":            { summary: "✕ 违反 学情触发硬约束",   riskBadges: ["禁条触发"],     detail: "每个学情校准点必须有「如果 X 则 Y」规则（来自 contract.HORIZONTAL_LAYERS.L1.hardConstraint），否则形成性评价与适应性调控环节不允许通过。", blockSave: true },
     },
 
     artifacts: [
@@ -158,7 +158,7 @@
     ],
 
     stateMachine: {
-      A: { id: "locked",       desc: "未进入 · 任务链环节 未生成 学情校准点" },
+      A: { id: "locked",       desc: "未进入 · 学习活动与教学支架设计环节 未生成 学情校准点" },
       B: { id: "entered",      desc: "已进入未判断" },
       C: { id: "selected",     desc: "已选未保存" },
       D: { id: "saved",        desc: "已保存判断" },
@@ -182,7 +182,7 @@
         writesTo: "Store.pulseRules",
         hardConstraint: "每个 学情校准点必须有「如果 X 则 Y」规则",
       },
-      L2: { visible: false, reason: "L2 在 4/6/8/11，课中调控环节 不直接处理议程" },
+      L2: { visible: false, reason: "L2 在 4/6/8/11，形成性评价与适应性调控环节 不直接处理议程" },
       L3: { visible: true, sticky: true, minimizedHeight: 32 },
     },
 

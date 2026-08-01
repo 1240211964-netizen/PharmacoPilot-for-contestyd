@@ -14,6 +14,25 @@
 
 const mount = document.getElementById("nav3d-mount");
 
+// 只把具有界面语义的 3D 颜色接回全站 token；地形、植被和灯光仍保留场景美术色。
+// CSS 已在 module 执行前加载，读取一次即可，避免每帧触发 getComputedStyle。
+function cssTokenColor(name, fallback) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
+const THEME_COLOR = Object.freeze({
+  paper: cssTokenColor("--paper", 0xfaf7f0),
+  paper2: cssTokenColor("--paper-2", 0xf3eee2),
+  ivory: cssTokenColor("--ivory", 0xfffdf7),
+  ink2: cssTokenColor("--ink-2", 0x2c2925),
+  inkSoft: cssTokenColor("--ink-soft", 0x4a463f),
+  mute: cssTokenColor("--mute", 0x6a655e),
+  amberDeep: cssTokenColor("--amber-deep", 0xa8492a),
+  ok: cssTokenColor("--ok", 0x3a8a4e),
+  indigo: cssTokenColor("--indigo", 0x3a4b6b),
+});
+
 function hasWebGL() {
   try {
     const c = document.createElement("canvas");
@@ -61,21 +80,21 @@ function subUrl(subKey) {
   return `./nav-detail.html#go=${st}.${encodeURIComponent(String(subKey))}`;
 }
 
-const PHASE_COLOR = { pre: 0xa8492a, in: 0x3a8a4e, post: 0x5a7090 };
+const PHASE_COLOR = { pre: THEME_COLOR.amberDeep, in: THEME_COLOR.ok, post: THEME_COLOR.indigo };
 const PHASE_CN = { pre: "课前 · 设计", in: "课中 · 调控", post: "课后 · 沉淀" };
 
 // 巡游叙事:每环节一句话(事实均出自契约/payload:32 人前测、45min、锚点 10'/28'/42'、
-// 华海·集采案例、38% 误区、5 维量规、S7→S2 反向修订等),开完一圈 = 一节课的全生命周期。
+// 华海·集采案例、38% 误区、5 维评价标准、S7→S2 反向修订等),开完一圈 = 一节课的全生命周期。
 const STAGE_STORY = {
   S1: { time: "开课前 2 周", line: "先摸清起点:32 人前测与经验画像落定,定位卡从 v0 迭代到 v1,学习者议程被正式接进课程设计。" },
-  S2: { time: "开课前 10 天", line: "倒着设计:先定学习目标与可接受证据,再校准 5 维 SWOT 量规——这套量规课后还会被 S7 的证据反向修订。" },
+  S2: { time: "开课前 10 天", line: "倒着设计:先定学习目标与可接受证据,再校准 5 维 SWOT 评价标准——这套评价标准课后还会被 S7 的证据反向修订。" },
   S3: { time: "开课前 1 周", line: "把内容拆成概念边界与误区清单,预埋问题链——前测里 38% 学生的「S 与 T 互斥」误区,就等问题链定点澄清。" },
   S4: { time: "开课前 5 天", line: "华海药业 · 集采常态化的真实案例进场,证据卡与学习者议程逐条对照,课堂有了可辩的真材料。" },
   S5: { time: "开课前 3 天", line: "45 分钟时间线 v0→v1,三个 ZPD 锚点钉在 10' / 28' / 42',协作任务与角色支架就位。" },
   S6: { time: "上课 · 45 分钟", line: "开课。Z1 条文测温、Z2 推演投票、Z3 知识封闭,每个锚点都有一条「如果 X 则 Y」的干预规则待命。" },
-  S7: { time: "课后 48 小时", line: "收表现性证据:5 维量规逐人评分汇成能力画像;量规本身的问题,沿虚线通道退回 S2 修订。" },
+  S7: { time: "课后 48 小时", line: "收表现性证据:5 维评价标准逐人评分汇成能力画像;评价标准本身的问题,沿虚线通道退回 S2 修订。" },
   S8: { time: "课后 1 周", line: "对照学习者议程逐条兑现,课中触发的干预被复盘成下一轮的改进决策。" },
-  S9: { time: "归档 · 面向下一轮", line: "案例 v2、量规 v2、法规日志入库——下一位新教师,从这里出发。" },
+  S9: { time: "归档 · 面向下一轮", line: "案例 v2、评价标准 v2、法规日志入库——下一位新教师,从这里出发。" },
 };
 
 // ---- 3D 主体 -------------------------------------------------------------
@@ -101,8 +120,8 @@ async function boot() {
   mount.appendChild(labelRenderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf6efe2);
-  scene.fog = new THREE.Fog(0xf6efe2, 60, 190);
+  scene.background = new THREE.Color(THEME_COLOR.paper2);
+  scene.fog = new THREE.Fog(THEME_COLOR.paper2, 60, 190);
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.05).texture;
 
@@ -203,14 +222,14 @@ async function boot() {
   roadGeo.setIndex(idx);
   roadGeo.computeVertexNormals();
   const road = new THREE.Mesh(roadGeo, new THREE.MeshStandardMaterial({
-    color: 0x6f665a, roughness: 0.95, metalness: 0,
+    color: THEME_COLOR.mute, roughness: 0.95, metalness: 0,
     side: THREE.DoubleSide, // 三角带绕向随曲线方向变化,双面渲染兜底
   }));
   road.receiveShadow = true;
   scene.add(road);
 
   // 中线虚线:小白条沿路
-  const dashMat = new THREE.MeshStandardMaterial({ color: 0xfffdf7, roughness: 0.8 });
+  const dashMat = new THREE.MeshStandardMaterial({ color: THEME_COLOR.ivory, roughness: 0.8 });
   const dashGeo = new THREE.BoxGeometry(0.16, 0.05, 1.1);
   for (let i = 0; i < 150; i++) {
     const t = (i + 0.5) / 150;
@@ -251,7 +270,7 @@ async function boot() {
   // ---- 9 个站点:路牌 + 状态旗 + CSS2D 标签 ----
   const stations = [];
   const poleGeo = new THREE.CylinderGeometry(0.09, 0.11, 3.1, 8);
-  const poleMat = new THREE.MeshStandardMaterial({ color: 0x4a4339, roughness: 0.8 });
+  const poleMat = new THREE.MeshStandardMaterial({ color: THEME_COLOR.inkSoft, roughness: 0.8 });
   const signGeo = new THREE.BoxGeometry(2.3, 1.5, 0.14);
   const ringGeo = new THREE.TorusGeometry(1.7, 0.09, 10, 40);
   const flagGeo = new THREE.BoxGeometry(0.9, 0.55, 0.05);
@@ -267,7 +286,7 @@ async function boot() {
 
     const grp = new THREE.Group();
     grp.position.copy(base);
-    const color = PHASE_COLOR[g.phase] || 0xa8492a;
+    const color = PHASE_COLOR[g.phase] || THEME_COLOR.amberDeep;
 
     const pole = new THREE.Mesh(poleGeo, poleMat);
     pole.position.y = 1.55; pole.castShadow = true;
@@ -283,7 +302,7 @@ async function boot() {
     ring.rotation.x = -Math.PI / 2;
     ring.position.copy(p).sub(base).setY(p.y - base.y + 0.05);
 
-    const flag = new THREE.Mesh(flagGeo, new THREE.MeshStandardMaterial({ color: 0x3a8a4e, roughness: 0.5 }));
+    const flag = new THREE.Mesh(flagGeo, new THREE.MeshStandardMaterial({ color: THEME_COLOR.ok, roughness: 0.5 }));
     flag.position.set(0.45, 4.35, 0);
     flag.visible = false;
 
@@ -323,7 +342,7 @@ async function boot() {
     stations.push({ stage: g, t, grp, sign, ring, flag, el, story, done: false, roadPoint: p });
   });
 
-  // ---- L3 产出链:站与站之间的光点弧线(契约 STAGE_CHAIN + 量规反修订通道) ----
+  // ---- L3 产出链:站与站之间的光点弧线(契约 STAGE_CHAIN + 评价标准反向修订通道) ----
   // 只在俯瞰模式显示 — 跟车视角下会遮挡路面,而产出链本来就是"全局结构"信息。
   const chainGroup = new THREE.Group();
   scene.add(chainGroup);
@@ -343,7 +362,7 @@ async function boot() {
       const mid = A.clone().lerp(B, 0.5);
       mid.y += A.distanceTo(B) * 0.22 + 5;
       const arc = new THREE.QuadraticBezierCurve3(A, mid, B);
-      const color = rev ? 0xa8492a : PHASE_COLOR[stations[a].stage.phase];
+      const color = rev ? THEME_COLOR.amberDeep : PHASE_COLOR[stations[a].stage.phase];
       const line = new THREE.Line(
         new THREE.BufferGeometry().setFromPoints(arc.getPoints(48)),
         new THREE.LineDashedMaterial({
@@ -364,15 +383,15 @@ async function boot() {
 
   // ---- 小车(副驾座驾):低多边形拼装 ----
   const car = new THREE.Group();
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xa8492a, roughness: 0.35, metalness: 0.15 });
+  const bodyMat = new THREE.MeshStandardMaterial({ color: THEME_COLOR.amberDeep, roughness: 0.35, metalness: 0.15 });
   const body = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.5, 2.3), bodyMat);
   body.position.y = 0.55; body.castShadow = true;
   const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.42, 1.15),
-    new THREE.MeshStandardMaterial({ color: 0xfaf7f0, roughness: 0.2, metalness: 0.1 }));
+    new THREE.MeshStandardMaterial({ color: THEME_COLOR.paper, roughness: 0.2, metalness: 0.1 }));
   cabin.position.set(0, 0.98, -0.1); cabin.castShadow = true;
   const wheelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.22, 12);
   wheelGeo.rotateZ(Math.PI / 2);
-  const wheelMat = new THREE.MeshStandardMaterial({ color: 0x2c2620, roughness: 0.9 });
+  const wheelMat = new THREE.MeshStandardMaterial({ color: THEME_COLOR.ink2, roughness: 0.9 });
   [[-0.62, 0.75], [0.62, 0.75], [-0.62, -0.8], [0.62, -0.8]].forEach(([x, z]) => {
     const w = new THREE.Mesh(wheelGeo, wheelMat);
     w.position.set(x, 0.28, z);
@@ -561,7 +580,7 @@ async function boot() {
         if (tour.idx >= stations.length - 1) {
           tour.state = "finale";
           tour.until = clock.elapsedTime + 4.5;
-          captionShow("<b>✓ 全程走完</b> 9 个教学环节 · 一节课的全生命周期。俯瞰全图(V)可见环节间的产出链与 S7→S2 量规回流。");
+          captionShow("<b>✓ 全程走完</b> 9 个教学环节 · 一节课的全生命周期。俯瞰全图(V)可见环节间的产出链与 S7→S2 评价标准回流。");
         } else {
           tour.idx += 1;
           tour.state = "drive";
