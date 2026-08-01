@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
+import { PRACTICE_REVIEWERS } from "./agents.mjs";
 import { createPharmacoServer } from "./app.mjs";
 import { loadConfig } from "./config.mjs";
 import { PharmacoDatabase } from "./db.mjs";
@@ -19,6 +20,13 @@ test("PharmacoPilot backend contract", async (t) => {
     issue: "目标要求比较权衡，但现有量规只记录结论，没有观察学生如何使用证据。",
     suggestion: "在量规中增加一项：能否引用两类证据解释取舍，并说明证据边界。",
     crossReferences: [{ envKey: "env05", sourceExcerpt: "任务：用两类证据完成替代决策并说明边界" }],
+  };
+  const pharmacyReview = {
+    targetEnv: "env05",
+    sourceExcerpt: "任务：用两类证据完成替代决策并说明边界",
+    issue: "任务没有落到具体科室与患者群，学生无法体会真实替代决策的临床语境。",
+    suggestion: "把任务背景设为心内科门诊的高血压长期处方患者，并指明由药事委员会作决策。",
+    crossReferences: [],
   };
   const fakeModel = {
     async status() {
@@ -43,6 +51,13 @@ test("PharmacoPilot backend contract", async (t) => {
           id: "practice-pack-test",
           model: "fake-model",
           choices: [{ message: { role: "assistant", content: JSON.stringify(generatedPack) } }],
+        }), { headers: { "content-type": "application/json" } });
+      }
+      if (request.messages[0]?.content.startsWith("你是 PharmacoPilot 教学实践卷宗中的“药学情境审校”")) {
+        return new Response(JSON.stringify({
+          id: "practice-review-pharmacy-test",
+          model: "fake-model",
+          choices: [{ message: { role: "assistant", content: JSON.stringify(pharmacyReview) } }],
         }), { headers: { "content-type": "application/json" } });
       }
       if (request.messages[0]?.content.includes("教学设计审校")) {
@@ -371,6 +386,75 @@ test("PharmacoPilot backend contract", async (t) => {
     assert.match(calls.at(-1).messages.at(-1).content, /机械门禁/);
   });
 
+  await t.test("forwards avoid-anchor hints and keys the review cache on them", async () => {
+    const currentPack = {
+      env01: "诊断：匿名投票识别学生对集采替代的初始判断",
+      env02: "目标：比较集采替代中的质量与可及性权衡 · 量规：能说明结论",
+      env03: "误区：只比较药价而忽略疗效与患者可及性",
+      env04: "证据：待核实集采政策来源与适用范围",
+      env05: "任务：用两类证据完成替代决策并说明边界 · 输出：三方决策备忘录",
+      env06: "调控：追问证据来源并记录沉默节点",
+      env07: "评价：依据量规形成学习画像",
+      env08: "复盘：比较初始判断与最终决策",
+      env09: "沉淀：保存可复用的问题链与量规",
+    };
+    const context = {
+      chapterId: "ch5-procurement",
+      courseTitle: "药事管理学",
+      courseLevel: "本科",
+      classTitle: "药管 1 班",
+      studentCount: 32,
+      sessionTitle: "第 7 周",
+      durationMinutes: 45,
+      chapterTitle: "集采制度",
+      topic: "集采后仿制药替代",
+    };
+    const avoidAnchors = [{ targetEnv: "env04", sourceExcerpt: "证据：待核实集采政策来源与适用范围" }];
+    const withAvoid = { reviewerId: "pharmacy-context", sourceRevision: 5, context, currentPack, avoidAnchors };
+
+    const before = calls.length;
+    const response = await fetch(`${base}/api/practice/reviews`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(withAvoid),
+    });
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.status, "anchored");
+    assert.equal(body.reviewer.expertId, "expert-pharm");
+    assert.equal(body.annotation.targetEnv, "env05");
+    assert.equal(calls.length, before + 1);
+    assert.match(calls.at(-1).messages[1].content, /<occupied_anchors>/);
+    assert.match(calls.at(-1).messages[1].content, /env04 · 证据：待核实集采政策来源与适用范围/);
+
+    const cachedResponse = await fetch(`${base}/api/practice/reviews`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(withAvoid),
+    });
+    assert.equal((await cachedResponse.json()).cache.hit, true);
+    assert.equal(calls.length, before + 1, "相同 avoidAnchors 应命中缓存");
+
+    const withoutAvoid = { reviewerId: "pharmacy-context", sourceRevision: 5, context, currentPack };
+    const freshResponse = await fetch(`${base}/api/practice/reviews`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(withoutAvoid),
+    });
+    assert.equal((await freshResponse.json()).cache.hit, false);
+    assert.equal(calls.length, before + 2, "avoidAnchors 变化必须视为不同缓存键");
+    assert.doesNotMatch(calls.at(-1).messages[1].content, /<occupied_anchors>/);
+
+    const invalidResponse = await fetch(`${base}/api/practice/reviews`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ...withAvoid, avoidAnchors: [{ targetEnv: "env99", sourceExcerpt: "不存在的环节" }] }),
+    });
+    assert.equal(invalidResponse.status, 400);
+    assert.equal((await invalidResponse.json()).error.code, "INVALID_AVOID_ANCHORS");
+    assert.equal(calls.length, before + 2, "非法 avoidAnchors 不应触发模型调用");
+  });
+
   await t.test("rejects an unknown practice reviewer before inference", async () => {
     const before = calls.length;
     const response = await fetch(`${base}/api/practice/reviews`, {
@@ -383,6 +467,33 @@ test("PharmacoPilot backend contract", async (t) => {
     assert.equal(body.error.code, "UNKNOWN_PRACTICE_REVIEWER");
     assert.equal(calls.length, before);
   });
+});
+
+test("practice reviewer registry covers five scoped disciplines", () => {
+  const reviewers = Object.values(PRACTICE_REVIEWERS);
+  assert.equal(reviewers.length, 5);
+  assert.deepEqual(
+    reviewers.map((reviewer) => reviewer.expertId).sort(),
+    ["expert-data", "expert-edu", "expert-law", "expert-mgmt", "expert-pharm"],
+  );
+  const envKeys = new Set(Array.from({ length: 9 }, (_, index) => `env${String(index + 1).padStart(2, "0")}`));
+  const promptVersions = new Set();
+  const scopeSignatures = new Set();
+  for (const reviewer of reviewers) {
+    assert.equal(PRACTICE_REVIEWERS[reviewer.id], reviewer);
+    assert.ok(reviewer.scope.length >= 1 && reviewer.scope.length <= 3, `${reviewer.id} scope 应聚焦 1–3 个主责环节`);
+    for (const key of reviewer.scope) {
+      assert.ok(envKeys.has(key), `${reviewer.id} 的 scope ${key} 不是合法环节`);
+      assert.match(reviewer.systemPrompt, new RegExp(key), `${reviewer.id} 的 prompt 未提及主责环节 ${key}`);
+    }
+    assert.match(reviewer.systemPrompt, /只输出一个 JSON 对象/);
+    assert.match(reviewer.systemPrompt, /逐字复制/);
+    assert.match(reviewer.systemPrompt, /只提一条主批注/);
+    promptVersions.add(reviewer.promptVersion);
+    scopeSignatures.add([...reviewer.scope].sort().join(","));
+  }
+  assert.equal(promptVersions.size, 5, "promptVersion 必须互不相同");
+  assert.equal(scopeSignatures.size, 5, "五路 scope 组合必须互相错开，防止审校同质化");
 });
 
 test("LAN binding is fail-closed without an API token", () => {

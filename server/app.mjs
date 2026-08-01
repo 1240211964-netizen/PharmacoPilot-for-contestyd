@@ -250,7 +250,22 @@ function validatePracticeReviewRequest(body) {
   if (!Number.isInteger(sourceRevision) || sourceRevision < 0) {
     fail(400, "INVALID_SOURCE_REVISION", "sourceRevision 必须是非负整数");
   }
-  return { ...input, reviewer, sourceRevision };
+  // 同段避让：五路并发时把已锚定批注占用的段落传给后续请求，属提示不属门禁。
+  const avoidAnchors = [];
+  if (body.avoidAnchors !== undefined) {
+    if (!Array.isArray(body.avoidAnchors) || body.avoidAnchors.length > 8) {
+      fail(400, "INVALID_AVOID_ANCHORS", "avoidAnchors 必须是不超过 8 项的数组");
+    }
+    for (const item of body.avoidAnchors) {
+      const targetEnv = typeof item?.targetEnv === "string" ? item.targetEnv : "";
+      const sourceExcerpt = typeof item?.sourceExcerpt === "string" ? item.sourceExcerpt.trim() : "";
+      if (!PRACTICE_PACK_KEYS.includes(targetEnv) || !sourceExcerpt || sourceExcerpt.length > 400) {
+        fail(400, "INVALID_AVOID_ANCHORS", "avoidAnchors 每项需要合法 targetEnv 与非空 sourceExcerpt（不超过 400 字）");
+      }
+      avoidAnchors.push({ targetEnv, sourceExcerpt });
+    }
+  }
+  return { ...input, reviewer, sourceRevision, avoidAnchors };
 }
 
 function reviewText(value, name, { max = 1_200, required = true } = {}) {
@@ -320,11 +335,14 @@ function gatePracticeReview(parsed, input) {
 }
 
 function buildPracticeReviewMessages(input, correction = null) {
+  const avoidBlock = input.avoidAnchors?.length
+    ? `\n<occupied_anchors>\n${input.avoidAnchors.map((item) => `${item.targetEnv} · ${item.sourceExcerpt}`).join("\n")}\n</occupied_anchors>\n以上段落已被其他学科审校的批注占用。请优先选择其它段落或环节；只有当该处存在你职责内必须指出、且与已有批注不同的问题时，才可再次选择同一段。`
+    : "";
   const base = [
     { role: "system", content: input.reviewer.systemPrompt },
     {
       role: "user",
-      content: `请审校以下当前稿件。\n<teaching_context>\n${JSON.stringify(input.context, null, 2)}\n</teaching_context>\n<current_pack source_revision="${input.sourceRevision}">\n${JSON.stringify(input.currentPack, null, 2)}\n</current_pack>`,
+      content: `请审校以下当前稿件。\n<teaching_context>\n${JSON.stringify(input.context, null, 2)}\n</teaching_context>\n<current_pack source_revision="${input.sourceRevision}">\n${JSON.stringify(input.currentPack, null, 2)}\n</current_pack>${avoidBlock}`,
     },
   ];
   if (!correction) return base;
@@ -556,6 +574,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         sourceRevision: input.sourceRevision,
         reviewerId: input.reviewer.id,
         promptVersion: input.reviewer.promptVersion,
+        avoidAnchors: input.avoidAnchors,
         model: config.modelName,
         temperature: PRACTICE_REVIEW_TEMPERATURE,
         maxTokens: PRACTICE_REVIEW_MAX_TOKENS,

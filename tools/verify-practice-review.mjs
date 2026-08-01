@@ -89,14 +89,23 @@ assert.equal(runtime.includes('data-review-act="edit"'), false, "旧的独立编
 assert.equal(runtime.includes(".ec-acts"), false, "旧的三按钮样式仍在运行时");
 assert.equal(page.includes(".ec-acts"), false, "旧的三按钮样式仍在页面 CSS");
 assert.match(runtime, /entry\.decisionNote = event\.target\.value\.trim\(\);[\s\S]{0,180}renderMigrate\(\);[\s\S]{0,80}renderStage3\(\);/, "教师判断依据未同步刷新修订摘要");
-assert.match(page, /practice-runtime\.js\?v=discipline-review-v11/, "practice runtime 缓存版本未更新");
+assert.match(page, /practice-runtime\.js\?v=discipline-review-v12/, "practice runtime 缓存版本未更新");
 assert.match(page, /practice-runtime-contract\.js\?v=discipline-review-v4/, "practice runtime contract 缓存版本未更新");
 assert.match(page, /backend-client\.js\?v=5-practice-review/, "backend client 缓存版本未更新");
 
-// Stage 2a: 只给教学设计审校接入真实本机模型，并保留其它四路固定种子。
+// Stage 2b: 五路审校全部接入真模型——scope 隔离防同质化,同段避让 + 并发 2 批量扇出,
+// 后端未连接或未锚定时保留固定种子。(2026-08-01 由 Stage 2a 单路升级)
 assert.equal((runtime.match(/<button[^>]+data-review-act="live"/g) || []).length, 1, "真实审校入口必须只渲染一个按钮模板");
-assert.match(runtime, /e\.id === "expert-edu" \? `[\s\S]{0,500}data-ec-role="live-review"/, "真实审校入口未限定到教学设计卡");
-assert.match(runtime, /reviewerId: "instructional-design"/, "教学设计单卡未使用独立审校 reviewerId");
+assert.equal(runtime.includes('e.id === "expert-edu" ?'), false, "真实审校入口不应再限定到教学设计卡");
+for (const reviewerId of ["pharmacy-context", "management-tradeoff", "regulatory-citation", "instructional-design", "evidence-metrics"]) {
+  assert.equal(runtime.includes(`reviewerId: "${reviewerId}"`), true, `缺少五路审校 reviewerId：${reviewerId}`);
+}
+assert.match(runtime, /function collectAvoidAnchors\(/, "五路扇出缺少同段避让收集");
+assert.match(runtime, /LIVE_REVIEW_CONCURRENCY = 2/, "批量审校未把并发上限定为 2");
+assert.match(runtime, /data-review-act="run-all"/, "运行时缺少五路批量审校入口");
+assert.match(page, /data-review-act="run-all"/, "页面缺少五路批量审校控件");
+assert.match(runtime, /liveReviewDupNote/, "同段批注缺少诚实标注");
+assert.match(runtime, /entry\.expert\?\.scopeCopy/, "各卡重审按钮未标注学科主责范围");
 assert.match(runtime, /getPackRevision\(entry\.chapterId/, "真实审校未比较稿件修订号");
 assert.match(runtime, /该批注针对旧版稿件/, "旧版批注未被阻止进入候选");
 assert.match(runtime, /result\?\.status !== "anchored"/, "未锚定模型输出可能进入审校卡");

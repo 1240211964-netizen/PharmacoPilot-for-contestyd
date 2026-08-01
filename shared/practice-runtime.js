@@ -2082,6 +2082,8 @@
       role: "药学情境审校",
       func: "把课题锚定到真实临床 / 药学决策场景",
       persona: "临床药学",
+      reviewerId: "pharmacy-context",
+      scopeCopy: "只审校案例证据与任务链两个主责环节",
       target: 5,
       inject: {
         upload:  "上传匿名病例 PDF / 临床指南",
@@ -2094,6 +2096,8 @@
       role: "管理决策审校",
       func: "审视医院管理 / 药事经济 / 政策路径",
       persona: "药事管理与卫生经济",
+      reviewerId: "management-tradeoff",
+      scopeCopy: "只审校目标量规与复盘决策两个主责环节",
       target: 4,
       inject: {
         upload:  "上传医院年报 / 政策分析报告",
@@ -2106,6 +2110,8 @@
       role: "法规合规审校",
       func: "校验法规引用 · 文号 · 年份 · 时效",
       persona: "药事法规与监管",
+      reviewerId: "regulatory-citation",
+      scopeCopy: "只审校知识误区与案例证据两个主责环节",
       target: 6,
       inject: {
         upload:  "上传法规 PDF / 飞检通告汇编",
@@ -2118,6 +2124,8 @@
       role: "教学设计审校",
       func: "审视问题链 · 目标对齐 · 量规设计",
       persona: "课程与评价",
+      reviewerId: "instructional-design",
+      scopeCopy: "只审校目标、误区与任务链三个主责环节",
       target: 4,
       inject: {
         upload:  "上传课程论文 / 评价范式材料",
@@ -2130,6 +2138,8 @@
       role: "数据循证审校",
       func: "提供 RWE / 监测数据 / 循证支撑",
       persona: "数据科学与真实世界证据",
+      reviewerId: "evidence-metrics",
+      scopeCopy: "只审校案例证据与评价画像两个主责环节",
       target: 9,
       inject: {
         upload:  "上传 CSV / 监测报表 / 真实世界数据",
@@ -2394,7 +2404,7 @@
     EXPERTS.forEach((e, i) => {
       const c = comments[i] || comments[0];
       const savedRecord = savedReviews[e.id];
-      const liveReview = e.id === "expert-edu" ? normalizeLiveReview(savedRecord?.liveReview) : null;
+      const liveReview = normalizeLiveReview(savedRecord?.liveReview);
       const seedSourceText = stripHtml(c.body).trim();
       const sourceText = liveReview ? liveReviewSourceText(liveReview) : seedSourceText;
       const defaultTargets = liveReview ? liveReviewTargetKeys(liveReview) : inferReviewTargetEnvKeys(sourceText);
@@ -2415,12 +2425,11 @@
           <div class="ec-who">${e.role} <span class="ec-demo">审校视角</span><small>${e.persona}</small></div>
         </div>
         <div class="ec-func">职能 · ${e.func}</div>
-        ${e.id === "expert-edu" ? `
         <div class="ec-live-review" data-ec-role="live-review" data-state="seed">
           <span class="ec-live-status" data-ec-role="live-status">固定审校种子</span>
           <button type="button" data-review-act="live">用本机 Qwen 审校</button>
           <span class="ec-live-error" data-ec-role="live-error" role="alert" hidden></span>
-        </div>` : ""}
+        </div>
         <span class="ec-anchor" title="${liveReview ? escapeHtml(liveReview.annotation.sourceExcerpt) : ""}">${liveReview ? escapeHtml(liveReviewAnchorCopy(liveReview)) : c.anchor}</span>
         <div class="ec-body" data-ec-role="body"></div>
         <div class="ec-edit-panel" data-ec-role="edit-panel" hidden>
@@ -2504,6 +2513,8 @@
     });
     updateExpertAdoptBar();
     composeAssets();
+    wireLiveReviewBatch();
+    updateBatchIdleStatus();
   }
 
   const EXPERT_ADOPT_STORE = "pp.practice.expertAdoptions";
@@ -2702,6 +2713,17 @@
     return !!entry.liveReview && entry.liveReview.sourceRevision !== getPackRevision(entry.chapterId || wizSelection.chapter);
   }
 
+  // 同段避让失败时不丢弃批注,而是标出"与××同段"——不同学科对同一段落
+  // 提出不同问题是真实情况,教师应看到并列意见而不是被系统裁剪。
+  function liveReviewDupNote(entry) {
+    if (!entry.liveReview) return "";
+    const dup = (state.expertCards || []).find((other) => other !== entry
+      && other.liveReview && !isLiveReviewStale(other)
+      && other.liveReview.annotation.targetEnv === entry.liveReview.annotation.targetEnv
+      && other.liveReview.annotation.segmentKey === entry.liveReview.annotation.segmentKey);
+    return dup ? ` · 与${dup.expert?.role || "另一路审校"}同段` : "";
+  }
+
   function syncLiveReviewVisual(entry) {
     const panel = entry.card?.querySelector('[data-ec-role="live-review"]');
     if (!panel) return;
@@ -2722,7 +2744,7 @@
           : stale
             ? `该批注针对第 ${entry.liveReview.sourceRevision} 版 · 当前第 ${currentRevision} 版`
             : entry.liveReview
-              ? `本机 Qwen · 已锚定 · 第 ${entry.liveReview.sourceRevision} 版`
+              ? `本机 Qwen · 已锚定 · 第 ${entry.liveReview.sourceRevision} 版${liveReviewDupNote(entry)}`
               : "固定审校种子";
     }
     if (error) {
@@ -2733,7 +2755,7 @@
       button.textContent = loading ? "审校中…" : entry.liveReview ? "重新审校" : "用本机 Qwen 审校";
       button.disabled = loading || entry.state !== "pending";
       button.setAttribute("aria-busy", String(loading));
-      button.title = entry.state !== "pending" ? "先改判回到待处理状态，才能重新审校" : "只审校目标、误区与任务链三个主责环节";
+      button.title = entry.state !== "pending" ? "先改判回到待处理状态，才能重新审校" : (entry.expert?.scopeCopy || "只审校本学科主责环节");
     }
     entry.card.querySelectorAll("[data-review-choice]").forEach((choice) => {
       choice.disabled = stale;
@@ -2761,33 +2783,49 @@
     return `${base}${hasPriorReview ? "现有批注未被替换；若其已过期，仍不能进入候选。" : "系统已保留固定审校种子。"}`;
   }
 
-  async function runLiveInstructionalReview(entry, chapter) {
-    if (entry.expertId !== "expert-edu" || entry.state !== "pending" || entry.liveReviewPhase === "loading") return;
+  // 同段避让：把其它卡已锚定且未过期的批注位置传给后端,提示模型优先另选段落。
+  // 只取主锚点、上限 8 条,与服务端校验一致;这是提示不是门禁,同段仍可能出现,
+  // 由 syncLiveReviewVisual 的"与××同段"标记诚实呈现。
+  function collectAvoidAnchors(excludeExpertId) {
+    return (state.expertCards || [])
+      .filter((other) => other.expertId !== excludeExpertId && other.liveReview && !isLiveReviewStale(other))
+      .map((other) => ({
+        targetEnv: other.liveReview.annotation.targetEnv,
+        sourceExcerpt: other.liveReview.annotation.sourceExcerpt,
+      }))
+      .slice(0, 8);
+  }
+
+  async function runLiveReview(entry, chapter, { silent = false } = {}) {
+    const reviewerId = entry.expert?.reviewerId;
+    const roleName = entry.expert?.role || "学科审校";
+    if (!reviewerId || entry.state !== "pending" || entry.liveReviewPhase === "loading") return "skipped";
     const course = getSelected("course");
     const klass = getSelected("class");
     const session = getSelected("session");
     const selectedChapter = getSelected("chapter");
     const currentPack = currentPackFromPreview();
     if (!course || !klass || !session || !selectedChapter || !currentPack) {
-      toast("请先完成实践包四项选择，并确保九个环节都有内容");
-      return;
+      if (!silent) toast("请先完成实践包四项选择，并确保九个环节都有内容");
+      return "skipped";
     }
     if (!global.PharmacoBackend?.reviewPractice) {
       entry.liveReviewPhase = "error";
       entry.liveReviewError = "本机后端未连接；当前仍显示固定审校种子。请用 npm start 打开页面。";
       syncLiveReviewVisual(entry);
-      return;
+      return "error";
     }
 
     const requestedChapterId = selectedChapter.id;
     const sourceRevision = getPackRevision(requestedChapterId);
+    const avoidAnchors = collectAvoidAnchors(entry.expertId);
     entry.liveReviewPhase = "loading";
     entry.liveReviewError = "";
     syncLiveReviewVisual(entry);
-    setStageStatus("ii", "教学设计审校正在读取当前稿件", true, false);
+    if (!silent) setStageStatus("ii", `${roleName}正在读取当前稿件`, true, false);
     try {
       const result = await global.PharmacoBackend.reviewPractice({
-        reviewerId: "instructional-design",
+        reviewerId,
         sourceRevision,
         context: {
           chapterId: selectedChapter.id,
@@ -2801,13 +2839,14 @@
           topic: selectedChapter.topic,
         },
         currentPack,
+        ...(avoidAnchors.length ? { avoidAnchors } : {}),
       });
       if (result?.status !== "anchored") {
         entry.liveReviewPhase = "error";
         entry.liveReviewError = liveReviewFailureCopy(result?.gate?.reason, !!entry.liveReview);
-        setStageStatus("ii", "本次审校未通过锚定门禁", false, true);
+        if (!silent) setStageStatus("ii", "本次审校未通过锚定门禁", false, true);
         syncLiveReviewVisual(entry);
-        return;
+        return "unanchored";
       }
       const liveReview = normalizeLiveReview(result);
       if (!liveReview) throw new Error("本地模型返回的审校记录不完整");
@@ -2830,8 +2869,12 @@
       });
       saveExpertReview(requestedChapterId, entry);
       syncReviewCardVisual(entry);
-      setStageStatus("ii", `教学设计审校已锚定到 ${PRACTICE_ENV_BY_KEY[liveReview.annotation.targetEnv]?.no || liveReview.annotation.targetEnv}`, false, true);
-      toast(`本机 Qwen 审校完成 · 已锚定第 ${sourceRevision} 版稿件`);
+      refreshReviewFreshness(requestedChapterId);
+      if (!silent) {
+        setStageStatus("ii", `${roleName}已锚定到 ${PRACTICE_ENV_BY_KEY[liveReview.annotation.targetEnv]?.no || liveReview.annotation.targetEnv}`, false, true);
+        toast(`本机 Qwen 审校完成 · 已锚定第 ${sourceRevision} 版稿件`);
+      }
+      return "anchored";
     } catch (error) {
       console.warn("[practice-runtime] 本机 Qwen 审校失败", error);
       entry.liveReviewPhase = "error";
@@ -2841,9 +2884,98 @@
       entry.liveReviewError = error?.code === "MODEL_UNAVAILABLE"
         ? `本机模型未就绪；${preserved}`
         : `本机后端或模型未完成审校；${preserved}`;
-      setStageStatus("ii", "本机审校暂不可用", false, true);
+      if (!silent) setStageStatus("ii", "本机审校暂不可用", false, true);
       syncLiveReviewVisual(entry);
+      return "error";
     }
+  }
+
+  // ---- 五路批量审校：并发上限 2,完成一张呈现一张,已判定的卡不静默覆盖 ----
+  const LIVE_REVIEW_CONCURRENCY = 2;
+  let liveReviewBatchActive = false;
+
+  function batchBarEls() {
+    const bar = document.querySelector('#stage-ii [data-ec-role="batch-bar"]');
+    return {
+      bar,
+      button: bar?.querySelector('[data-review-act="run-all"]') || null,
+      status: bar?.querySelector('[data-ec-role="batch-status"]') || null,
+    };
+  }
+
+  function setBatchStatus(text) {
+    const { status } = batchBarEls();
+    if (status) status.textContent = text;
+  }
+
+  function updateBatchIdleStatus() {
+    if (liveReviewBatchActive) return;
+    const phase = document.documentElement.dataset.backend;
+    setBatchStatus(phase === "ready" || phase === "conflict"
+      ? "本机 Qwen 已连接 · 可对当前稿件运行五路审校"
+      : "本机后端未连接 · 当前显示固定审校种子");
+  }
+
+  async function runAllLiveReviews() {
+    if (liveReviewBatchActive) return;
+    const chapter = getSelected("chapter");
+    if (!getSelected("course") || !getSelected("class") || !getSelected("session") || !chapter || !currentPackFromPreview()) {
+      toast("请先完成实践包四项选择，并确保九个环节都有内容");
+      return;
+    }
+    const phase = document.documentElement.dataset.backend;
+    if (!global.PharmacoBackend?.reviewPractice || (phase !== "ready" && phase !== "conflict")) {
+      setBatchStatus("本机后端未连接 · 请用 npm start 打开页面后重试");
+      toast("本机后端未连接 · 当前仍显示固定审校种子");
+      return;
+    }
+    const entries = state.expertCards || [];
+    const targets = entries.filter((en) => en.expert?.reviewerId && en.state === "pending"
+      && en.liveReviewPhase !== "loading" && (!en.liveReview || isLiveReviewStale(en)));
+    const decided = entries.filter((en) => en.state !== "pending").length;
+    const fresh = entries.filter((en) => en.state === "pending" && en.liveReview && !isLiveReviewStale(en)).length;
+    if (!targets.length) {
+      setBatchStatus(`没有需要审校的卡${decided ? ` · ${decided} 张已判定` : ""}${fresh ? ` · ${fresh} 张批注仍为当前版` : ""}`);
+      return;
+    }
+    liveReviewBatchActive = true;
+    const { button } = batchBarEls();
+    if (button) { button.disabled = true; button.setAttribute("aria-busy", "true"); }
+    setStageStatus("ii", "五路学科审校进行中", true, false);
+    const chapterId = chapter.id;
+    const queue = [...targets];
+    const tally = { anchored: 0, unanchored: 0, error: 0, skipped: 0 };
+    let done = 0;
+    const worker = async () => {
+      while (queue.length) {
+        if (getSelected("chapter")?.id !== chapterId) { tally.skipped += queue.length; queue.length = 0; return; }
+        const entry = queue.shift();
+        setBatchStatus(`审校中 ${Math.min(done + 1, targets.length)}/${targets.length} · ${entry.expert?.role || "学科审校"} · 已锚定 ${tally.anchored}`);
+        const outcome = await runLiveReview(entry, chapter, { silent: true });
+        tally[outcome] = (tally[outcome] || 0) + 1;
+        done += 1;
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(LIVE_REVIEW_CONCURRENCY, queue.length) }, () => worker()));
+    liveReviewBatchActive = false;
+    if (button) { button.disabled = false; button.removeAttribute("aria-busy"); }
+    const parts = [`${tally.anchored} 已锚定`];
+    if (tally.unanchored) parts.push(`${tally.unanchored} 未定位（保留原批注）`);
+    if (tally.error) parts.push(`${tally.error} 未完成`);
+    if (tally.skipped) parts.push(`${tally.skipped} 因切换章节中止`);
+    if (decided) parts.push(`跳过 ${decided} 张已判定卡`);
+    setBatchStatus(`五路审校结束 · ${parts.join(" · ")}`);
+    setStageStatus("ii", "五路学科审校结束", false, true);
+    toast(`五路审校结束 · ${parts.join(" · ")}`);
+  }
+
+  function wireLiveReviewBatch() {
+    const { bar, button } = batchBarEls();
+    if (!bar || bar.dataset.wired === "1") return;
+    bar.dataset.wired = "1";
+    button?.addEventListener("click", () => { runAllLiveReviews(); });
+    global.addEventListener("pharmaco:backend-status", () => updateBatchIdleStatus());
+    updateBatchIdleStatus();
   }
 
   function wireReviewCard(entry, chapter) {
@@ -2898,7 +3030,7 @@
     };
 
     card.querySelector('[data-review-act="live"]')?.addEventListener("click", () => {
-      runLiveInstructionalReview(entry, chapter);
+      runLiveReview(entry, chapter);
     });
 
     card.querySelector('[data-review-choice="original"]')?.addEventListener("click", () => {

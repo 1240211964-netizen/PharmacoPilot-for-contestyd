@@ -816,6 +816,25 @@
 .ec-live-error[hidden] { display: none !important; }
 @keyframes ecReviewPulse { 50% { opacity: .42; } }
 @media (prefers-reduced-motion: reduce) { .ec-live-review[data-state="loading"] .ec-live-status { animation: none; } }
+.ec-batch-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin: 2px 0 14px;
+  padding: 9px 12px; border: 1px solid var(--rule); border-radius: 8px;
+  background: var(--paper-2);
+}
+.ec-batch-bar .ec-batch-run {
+  border: 1px solid var(--amber-deep); border-radius: 6px; padding: 6px 13px;
+  background: transparent; color: var(--amber-deep); cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .04em; white-space: nowrap;
+}
+.ec-batch-bar .ec-batch-run:hover:not(:disabled) { background: var(--amber-wash); }
+.ec-batch-bar .ec-batch-run:disabled { border-color: var(--rule); color: var(--mute); cursor: not-allowed; }
+.ec-batch-bar .ec-batch-run[aria-busy="true"] { animation: ecReviewPulse 1.15s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .ec-batch-bar .ec-batch-run[aria-busy="true"] { animation: none; } }
+.ec-batch-status {
+  min-width: 0; font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.5;
+  color: var(--mute); letter-spacing: .025em;
+}
 .expert-card.has-stale-review .ec-anchor { background: var(--paper-2); color: var(--mute); }
 .expert-card .ec-inject {
   display: flex; flex-direction: column; gap: 6px;
@@ -1712,7 +1731,7 @@ window.__ANIM = window.__ANIM || { reveal: { step: 75 } };
 <script src="./shared/practice-runtime-contract.js?v=discipline-review-v4" defer></script>
 <script src="./shared/toast.js?v=2" defer></script>
 <script src="./shared/faq.js?v=1" defer></script>
-<script src="./shared/practice-runtime.js?v=discipline-review-v11" defer></script>
+<script src="./shared/practice-runtime.js?v=discipline-review-v12" defer></script>
 <script src="./shared/rerun-bridge.js?v=3" defer></script>
 <script src="./shared/backend-client.js?v=5-practice-review" defer></script>
 <!-- ===== 虚拟教室 ===== 优先 3D；core=仿真大脑；2.5D 为回退 -->
@@ -1939,8 +1958,14 @@ window.addEventListener('load', function () {
       <div class="substage-h" data-reveal>
         <span class="lab">A · 五路学科审校</span>
         <h4>五个学科视角并行发现问题</h4>
-        <span class="note">模板化审校视角 · 可编辑候选 · 目标环节可多选</span>
+        <span class="note">真模型逐卡锚定批注 · 未连接时保留固定种子 · 目标环节可多选</span>
       </div>
+
+    <!-- 五路批量审校总控 · 由 practice-runtime.js 接管;并发上限 2,完成一张呈现一张 -->
+    <div class="ec-batch-bar" data-ec-role="batch-bar" data-reveal>
+      <button type="button" class="ec-batch-run" data-review-act="run-all">五路审校当前稿件</button>
+      <span class="ec-batch-status" data-ec-role="batch-status" role="status" aria-live="polite">本机后端未连接 · 当前显示固定审校种子</span>
+    </div>
 
     <!-- 由 practice-runtime.js · renderExpertCards 按所选章节动态填充 -->
     <div class="expert-grid" data-ec-role="grid" aria-live="polite" data-reveal-stagger></div>
