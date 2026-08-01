@@ -998,47 +998,6 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
   display: flex; gap: 8px; margin-top: 14px;
 }
 
-/* ============ ∴ 工程架构 section (homepage 结尾) ============ */
-.arch-section-home { padding: 80px 0 56px; }
-.arch-section-home .sec-h .num {
-  /* "∴" 比数字稍小一些，避免压住中文标题 */
-  font-size: var(--fs-hero);
-  line-height: 0.95;
-}
-.arch-figure-home {
-  background: var(--ivory);
-  border: 1px solid var(--ink);
-  border-radius: 16px;
-  padding: 20px 36px 32px;
-  box-shadow: 6px 6px 0 var(--ink);
-  max-width: 920px;
-  margin: 8px auto 0;
-}
-.arch-figure-tag {
-  display: flex; justify-content: space-between; align-items: baseline;
-  padding-bottom: 12px; margin-bottom: 18px;
-  border-bottom: 1px dashed var(--rule);
-  flex-wrap: wrap; gap: 8px;
-}
-.arch-figure-tag .tag-lbl {
-  font-family: var(--mono); font-size: var(--fs-2xs);
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--amber-deep); font-weight: 600;
-  position: relative; padding-left: 22px;
-}
-.arch-figure-tag .tag-lbl::before {
-  content: ""; position: absolute; left: 0; top: 50%;
-  width: 14px; height: 1px; background: var(--amber-deep);
-}
-.arch-figure-tag .tag-note {
-  font-family: var(--mono); font-size: var(--fs-2xs);
-  color: var(--mute); letter-spacing: 0.04em;
-}
-.arch-svg-home {
-  width: 100%;
-  height: auto;
-  display: block;
-}
 
 /* ============ 01 教学导航 — three-column workbench inside editorial frame ============ */
 .workbench {
@@ -1559,9 +1518,6 @@ html.lenis, html.lenis body { height: auto; }
   .pf-bar { grid-template-columns: 1fr; }
   .duo { grid-template-columns: 1fr; }
 
-  /* 架构大图：保留原始尺寸可横向滚动，而非压扁到不可读 */
-  .arch-figure-home { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .arch-svg-home { min-width: 680px; }
 }
 
 @media (max-width: 620px) {
@@ -1616,7 +1572,7 @@ html.lenis, html.lenis body { height: auto; }
     kinetic:  { stagger: 0.12 }
   };
   </script>
-  <script src="./shared/wendao.js?v=2" defer></script>
+  <script src="./shared/wendao.js?v=3" defer></script>
   <script src="./shared/fanya.js?v=2" defer></script>
   <script src="./shared/live-stats.js?v=1" defer></script>
   <script src="./shared/toast.js?v=2" defer></script>
@@ -2405,165 +2361,6 @@ html.lenis, html.lenis body { height: auto; }
 
     </section>
 
-    <!-- ================= ∴ 工程架构 · 一个主 LLM 三种工作模式 ================= -->
-    <section class="section arch-section-home">
-      <div class="sec-h" data-reveal>
-        <div class="num">
-          ∴
-          <small>ENGINEERING VIEW · 工程视图</small>
-        </div>
-        <div>
-          <h2>三个特性背后，是<span class="it">同一次</span>主 LLM 调用。</h2>
-          <p class="lede">导航是设计陪伴，实践是演练复盘，数据是评价回流——三个工作面背后是同一个大参数对话 LLM 在不同状态下与教师协作。规则性工作（实时事件分类、契约校验、离线评估）走旁路只调小参数模型或纯代码——这样比"多 Agent 编排"省钱、低延迟、更可控。</p>
-        </div>
-      </div>
-
-      <div class="arch-figure-home" data-reveal>
-        <div class="arch-figure-tag">
-          <span class="tag-lbl">ENGINEERING VIEW · 工程视图</span>
-          <span class="tag-note">实现细节 · 给工程师看的图 · 非产品营销示意</span>
-        </div>
-        <svg class="arch-svg-home" viewBox="0 0 800 660" aria-label="PharmacoPilot 工程架构 · 一个主 LLM · 三种工作模式">
-          <defs>
-            <marker id="arr-amber-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--amber-deep)"/>
-            </marker>
-            <marker id="arr-ink-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ink)"/>
-            </marker>
-            <marker id="arr-mute-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--mute)"/>
-            </marker>
-          </defs>
-
-          <!-- LAYER 1 · 教师 = DECISION AGENT -->
-          <rect x="270" y="14" width="260" height="50" rx="25" fill="var(--amber-deep)"/>
-          <text x="400" y="34" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="rgba(255,253,247,0.7)" letter-spacing="0.14em">DECISION AGENT</text>
-          <text x="400" y="54" text-anchor="middle" font-family="var(--serif-cn)" font-size="15" fill="var(--ivory)" font-weight="500">教师 · 不可替代的判断权</text>
-
-          <!-- bidirectional arrows -->
-          <line x1="392" y1="64" x2="392" y2="92" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr-ink-h)"/>
-          <line x1="408" y1="92" x2="408" y2="64" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#arr-ink-h)"/>
-          <text x="430" y="82" font-family="var(--mono)" font-size="9" fill="var(--mute)" letter-spacing="0.04em">自然语言对话</text>
-
-          <!-- LAYER 2 · 主 LLM 对话 -->
-          <rect x="36" y="96" width="728" height="80" rx="12" fill="var(--ink)"/>
-          <text x="56" y="121" font-family="var(--mono)" font-size="10.5" fill="var(--amber-soft)" letter-spacing="0.14em">MAIN LLM · 大参数对话模型 · 单一协作者</text>
-          <text x="56" y="146" font-family="var(--serif-cn)" font-size="17" fill="var(--ivory)" font-weight="500">一次主 LLM 调用 · 三种工作模式</text>
-          <text x="744" y="121" text-anchor="end" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.55)">引用强制</text>
-          <text x="744" y="146" text-anchor="end" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.55)">禁止编造 ID</text>
-          <text x="56" y="166" font-family="var(--mono)" font-size="10" fill="rgba(255,255,255,0.4)" letter-spacing="0.04em">System prompt = 当前工作面 + 上游产物链 + 检索材料 + 最近对话</text>
-
-          <!-- 3 arrows down to surfaces -->
-          <line x1="160" y1="176" x2="160" y2="208" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
-          <line x1="400" y1="176" x2="400" y2="208" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
-          <line x1="640" y1="176" x2="640" y2="208" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
-
-          <!-- LAYER 3 · 3 工作面 (surfaces) -->
-          <!-- 01 教学导航 · 设计 -->
-          <rect x="50" y="212" width="220" height="92" rx="10" fill="var(--ivory)" stroke="var(--amber-deep)" stroke-width="1.5"/>
-          <text x="62" y="232" font-family="var(--mono)" font-size="9.5" fill="var(--amber-deep)" letter-spacing="0.12em" font-weight="600">SURFACE · 01</text>
-          <text x="62" y="256" font-family="var(--serif-cn)" font-size="16" fill="var(--ink)" font-weight="500">教学导航</text>
-          <text x="62" y="276" font-family="var(--mono)" font-size="10.5" fill="var(--ink)">设计陪伴 · 走 9 个教学环节</text>
-          <text x="62" y="293" font-family="var(--mono)" font-size="10" fill="var(--mute)">问题链 · 量规 · 时间线</text>
-
-          <!-- 02 教学实践 · 演练 -->
-          <rect x="290" y="212" width="220" height="92" rx="10" fill="var(--ivory)" stroke="var(--amber)" stroke-width="1.5"/>
-          <text x="302" y="232" font-family="var(--mono)" font-size="9.5" fill="var(--amber)" letter-spacing="0.12em" font-weight="600">SURFACE · 02</text>
-          <text x="302" y="256" font-family="var(--serif-cn)" font-size="16" fill="var(--ink)" font-weight="500">教学实践</text>
-          <text x="302" y="276" font-family="var(--mono)" font-size="10.5" fill="var(--ink)">演练复盘 · 4 步一圈</text>
-          <text x="302" y="293" font-family="var(--mono)" font-size="10" fill="var(--mute)">关键时刻 · 同行评阅</text>
-
-          <!-- 03 教学数据 · 评价 -->
-          <rect x="530" y="212" width="220" height="92" rx="10" fill="var(--ivory)" stroke="var(--sage)" stroke-width="1.5"/>
-          <text x="542" y="232" font-family="var(--mono)" font-size="9.5" fill="var(--sage)" letter-spacing="0.12em" font-weight="600">SURFACE · 03</text>
-          <text x="542" y="256" font-family="var(--serif-cn)" font-size="16" fill="var(--ink)" font-weight="500">教学数据</text>
-          <text x="542" y="276" font-family="var(--mono)" font-size="10.5" fill="var(--ink)">评价回流 · 9 环节</text>
-          <text x="542" y="293" font-family="var(--mono)" font-size="10" fill="var(--mute)">双向能力 · 师生耦合</text>
-
-          <!-- 3 arrows down to tools -->
-          <line x1="160" y1="304" x2="160" y2="334" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
-          <line x1="400" y1="304" x2="400" y2="334" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
-          <line x1="640" y1="304" x2="640" y2="334" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
-          <text x="775" y="324" text-anchor="end" font-family="var(--mono)" font-size="9.5" fill="var(--mute)" letter-spacing="0.06em">tool calling ↓</text>
-
-          <!-- LAYER 4 · Tools layer (single wide bar with chips) -->
-          <rect x="36" y="340" width="728" height="70" rx="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1"/>
-          <text x="56" y="360" font-family="var(--mono)" font-size="10" fill="var(--mute)" letter-spacing="0.12em">TOOLS · 确定性函数</text>
-          <text x="56" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">search_wendao()</text>
-          <text x="200" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">fetch_fanya()</text>
-          <text x="330" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">retrieve_cases()</text>
-          <text x="480" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">validate_chain()</text>
-          <text x="620" y="390" font-family="var(--mono)" font-size="11.5" fill="var(--ink)" font-weight="600">save_artifact()</text>
-          <text x="744" y="360" text-anchor="end" font-family="var(--mono)" font-size="9.5" fill="var(--mute)">闻道 · 泛雅 · 案例库 · 量规库</text>
-
-          <!-- arrows down to state -->
-          <line x1="160" y1="410" x2="160" y2="436" stroke="var(--mute)" stroke-width="1" marker-end="url(#arr-mute-h)" stroke-dasharray="2,2"/>
-          <line x1="400" y1="410" x2="400" y2="436" stroke="var(--mute)" stroke-width="1" marker-end="url(#arr-mute-h)" stroke-dasharray="2,2"/>
-          <line x1="640" y1="410" x2="640" y2="436" stroke="var(--mute)" stroke-width="1" marker-end="url(#arr-mute-h)" stroke-dasharray="2,2"/>
-
-          <!-- LAYER 5 · Persistence -->
-          <text x="36" y="430" font-family="var(--mono)" font-size="10" fill="var(--mute)" letter-spacing="0.12em">STATE · 持久层</text>
-
-          <rect x="50" y="442" width="220" height="64" rx="8" fill="var(--ivory)" stroke="var(--ink)" stroke-width="1.2"/>
-          <text x="62" y="462" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">Postgres</text>
-          <text x="62" y="479" font-family="var(--mono)" font-size="10" fill="var(--mute)">artifacts · decisions</text>
-          <text x="62" y="494" font-family="var(--mono)" font-size="10" fill="var(--mute)">per-class · per-teacher</text>
-
-          <rect x="290" y="442" width="220" height="64" rx="8" fill="var(--ivory)" stroke="var(--ink)" stroke-width="1.2"/>
-          <text x="302" y="462" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">Vector Store</text>
-          <text x="302" y="479" font-family="var(--mono)" font-size="10" fill="var(--mute)">复用资产 embedding</text>
-          <text x="302" y="494" font-family="var(--mono)" font-size="10" fill="var(--mute)">跨教师跨班级检索</text>
-
-          <rect x="530" y="442" width="220" height="64" rx="8" fill="var(--ivory)" stroke="var(--ink)" stroke-width="1.2"/>
-          <text x="542" y="462" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">Redis</text>
-          <text x="542" y="479" font-family="var(--mono)" font-size="10" fill="var(--mute)">session state · turn cache</text>
-          <text x="542" y="494" font-family="var(--mono)" font-size="10" fill="var(--mute)">热路径低延迟</text>
-
-          <!-- divider -->
-          <line x1="36" y1="528" x2="764" y2="528" stroke="var(--rule)" stroke-dasharray="6,4"/>
-
-          <!-- LAYER 6 · Bypass -->
-          <text x="36" y="546" font-family="var(--mono)" font-size="10" fill="var(--mute)" letter-spacing="0.12em">BYPASS · 旁路 · 不用主 LLM</text>
-
-          <rect x="50" y="558" width="220" height="68" rx="8" fill="var(--paper-2)" stroke="var(--mute)" stroke-width="1" stroke-dasharray="4,3"/>
-          <text x="62" y="578" font-family="var(--mono)" font-size="9.5" fill="var(--sage)" letter-spacing="0.1em" font-weight="600">L1 · 实时事件流</text>
-          <text x="62" y="598" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">小参数 LLM 分类 + 规则引擎</text>
-          <text x="62" y="616" font-family="var(--mono)" font-size="10" fill="var(--mute)">毫秒级响应 · 高吞吐</text>
-
-          <rect x="290" y="558" width="220" height="68" rx="8" fill="var(--paper-2)" stroke="var(--mute)" stroke-width="1" stroke-dasharray="4,3"/>
-          <text x="302" y="578" font-family="var(--mono)" font-size="9.5" fill="var(--amber-deep)" letter-spacing="0.1em" font-weight="600">L3 · 产物链校验</text>
-          <text x="302" y="598" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">纯代码 · 契约驱动</text>
-          <text x="302" y="616" font-family="var(--mono)" font-size="10" fill="var(--mute)">上游变更 → 下游 flag</text>
-
-          <rect x="530" y="558" width="220" height="68" rx="8" fill="var(--paper-2)" stroke="var(--mute)" stroke-width="1" stroke-dasharray="4,3"/>
-          <text x="542" y="578" font-family="var(--mono)" font-size="9.5" fill="var(--ink)" letter-spacing="0.1em" font-weight="600">EVALS · 离线评估</text>
-          <text x="542" y="598" font-family="var(--serif-cn)" font-size="13" fill="var(--ink)" font-weight="500">每周 50 个测试场景</text>
-          <text x="542" y="616" font-family="var(--mono)" font-size="10" fill="var(--mute)">引用准确性 · 拒答边界</text>
-
-          <!-- Legend -->
-          <g transform="translate(36, 648)">
-            <text x="0" y="6" font-family="var(--mono)" font-size="9.5" fill="var(--mute)" letter-spacing="0.12em">LEGEND</text>
-            <g transform="translate(70, 0)">
-              <line x1="0" y1="2" x2="22" y2="2" stroke="var(--amber-deep)" stroke-width="1.5" marker-end="url(#arr-amber-h)"/>
-              <text x="30" y="6" font-family="var(--mono)" font-size="10" fill="var(--ink)">主路径 · LLM 调用</text>
-            </g>
-            <g transform="translate(220, 0)">
-              <line x1="0" y1="2" x2="22" y2="2" stroke="var(--mute)" stroke-width="1" stroke-dasharray="2,2" marker-end="url(#arr-mute-h)"/>
-              <text x="30" y="6" font-family="var(--mono)" font-size="10" fill="var(--ink)">读写持久层</text>
-            </g>
-            <g transform="translate(370, -5)">
-              <rect x="0" y="0" width="16" height="12" rx="3" fill="var(--paper-2)" stroke="var(--mute)" stroke-dasharray="3,2"/>
-              <text x="22" y="10" font-family="var(--mono)" font-size="10" fill="var(--ink)">旁路 · 非 LLM</text>
-            </g>
-            <g transform="translate(530, -5)">
-              <rect x="0" y="0" width="16" height="12" rx="3" fill="var(--ink)"/>
-              <text x="22" y="10" font-family="var(--mono)" font-size="10" fill="var(--ink)">主 LLM · 大参数</text>
-            </g>
-          </g>
-        </svg>
-      </div>
-    </section>
   </div>
 
   <!-- ================= Colophon ================= -->
@@ -2912,12 +2709,18 @@ html.lenis, html.lenis body { height: auto; }
     requestAnimationFrame(() => el.classList.add('show'));
     while (stream.children.length > 8) stream.removeChild(stream.firstElementChild);
   }
+  let timer = null;
   function tick() {
-    if (i >= lines.length) { setTimeout(()=>{stream.innerHTML=''; i=0; tick();}, 3500); return; }
+    if (i >= lines.length) { timer = setTimeout(()=>{stream.innerHTML=''; i=0; tick();}, 3500); return; }
     row(lines[i++]);
-    setTimeout(tick, 1100);
+    timer = setTimeout(tick, 1100);
   }
   tick();
+  // 后台标签页暂停打字流，回到前台续播（否则永不停止地空写 DOM）
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { clearTimeout(timer); timer = null; }
+    else if (!timer) tick();
+  });
 })();
 </script>
 

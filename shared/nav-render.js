@@ -4324,6 +4324,8 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           ${isDoneNow ? `<span class="sc-done-mark" aria-label="已完成">✓</span>` : ""}
         </div>`;
       }).join("");
+      // 桥层钩子：chip 栏重渲染会清掉桥层注入的徽章（如 S2 修订徽章），渲染完成后通知桥层补回
+      try { if (window.__navAfterStageChipsRender) window.__navAfterStageChipsRender(); } catch (e) {}
     }
 
     // 方法依据 popover · 单例全局浮层

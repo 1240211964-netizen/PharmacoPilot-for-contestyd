@@ -93,6 +93,9 @@
     // -------- 3. 拦截判断选项点击（暂存 + 视觉同步）--------
     // 优先使用 data-key（v4 渲染器输出），缺失时回退到 label 前缀匹配（保持旧渲染路径兼容）
     let staged = null;
+    function currentSubKey() {
+      return (global.__navRenderState && global.__navRenderState.currentSubKey) ? global.__navRenderState.currentSubKey() : null;
+    }
     function markSelected(key) {
       document.querySelectorAll(".decision-dock .dd-opt").forEach((b) => {
         b.classList.toggle("is-selected", b.getAttribute("data-key") === key);
@@ -132,7 +135,7 @@
       }
 
       const meta = matched[4] || {};
-      staged = { stationId, key: matched[0], score: matched[3], label: matched[1], meta };
+      staged = { stationId, key: matched[0], score: matched[3], label: matched[1], meta, subKey: currentSubKey() };
       if (meta.blockSave) {
         btn.setAttribute("data-demo-toast", "✕ 此选项违反禁条 · 已阻止保存");
       } else {
@@ -158,7 +161,15 @@
       }
 
       // v4 复合键：保存时携带当前子节点 subKey（区分 v0/v1/锚点/UbD 段）
-      const subKey = (global.__navRenderState && global.__navRenderState.currentSubKey) ? global.__navRenderState.currentSubKey() : null;
+      const subKey = currentSubKey();
+      // 防错位：暂存后若切换了站点或子节点，staged 属于旧上下文——直接落库会产生
+      // 「旧 stationId + 新 subKey」的错位 judgment，进度/门禁/S7→S2 反修订全跟着错。
+      // 丢弃暂存并要求在当前节点重选（视觉选中态本来也随重渲染被清掉）。
+      if (staged.stationId !== effectiveStation() || staged.subKey !== subKey) {
+        staged = null;
+        btn.setAttribute("data-demo-toast", "已切换站点/节点 · 请重新选择判断选项");
+        return;
+      }
       Store.saveJudgment(staged.stationId, staged.key, staged.score, staged.label, subKey);
 
       // v4 反向修订闭环：在 S7 节点 10-c（量规反向修订）保存判断时，同时向 S2 提交一条 pending revision
@@ -213,18 +224,12 @@
     }
 
     function refreshSidebarProgress() {
-      const p = Store.getProgress();
       const sp = getStageProgressV4();
-      // 只处理"全局进度"型计数器；跳过 chip 序号 (.sc-num)、子节点序号等
-      const SKIP_CLASSES = ["sc-num", "t-num", "n", "zpd-num"];
-      document.querySelectorAll("*").forEach((el) => {
-        if (el.children.length !== 0) return;
-        if (SKIP_CLASSES.some((cl) => el.classList && el.classList.contains(cl))) return;
-        const m = el.textContent && el.textContent.match(/^\s*(\d+)\s*\/\s*(\d+)\s*$/);
-        if (!m) return;
-        if (m[2] === "11") el.textContent = `${p.done} / ${p.total}`;
-        else if (m[2] === "9" && sp) el.textContent = `${sp.done} / ${sp.total}`;
-      });
+      // v4 进度计数器只有 #nodeListMeta 一处（"n / 9" 纯文本）；
+      // 历史上这里用 querySelectorAll("*") 全 DOM 扫描 + 文本正则猜测，会误伤任何形如 "n / 9" 的无关文本。
+      // nav-render 重渲染时也会以会话口径写它（nav-render.js:1862），此处保持 Store 口径覆盖。
+      const meta = document.getElementById("nodeListMeta");
+      if (meta && sp) meta.textContent = `${sp.done} / ${sp.total}`;
       Object.keys(Store.dump().judgments).forEach((sid) => {
         const tile = document.querySelector(`[data-st="${sid}"][role="button"]`);
         if (tile && !tile.classList.contains("is-active")) tile.classList.add("is-done");
@@ -1034,7 +1039,7 @@
 
     function maybeTriggerCelebration() {
       if (!isAllDone()) return;
-      if (localStorage.getItem(CELEBRATED_KEY) === "1") return;
+      try { if (localStorage.getItem(CELEBRATED_KEY) === "1") return; } catch (e) { return; }
       try { localStorage.setItem(CELEBRATED_KEY, "1"); } catch (e) {}
       setTimeout(openCelebrateModal, 350);  // 让用户看到最后一次保存的反馈再弹
     }
@@ -1421,9 +1426,11 @@
     // 触发：每次切换节点 / 触发修订事件时重新注入
     setTimeout(renderRubricRevisionPanel, 140);
     Store.on("rubric:revisionProposed", () => setTimeout(renderRubricRevisionPanel, 60));
+    Store.on("rubric:revisionProposed", updateChipRevisionBadge);
     Store.on("rubric:revisionResolved", () => setTimeout(renderRubricRevisionPanel, 60));
-    // chip 重渲染后徽章会被清掉，需要再补
-    setInterval(updateChipRevisionBadge, 1500);
+    // chip 栏重渲染会清掉徽章——挂到 nav-render 暴露的重渲染钩子上补回（替代原来的 1.5s 永久轮询）
+    global.__navAfterStageChipsRender = updateChipRevisionBadge;
+    updateChipRevisionBadge();
     // 切换节点时重新决定显示哪个面板
     const origInject = injectArtifactsForCurrentStation;
     if (!origInject.__rubricPatched) {

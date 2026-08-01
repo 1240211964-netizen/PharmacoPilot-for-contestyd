@@ -6,14 +6,14 @@
  * 与 nav-stations-contract 同级，但角色不同：
  *   · nav  侧解决「一节课怎么备」 → 输出 plan.md（9 个教学环节产物）。
  *   · practice 侧解决「这份 plan.md 怎么在虚拟班跑一遍，再把可复用片段
- *     写回到对应的 9 个教学环节里去」→ 输出 KeyMoment / Comment / ReusableAsset。
+ *     写回到对应的 9 个教学环节里去」→ 输出 KeyMoment / ReviewCandidate / ReusableAsset。
  *
  * 不重复造存储——所有持久化与跨页广播都走 PharmacoPilotStore。
  * 不重复造数据源——本契约只定义：
- *   1) PRACTICE_STAGES：4 阶段状态机
+ *   1) PRACTICE_STAGES：3 阶段状态机
  *   2) EVENT_SCHEMA：模拟课堂事件流 schema（一行 beat 是什么）
  *   3) KEY_MOMENT_TYPES：Agent 用什么规则从事件流里挑出"关键时刻"
- *   4) COMMENT_SCHEMA：同行评阅的批注数据形状
+ *   4) COMMENT_SCHEMA：学科审校候选与教师决策的数据形状（保留旧导出名兼容）
  *   5) ASSET_TARGETS：每一种可复用资产能写回到 nav 哪个站、哪种 slot
  *   6) PRACTICE_TO_NAV：KM/Comment 组合 → 资产 → 写回调用 的映射表
  *
@@ -25,7 +25,7 @@
   const VERSION = "practice-v1";
 
   // ============================================================
-  // 1. 4 阶段状态机
+  // 1. 3 阶段状态机
   // ============================================================
   // 每一阶段都明确：本阶段读什么、产出什么、下一阶段消费什么。
   // 这是 practice 内部的"小 PRODUCT_CHAIN"。
@@ -48,7 +48,7 @@
     },
     {
       // 旧 i/ii/iii 三阶段（simulate/capture/review）合并为「试错+证据」单一阶段。
-      // 同时承载：A · 5 类专家批注；B · 虚拟班关键时刻 + 风险信号 + 量规歧义。
+      // 同时承载：A · 五路学科审校；B · 虚拟班仿真记录 + 风险信号 + 量规歧义。
       id: "ii",
       key: "trial-evidence",
       seq: "ii",
@@ -57,9 +57,9 @@
       anchor: "#stage-ii",
       reads: { from: "i.practicePack", plan: "store.artifacts" },
       produces: {
-        comments: "Comment[] — 5 类专家批注，可被采纳/搁置",
+        comments: "Comment[] — 五路学科审校建议，可编辑为修订候选并由教师判断",
         eventStream: "时间步进的 beats 数组（教师/Agent/学生发言 + 沉默标记）",
-        keyMoments: "KeyMoment[] — 3 到 5 个，每个含原始时间戳和可引用片段",
+        keyMoments: "KeyMoment[] — 3 到 5 条仿真记录，每条含时间戳和可引用片段；只建议关联，不自动验证",
         participation: "32 学生发言计数 + 教师讲/学生说/停顿三段比例",
         consensus: "本轮共识纪要（用于环节 09 复盘）",
       },
@@ -73,7 +73,7 @@
       cn: "确认写回",
       en: "WRITE-BACK",
       anchor: "#stage-iii",
-      reads: { from: ["ii.keyMoments", "ii.comments"] },
+      reads: { from: ["ii.keyMoments", "ii.reviewCandidates", "ii.teacherDecisions"] },
       produces: {
         reusableAssets: "ReusableAsset[] — 已打包为 P-{stationId}-{α/β/...}",
         writebackCalls: "对 PharmacoPilotStore 的 saveArtifact / setZpdAnchors / setPulseRule 调用",
@@ -144,7 +144,7 @@
     },
     {
       id: "agent-intervention-adopted",
-      cn: "Agent 介入建议被采纳",
+      cn: "Agent 介入后教师执行了对应动作",
       detectRule: "Agent 发出 agentSuggest 后，≤ 60 秒内教师执行对应动作（breakout/重述等）",
       suggestStation: 9, // 形成性评价 / ZPD 锚点学情触发规则
       suggestSlot: "pulseRule.ifThen",
@@ -163,24 +163,28 @@
   ];
 
   // ============================================================
-  // 4. Comment schema（同行评阅）
+  // 4. ReviewCandidate schema（保留 COMMENT_SCHEMA 名称作兼容导出）
   // ============================================================
   const COMMENT_SCHEMA = {
     fields: {
-      id: "string — 自增 c-01 / c-02",
-      pinNum: "number — 在 plan.md 上的图钉号",
-      anchorBlockId: "string — 锚定到 review-block 的 id（plan 行级）",
-      anchorSelection: "{ start, end, text } — 高亮文本片段",
-      author: "{ name, role, avatar }",
-      body: "string — 评阅意见原文，建议含具体替换文本",
-      createdAt: "ts",
-      status: "'pending' | 'adopted' | 'declined' | 'discussing'",
-      replyByTeacher: "string?",
-      mergesIntoKM: "string? — 关联到某个 KeyMoment.id（用于打包写回）",
+      expertId: "string — 审校视角标识",
+      draftText: "string — 教师可编辑的修订候选文本",
+      targetEnvKeys: "envKey[] — 当前 S1–S9 目标环节，可多选",
+      originalEnvContent: "Record<envKey,string> — 加入候选时冻结的原文快照",
+      evidenceLinks: "KeyMoment.id[] — 系统建议、教师可调整的仿真记录关联",
+      state: "'pending' | 'candidate' | 'rejected'",
+      candidateMode: "'original' | 'modified' | null — 原意见或修改后意见进入候选",
+      decision: "'pending' | 'supported' | 'unsupported' | 'insufficient'",
+      decisionNote: "string? — 教师判断依据",
+      rejectionReason: "string? — 不采用时必填",
+      writtenBack: "boolean — 仅 supported 候选可写回",
+      liveReview: "PracticeLiveReview? — 本机模型单卡审校结果；含原文摘录、稿件修订号、模型与提示词版本",
     },
-    adoptionRules: {
-      mustReply: "采纳前教师必须给出 replyByTeacher，否则按钮 disabled",
-      mergeHint: "若评阅与 KM 主题一致，Stage iv 默认合并打包",
+    decisionRules: {
+      supportedNeedsEvidence: "支持/不支持至少关联一条仿真记录；否则只能选证据不足",
+      teacherAuthority: "系统只建议关联，不自动宣布验证结论",
+      writebackGate: "仅教师确认支持的候选可按目标环节打包写回",
+      anchorGate: "模型批注仅在摘录通过逐字或规范化定位门禁后标记为已锚定；旧修订批注不得进入候选",
     },
   };
 
@@ -284,7 +288,7 @@
   // 6. PRACTICE_TO_NAV：写回路径表
   // ============================================================
   // 对每一种 (KM类型 + 是否带评阅) 组合，规定打包资产编号与目标 slot。
-  // 这张表是 Stage iv 自动建议"打包合并"的数据来源。
+  // 这张表是 Stage iii 在教师确认支持后建议“打包合并”的数据来源。
   const PRACTICE_TO_NAV = [
     {
       from: { km: "structural-conflict", withComment: true },
@@ -311,7 +315,7 @@
       from: { km: "agent-intervention-adopted" },
       assetPrefix: "P-09-",
       packages: ["pulseRule.ifThen"],
-      copyHint: "Agent 介入被采纳就是一条天然的「如果 X 则 Y」规则",
+      copyHint: "Agent 介入后的教师执行动作可由教师确认为「如果 X 则 Y」候选规则",
     },
     {
       from: { km: "silence-cliff" },
@@ -367,9 +371,9 @@
   // 8. 防退化约束（与 nav contract 的 FORBIDDEN_CHANGES 对齐）
   // ============================================================
   const FORBIDDEN_CHANGES = [
-    "不得让模拟课堂退化为「自动答题剧本」；事件流必须显示出 Agent 检测 + 教师采纳的人机协作节奏。",
+    "不得让模拟课堂退化为「自动答题剧本」；事件流必须如实记录 Agent 检测与教师实际动作。",
     '不得让关键时刻退化为打分；只能输出"标记 + 引用 + 写回建议"，不出分数。',
-    '不得让同行评阅退化为"赞/踩"；必须锚定到 plan.md 某一行，必须可被采纳/搁置且留下回复。',
+    '不得让学科审校退化为“赞/踩”；必须可编辑、可选目标环节、可关联仿真记录并保留教师判断。',
     '不得让写回地图退化为"再存一份归档"；每个 Asset 必须显式落到 nav 某站某 slot，且通过 PharmacoPilotStore 广播。',
     "不得绕过 PharmacoPilotStore 自建持久化；practice 与 nav 必须共用同一份 state。",
     "不得创建无目标站的资产；ASSET_TARGETS 表未列出的 slot 一律拒绝写回。",

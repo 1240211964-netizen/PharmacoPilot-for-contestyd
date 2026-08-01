@@ -8,7 +8,7 @@
  *        window.PharmacoPilotPracticeContract    (本页运行时契约)
  * 写：   PharmacoPilotStore.saveArtifact / setZpdAnchors /
  *        setPulseRule / markAgendaFulfilled
- * 广播： Stage iv 写回时，nav 页通过 store 的 artifact:saved
+ * 广播： Stage iii 写回时，nav 页通过 store 的 artifact:saved
  *        / zpd:anchorsChanged / pulse:ruleSaved 事件实时拿到更新。
  * ============================================================ */
 (function attachPracticeRuntime(global) {
@@ -334,8 +334,6 @@
 .pr-btn[disabled] { opacity: .35; cursor: not-allowed; }
 .pr-btn.pr-btn-tiny { padding: 4px 10px; font-size: var(--fs-2xs); }
 .btn-run.is-running { background: #8e3d22; }
-.expert-card.is-done { opacity: 0.7; }
-.expert-card .ec-acts button.is-adopt { background: var(--amber-deep); color: var(--ivory); border-color: var(--amber-deep); }
 .pr-flash {
   position: relative;
   animation: prflash 1.2s ease-out;
@@ -753,7 +751,7 @@
     const div = document.createElement("div");
     const isMarker = b.role === "marker";
     const isNote = b.kind === "agentDetect";
-    div.className = "beat-row" + (isMarker ? " marker" : "") + (isNote ? " note" : "") + " pr-flash";
+    div.className = "beat-row" + (isMarker ? " marker" : "") + (isNote ? " note" : "") + " pr-flash is-runtime";
     const ts = fmtTime(b.tSec);
 
     // Agent-driven 学生发言 "A1·沈语晴" → role pill="A1"，化名前置在 quote 前
@@ -806,18 +804,16 @@
     const tPct = Math.max(0.20, 0.31 - totalSpeak * 0.002);
     const pPct = Math.max(0.10, 1 - sPct - tPct);
     const meterRows = $$(".part-meter .row");
-    if (meterRows[0]) {
-      meterRows[0].querySelector(".bar i").style.width = `${(tPct * 100).toFixed(0)}%`;
-      meterRows[0].querySelector(".v").textContent = `${(tPct * 100).toFixed(0)}%`;
-    }
-    if (meterRows[1]) {
-      meterRows[1].querySelector(".bar i").style.width = `${(sPct * 100).toFixed(0)}%`;
-      meterRows[1].querySelector(".v").textContent = `${(sPct * 100).toFixed(0)}%`;
-    }
-    if (meterRows[2]) {
-      meterRows[2].querySelector(".bar i").style.width = `${(pPct * 100).toFixed(0)}%`;
-      meterRows[2].querySelector(".v").textContent = `${(pPct * 100).toFixed(0)}%`;
-    }
+    const setRow = (row, pct) => {
+      if (!row) return;
+      const bar = row.querySelector(".bar i");
+      const v = row.querySelector(".v");
+      if (bar) bar.style.width = `${(pct * 100).toFixed(0)}%`;
+      if (v) v.textContent = `${(pct * 100).toFixed(0)}%`;
+    };
+    setRow(meterRows[0], tPct);
+    setRow(meterRows[1], sPct);
+    setRow(meterRows[2], pPct);
     state.participation.breakdown = { teacher: tPct, student: sPct, silent: pPct };
     // LIVE 提示动态化
     const tip = $(".live-tip .body");
@@ -839,10 +835,13 @@
       else if (s.count === 2) c2++;
       else c3++;
     });
-    keys[0].lastChild.nodeValue = `沉默 ${c0}`;
-    keys[1].lastChild.nodeValue = `1 次 ${c1}`;
-    keys[2].lastChild.nodeValue = `2+ 次 ${c2}`;
-    keys[3].lastChild.nodeValue = `主动 ${c3}`;
+    const setKey = (el, txt) => {
+      if (el && el.lastChild && el.lastChild.nodeType === 3) el.lastChild.nodeValue = txt;
+    };
+    setKey(keys[0], `沉默 ${c0}`);
+    setKey(keys[1], `1 次 ${c1}`);
+    setKey(keys[2], `2+ 次 ${c2}`);
+    setKey(keys[3], `主动 ${c3}`);
   }
 
   function setInlineRunBtn(running) {
@@ -902,14 +901,17 @@
     pauseSim();
     state.tSec = 132;
     state.eventStream = [];
+    state.keyMoments = [];
+    saveKeyMoments(wizSelection.chapter, []);
     state._teacherCallCUntil = 0;
     state._teacherCallSilentUntil = 0;
     state._teacherOpenQUntil = 0;
     state._callResponders = null;
     state.participation.students.forEach((s) => (s.count = 0));
     $$(".part-grid .part-dot").forEach((d) => d.classList.remove("spoke-1", "spoke-2", "spoke-3"));
-    // 移除运行时追加的 beat（保留页面静态那批）
-    $$(".scene .beat-row.pr-flash, .scene .beat-row.is-runtime").forEach((el) => el.classList.remove("pr-flash"));
+    // 移除运行时追加的 beat（保留页面静态那批）——节点真正删掉，
+    // 否则 reset 后旧 beat 会被 ingestExistingBeats 重新读入，靠 tSec 去重堵死重跑发言
+    $$(".scene .beat-row.is-runtime").forEach((el) => el.remove());
     // 清画像 live 高亮
     $$("#stage-ii .persona-cell.is-live-active").forEach((c) => c.classList.remove("is-live-active"));
     // 重置 agent runtime 到 state_init
@@ -920,6 +922,16 @@
       delete c.dataset.prevAttention;
     });
     ingestExistingBeats();
+    renderKeyMoments();
+    (state.expertCards || []).forEach((entry) => {
+      entry.evidenceLinks = [];
+      entry.evidenceTouched = false;
+      if (entry.decision !== "insufficient") entry.decision = "pending";
+      entry.writtenBack = false;
+      saveExpertReview(wizSelection.chapter, entry);
+    });
+    refreshAllReviewEvidence();
+    composeAssets();
     syncHeaderTimers();
     updatePersonaLive();
     reflectAgentStateInGrid([]);
@@ -934,16 +946,87 @@
   // ──────────────────────────────────────────────────────────────
   function deriveKeyMoments() {
     setStageStatus("ii", "正在派生…", true, false);
+    const mvMoments = readMetaverseKeyMoments();
     state.keyMoments = [];
-    Practice.KEY_MOMENT_TYPES.forEach((rule) => {
-      const hit = matchRule(rule);
-      if (hit) state.keyMoments.push(hit);
-    });
+    if (Array.isArray(mvMoments)) {
+      state.keyMoments = mvMoments;
+    } else {
+      // 兼容旧版内嵌剧本运行时；新版 3D / 2.5D 教室优先走统一 hook。
+      Practice.KEY_MOMENT_TYPES.forEach((rule) => {
+        const hit = matchRule(rule);
+        if (hit) state.keyMoments.push(hit);
+      });
+    }
     // 限制 3-5 个，按优先级
     state.keyMoments.sort((a, b) => a.priority - b.priority);
     state.keyMoments = state.keyMoments.slice(0, 5);
+    saveKeyMoments(wizSelection.chapter, state.keyMoments);
     renderKeyMoments();
-    setStageStatus("ii", `已派生 ${state.keyMoments.length} 个关键时刻`, false, true);
+    refreshAllReviewEvidence({ autoLink: true });
+    composeAssets();
+    if (state.keyMoments.length) {
+      setStageStatus("ii", `已读取 ${state.keyMoments.length} 条已发生仿真记录`, false, true);
+    } else {
+      setStageStatus("ii", "尚无已发生仿真记录 · 请先播放或拖动录播", false, false);
+      toast("尚无可关联记录 · 请先播放或拖动虚拟班录播，再刷新关键时刻");
+    }
+  }
+
+  function readMetaverseKeyMoments() {
+    const mv = window.PharmacoPilotMV;
+    if (!(mv && typeof mv.getT === "function" && typeof mv.keyMoments === "function")) return null;
+    const capturedUntil = Number(mv.getT()) || 0;
+    const records = mv.keyMoments()
+      .filter((record) => Number(record?.t) > 0 && Number(record.t) <= capturedUntil)
+      .sort((a, b) => Number(a.t) - Number(b.t));
+    return records.map((record, index) => packMetaverseMoment(record, index));
+  }
+
+  function packMetaverseMoment(record, index) {
+    const text = stripHtml(record?.text || record?.label || "虚拟班关键记录").trim();
+    const tSec = Math.max(0, Number(record?.t) || 0);
+    let typeId = "simulation-signal";
+    let cn = "虚拟班关键信号";
+    let suggestSlot = "pulseRule.ifThen";
+    let copyTemplate = "将这条仿真记录与相关修订候选并列呈现，等待教师判断。";
+    let priority = 3;
+
+    if (record?.type === "silence" || /沉默|未发声/.test(text)) {
+      typeId = "silence-cliff";
+      cn = "仿真中出现沉默或未发声信号";
+      suggestSlot = "timeline.scaffoldInsertion";
+      copyTemplate = "将这段沉默保留为调控信号，由教师判断是否需要新增支架。";
+      priority = 2;
+    } else if (/结构性|对立|分歧/.test(text) && record?.type !== "marker") {
+      typeId = "structural-conflict";
+      cn = "仿真中出现结构性分歧";
+      suggestSlot = "questionChain.divergenceAnchor";
+      copyTemplate = "将这段结构性分歧与修订候选关联，由教师判断是否需要新增分歧锚点。";
+      priority = 1;
+    } else if (/反思|复盘|被低估/.test(text)) {
+      typeId = "reflection-signal";
+      cn = "仿真进入反思与复盘节点";
+      suggestSlot = "retro.agendaFulfillment";
+      copyTemplate = "将这条反思记录与复盘候选关联，由教师判断是否写回。";
+    } else if (record?.type === "marker" || /问题链|锚点|第\s*\d+\s*题/.test(text)) {
+      typeId = "question-chain-marker";
+      cn = text || "问题链进入新节点";
+      suggestSlot = /分歧|对立/.test(text) ? "questionChain.divergenceAnchor" : "questionChain.openerTemplate";
+      copyTemplate = "将该问题链节点与修订候选关联，由教师判断是否调整问句或节奏。";
+    }
+
+    return {
+      id: `KM-mv-${typeId}-${Math.round(tSec)}-${index}`,
+      typeId,
+      cn,
+      tSec,
+      quote: text.slice(0, 120),
+      priority,
+      suggestSlot,
+      copyTemplate,
+      beats: [{ tSec, role: "MV", text }],
+      source: "metaverse-classroom",
+    };
   }
   function matchRule(rule) {
     const beats = state.eventStream;
@@ -1007,13 +1090,21 @@
     };
   }
   function stripHtml(s) { return String(s).replace(/<[^>]+>/g, ""); }
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    })[char]);
+  }
 
   function renderKeyMoments() {
     const grid = $(".km-grid");
     if (!grid) return;
     grid.innerHTML = "";
     state.keyMoments.forEach((km, i) => {
-      const station = stationOf(km.suggestStation);
+      const envLabels = envKeysForMoment(km).map((key) => {
+        const env = PRACTICE_ENV_BY_KEY[key];
+        return env ? `${env.no} ${env.label}` : key;
+      }).join(" / ");
       const card = document.createElement("div");
       card.className = "km-card pr-flash is-new";
       card.dataset.kmId = km.id;
@@ -1026,8 +1117,8 @@
         <div class="km-quote">"${km.quote}"</div>
         <p>${km.copyTemplate.replace(/{[^}]+}/g, "—")}</p>
         <div class="km-tag">
-          <span class="pill pill-amber">环节 ${km.suggestStation} · ${station?.title || ""}</span>
-          <span class="pill pill-sage">建议写回</span>
+          <span class="pill pill-amber">相关环节 · ${envLabels || "待教师判断"}</span>
+          <span class="pill pill-sage">可关联修订候选</span>
         </div>
         <div class="km-meta">
           <span>类型 <b>${km.typeId}</b></span>
@@ -1037,157 +1128,120 @@
       grid.appendChild(card);
       setTimeout(() => card.classList.remove("is-new"), 2400);
     });
+    if (!state.keyMoments.length) {
+      grid.innerHTML = `<div class="decision-empty">尚无已发生仿真记录 · 请先播放或拖动上方录播，再点击“关键时刻”</div>`;
+    }
     // 同步 hero meta 已识别关键时刻
     const moments = $('[data-field="moments"]');
-    if (moments) moments.innerHTML = `${state.keyMoments.length} 处 · 待写回 ${state.keyMoments.length}`;
+    if (moments) moments.innerHTML = `${state.keyMoments.length} 处 · 待教师关联与判断`;
   }
 
   // ──────────────────────────────────────────────────────────────
-  // 6. Stage iii —— 评阅采纳流
-  // ──────────────────────────────────────────────────────────────
-  function ingestExistingComments() {
-    state.comments = [];
-    $$(".comment").forEach((c, idx) => {
-      const num = c.querySelector(".pin-num")?.textContent?.trim() || String(idx + 1);
-      const author = c.querySelector(".who")?.firstChild?.textContent?.trim() || "匿名";
-      const body = c.querySelector(".body")?.textContent?.trim() || "";
-      const isAdopted = /已采纳/.test(c.querySelector(".who")?.textContent || "");
-      state.comments.push({
-        id: `c-${num}`,
-        pinNum: Number(num),
-        anchorBlockId: `block-${num}`,
-        author,
-        body,
-        status: isAdopted ? "adopted" : "pending",
-        replyByTeacher: isAdopted ? c.querySelector(".reply")?.textContent?.trim() : null,
-        domRef: c,
-      });
-    });
-  }
-  function mountCommentActions() {
-    state.comments.forEach((c) => {
-      const reply = c.domRef.querySelector(".reply");
-      if (!reply) return;
-      if (c.status === "adopted") {
-        c.domRef.classList.add("is-adopted");
-        return;
-      }
-      // 在 pending 的 reply 后追加按钮组
-      const actions = document.createElement("div");
-      actions.style.cssText = "display:flex; gap:8px; margin-top:8px;";
-      actions.innerHTML = `
-        <button class="pr-btn is-primary" data-act="adopt">采纳</button>
-        <button class="pr-btn" data-act="discuss">继续讨论</button>
-        <button class="pr-btn" data-act="decline">搁置</button>
-      `;
-      reply.appendChild(actions);
-      actions.addEventListener("click", (e) => {
-        const act = e.target.dataset.act;
-        if (!act) return;
-        e.stopPropagation();
-        if (act === "adopt") adoptComment(c);
-        else if (act === "discuss") {
-          c.status = "discussing";
-          reply.classList.remove("is-pending");
-          reply.firstChild.textContent = "● 讨论中 · 等待二次评阅";
-        }
-        else if (act === "decline") {
-          c.status = "declined";
-          c.domRef.style.opacity = ".55";
-          reply.firstChild.textContent = "● 已搁置";
-        }
-        updateReviewStatusBar();
-      });
-    });
-    updateReviewStatusBar();
-  }
-  function adoptComment(c) {
-    c.status = "adopted";
-    c.replyByTeacher = c.replyByTeacher || `已采纳 · 将合并写回到环节 ${guessTargetStation(c)}.`;
-    const reply = c.domRef.querySelector(".reply");
-    reply.classList.remove("is-pending");
-    reply.innerHTML = `<b>本节教师:</b> ${c.replyByTeacher}`;
-    c.domRef.classList.add("is-adopted");
-    toast(`已采纳评阅 #${c.pinNum} — 进入 Stage iv 打包`);
-    updateReviewStatusBar();
-    // 自动重新渲染 Stage iv 资产候选
-    composeAssets();
-  }
-  function guessTargetStation(c) {
-    // 极简启发（按新 9 环节口径）：
-    //   "问句/问题/开口" → 05 任务链设计
-    //   "分组/时间/分钟" → 06 课中调控
-    //   "量规/评价/锚点" → 07 评价与画像
-    //   "证据/案例/政策"   → 04 案例与证据
-    //   其余                  → 08 复盘与决策
-    if (/问句|问题|开口|具体|追问/.test(c.body)) return 5;
-    if (/分组|分钟|时间|沉默|节奏/.test(c.body)) return 6;
-    if (/量规|评价|锚点|画像/.test(c.body)) return 7;
-    if (/证据|案例|政策|法规|文号/.test(c.body)) return 4;
-    return 8;
-  }
-  function updateReviewStatusBar() {
-    const adopted = state.comments.filter((x) => x.status === "adopted").length;
-    const pending = state.comments.filter((x) => x.status === "pending").length;
-    setStageStatus("ii", `${adopted} 已采纳 · ${pending} 待回应 · 派生 ${state.keyMoments.length} 个关键时刻`, false, adopted > 0);
-    // 同步 plan.md 评阅列表头
-    const h5 = $(".review-side h5");
-    if (h5) h5.textContent = `${state.comments.length} 条评阅 · ${adopted} 已采纳 · ${pending} 待回应`;
-  }
-
-  // ──────────────────────────────────────────────────────────────
-  // 7. Stage iv —— 打包资产 + 写回 nav
+  // 6. Stage iii —— 教师确认与写回
   // ──────────────────────────────────────────────────────────────
 
-  // 专家 → 写回 slot 映射（独立于 keyMoments）
-  const EXPERT_SLOT_MAP = {
-    "expert-pharm": { slotId: "questionChain.openerTemplate", prefix: "P-05-", label: "问题链 · 临床情境" },
-    "expert-mgmt":  { slotId: "goal.observableCriterion",      prefix: "P-04-", label: "目标 · 管理权衡" },
-    "expert-law":   { slotId: "case.evidenceForAgenda",        prefix: "P-06-", label: "案例证据 · 法规引用" },
-    "expert-edu":   { slotId: "evidence.rubricRowAdd",          prefix: "P-04-", label: "量规 · 可观测锚点" },
-    "expert-data":  { slotId: "pulseRule.ifThen",               prefix: "P-09-", label: "学情触发规则 · 数据触发" },
-  };
+  // ──────────────────────────────────────────────────────────────
+  // 打包资产 + 写回实践包
+  // ──────────────────────────────────────────────────────────────
+
+  // 当前实践包使用 S1–S9；ASSET_TARGETS 仍保留旧 slot/station 契约。
+  // 适配层只负责把“这条审校意见影响哪个当前环节”翻译成可复用资产 slot，
+  // UI 永远展示 envKey 语义，不把旧 stationId 冒充当前九环节编号。
+  const PRACTICE_ENV_META = Object.freeze([
+    { key: "env01", no: "01", label: "学情诊断", short: "学情" },
+    { key: "env02", no: "02", label: "目标与量规", short: "目标" },
+    { key: "env03", no: "03", label: "知识与误区", short: "误区" },
+    { key: "env04", no: "04", label: "案例与证据", short: "证据" },
+    { key: "env05", no: "05", label: "任务链设计", short: "任务链" },
+    { key: "env06", no: "06", label: "课中调控", short: "调控" },
+    { key: "env07", no: "07", label: "评价与画像", short: "评价" },
+    { key: "env08", no: "08", label: "复盘与决策", short: "复盘" },
+    { key: "env09", no: "09", label: "资产沉淀", short: "沉淀" },
+  ]);
+  const PRACTICE_ENV_BY_KEY = Object.freeze(Object.fromEntries(PRACTICE_ENV_META.map((env) => [env.key, env])));
+  const SLOT_TO_ENV_KEYS = Object.freeze({
+    "positioning.spiralCorrection": ["env01"],
+    "goal.observableCriterion": ["env02"],
+    "evidence.rubricRowAdd": ["env02", "env07"],
+    "questionChain.openerTemplate": ["env05"],
+    "questionChain.divergenceAnchor": ["env03", "env05"],
+    "case.evidenceForAgenda": ["env04"],
+    "timeline.scaffoldInsertion": ["env06"],
+    "timeline.zpdAnchorAdd": ["env06"],
+    "explore.studentInitiatedDimension": ["env05"],
+    "explore.roleRebalance": ["env05"],
+    "pulseRule.ifThen": ["env06", "env07"],
+    "retro.consensusPull": ["env08", "env09"],
+    "retro.agendaFulfillment": ["env08"],
+  });
+
+  function slotForReviewTarget(envKey, text) {
+    const body = String(text || "");
+    if (envKey === "env01") return "positioning.spiralCorrection";
+    if (envKey === "env02") return /量规|评价|评分|锚点/.test(body) ? "evidence.rubricRowAdd" : "goal.observableCriterion";
+    if (envKey === "env03") return "questionChain.divergenceAnchor";
+    if (envKey === "env04") return "case.evidenceForAgenda";
+    if (envKey === "env05") return /分歧|对立|锚点|博弈/.test(body) ? "questionChain.divergenceAnchor" : "questionChain.openerTemplate";
+    if (envKey === "env06") return /如果|则|触发|监测|信号/.test(body) ? "pulseRule.ifThen" : "timeline.scaffoldInsertion";
+    if (envKey === "env07") return /量规|评分|评价|画像/.test(body) ? "evidence.rubricRowAdd" : "pulseRule.ifThen";
+    if (envKey === "env08") return "retro.consensusPull";
+    if (envKey === "env09") return "retro.consensusPull";
+    return null;
+  }
+
+  function envKeysForMoment(km) {
+    return SLOT_TO_ENV_KEYS[km?.suggestSlot] || [];
+  }
+
+  function inferReviewTargetEnvKeys(text) {
+    const body = String(text || "");
+    const hits = [];
+    const add = (key) => { if (!hits.includes(key)) hits.push(key); };
+    if (/学情|先验|前经验|认知起点/.test(body)) add("env01");
+    if (/目标|量规|评价标准|可观测|可观察/.test(body)) add("env02");
+    if (/概念|误区|混淆|机制/.test(body)) add("env03");
+    if (/证据|案例|政策|法规|文号|数据|报告|引用|病例|通告|RWE|数据库/.test(body)) add("env04");
+    if (/问题链|任务|角色|情境|场景|分歧|博弈|课题|锚点/.test(body)) add("env05");
+    if (/分组|分钟|时间|沉默|干预|追问|节奏|触发/.test(body)) add("env06");
+    if (/画像|立场迁移|评价维度|评分|量规/.test(body)) add("env07");
+    if (/复盘|原因|下一轮|改进决策/.test(body)) add("env08");
+    if (/沉淀|模板|复用|知识库/.test(body)) add("env09");
+    return hits.length ? hits.slice(0, 3) : ["env08"];
+  }
 
   function composeAssets() {
     state.assets = [];
 
-    // —— A. 关键时刻生成资产（模拟后）
-    state.keyMoments.forEach((km) => {
-      const matchedComments = state.comments.filter(
-        (c) => c.status === "adopted" && guessTargetStation(c) === km.suggestStation
-      );
-      const pack = Practice.packageFor(km.typeId, matchedComments.length > 0);
-      if (!pack) return;
-      pack.packages.forEach((slotId) => {
-        const target = Practice.assetTargetFor(slotId);
-        if (!target) return;
-        const id = Practice.nextAssetId(pack.assetPrefix, state.assets.map((a) => a.id));
-        state.assets.push({ id, slotId, target, km, mergedComments: matchedComments, status: "ready" });
+    // 关键时刻只是仿真记录，不自动成为资产。只有教师明确判断“支持”的
+    // 修订候选才按其目标 envKey 生成一个或多个资产。
+    (state.expertCards || [])
+      .filter((entry) => entry.state === "candidate" && entry.decision === "supported")
+      .forEach((entry) => {
+        const linkedMoments = state.keyMoments.filter((km) => entry.evidenceLinks.includes(km.id));
+        entry.targetEnvKeys.forEach((envKey) => {
+          const slotId = slotForReviewTarget(envKey, entry.draftText);
+          if (!slotId) return;
+          const target = Practice.assetTargetFor(slotId);
+          if (!target) return;
+          const env = PRACTICE_ENV_BY_KEY[envKey];
+          const id = Practice.nextAssetId(`P-${env?.no || "00"}-`, state.assets.map((asset) => asset.id));
+          state.assets.push({
+            id,
+            slotId,
+            target,
+            practiceEnvKey: envKey,
+            km: linkedMoments[0] || null,
+            linkedMoments,
+            mergedComments: [{ author: entry.expert.role, body: entry.draftText }],
+            status: entry.writtenBack ? "shipped" : "ready",
+            _fromReview: true,
+            _reviewId: entry.expertId,
+            _reviewLabel: `${env?.no || "--"} ${env?.label || envKey}`,
+            _reviewRole: entry.expert?.role || "",
+            _reviewDraft: entry.draftText,
+          });
+        });
       });
-    });
-
-    // —— B. 已采纳专家批注直接生成资产（无需关键时刻）
-    (state.expertCards || []).filter((e) => e.state === "adopted").forEach((e) => {
-      const mapping = EXPERT_SLOT_MAP[e.expertId];
-      if (!mapping) return;
-      if (state.assets.find((a) => a._expertId === e.expertId)) return; // 去重
-      const target = Practice.assetTargetFor(mapping.slotId);
-      if (!target) return;
-      const id = Practice.nextAssetId(mapping.prefix, state.assets.map((a) => a.id));
-      const expertComments = state.comments.filter(
-        (c) => c._expertSource && c.id.includes(e.expertId)
-      );
-      state.assets.push({
-        id, slotId: mapping.slotId, target,
-        km: null,
-        mergedComments: expertComments,
-        status: "ready",
-        _fromExpert: true,
-        _expertId: e.expertId,
-        _expertLabel: mapping.label,
-        _expertRole: e.expert?.role || "",
-      });
-    });
 
     renderMigrate();
   }
@@ -1197,76 +1251,82 @@
     const leftSide = migrate.querySelectorAll(".mig-side")[0];
     const rightSide = migrate.querySelectorAll(".mig-side")[1];
     if (leftSide) {
-      leftSide.innerHTML = `<h5>本轮 <b>关键时刻 + 专家批注</b></h5>`;
-      state.keyMoments.forEach((km, i) => {
+      const candidates = (state.expertCards || []).filter((entry) => entry.state === "candidate");
+      leftSide.innerHTML = `<h5>本轮 <b>修订候选 + 仿真证据关联</b></h5>`;
+      candidates.forEach((entry) => {
         const card = document.createElement("div");
         card.className = "mig-card";
+        const envLabels = entry.targetEnvKeys.map((key) => {
+          const env = PRACTICE_ENV_BY_KEY[key];
+          return env ? `${env.no} ${env.label}` : key;
+        }).join(" / ");
+        const linked = state.keyMoments.filter((km) => entry.evidenceLinks.includes(km.id));
+        const decisionLabel = {
+          supported: "教师确认支持",
+          unsupported: "教师确认不支持",
+          insufficient: "证据不足",
+          pending: "待教师判断",
+        }[entry.decision] || "待教师判断";
         card.innerHTML = `
           <div class="top">
-            <span class="id">KM-${String(i + 1).padStart(2, "0")} · ${fmtTime(km.tSec)}</span>
-            <span class="kind">moment</span>
+            <span class="id">${escapeHtml(entry.expert.role)}</span>
+            <span class="kind">revision</span>
           </div>
-          <div class="title">${km.cn}</div>
-          <div class="meta"><span>环节 ${km.suggestStation}</span><span><b>可写回</b></span></div>
+          <div class="title">${escapeHtml(entry.draftText.slice(0, 76))}${entry.draftText.length > 76 ? "…" : ""}</div>
+          <div class="meta"><span>${escapeHtml(envLabels)}</span><span><b>${decisionLabel}</b></span></div>
+          <div class="meta"><span>${linked.length ? `已关联 ${linked.length} 条仿真记录` : "尚无仿真记录关联"}</span><span>${entry.decisionNote ? escapeHtml(entry.decisionNote) : ""}</span></div>
         `;
         leftSide.appendChild(card);
       });
-      state.comments.filter((c) => c.status === "adopted").forEach((c) => {
-        const card = document.createElement("div");
-        card.className = "mig-card";
-        card.innerHTML = `
-          <div class="top">
-            <span class="id">CMT-${String(c.pinNum).padStart(2, "0")} · ${c.author}</span>
-            <span class="kind">comment</span>
-          </div>
-          <div class="title">${c.body.slice(0, 60)}…</div>
-          <div class="meta"><span>合并目标 环节 ${guessTargetStation(c)}</span><span><b>合并写回</b></span></div>
-        `;
-        leftSide.appendChild(card);
-      });
+      if (!candidates.length) {
+        leftSide.insertAdjacentHTML("beforeend", `<div class="mig-card is-empty"><div class="title">尚无修订候选</div><div class="meta"><span>请先在 ii 段加入候选</span></div></div>`);
+      }
     }
     if (rightSide) {
-      rightSide.innerHTML = `<h5>按 <b>9 个教学环节</b> 写回（依 ASSET_TARGETS 表）</h5>`;
+      rightSide.innerHTML = `<h5>教师确认支持后，按 <b>当前 S1–S9</b> 生成资产</h5>`;
       const grouped = {};
       state.assets.forEach((a) => {
-        const k = a.target.stationId;
+        const k = a.practiceEnvKey || "env09";
         if (!grouped[k]) grouped[k] = [];
         grouped[k].push(a);
       });
-      Object.keys(grouped).sort().forEach((sid) => {
-        const station = stationOf(Number(sid));
-        grouped[sid].forEach((a) => {
+      Object.keys(grouped).sort().forEach((envKey) => {
+        const env = PRACTICE_ENV_BY_KEY[envKey];
+        grouped[envKey].forEach((a) => {
           const card = document.createElement("div");
           card.className = "mig-card right" + (a.status === "shipped" ? " is-shipped" : "");
           card.dataset.assetId = a.id;
           card.style.position = "relative";
-          const sourceLabel = a._fromExpert
-            ? `来自 ${a._expertRole} · ${a._expertLabel}`
-            : (a.mergedComments.length ? `合并 ${a.mergedComments.length} 条` : "来自关键时刻");
+          const sourceLabel = `来自 ${a._reviewRole} · 关联 ${a.linkedMoments?.length || 0} 条仿真记录`;
           card.innerHTML = `
             <div class="top">
               <span class="id">${a.id}</span>
               <span class="kind">${a.target.kind}</span>
             </div>
-            <div class="title">环节 ${sid} · ${station?.title?.split("·")[1]?.trim() || station?.title || "—"}<br/>
+            <div class="title">${env?.no || "--"} · ${env?.label || envKey}<br/>
               <small style="font-family:var(--mono); color:var(--mute); font-size: var(--fs-2xs);">slot · ${a.slotId}</small>
             </div>
             <div class="meta">
-              <span>${sourceLabel}</span>
+              <span>${escapeHtml(sourceLabel)}</span>
               <span><b>${a.status === "shipped" ? "已写入 ✓" : "待写入"}</b></span>
             </div>
           `;
           rightSide.appendChild(card);
         });
       });
+      if (!state.assets.length) {
+        rightSide.insertAdjacentHTML("beforeend", `<div class="mig-card is-empty"><div class="title">尚无可写回资产</div><div class="meta"><span>需先由教师确认至少一条候选为“支持”</span></div></div>`);
+      }
     }
-    setStageStatus("iii", `${state.assets.length} 个资产候选 · 点"确认写回"`, false, false);
+    const candidates = (state.expertCards || []).filter((entry) => entry.state === "candidate");
+    const supported = candidates.filter((entry) => entry.decision === "supported").length;
+    setStageStatus("iii", `${candidates.length} 条修订候选 · ${supported} 条教师确认支持`, false, supported > 0);
     renderStage3();
   }
 
   // ============================================================
   // Stage 3 动态渲染：变更清单 / publish-bar / sync-tri
-  // 跟随 Stage 1（章节选择）和 Stage 2（专家批注采纳）实时更新
+  // 跟随 Stage 1（章节选择）和 Stage 2（学科审校、仿真记录关联与教师判断）实时更新
   // ============================================================
 
   const EC_LABEL_MAP = {
@@ -1292,86 +1352,106 @@
     const cl = document.querySelector("#stage-iii .change-list");
     if (!cl) return;
 
-    const adoptedExperts = (state.expertCards || []).filter((e) => e.state === "adopted");
-    const kms = state.keyMoments || [];
-    const total = adoptedExperts.length + kms.length;
+    const candidates = (state.expertCards || []).filter((entry) => entry.state === "candidate");
 
     const ct = cl.querySelector(".ct");
-    if (ct) ct.textContent = total;
+    if (ct) ct.textContent = candidates.length;
 
-    cl.querySelectorAll(".cl-row").forEach((r) => r.remove());
+    cl.querySelectorAll(".decision-row, .decision-empty").forEach((row) => row.remove());
 
-    const chapter  = getSelected("chapter");
-    const comments = chapter ? getExpertCommentsForChapter(chapter) : null;
-
-    adoptedExperts.forEach((e) => {
-      const expertIdx = EXPERTS.indexOf(e.expert);
-      const comment   = comments?.[expertIdx >= 0 ? expertIdx : 0];
-      const bodyText  = comment
-        ? comment.body.replace(/<[^>]+>/g, "").trim().slice(0, 52) + "…"
-        : e.expert.func;
-      const label = EC_LABEL_MAP[e.expert.ec] || e.expert.role;
-      const row = document.createElement("div");
-      row.className = "cl-row";
-      row.innerHTML = `<span class="src ${e.expert.ec}">${label}</span><span class="desc">${bodyText}</span><span class="stat">✓ 已采纳</span>`;
+    candidates.forEach((entry) => {
+      const row = document.createElement("article");
+      row.className = `decision-row ${entry.expert.ec}`;
+      const envLabels = entry.targetEnvKeys.map((key) => {
+        const env = PRACTICE_ENV_BY_KEY[key];
+        return env ? `${env.no} ${env.label}` : key;
+      });
+      const originalTexts = entry.targetEnvKeys.map((key) => {
+        const env = PRACTICE_ENV_BY_KEY[key];
+        const text = entry.originalEnvContent?.[key] || "当前环节暂无内容";
+        return `<span><b>${env?.no || "--"}</b>${escapeHtml(text.slice(0, 86))}${text.length > 86 ? "…" : ""}</span>`;
+      }).join("");
+      const linked = state.keyMoments.filter((km) => entry.evidenceLinks.includes(km.id));
+      const evidenceHtml = linked.length
+        ? linked.map((km) => `<span><b>${fmtTime(km.tSec)}</b>${escapeHtml(km.cn)}</span>`).join("")
+        : `<span class="is-muted">尚未关联仿真记录</span>`;
+      const decision = {
+        supported: ["教师确认支持", "is-supported"],
+        unsupported: ["教师确认不支持", "is-unsupported"],
+        insufficient: ["证据不足", "is-insufficient"],
+        pending: ["待教师判断", "is-pending"],
+      }[entry.decision] || ["待教师判断", "is-pending"];
+      row.innerHTML = `
+        <header class="decision-head">
+          <span class="src ${entry.expert.ec}">${escapeHtml(entry.expert.role)}</span>
+          <span class="decision-targets">${escapeHtml(envLabels.join(" / "))}</span>
+        </header>
+        <div class="decision-flow">
+          <section><small>01 · 原内容</small><div class="decision-copy">${originalTexts}</div></section>
+          <section><small>02 · 修订候选</small><p>${escapeHtml(entry.draftText)}</p></section>
+          <section><small>03 · 仿真证据关联</small><div class="decision-copy">${evidenceHtml}</div></section>
+          <section><small>04 · 教师判断</small><span class="decision-state ${decision[1]}">${decision[0]}</span>${entry.decisionNote ? `<p>${escapeHtml(entry.decisionNote)}</p>` : ""}</section>
+        </div>
+      `;
       cl.appendChild(row);
     });
 
-    kms.forEach((km) => {
-      const row = document.createElement("div");
-      row.className = "cl-row";
-      row.innerHTML = `<span class="src" style="background:#e6f0e8;color:var(--ok);">虚拟班</span><span class="desc">${km.cn}</span><span class="stat">✓ 试错已验证</span>`;
-      cl.appendChild(row);
-    });
-
-    if (total === 0) {
-      const row = document.createElement("div");
-      row.className = "cl-row";
-      row.innerHTML = `<span class="src" style="background:var(--surface-2,#f5f5f0);color:var(--mute,#9a9a90);">—</span><span class="desc" style="color:var(--mute,#9a9a90);">尚无已采纳批注 · 请在 ii 段采纳至少一条专家批注</span><span class="stat" style="color:var(--mute,#9a9a90);">—</span>`;
-      cl.appendChild(row);
+    if (!candidates.length) {
+      const empty = document.createElement("div");
+      empty.className = "decision-empty";
+      empty.textContent = "尚无修订候选 · 请在 ii 段从五路学科审校中加入至少一条候选";
+      cl.appendChild(empty);
     }
   }
 
   function renderPublishBar() {
     const bar = document.querySelector(".publish-bar");
     if (!bar) return;
-    const adopted = (state.expertCards || []).filter((e) => e.state === "adopted").length;
-    const pending = (state.expertCards || []).filter((e) => e.state === "pending").length;
-    const kms     = (state.keyMoments || []).length;
-    const total   = adopted + kms;
+    const candidates = (state.expertCards || []).filter((entry) => entry.state === "candidate");
+    const supportedEntries = candidates.filter((entry) => entry.decision === "supported");
+    const supported = supportedEntries.length;
+    const writable = supportedEntries.filter((entry) => !entry.writtenBack).length;
+    const pending = candidates.filter((entry) => entry.decision === "pending").length;
+    const linked = new Set(candidates.flatMap((entry) => entry.evidenceLinks)).size;
+    const heading = bar.querySelector(".pb-l h4");
+    if (heading) heading.textContent = supported > 0
+      ? (writable > 0 ? "本轮已有教师确认支持的候选" : "本轮教师确认写回已完成")
+      : "教师确认后才可写回";
     const p = bar.querySelector("p");
-    if (p) p.textContent = `${total} 条修改 · ${adopted} 已采纳 · ${pending} 待回应 · 关键时刻 ${kms} 处 · 按 9 个教学环节归位`;
+    if (p) p.textContent = `${candidates.length} 条修订候选 · ${linked} 条已关联仿真记录 · ${supported} 条教师确认支持 · ${pending} 条待判断`;
+    const publish = bar.querySelector("#inline-publish");
+    if (publish) {
+      publish.disabled = writable === 0;
+      publish.setAttribute("aria-disabled", writable === 0 ? "true" : "false");
+    }
   }
 
   function renderSyncTri() {
     const tri = document.querySelector(".sync-tri");
     if (!tri) return;
     const chapter        = getSelected("chapter");
-    const adoptedExperts = (state.expertCards || []).filter((e) => e.state === "adopted");
-    const kms            = (state.keyMoments || []).length;
+    const candidates     = (state.expertCards || []).filter((entry) => entry.state === "candidate");
+    const supported      = candidates.filter((entry) => entry.decision === "supported");
+    const linkedCount    = new Set(candidates.flatMap((entry) => entry.evidenceLinks)).size;
     const cells          = tri.querySelectorAll(".sync-cell");
 
     if (cells[0]) {
-      const targetStations = [...new Set(adoptedExperts.map((e) => e.expert.target))].sort((a, b) => a - b);
-      const stationLabel = targetStations.length
-        ? targetStations.map((s) => {
-            const st = stationOf(s);
-            const shortTitle = st?.title?.split("·")[1]?.trim() || `环节 ${s}`;
-            return `0${s} ${shortTitle}`;
-          }).join(" / ")
-        : "05 任务链设计 / 06 课中调控";
-      cells[0].querySelector(".sc-target").textContent = `本课实践包 · ${stationLabel}`;
+      const targetEnvKeys = [...new Set(supported.flatMap((entry) => entry.targetEnvKeys))].sort();
+      const targetLabel = targetEnvKeys.length
+        ? targetEnvKeys.map((key) => `${PRACTICE_ENV_BY_KEY[key]?.no} ${PRACTICE_ENV_BY_KEY[key]?.label}`).join(" / ")
+        : "等待教师确认支持";
+      cells[0].querySelector(".sc-target").textContent = `本课实践包 · ${targetLabel}`;
       const chapterLabel = chapter ? chapter.title : "当前章节";
       cells[0].querySelector(".sc-detail").innerHTML =
-        `采纳 <b>${adoptedExperts.length}</b> 条专家批注 + <b>${kms}</b> 个关键时刻 · 写回「${chapterLabel}」`;
-      const hasContent = adoptedExperts.length > 0 || kms > 0;
+        `教师确认支持 <b>${supported.length}</b> 条 · 写回「${escapeHtml(chapterLabel)}」并保留原始审校与判断记录`;
+      const hasContent = supported.length > 0;
       cells[0].classList.toggle("is-ready",   hasContent);
       cells[0].classList.toggle("is-pending", !hasContent);
     }
 
     if (cells[1]) {
       cells[1].querySelector(".sc-detail").innerHTML =
-        `专家采纳率 <b>${adoptedExperts.length}/5</b> · 关键时刻 <b>${kms}</b> 处 · 立场迁移度 → <b>同步进入 data-detail 下一轮改进队列</b>`;
+        `修订候选 <b>${candidates.length}</b> 条 · 仿真证据已关联 <b>${linkedCount}</b> 条 · 教师判断 → <b>同步进入下一轮改进队列</b>`;
     }
 
     if (cells[2]) {
@@ -1385,29 +1465,67 @@
     renderChangeList();
     renderPublishBar();
     renderSyncTri();
+    renderLoopClose();
+  }
+
+  function renderLoopClose() {
+    const close = document.querySelector(".loop-close");
+    if (!close) return;
+    const heading = close.querySelector(".lc-txt b");
+    const detail = close.querySelector(".lc-txt span");
+    const cta = close.querySelector(".lc-cta");
+    const candidates = (state.expertCards || []).filter((entry) => entry.state === "candidate");
+    const supported = candidates.filter((entry) => entry.decision === "supported");
+    const pending = candidates.filter((entry) => entry.decision === "pending");
+    const allSupportedWritten = supported.length > 0 && supported.every((entry) => entry.writtenBack);
+
+    if (allSupportedWritten) {
+      if (heading) heading.textContent = "本轮闭环完成 · 教师确认的修订已回写";
+      if (detail) detail.textContent = "实践包已更新，审校来源、仿真记录关联与教师判断均已保留";
+      if (cta) { cta.textContent = "带着修订再来一轮 →"; cta.href = "#stage-i"; }
+      return;
+    }
+    if (!candidates.length) {
+      if (heading) heading.textContent = "本轮闭环待启动 · 尚无修订候选";
+      if (detail) detail.textContent = "先将审校意见加入修订候选，再关联仿真记录并完成教师判断";
+    } else if (supported.length) {
+      if (heading) heading.textContent = `本轮闭环待写回 · ${supported.length} 条候选已由教师确认支持`;
+      if (detail) detail.textContent = "点击“教师确认写回”后，系统才会更新目标教学环节";
+    } else if (!pending.length) {
+      if (heading) heading.textContent = "本轮教师判断已记录 · 暂无支持写回的候选";
+      if (detail) detail.textContent = "不支持、证据不足与不采用理由仍保留为可追溯记录";
+    } else {
+      if (heading) heading.textContent = `本轮闭环待判断 · ${pending.length} 条候选尚待教师确认`;
+      if (detail) detail.textContent = "系统只呈现关联的仿真记录，不替教师宣布验证结论";
+    }
+    if (cta) { cta.textContent = "回到审校与仿真 →"; cta.href = "#stage-ii"; }
   }
 
   function writeBackAllAssets() {
     if (!state.assets.length) {
-      toast("还没有可写回的资产 — 请先在 ii 段采纳至少一条专家批注");
+      toast("尚无教师确认支持的修订候选 · 系统不会替教师自动写回");
       return;
     }
     let shipped = 0;
+    const shippedReviewIds = new Set();
     state.assets.forEach((a) => {
       if (a.status === "shipped") return;
       const ok = writeBackOne(a);
       if (ok) {
         a.status = "shipped";
         shipped++;
+        if (a._reviewId) shippedReviewIds.add(a._reviewId);
         state.writebackLog.push({
-          assetId: a.id, slotId: a.slotId, stationId: a.target.stationId,
+          assetId: a.id, slotId: a.slotId, practiceEnvKey: a.practiceEnvKey, stationId: a.target.stationId,
           storeCall: a.target.storeCall, at: Date.now(),
         });
       }
     });
+    applySupportedCandidatesToPracticePack(shippedReviewIds);
     renderMigrate();
-    toast(`已写回 ${shipped} 个资产到 PharmacoPilotStore · nav 页打开即可看到`);
-    setStageStatus("iii", `已写回 ${shipped} 个资产到 ${new Set(state.writebackLog.map((x) => `环节 ${x.stationId}`)).size} 个环节`, false, true);
+    toast(`教师已确认写回 ${shipped} 个资产 · 修订与判断记录已保留`);
+    const envCount = new Set(state.writebackLog.map((item) => item.practiceEnvKey).filter(Boolean)).size;
+    setStageStatus("iii", `已写回 ${shipped} 个资产到 ${envCount} 个当前教学环节`, false, true);
     // 更新 hero meta "待写回"计数
     const moments = $('[data-field="moments"]');
     if (moments) moments.innerHTML = `${state.keyMoments.length} 处 · 已写回 ${state.writebackLog.length}`;
@@ -1416,13 +1534,32 @@
       window.ppPracticeTouchUpdated();
     }
   }
+  function applySupportedCandidatesToPracticePack(reviewIds) {
+    const chapterId = wizSelection.chapter;
+    if (!chapterId || !reviewIds.size) return;
+    (state.expertCards || []).forEach((entry) => {
+      if (!reviewIds.has(entry.expertId) || entry.writtenBack) return;
+      entry.targetEnvKeys.forEach((envKey) => {
+        const body = document.querySelector(`.pack-preview [data-pack-field="${envKey}"]`);
+        const current = body?.textContent?.trim() || loadPackEdits(chapterId)[envKey] || "";
+        const addition = `修订：${entry.draftText}`;
+        const next = current.includes(addition) ? current : [current, addition].filter(Boolean).join(" · ");
+        savePackEdit(chapterId, envKey, next);
+        if (body) body.textContent = next;
+      });
+      entry.writtenBack = true;
+      saveExpertReview(chapterId, entry);
+    });
+  }
   function writeBackOne(a) {
     try {
       const data = {
         sourcePractice: { sessionId: "#3417", round: 3 },
         kmId: a.km?.id || null,
-        kmType: a.km?.typeId || (a._fromExpert ? "expert" : "unknown"),
-        kmQuote: a.km?.quote || (a._expertLabel ? `专家批注 · ${a._expertLabel}` : ""),
+        kmType: a.km?.typeId || (a._fromReview ? "discipline-review" : "unknown"),
+        kmQuote: a.km?.quote || (a._reviewLabel ? `学科审校 · ${a._reviewLabel}` : ""),
+        practiceEnvKey: a.practiceEnvKey || null,
+        teacherDecision: a._fromReview ? "supported" : null,
         comments: a.mergedComments.map((c) => ({ author: c.author, body: c.body })),
         slotPayload: buildSlotPayload(a),
       };
@@ -1460,33 +1597,36 @@
     }
   }
   function buildSlotPayload(a) {
-    // 根据 slotId 生成可写入对应 9 个教学环节标签的最小可用 payload
+    // ASSET_TARGETS 继续负责底层 slot；当前 S1–S9 目标通过 practiceEnvKey 另行记录。
+    const reviewText = a._reviewDraft || a.mergedComments?.[0]?.body || "";
     switch (a.slotId) {
       case "questionChain.openerTemplate":
-        return { label: "开放问题破冰句式", template: '"看到这张图，你最先注意到哪个角落？" 等 4 句' };
+        return { label: "开放问题破冰句式", template: reviewText };
       case "questionChain.divergenceAnchor":
-        return { label: "立场切换分歧锚点", template: '"如果你是 ___ ，回看今天，最遗憾什么？"', anchorAt: "问题链第 3 题前" };
+        return { label: "立场切换分歧锚点", template: reviewText, anchorAt: "由教师按目标环节确认" };
       case "explore.studentInitiatedDimension":
-        return { label: "学生意外提出维度", dimension: "回款周期与研发投入关联", howToUse: "作为协作任务可选入口，而非抑制" };
+        return { label: "学生意外提出维度", dimension: reviewText, howToUse: "由教师确认后作为协作任务可选入口" };
       case "pulseRule.ifThen":
         return {
           label: "Agent 介入复盘规则",
-          ifCond: "出现 ≥ 2 名学生立场对立",
-          thenAct: "15 秒内引入分组（A 长期视角 / B 短期视角）",
-          microFormat: "举手投票 + 30 秒立场陈述",
+          ifCond: a.km?.cn || "出现与修订候选相关的仿真信号",
+          thenAct: reviewText,
+          microFormat: "仿真记录关联 + 教师判断",
         };
       case "timeline.scaffoldInsertion":
-        return { label: "支架插入点", tRange: `${fmtTime(a.km.tSec)}–${fmtTime(a.km.tSec + 60)}`, scaffold: "提示卡 + 小组互判" };
+        return { label: "支架插入点", tRange: a.km ? `${fmtTime(a.km.tSec)}–${fmtTime(a.km.tSec + 60)}` : "待教师编排", scaffold: reviewText };
       case "case.evidenceForAgenda":
-        return { label: "议程对应证据", evidenceRow: "在节点 6 案例材料里加一行回应学生议程" };
+        return { label: "案例与证据修订", evidenceRow: reviewText };
       case "goal.observableCriterion":
-        return { label: "可观察目标改写", criterion: "学生能在 25 min 内基于政策原文形成至少 1 个有据可依的立场" };
+        return { label: "可观察目标改写", criterion: reviewText };
       case "evidence.rubricRowAdd":
-        return { label: "评价证据新增项", row: "立场依据完整度 (0–3)" };
+        return { label: "评价证据新增项", row: reviewText };
       case "retro.consensusPull":
-        return { label: "本轮共识", pull: "问题链第 1 题更具体化 + 分组提示词再设计" };
+        return { label: "本轮教师确认的改进", pull: reviewText };
+      case "positioning.spiralCorrection":
+        return { label: "学情与定位修订", correction: reviewText };
       default:
-        return { label: a.km.cn, raw: a.km.copyTemplate };
+        return { label: a.km?.cn || "教师确认修订", raw: reviewText || a.km?.copyTemplate || "" };
     }
   }
 
@@ -1499,13 +1639,9 @@
   // Path A: wire 页内主按钮到已有的 runtime 函数
   // ──────────────────────────────────────────────────────────────
   function wireInlineControls() {
-    // Stage i — 生成实践包 → 提示 + 跳转 ii
+    // Stage i — 调用本机模型生成九环节实践包；不可用时保留当前模板
     const gen = $("#inline-generate-pack");
-    if (gen) gen.addEventListener("click", () => {
-      toast("实践包已重新生成 · 进入 ii 段试错");
-      const next = document.querySelector("#stage-ii");
-      if (next) next.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    if (gen) gen.addEventListener("click", () => generatePracticePackWithLocalModel(gen));
 
     // Stage ii — sim-controls 三按钮（▶ 运行模拟 / ⟲ 重置 / ▷ 步进）
     const run = $("#inline-sim-run");
@@ -1518,20 +1654,22 @@
     const step = $("#inline-sim-step");
     if (step) step.addEventListener("click", () => stepSim(30));
 
-    // Stage ii — 专家卡按钮的绑定移到 wireExpertCardActions()（renderExpertCards 调用）
+    // Stage ii — 五路审校卡在 renderExpertCards() 内完成绑定
 
     // Stage iii — 教师确认写回 / 查看完整 diff
     const pub = $("#inline-publish");
     if (pub) pub.addEventListener("click", () => {
       if (state.assets.length === 0) {
-        toast("尚无可写回资产 · 先在 ii 段采纳至少一条专家批注");
+        toast("尚无可写回资产 · 需先加入修订候选、关联仿真记录并由教师确认支持");
         return;
       }
       writeBackAllAssets();
     });
     const diff = $("#inline-diff");
     if (diff) diff.addEventListener("click", () => {
-      toast(`修改清单共 ${state.comments.filter(c => c.status === "adopted").length} 条已采纳 · ${state.keyMoments.length} 个关键时刻`);
+      const candidates = (state.expertCards || []).filter((entry) => entry.state === "candidate");
+      const supported = candidates.filter((entry) => entry.decision === "supported").length;
+      toast(`教师决策卷宗 · ${candidates.length} 条修订候选 · ${supported} 条确认支持 · ${state.keyMoments.length} 条仿真记录`);
       const cl = document.querySelector(".change-list");
       if (cl) cl.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -1614,7 +1752,7 @@
     } catch {}
   }
   function saveWizSelection() {
-    localStorage.setItem(WIZ_STORE_KEY, JSON.stringify(wizSelection));
+    try { localStorage.setItem(WIZ_STORE_KEY, JSON.stringify(wizSelection)); } catch {}
   }
 
   function mountPackWizard() {
@@ -1733,6 +1871,9 @@
   // 实践包内容编辑：按 chapter.id 分别持久化到 localStorage
   // ============================================================
   const PACK_EDITS_KEY = "pp.practice.packEdits";
+  const PACK_GENERATION_META_KEY = "pp.practice.packGenerationMeta";
+  const PACK_REVISION_KEY = "pp.practice.packRevision.v1";
+  const PACK_KEYS = Object.freeze(["env01","env02","env03","env04","env05","env06","env07","env08","env09"]);
   function loadAllPackEdits() {
     try { return JSON.parse(localStorage.getItem(PACK_EDITS_KEY) || "{}"); }
     catch { return {}; }
@@ -1741,16 +1882,143 @@
     const all = loadAllPackEdits();
     return all[chapterId] || {};
   }
-  function savePackEdit(chapterId, fieldKey, html) {
+  function loadAllPackRevisions() {
+    try {
+      const value = JSON.parse(localStorage.getItem(PACK_REVISION_KEY) || "{}");
+      return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    } catch { return {}; }
+  }
+  function getPackRevision(chapterId) {
+    const revision = Number(loadAllPackRevisions()[chapterId] || 0);
+    return Number.isInteger(revision) && revision >= 0 ? revision : 0;
+  }
+  function bumpPackRevision(chapterId) {
+    if (!chapterId) return 0;
+    const all = loadAllPackRevisions();
+    const next = getPackRevision(chapterId) + 1;
+    all[chapterId] = next;
+    try { localStorage.setItem(PACK_REVISION_KEY, JSON.stringify(all)); } catch {}
+    global.dispatchEvent(new CustomEvent("pharmaco:pack-revision", { detail: { chapterId, revision: next } }));
+    refreshReviewFreshness(chapterId);
+    return next;
+  }
+  function savePackEdit(chapterId, fieldKey, html, { bump = true } = {}) {
     const all = loadAllPackEdits();
     if (!all[chapterId]) all[chapterId] = {};
     all[chapterId][fieldKey] = html;
-    localStorage.setItem(PACK_EDITS_KEY, JSON.stringify(all));
+    try { localStorage.setItem(PACK_EDITS_KEY, JSON.stringify(all)); } catch {}
+    if (bump) bumpPackRevision(chapterId);
+  }
+  function saveGeneratedPack(chapterId, pack, metadata, previousPack = null) {
+    const all = loadAllPackEdits();
+    all[chapterId] = Object.fromEntries(PACK_KEYS.map((key) => [key, String(pack[key] || "").trim()]));
+    try { localStorage.setItem(PACK_EDITS_KEY, JSON.stringify(all)); } catch {}
+    try {
+      const allMeta = JSON.parse(localStorage.getItem(PACK_GENERATION_META_KEY) || "{}");
+      allMeta[chapterId] = metadata;
+      localStorage.setItem(PACK_GENERATION_META_KEY, JSON.stringify(allMeta));
+    } catch {}
+    const changed = !previousPack || PACK_KEYS.some((key) => String(previousPack[key] || "").trim() !== String(pack[key] || "").trim());
+    if (changed) bumpPackRevision(chapterId);
+  }
+  function loadPackGenerationMeta(chapterId) {
+    try {
+      const allMeta = JSON.parse(localStorage.getItem(PACK_GENERATION_META_KEY) || "{}");
+      return allMeta[chapterId] || null;
+    } catch { return null; }
+  }
+  function currentPackFromPreview() {
+    const preview = document.querySelector(".pack-preview");
+    if (!preview) return null;
+    const pack = {};
+    for (const key of PACK_KEYS) {
+      const body = preview.querySelector(`.body[data-pack-field="${key}"]`);
+      const value = body?.textContent?.trim() || "";
+      if (!value) return null;
+      pack[key] = value;
+    }
+    return pack;
+  }
+  function validGeneratedPack(pack) {
+    return !!pack && PACK_KEYS.every((key) => typeof pack[key] === "string" && pack[key].trim());
+  }
+  async function generatePracticePackWithLocalModel(button) {
+    if (button.dataset.generating === "1") return;
+    const course = getSelected("course");
+    const klass = getSelected("class");
+    const session = getSelected("session");
+    const chapter = getSelected("chapter");
+    const currentPack = currentPackFromPreview();
+    if (!course || !klass || !session || !chapter || !currentPack) {
+      toast("请先完成课程、班级、课时和章节选择");
+      return;
+    }
+    if (!global.PharmacoBackend?.generatePracticePack) {
+      toast("本地后端未连接 · 已保留当前模板实践包");
+      return;
+    }
+
+    const originalText = button.textContent;
+    const requestedChapterId = chapter.id;
+    button.dataset.generating = "1";
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    button.textContent = "本机 Qwen 生成中…";
+    setStageStatus("i", "本机 Qwen 正在生成九环节实践包", true, false);
+    toast("已提交本机 Qwen · 正在生成九个教学环节");
+
+    try {
+      const result = await global.PharmacoBackend.generatePracticePack({
+        context: {
+          chapterId: chapter.id,
+          courseTitle: course.title,
+          courseLevel: course.level || "",
+          classTitle: klass.title,
+          studentCount: klass.n,
+          sessionTitle: session.title,
+          durationMinutes: session.min,
+          chapterTitle: chapter.title,
+          topic: chapter.topic,
+        },
+        currentPack,
+      });
+      if (!validGeneratedPack(result?.pack)) throw new Error("本地模型返回的实践包不完整");
+      saveGeneratedPack(requestedChapterId, result.pack, {
+        source: "local-model",
+        model: result.model || "Qwen3.5-9B-4bit",
+        generatedAt: result.generatedAt || new Date().toISOString(),
+      }, currentPack);
+
+      if (wizSelection.chapter === requestedChapterId) {
+        syncToHeroAndPreview();
+        setStageStatus("i", "本机 Qwen 实践包已生成", false, true);
+        toast("本机 Qwen 已生成九环节实践包 · 可逐环节编辑后进入 ii 段试错");
+        // v5:实践包独占下一栏 —— 滚到生成结果本身,而不是越过它直奔 stage-ii
+        (document.querySelector(".pack-result") || document.querySelector("#stage-ii"))
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        setStageStatus("i", "实践包已保存到原章节", false, true);
+        toast(`实践包已保存到「${chapter.title}」· 当前章节未被覆盖`);
+      }
+    } catch (error) {
+      console.warn("[practice-runtime] 本地模型生成失败", error);
+      setStageStatus("i", "本地模型不可用 · 当前模板已保留", false, true);
+      const detail = error?.code === "MODEL_OUTPUT_INVALID"
+        ? "模型输出未通过九环节校验"
+        : "本地后端或模型尚未就绪";
+      toast(`${detail} · 已保留当前模板实践包`);
+    } finally {
+      button.dataset.generating = "0";
+      button.disabled = false;
+      button.removeAttribute("aria-busy");
+      button.textContent = originalText;
+    }
   }
   function wirePackEdits(previewRoot, chapterId) {
     previewRoot.querySelectorAll(".pack-item .body[contenteditable=true]").forEach((el) => {
       if (el.dataset.packBound === "1") return;
       el.dataset.packBound = "1";
+      el.addEventListener("focus", () => { el.dataset.packOriginalHtml = el.innerHTML.trim(); });
       el.addEventListener("blur", () => {
         const field = el.dataset.packField;
         if (!field) return;
@@ -1758,7 +2026,9 @@
         const curChapter = wizSelection.chapter;
         if (!curChapter) return;
         const txt = el.innerHTML.trim();
-        savePackEdit(curChapter, field, txt);
+        const changed = txt !== (el.dataset.packOriginalHtml ?? txt);
+        savePackEdit(curChapter, field, txt, { bump: changed });
+        el.dataset.packOriginalHtml = txt;
         // blur 后重新计数（按 · 分割）
         const n = el.textContent.split(/[·；;]/).map((s) => s.trim()).filter(Boolean).length;
         const cnt = el.closest(".pack-item")?.querySelector(".env-count");
@@ -1802,16 +2072,16 @@
   }
 
   // ============================================================
-  // Stage 2 模板：专家批注 / 剧本 beats / 风险 / 量规 / 画像
-  // 5 个专家身份固定，内容按 chapter 模板化
+  // Stage 2 模板：五路学科审校 / 剧本 beats / 风险 / 量规 / 画像
+  // 5 路审校视角固定，内容按 chapter 模板化
   // ============================================================
-  // 5 学科专家（按学科出处分，每张卡 3 个数据来源位）
+  // 5 路学科审校（按学科出处分，每张卡 3 个数据来源位）
   const EXPERTS = [
     {
       id: "expert-pharm",   ec: "is-pharm",   av: "药",
-      role: "药学类",
+      role: "药学情境审校",
       func: "把课题锚定到真实临床 / 药学决策场景",
-      persona: "示例 · 临床药学教师 A",
+      persona: "临床药学",
       target: 5,
       inject: {
         upload:  "上传匿名病例 PDF / 临床指南",
@@ -1821,9 +2091,9 @@
     },
     {
       id: "expert-mgmt",    ec: "is-design",  av: "经",
-      role: "经管类",
+      role: "管理决策审校",
       func: "审视医院管理 / 药事经济 / 政策路径",
-      persona: "示例 · 药事经管教师 B",
+      persona: "药事管理与卫生经济",
       target: 4,
       inject: {
         upload:  "上传医院年报 / 政策分析报告",
@@ -1833,10 +2103,10 @@
     },
     {
       id: "expert-law",     ec: "is-law",     av: "法",
-      role: "法学类",
+      role: "法规合规审校",
       func: "校验法规引用 · 文号 · 年份 · 时效",
-      persona: "示例 · 药事法规教师 C",
-      target: 3,
+      persona: "药事法规与监管",
+      target: 6,
       inject: {
         upload:  "上传法规 PDF / 飞检通告汇编",
         link:    "链接 NMPA / 国家医保局公开库",
@@ -1845,10 +2115,10 @@
     },
     {
       id: "expert-edu",     ec: "is-eval",    av: "教",
-      role: "教育学类",
+      role: "教学设计审校",
       func: "审视问题链 · 目标对齐 · 量规设计",
-      persona: "示例 · 课程与评价教师 D",
-      target: 8,
+      persona: "课程与评价",
+      target: 4,
       inject: {
         upload:  "上传课程论文 / 评价范式材料",
         link:    "链接学校教学评价数据库",
@@ -1857,9 +2127,9 @@
     },
     {
       id: "expert-data",    ec: "is-reflect", av: "数",
-      role: "数据科学",
+      role: "数据循证审校",
       func: "提供 RWE / 监测数据 / 循证支撑",
-      persona: "示例 · 数据循证教师 E",
+      persona: "数据科学与真实世界证据",
       target: 9,
       inject: {
         upload:  "上传 CSV / 监测报表 / 真实世界数据",
@@ -1869,7 +2139,7 @@
     },
   ];
 
-  // 章节 → 5 条专家批注，按学科顺序：药学 / 经管 / 法学 / 教育学 / 数据
+  // 章节 → 5 路审校建议，按学科顺序：药学 / 经管 / 法学 / 教育学 / 数据
   const EXPERT_CHAPTER_COMMENTS = {
     "ch5-procurement": [
       { anchor: "⌗ 药学 · 患者代表",       body: '"集采替代"应聚焦<b>慢性病长期处方</b>（如高血压、糖尿病）——建议把患者代表设为<b>已用原研 2 年</b>的慢病患者，使分歧更贴近临床真实。' },
@@ -2032,10 +2302,68 @@
     ];
   }
 
+  function normalizeLiveReview(raw) {
+    if (!raw || typeof raw !== "object" || raw.status !== "anchored") return null;
+    const annotation = raw.annotation;
+    const sourceRevision = Number(raw.sourceRevision);
+    if (!annotation || typeof annotation !== "object"
+      || !Number.isInteger(sourceRevision) || sourceRevision < 0
+      || !PRACTICE_ENV_BY_KEY[annotation.targetEnv]
+      || typeof annotation.issue !== "string" || !annotation.issue.trim()
+      || typeof annotation.suggestion !== "string" || !annotation.suggestion.trim()
+      || typeof annotation.sourceExcerpt !== "string" || !annotation.sourceExcerpt.trim()) return null;
+    return {
+      status: "anchored",
+      sourceRevision,
+      manuscriptHash: typeof raw.manuscriptHash === "string" ? raw.manuscriptHash : "",
+      model: typeof raw.model === "string" ? raw.model : "本机 Qwen",
+      promptVersion: typeof raw.promptVersion === "string" ? raw.promptVersion : "",
+      generatedAt: typeof raw.generatedAt === "string" ? raw.generatedAt : "",
+      attempts: Number.isInteger(Number(raw.attempts)) ? Number(raw.attempts) : 1,
+      annotation: {
+        targetEnv: annotation.targetEnv,
+        segmentKey: typeof annotation.segmentKey === "string" ? annotation.segmentKey : "",
+        sourceExcerpt: annotation.sourceExcerpt.trim(),
+        sourceHash: typeof annotation.sourceHash === "string" ? annotation.sourceHash : "",
+        anchorMethod: typeof annotation.anchorMethod === "string" ? annotation.anchorMethod : "",
+        issue: annotation.issue.trim(),
+        suggestion: annotation.suggestion.trim(),
+        crossReferences: Array.isArray(annotation.crossReferences)
+          ? annotation.crossReferences.filter((ref) => ref?.ok === true && PRACTICE_ENV_BY_KEY[ref.targetEnv])
+            .map((ref) => ({
+              ok: true,
+              targetEnv: ref.targetEnv,
+              segmentKey: typeof ref.segmentKey === "string" ? ref.segmentKey : "",
+              sourceExcerpt: typeof ref.sourceExcerpt === "string" ? ref.sourceExcerpt : "",
+              sourceHash: typeof ref.sourceHash === "string" ? ref.sourceHash : "",
+              anchorMethod: typeof ref.anchorMethod === "string" ? ref.anchorMethod : "",
+            }))
+          : [],
+      },
+    };
+  }
+  function liveReviewSourceText(liveReview) {
+    return `问题：${liveReview.annotation.issue}\n建议：${liveReview.annotation.suggestion}`;
+  }
+  function liveReviewBodyMarkup(liveReview) {
+    return `<span class="ec-review-line"><b>问题</b>${escapeHtml(liveReview.annotation.issue)}</span><span class="ec-review-line"><b>建议</b>${escapeHtml(liveReview.annotation.suggestion)}</span>`;
+  }
+  function liveReviewAnchorCopy(liveReview) {
+    const env = PRACTICE_ENV_BY_KEY[liveReview.annotation.targetEnv];
+    const segment = liveReview.annotation.segmentKey ? ` · ${liveReview.annotation.segmentKey}` : "";
+    return `⌗ ${env?.no || liveReview.annotation.targetEnv} ${env?.short || ""}${segment}`;
+  }
+  function liveReviewTargetKeys(liveReview) {
+    return [...new Set([
+      liveReview.annotation.targetEnv,
+      ...liveReview.annotation.crossReferences.map((ref) => ref.targetEnv),
+    ].filter((key) => PRACTICE_ENV_BY_KEY[key]))];
+  }
+
   // 章节 → 量规歧义
   const FLAGS_BY_CHAPTER = {
     "ch5-procurement": [
-      { fid: "R-04", body: '<b>立场迁移度</b>缺少可观测锚点；建议补 3 级量规（已被评价专家提出）' },
+      { fid: "R-04", body: '<b>立场迁移度</b>缺少可观测锚点；建议补 3 级量规（已被教学设计审校提出）' },
       { fid: "R-06", body: '<b>反思深度</b>与"政策引用"维度有交叠，可能双计分' },
     ],
     "ch4-gmp": [
@@ -2056,29 +2384,67 @@
   }
 
   function renderExpertCards(chapter) {
-    const grid = document.querySelector("#stage-ii .expert-grid");
+    const grid = document.querySelector('#stage-ii [data-ec-role="grid"]');
     if (!grid) return;
     const comments = getExpertCommentsForChapter(chapter);
     if (!comments) return;
-    // 读已采纳状态
-    const adopted = loadExpertAdoptions(chapter?.id);
+    const savedReviews = loadExpertAdoptions(chapter?.id);
     grid.innerHTML = "";
+    state.expertCards = [];
     EXPERTS.forEach((e, i) => {
       const c = comments[i] || comments[0];
-      const isAdopted = adopted[e.id] === "adopted";
-      const isIgnored = adopted[e.id] === "ignored";
+      const savedRecord = savedReviews[e.id];
+      const liveReview = e.id === "expert-edu" ? normalizeLiveReview(savedRecord?.liveReview) : null;
+      const seedSourceText = stripHtml(c.body).trim();
+      const sourceText = liveReview ? liveReviewSourceText(liveReview) : seedSourceText;
+      const defaultTargets = liveReview ? liveReviewTargetKeys(liveReview) : inferReviewTargetEnvKeys(sourceText);
+      const record = normalizeReviewRecord(savedRecord, sourceText, defaultTargets);
+      record.liveReview = liveReview;
       const card = document.createElement("div");
-      card.className = `expert-card ${e.ec}` + (isAdopted ? " is-done" : "") + (isIgnored ? " is-done" : "");
-      if (isIgnored) card.style.opacity = "0.55";
+      card.className = `expert-card ${e.ec}`;
       card.dataset.expertId = e.id;
+      const targetOptions = PRACTICE_ENV_META.map((env) => `
+        <label class="ec-target-chip">
+          <input type="checkbox" data-ec-role="target-input" value="${env.key}" ${record.targetEnvKeys.includes(env.key) ? "checked" : ""}/>
+          <span>${env.no} ${env.short}</span>
+        </label>
+      `).join("");
       card.innerHTML = `
         <div class="ec-head">
           <div class="ec-av">${e.av}</div>
-          <div class="ec-who">${e.role} <span class="ec-demo">DEMO</span><small>${e.persona}</small></div>
+          <div class="ec-who">${e.role} <span class="ec-demo">审校视角</span><small>${e.persona}</small></div>
         </div>
         <div class="ec-func">职能 · ${e.func}</div>
-        <span class="ec-anchor">${c.anchor}</span>
-        <div class="ec-body">${c.body}</div>
+        ${e.id === "expert-edu" ? `
+        <div class="ec-live-review" data-ec-role="live-review" data-state="seed">
+          <span class="ec-live-status" data-ec-role="live-status">固定审校种子</span>
+          <button type="button" data-review-act="live">用本机 Qwen 审校</button>
+          <span class="ec-live-error" data-ec-role="live-error" role="alert" hidden></span>
+        </div>` : ""}
+        <span class="ec-anchor" title="${liveReview ? escapeHtml(liveReview.annotation.sourceExcerpt) : ""}">${liveReview ? escapeHtml(liveReviewAnchorCopy(liveReview)) : c.anchor}</span>
+        <div class="ec-body" data-ec-role="body"></div>
+        <div class="ec-edit-panel" data-ec-role="edit-panel" hidden>
+          <label>修改后意见<textarea maxlength="1200"></textarea></label>
+          <span class="ec-inline-error" data-ec-role="edit-error" role="alert" hidden></span>
+          <div><button type="button" data-edit-act="save">保存修订</button><button type="button" data-edit-act="cancel">取消</button></div>
+        </div>
+        <details class="ec-target-picker">
+          <summary>目标环节 · <span class="ec-target-summary" data-ec-role="target-summary"></span></summary>
+          <div class="ec-target-grid">${targetOptions}</div>
+        </details>
+        <div class="ec-evidence">
+          <span class="ec-section-lbl">仿真证据关联 <small>系统只建议，教师可调整</small></span>
+          <div class="ec-evidence-list" data-ec-role="evidence-list"><span class="ec-empty">运行虚拟班后显示可关联记录</span></div>
+        </div>
+        <div class="ec-decision">
+          <span class="ec-section-lbl">教师判断</span>
+          <div class="ec-decision-acts">
+            <button type="button" data-decision="supported">支持</button>
+            <button type="button" data-decision="unsupported">不支持</button>
+            <button type="button" data-decision="insufficient">证据不足</button>
+          </div>
+          <input class="ec-decision-note" data-ec-role="decision-note" maxlength="120" placeholder="判断依据（建议填写）"/>
+        </div>
         <div class="ec-inject">
           <span class="ec-inject-lbl">⌕ 自定义数据源</span>
           <div class="ec-inject-acts">
@@ -2087,19 +2453,81 @@
             <button type="button" class="ec-inject-btn" data-act="distill" title="${e.inject.distill}">✨ 蒸馏</button>
           </div>
         </div>
-        <div class="ec-acts">
-          <button type="button" class="${isAdopted ? "is-adopt" : ""}">${isAdopted ? "已采纳 ✓" : "采纳"}</button>
-          <button type="button">修改</button>
-          <button type="button">忽略</button>
+        <div class="ec-resolution" data-ec-role="resolution">
+          <span class="ec-resolution-label">候选处理</span>
+          <div class="ec-resolution-picker" data-ec-role="resolution-picker" role="group" aria-label="候选处理">
+            <button type="button" data-review-choice="original">原意见入候选</button>
+            <button type="button" data-review-choice="modified">修改后入候选</button>
+            <button type="button" data-review-choice="rejected">不采用</button>
+          </div>
+          <div class="ec-resolution-summary" data-ec-role="resolution-summary" data-state="pending" hidden>
+            <span class="ec-resolution-mark" aria-hidden="true">✓</span>
+            <span class="ec-resolution-copy"></span>
+            <button type="button" data-review-act="revise">改判</button>
+          </div>
+        </div>
+        <div class="ec-reject-panel" data-ec-role="reject-panel" hidden>
+          <label>不采用原因<input maxlength="120" placeholder="请留下一句教师决策理由"/></label>
+          <span class="ec-inline-error" data-ec-role="reject-error" role="alert" hidden></span>
+          <div><button type="button" data-reject-act="confirm">确认不采用</button><button type="button" data-reject-act="cancel">取消</button></div>
         </div>
       `;
+      const body = card.querySelector('[data-ec-role="body"]');
+      if (record.draftText === sourceText) body.innerHTML = liveReview ? liveReviewBodyMarkup(liveReview) : c.body;
+      else body.textContent = record.draftText;
       grid.appendChild(card);
+      const sourceComment = liveReview ? { anchor: liveReviewAnchorCopy(liveReview), body: liveReviewBodyMarkup(liveReview) } : c;
+      const entry = {
+        ...record,
+        card,
+        expertId: e.id,
+        chapterId: chapter?.id || "",
+        expert: e,
+        sourceComment,
+        seedComment: c,
+        seedSourceText,
+        sourceText,
+        liveReview,
+        liveReviewPhase: "idle",
+        liveReviewError: "",
+        isRevising: false,
+      };
+      state.expertCards.push(entry);
+      if (entry.state === "candidate") {
+        captureOriginalEnvContent(entry);
+        saveExpertReview(chapter?.id, entry);
+      }
+      wireReviewCard(entry, chapter);
+      syncReviewCardVisual(entry);
+      syncLiveReviewVisual(entry);
+      renderReviewEvidence(entry, { autoLink: true });
     });
-    wireExpertCardActions(grid, chapter);
     updateExpertAdoptBar();
+    composeAssets();
   }
 
   const EXPERT_ADOPT_STORE = "pp.practice.expertAdoptions";
+  const KEY_MOMENT_STORE = "pp.practice.keyMoments.v1";
+
+  function loadKeyMoments(chapterId) {
+    if (!chapterId) return [];
+    try {
+      const all = JSON.parse(localStorage.getItem(KEY_MOMENT_STORE) || "{}");
+      return Array.isArray(all[chapterId])
+        ? all[chapterId].filter((item) => item && item.id && Number.isFinite(Number(item.tSec)))
+        : [];
+    } catch { return []; }
+  }
+
+  function saveKeyMoments(chapterId, moments) {
+    if (!chapterId) return;
+    try {
+      const all = JSON.parse(localStorage.getItem(KEY_MOMENT_STORE) || "{}");
+      all[chapterId] = Array.isArray(moments) ? moments : [];
+      localStorage.setItem(KEY_MOMENT_STORE, JSON.stringify(all));
+    } catch {}
+  }
+
   function loadAllExpertAdoptions() {
     try { return JSON.parse(localStorage.getItem(EXPERT_ADOPT_STORE) || "{}"); }
     catch { return {}; }
@@ -2108,103 +2536,487 @@
     if (!chapterId) return {};
     return (loadAllExpertAdoptions()[chapterId]) || {};
   }
-  function saveExpertAdoption(chapterId, expertId, status) {
+  function normalizeReviewRecord(raw, sourceText, defaultTargetEnvKeys) {
+    const legacy = typeof raw === "string" ? raw : null;
+    const value = raw && typeof raw === "object" ? raw : {};
+    const stateValue = legacy === "adopted" ? "candidate"
+      : legacy === "ignored" ? "rejected"
+      : ["pending", "candidate", "rejected"].includes(value.state) ? value.state
+      : "pending";
+    const draftText = typeof value.draftText === "string" && value.draftText.trim() ? value.draftText.trim() : sourceText;
+    const candidateMode = stateValue === "candidate"
+      ? (["original", "modified"].includes(value.candidateMode)
+          ? value.candidateMode
+          : draftText === sourceText ? "original" : "modified")
+      : null;
+    const targets = Array.isArray(value.targetEnvKeys)
+      ? value.targetEnvKeys.filter((key) => PRACTICE_ENV_BY_KEY[key])
+      : defaultTargetEnvKeys;
+    return {
+      state: stateValue,
+      candidateMode,
+      draftText,
+      targetEnvKeys: targets.length ? [...new Set(targets)] : defaultTargetEnvKeys,
+      evidenceLinks: Array.isArray(value.evidenceLinks) ? [...new Set(value.evidenceLinks.map(String))] : [],
+      evidenceTouched: value.evidenceTouched === true,
+      decision: ["supported", "unsupported", "insufficient"].includes(value.decision) ? value.decision : "pending",
+      decisionNote: typeof value.decisionNote === "string" ? value.decisionNote : "",
+      rejectionReason: typeof value.rejectionReason === "string" ? value.rejectionReason : "",
+      originalEnvContent: value.originalSnapshotVersion === 1
+        && value.originalEnvContent && typeof value.originalEnvContent === "object"
+        ? Object.fromEntries(Object.entries(value.originalEnvContent)
+            .filter(([key, text]) => PRACTICE_ENV_BY_KEY[key] && typeof text === "string"))
+        : {},
+      originalSnapshotVersion: value.originalSnapshotVersion === 1 ? 1 : 0,
+      writtenBack: value.writtenBack === true,
+    };
+  }
+  function saveExpertReview(chapterId, entry) {
+    if (!chapterId || !entry) return;
     const all = loadAllExpertAdoptions();
     if (!all[chapterId]) all[chapterId] = {};
-    all[chapterId][expertId] = status;
-    localStorage.setItem(EXPERT_ADOPT_STORE, JSON.stringify(all));
+    all[chapterId][entry.expertId] = {
+      state: entry.state,
+      candidateMode: entry.candidateMode,
+      draftText: entry.draftText,
+      targetEnvKeys: entry.targetEnvKeys,
+      evidenceLinks: entry.evidenceLinks,
+      evidenceTouched: entry.evidenceTouched,
+      decision: entry.decision,
+      decisionNote: entry.decisionNote,
+      rejectionReason: entry.rejectionReason,
+      originalEnvContent: entry.originalEnvContent,
+      originalSnapshotVersion: entry.originalSnapshotVersion,
+      writtenBack: entry.writtenBack,
+      liveReview: entry.liveReview,
+    };
+    try { localStorage.setItem(EXPERT_ADOPT_STORE, JSON.stringify(all)); } catch {}
   }
 
-  function wireExpertCardActions(grid, chapter) {
-    state.expertCards = [];
-    grid.querySelectorAll(".expert-card").forEach((card) => {
-      const eid = card.dataset.expertId;
-      const expert = EXPERTS.find((x) => x.id === eid);
-      if (!expert) return;
-      const acts = card.querySelector(".ec-acts");
-      const [adoptBtn, editBtn, ignoreBtn] = acts.querySelectorAll("button");
-      const adoptions = loadExpertAdoptions(chapter?.id);
-      const initialAdopted = adoptions[eid] === "adopted";
-      const initialIgnored = adoptions[eid] === "ignored";
-      const entry = { card, state: initialAdopted ? "adopted" : initialIgnored ? "ignored" : "pending", expertId: eid, expert };
-      state.expertCards.push(entry);
+  function captureOriginalEnvContent(entry, envKeys = entry.targetEnvKeys) {
+    if (!entry.originalEnvContent) entry.originalEnvContent = {};
+    envKeys.forEach((envKey) => {
+      if (Object.prototype.hasOwnProperty.call(entry.originalEnvContent, envKey)) return;
+      const current = document.querySelector(`.pack-preview [data-pack-field="${envKey}"]`)?.textContent?.trim()
+        || loadPackEdits(wizSelection.chapter)[envKey]
+        || "当前环节暂无内容";
+      const writtenSuffix = ` · 修订：${entry.draftText}`;
+      entry.originalEnvContent[envKey] = entry.writtenBack && current.endsWith(writtenSuffix)
+        ? current.slice(0, -writtenSuffix.length)
+        : current;
+    });
+    entry.originalSnapshotVersion = 1;
+  }
 
-      const pushToCommentsIfAdopted = () => {
-        // 把已采纳的专家批注注入 state.comments（去重）
-        if (entry.state !== "adopted") {
-          // 移除之前注入的同 id 评论
-          state.comments = state.comments.filter((c) => c.id !== `expert-${eid}-${chapter?.id || ""}`);
-          composeAssets();
+  function suggestedEvidenceIdsForEntry(entry) {
+    const targetSet = new Set(entry.targetEnvKeys);
+    return state.keyMoments
+      .filter((km) => envKeysForMoment(km).some((key) => targetSet.has(key)))
+      .map((km) => km.id);
+  }
+
+  function renderReviewEvidence(entry, { autoLink = false } = {}) {
+    if (autoLink && entry.state === "candidate" && !entry.evidenceTouched) {
+      entry.evidenceLinks = suggestedEvidenceIdsForEntry(entry);
+      saveExpertReview(wizSelection.chapter, entry);
+    }
+    entry.evidenceLinks = entry.evidenceLinks.filter((id) => state.keyMoments.some((km) => km.id === id));
+    if ((entry.decision === "supported" || entry.decision === "unsupported") && !entry.evidenceLinks.length) {
+      entry.decision = "pending";
+      entry.writtenBack = false;
+      saveExpertReview(wizSelection.chapter, entry);
+    }
+    const list = entry.card.querySelector('[data-ec-role="evidence-list"]');
+    if (!list) return;
+    const suggestions = new Set(suggestedEvidenceIdsForEntry(entry));
+    if (!state.keyMoments.length) {
+      list.innerHTML = `<span class="ec-empty">运行虚拟班后显示可关联记录</span>`;
+      return;
+    }
+    list.innerHTML = state.keyMoments.map((km, index) => {
+      const linked = entry.evidenceLinks.includes(km.id);
+      const suggested = suggestions.has(km.id);
+      return `<button type="button" class="ec-evidence-chip${linked ? " is-linked" : ""}${suggested ? " is-suggested" : ""}" data-km-id="${escapeHtml(km.id)}" title="${escapeHtml(km.cn)}">
+        <b>KM-${String(index + 1).padStart(2, "0")}</b> ${fmtTime(km.tSec)}${suggested ? " · 系统建议" : ""}
+      </button>`;
+    }).join("");
+    list.querySelectorAll("[data-km-id]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.kmId;
+        entry.evidenceTouched = true;
+        entry.evidenceLinks = entry.evidenceLinks.includes(id)
+          ? entry.evidenceLinks.filter((item) => item !== id)
+          : [...entry.evidenceLinks, id];
+        entry.decision = "pending";
+        entry.writtenBack = false;
+        saveExpertReview(wizSelection.chapter, entry);
+        syncReviewCardVisual(entry);
+        renderReviewEvidence(entry);
+        updateExpertAdoptBar();
+        composeAssets();
+      });
+    });
+  }
+
+  function refreshAllReviewEvidence({ autoLink = false } = {}) {
+    (state.expertCards || []).forEach((entry) => renderReviewEvidence(entry, { autoLink }));
+    renderStage3();
+  }
+
+  function syncReviewCardVisual(entry) {
+    const card = entry.card;
+    card.classList.toggle("is-candidate", entry.state === "candidate");
+    card.classList.toggle("is-rejected", entry.state === "rejected");
+    card.classList.toggle("is-resolved", entry.state !== "pending");
+    const picker = card.querySelector('[data-ec-role="resolution-picker"]');
+    const resolutionSummary = card.querySelector('[data-ec-role="resolution-summary"]');
+    const resolved = entry.state !== "pending";
+    if (picker) picker.hidden = resolved && !entry.isRevising;
+    if (resolutionSummary) {
+      resolutionSummary.hidden = !resolved || entry.isRevising;
+      resolutionSummary.dataset.state = entry.state;
+      const copy = resolutionSummary.querySelector(".ec-resolution-copy");
+      if (copy) {
+        const targets = entry.targetEnvKeys.map((key) => PRACTICE_ENV_BY_KEY[key]?.no).filter(Boolean).join(" / ");
+        copy.textContent = entry.state === "rejected"
+          ? `不采用 · ${entry.rejectionReason || "已保留教师理由"}`
+          : `${entry.candidateMode === "modified" ? "修改后意见" : "原意见"}已进入修订候选${targets ? ` · ${targets}` : ""}`;
+      }
+    }
+    card.querySelectorAll("[data-review-choice]").forEach((button) => {
+      const activeChoice = entry.state === "rejected" ? "rejected" : entry.candidateMode;
+      button.setAttribute("aria-pressed", String(resolved && button.dataset.reviewChoice === activeChoice));
+    });
+    const summary = card.querySelector('[data-ec-role="target-summary"]');
+    if (summary) summary.textContent = entry.targetEnvKeys.map((key) => PRACTICE_ENV_BY_KEY[key]?.no).filter(Boolean).join(" / ") || "未选择";
+    card.querySelectorAll("[data-decision]").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.decision === entry.decision);
+      button.disabled = entry.state !== "candidate";
+    });
+    const note = card.querySelector('[data-ec-role="decision-note"]');
+    if (note && note.value !== entry.decisionNote) note.value = entry.decisionNote;
+    syncLiveReviewVisual(entry);
+  }
+
+  function isLiveReviewStale(entry) {
+    return !!entry.liveReview && entry.liveReview.sourceRevision !== getPackRevision(entry.chapterId || wizSelection.chapter);
+  }
+
+  function syncLiveReviewVisual(entry) {
+    const panel = entry.card?.querySelector('[data-ec-role="live-review"]');
+    if (!panel) return;
+    const status = panel.querySelector('[data-ec-role="live-status"]');
+    const error = panel.querySelector('[data-ec-role="live-error"]');
+    const button = panel.querySelector('[data-review-act="live"]');
+    const currentRevision = getPackRevision(entry.chapterId || wizSelection.chapter);
+    const stale = isLiveReviewStale(entry);
+    const loading = entry.liveReviewPhase === "loading";
+    const failed = entry.liveReviewPhase === "error";
+    panel.dataset.state = loading ? "loading" : failed ? "error" : stale ? "stale" : entry.liveReview ? "ready" : "seed";
+    entry.card.classList.toggle("has-stale-review", stale);
+    if (status) {
+      status.textContent = loading
+        ? "本机 Qwen 正在审校当前稿件…"
+        : failed
+          ? "本次审校未形成可定位批注"
+          : stale
+            ? `该批注针对第 ${entry.liveReview.sourceRevision} 版 · 当前第 ${currentRevision} 版`
+            : entry.liveReview
+              ? `本机 Qwen · 已锚定 · 第 ${entry.liveReview.sourceRevision} 版`
+              : "固定审校种子";
+    }
+    if (error) {
+      error.textContent = failed ? entry.liveReviewError : "";
+      error.hidden = !failed;
+    }
+    if (button) {
+      button.textContent = loading ? "审校中…" : entry.liveReview ? "重新审校" : "用本机 Qwen 审校";
+      button.disabled = loading || entry.state !== "pending";
+      button.setAttribute("aria-busy", String(loading));
+      button.title = entry.state !== "pending" ? "先改判回到待处理状态，才能重新审校" : "只审校目标、误区与任务链三个主责环节";
+    }
+    entry.card.querySelectorAll("[data-review-choice]").forEach((choice) => {
+      choice.disabled = stale;
+      choice.title = stale ? "稿件已修改，请先重新审校当前版本" : "";
+    });
+  }
+
+  function refreshReviewFreshness(chapterId) {
+    (state.expertCards || [])
+      .filter((entry) => !chapterId || entry.chapterId === chapterId)
+      .forEach((entry) => syncLiveReviewVisual(entry));
+  }
+
+  function liveReviewFailureCopy(reason, hasPriorReview = false) {
+    const copies = {
+      out_of_scope: "模型把意见落到了教学设计主责范围之外。",
+      wrong_env: "模型摘录来自另一个环节，未通过跨环节核对。",
+      ambiguous: "同一摘录在稿件中出现多次，无法确定唯一位置。",
+      ambiguous_env: "短摘录在多个环节重复出现，无法确定唯一位置。",
+      too_short: "模型摘录过短，不足以形成可靠锚点。",
+      not_found: "模型摘录未逐字命中当前稿件。",
+      cross_reference_unanchored: "交叉引用没有全部命中当前稿件。",
+    };
+    const base = copies[reason] || "模型输出未通过锚定门禁。";
+    return `${base}${hasPriorReview ? "现有批注未被替换；若其已过期，仍不能进入候选。" : "系统已保留固定审校种子。"}`;
+  }
+
+  async function runLiveInstructionalReview(entry, chapter) {
+    if (entry.expertId !== "expert-edu" || entry.state !== "pending" || entry.liveReviewPhase === "loading") return;
+    const course = getSelected("course");
+    const klass = getSelected("class");
+    const session = getSelected("session");
+    const selectedChapter = getSelected("chapter");
+    const currentPack = currentPackFromPreview();
+    if (!course || !klass || !session || !selectedChapter || !currentPack) {
+      toast("请先完成实践包四项选择，并确保九个环节都有内容");
+      return;
+    }
+    if (!global.PharmacoBackend?.reviewPractice) {
+      entry.liveReviewPhase = "error";
+      entry.liveReviewError = "本机后端未连接；当前仍显示固定审校种子。请用 npm start 打开页面。";
+      syncLiveReviewVisual(entry);
+      return;
+    }
+
+    const requestedChapterId = selectedChapter.id;
+    const sourceRevision = getPackRevision(requestedChapterId);
+    entry.liveReviewPhase = "loading";
+    entry.liveReviewError = "";
+    syncLiveReviewVisual(entry);
+    setStageStatus("ii", "教学设计审校正在读取当前稿件", true, false);
+    try {
+      const result = await global.PharmacoBackend.reviewPractice({
+        reviewerId: "instructional-design",
+        sourceRevision,
+        context: {
+          chapterId: selectedChapter.id,
+          courseTitle: course.title,
+          courseLevel: course.level || "",
+          classTitle: klass.title,
+          studentCount: klass.n,
+          sessionTitle: session.title,
+          durationMinutes: session.min,
+          chapterTitle: selectedChapter.title,
+          topic: selectedChapter.topic,
+        },
+        currentPack,
+      });
+      if (result?.status !== "anchored") {
+        entry.liveReviewPhase = "error";
+        entry.liveReviewError = liveReviewFailureCopy(result?.gate?.reason, !!entry.liveReview);
+        setStageStatus("ii", "本次审校未通过锚定门禁", false, true);
+        syncLiveReviewVisual(entry);
+        return;
+      }
+      const liveReview = normalizeLiveReview(result);
+      if (!liveReview) throw new Error("本地模型返回的审校记录不完整");
+
+      entry.liveReview = liveReview;
+      entry.sourceText = liveReviewSourceText(liveReview);
+      entry.draftText = entry.sourceText;
+      entry.sourceComment = { anchor: liveReviewAnchorCopy(liveReview), body: liveReviewBodyMarkup(liveReview) };
+      entry.targetEnvKeys = liveReviewTargetKeys(liveReview);
+      entry.liveReviewPhase = "idle";
+      entry.liveReviewError = "";
+      entry.card.querySelector('[data-ec-role="body"]').innerHTML = entry.sourceComment.body;
+      const anchor = entry.card.querySelector(".ec-anchor");
+      if (anchor) {
+        anchor.textContent = entry.sourceComment.anchor;
+        anchor.title = liveReview.annotation.sourceExcerpt;
+      }
+      entry.card.querySelectorAll('[data-ec-role="target-input"]').forEach((input) => {
+        input.checked = entry.targetEnvKeys.includes(input.value);
+      });
+      saveExpertReview(requestedChapterId, entry);
+      syncReviewCardVisual(entry);
+      setStageStatus("ii", `教学设计审校已锚定到 ${PRACTICE_ENV_BY_KEY[liveReview.annotation.targetEnv]?.no || liveReview.annotation.targetEnv}`, false, true);
+      toast(`本机 Qwen 审校完成 · 已锚定第 ${sourceRevision} 版稿件`);
+    } catch (error) {
+      console.warn("[practice-runtime] 本机 Qwen 审校失败", error);
+      entry.liveReviewPhase = "error";
+      const preserved = entry.liveReview
+        ? "现有批注未被替换；若其已过期，仍不能进入候选。"
+        : "当前仍显示固定审校种子。";
+      entry.liveReviewError = error?.code === "MODEL_UNAVAILABLE"
+        ? `本机模型未就绪；${preserved}`
+        : `本机后端或模型未完成审校；${preserved}`;
+      setStageStatus("ii", "本机审校暂不可用", false, true);
+      syncLiveReviewVisual(entry);
+    }
+  }
+
+  function wireReviewCard(entry, chapter) {
+    const card = entry.card;
+    const body = card.querySelector('[data-ec-role="body"]');
+    const editPanel = card.querySelector('[data-ec-role="edit-panel"]');
+    const textarea = editPanel?.querySelector("textarea");
+    const editError = editPanel?.querySelector('[data-ec-role="edit-error"]');
+    const rejectPanel = card.querySelector('[data-ec-role="reject-panel"]');
+    const rejectInput = rejectPanel?.querySelector("input");
+    const rejectError = rejectPanel?.querySelector('[data-ec-role="reject-error"]');
+
+    const showInlineError = (element, message) => {
+      if (!element) return;
+      element.textContent = message;
+      element.hidden = !message;
+    };
+    const renderEntryBody = () => {
+      if (entry.draftText === entry.sourceText) body.innerHTML = entry.sourceComment.body;
+      else body.textContent = entry.draftText;
+    };
+    const commitCandidate = (mode, text) => {
+      if (isLiveReviewStale(entry)) {
+        toast("该批注针对旧版稿件 · 请先重新审校当前版本");
+        return;
+      }
+      if (!entry.targetEnvKeys.length) {
+        toast("请先为这条审校意见选择至少一个目标教学环节");
+        return;
+      }
+      captureOriginalEnvContent(entry);
+      entry.state = "candidate";
+      entry.candidateMode = mode;
+      entry.draftText = text;
+      entry.rejectionReason = "";
+      entry.evidenceTouched = false;
+      entry.evidenceLinks = suggestedEvidenceIdsForEntry(entry);
+      entry.decision = "pending";
+      entry.decisionNote = "";
+      entry.writtenBack = false;
+      entry.isRevising = false;
+      editPanel.hidden = true;
+      rejectPanel.hidden = true;
+      showInlineError(editError, "");
+      showInlineError(rejectError, "");
+      renderEntryBody();
+      saveExpertReview(chapter?.id, entry);
+      syncReviewCardVisual(entry);
+      renderReviewEvidence(entry);
+      updateExpertAdoptBar();
+      composeAssets();
+    };
+
+    card.querySelector('[data-review-act="live"]')?.addEventListener("click", () => {
+      runLiveInstructionalReview(entry, chapter);
+    });
+
+    card.querySelector('[data-review-choice="original"]')?.addEventListener("click", () => {
+      commitCandidate("original", entry.sourceText);
+    });
+    card.querySelector('[data-review-choice="modified"]')?.addEventListener("click", () => {
+      textarea.value = entry.candidateMode === "modified" ? entry.draftText : entry.sourceText;
+      rejectPanel.hidden = true;
+      showInlineError(editError, "");
+      editPanel.hidden = false;
+      textarea.focus();
+    });
+    editPanel?.querySelector('[data-edit-act="save"]')?.addEventListener("click", () => {
+      const next = textarea.value.trim();
+      if (!next) { showInlineError(editError, "修改后意见不能为空"); return; }
+      const mode = next === entry.sourceText ? "original" : "modified";
+      commitCandidate(mode, next);
+      toast(`${entry.expert.role} · ${mode === "modified" ? "修改后意见" : "原意见"}已进入修订候选`);
+    });
+    editPanel?.querySelector('[data-edit-act="cancel"]')?.addEventListener("click", () => {
+      editPanel.hidden = true;
+      showInlineError(editError, "");
+      entry.isRevising = false;
+      syncReviewCardVisual(entry);
+    });
+
+    card.querySelectorAll('[data-ec-role="target-input"]').forEach((input) => {
+      input.addEventListener("change", () => {
+        const selected = Array.from(card.querySelectorAll('[data-ec-role="target-input"]:checked')).map((item) => item.value);
+        if (!selected.length) {
+          input.checked = true;
+          toast("至少保留一个目标教学环节");
           return;
         }
-        const synId = `expert-${eid}-${chapter?.id || ""}`;
-        if (state.comments.find((c) => c.id === synId)) return;
-        const bodyText = (card.querySelector(".ec-body")?.textContent || "").trim();
-        state.comments.push({
-          id: synId,
-          pinNum: 100 + state.comments.length,  // 与原评论编号不冲突
-          anchorBlockId: null,
-          author: expert.who,
-          body: bodyText,
-          status: "adopted",
-          replyByTeacher: `已采纳 · 将合并写回到环节 ${expert.target}.`,
-          domRef: card,
-          _expertSource: true,
-          _targetEnv: expert.target,
-        });
+        captureOriginalEnvContent(entry, selected);
+        entry.targetEnvKeys = selected;
+        entry.evidenceTouched = false;
+        entry.evidenceLinks = entry.state === "candidate" ? suggestedEvidenceIdsForEntry(entry) : [];
+        entry.decision = "pending";
+        entry.writtenBack = false;
+        saveExpertReview(chapter?.id, entry);
+        syncReviewCardVisual(entry);
+        renderReviewEvidence(entry);
+        updateExpertAdoptBar();
         composeAssets();
-      };
+      });
+    });
 
-      adoptBtn.addEventListener("click", () => {
-        if (entry.state === "adopted") {
-          entry.state = "pending";
-          adoptBtn.classList.remove("is-adopt");
-          adoptBtn.textContent = "采纳";
-          card.classList.remove("is-done");
-          card.style.opacity = "";
-          saveExpertAdoption(chapter?.id, eid, "pending");
-        } else {
-          entry.state = "adopted";
-          adoptBtn.classList.add("is-adopt");
-          adoptBtn.textContent = "已采纳 ✓";
-          card.classList.add("is-done");
-          card.style.opacity = "";
-          saveExpertAdoption(chapter?.id, eid, "adopted");
+    card.querySelector('[data-review-choice="rejected"]')?.addEventListener("click", () => {
+      editPanel.hidden = true;
+      showInlineError(rejectError, "");
+      rejectPanel.hidden = false;
+      rejectInput.value = entry.rejectionReason || "";
+      rejectInput.focus();
+    });
+    rejectPanel?.querySelector('[data-reject-act="confirm"]')?.addEventListener("click", () => {
+      const reason = rejectInput.value.trim();
+      if (!reason) { showInlineError(rejectError, "请填写一句不采用原因，保留教师决策痕迹"); return; }
+      entry.state = "rejected";
+      entry.candidateMode = null;
+      entry.rejectionReason = reason;
+      entry.decision = "pending";
+      entry.decisionNote = "";
+      entry.evidenceLinks = [];
+      entry.writtenBack = false;
+      entry.isRevising = false;
+      rejectPanel.hidden = true;
+      showInlineError(rejectError, "");
+      saveExpertReview(chapter?.id, entry);
+      syncReviewCardVisual(entry);
+      renderReviewEvidence(entry);
+      updateExpertAdoptBar();
+      composeAssets();
+    });
+    rejectPanel?.querySelector('[data-reject-act="cancel"]')?.addEventListener("click", () => {
+      rejectPanel.hidden = true;
+      showInlineError(rejectError, "");
+      entry.isRevising = false;
+      syncReviewCardVisual(entry);
+    });
+
+    card.querySelector('[data-review-act="revise"]')?.addEventListener("click", () => {
+      entry.isRevising = true;
+      editPanel.hidden = true;
+      rejectPanel.hidden = true;
+      syncReviewCardVisual(entry);
+    });
+
+    card.querySelectorAll("[data-decision]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (entry.state !== "candidate") return;
+        const next = button.dataset.decision;
+        if (next !== "insufficient" && !entry.evidenceLinks.length) {
+          toast("“支持/不支持”必须关联至少一条仿真记录；否则请选择“证据不足”");
+          return;
         }
-        pushToCommentsIfAdopted();
+        entry.decision = next;
+        entry.writtenBack = false;
+        saveExpertReview(chapter?.id, entry);
+        syncReviewCardVisual(entry);
         updateExpertAdoptBar();
-      });
-      editBtn.addEventListener("click", () => {
-        entry.state = "edit";
-        saveExpertAdoption(chapter?.id, eid, "edit");
-        toast(`已标记 ${expert.role} 为"修改" · 下一轮再处理`);
-        updateExpertAdoptBar();
-      });
-      ignoreBtn.addEventListener("click", () => {
-        entry.state = "ignored";
-        card.style.opacity = "0.55";
-        card.classList.add("is-done");
-        saveExpertAdoption(chapter?.id, eid, "ignored");
-        // 若之前采纳过，撤销 comment
-        state.comments = state.comments.filter((c) => c.id !== `expert-${eid}-${chapter?.id || ""}`);
         composeAssets();
-        updateExpertAdoptBar();
       });
+    });
+    card.querySelector('[data-ec-role="decision-note"]')?.addEventListener("blur", (event) => {
+      entry.decisionNote = event.target.value.trim();
+      saveExpertReview(chapter?.id, entry);
+      renderMigrate();
+      renderStage3();
+    });
 
-      // 3 个数据源按钮：上传 / 链接 / 蒸馏（点击弹 toast，占位待对接）
-      const ACT_VERBS = { upload: "上传文件", link: "链接知识库", distill: "蒸馏学者" };
-      card.querySelectorAll(".ec-inject-btn").forEach((btn) => {
-        btn.addEventListener("click", (ev) => {
-          ev.stopPropagation();
-          const act = btn.dataset.act;
-          const verb = ACT_VERBS[act] || "接入";
-          const hint = expert.inject?.[act] || "";
-          toast(`${expert.role} · ${verb}\n${hint}\n（demo · 接入位待对接 SDK / API / RAG / LoRA）`);
-        });
+    const ACT_VERBS = { upload: "上传文件", link: "链接知识库", distill: "蒸馏学者" };
+    card.querySelectorAll(".ec-inject-btn").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const act = button.dataset.act;
+        toast(`${entry.expert.role} · ${ACT_VERBS[act] || "接入"}\n${entry.expert.inject?.[act] || ""}\n（demo · 接入位待对接）`);
       });
-
-      // 若初始已采纳，确保 comment 已在 state 内
-      if (initialAdopted) pushToCommentsIfAdopted();
     });
   }
 
@@ -2710,8 +3522,7 @@
   }
 
   function updateBottomAdoptBar() {
-    // 第二个 adopt-bar（关键时刻总览）
-    const bar = document.querySelectorAll("#stage-ii .adopt-bar")[1];
+    const bar = document.querySelector('#stage-ii [data-adopt-bar="km"]');
     if (!bar) return;
     const km = state.keyMoments.length || document.querySelectorAll(".km-card").length;
     const risks = document.querySelectorAll("#stage-ii .risk-list .risk-item").length;
@@ -2782,8 +3593,24 @@
   }
 
   function renderStage2(chapter) {
-    renderExpertCards(chapter);
+    const previousChapterId = state.reviewChapterId;
+    const chapterChanged = previousChapterId && previousChapterId !== chapter?.id;
+    const firstChapterLoad = !previousChapterId;
+    state.reviewChapterId = chapter?.id || null;
+    if (firstChapterLoad || chapterChanged) {
+      state.keyMoments = loadKeyMoments(chapter?.id);
+      setStageStatus(
+        "ii",
+        state.keyMoments.length
+          ? `已读取 ${state.keyMoments.length} 条已发生仿真记录`
+          : "待启动仿真并读取记录",
+        false,
+        state.keyMoments.length > 0,
+      );
+    }
+    renderKeyMoments();
     renderSceneBeats(chapter);
+    renderExpertCards(chapter);
     renderRiskAndFlag(chapter);
     renderPersonaGrid(getSelected("class"));
     updatePersonaLive();
@@ -2813,7 +3640,6 @@
 
   function syncToHeroAndPreview() {
     updateWizFlow();
-    renderStage2(getSelected("chapter"));
     const course = getSelected("course");
     const klass  = getSelected("class");
     const session= getSelected("session");
@@ -2996,10 +3822,13 @@
       const envContent = buildEnvPackContent(chapter, rawMock);
       const edits      = loadPackEdits(chapter.id);
       const merged     = { ...envContent, ...edits };
+      const generation = loadPackGenerationMeta(chapter.id);
+      if (ttl && generation?.source === "local-model") {
+        ttl.innerHTML = `课堂实践包预览<small>章节：${chapter.title}（${chapter.topic}） · 本机 Qwen 生成 · 可继续编辑</small>`;
+      }
 
       // 填充 9 张环节卡
-      const ENV_KEYS = ["env01","env02","env03","env04","env05","env06","env07","env08","env09"];
-      ENV_KEYS.forEach((key) => {
+      PACK_KEYS.forEach((key) => {
         const envNum = key.slice(3);                                  // "01".."09"
         const card   = preview.querySelector(`.pack-item[data-env="${envNum}"]`);
         if (!card) return;
@@ -3016,6 +3845,8 @@
       });
       wirePackEdits(preview, chapter.id);
     }
+    // 实践包先就绪，再构建审校候选；加入候选时才能冻结真实原文快照。
+    renderStage2(chapter);
     // Stage 3 的 sync-tri 和模板类型随章节选择联动
     renderStage3();
   }
@@ -3023,28 +3854,25 @@
   function updateExpertAdoptBar() {
     if (!state.expertCards) return;
     const total = state.expertCards.length;
-    let adopted = 0, edit = 0, ignored = 0, pending = 0;
-    state.expertCards.forEach((e) => {
-      if (e.state === "adopted") adopted++;
-      else if (e.state === "edit") edit++;
-      else if (e.state === "ignored") ignored++;
+    let candidates = 0, rejected = 0, pending = 0, decided = 0;
+    state.expertCards.forEach((entry) => {
+      if (entry.state === "candidate") candidates++;
+      else if (entry.state === "rejected") rejected++;
       else pending++;
+      if (entry.decision !== "pending") decided++;
     });
-    // 第一个 adopt-bar 在 substage A 内（专家批注下方）
-    const bar = document.querySelector("#stage-ii .substage:nth-of-type(1) .adopt-bar")
-              || document.querySelector("#stage-ii .substage .adopt-bar");
+    const candidateEntries = state.expertCards.filter((entry) => entry.state === "candidate");
+    const linked = new Set(candidateEntries.flatMap((entry) => entry.evidenceLinks)).size;
+    const bar = document.querySelector('#stage-ii [data-substage="A"] .adopt-bar');
     if (bar) {
       const left = bar.querySelector("span:first-child");
-      if (left) left.innerHTML = `采纳率 · <span class="pct">${adopted} / ${total}</span> · 待回应 ${pending} · 修改 ${edit} · 忽略 ${ignored}`;
+      if (left) left.innerHTML = `修订候选 · <span class="pct">${candidates} / ${total}</span> · 证据已关联 ${linked} · 教师已判断 ${decided} · 不采用 ${rejected} · 待处理 ${pending}`;
     }
-    // 同步页眉摘要卡"专家采纳率"——让采纳/撤销操作所见即所得
+    // 同步页眉摘要卡，让候选/判断操作所见即所得
     const summary = document.querySelector('#practiceMeta [data-field="adoption"]')
                   || document.querySelector('[data-field="adoption"]');
     if (summary) {
-      let txt = `${total} 条意见 · 已采纳 ${adopted} · 待回应 ${pending}`;
-      if (edit) txt += ` · 修改 ${edit}`;
-      if (ignored) txt += ` · 忽略 ${ignored}`;
-      summary.textContent = txt;
+      summary.textContent = `${total} 路审校 · 候选 ${candidates} · 已判断 ${decided} · 待处理 ${pending}`;
     }
   }
 
@@ -3052,14 +3880,10 @@
     mountControls();
     ingestExistingBeats();
     syncDotKey();
-    ingestExistingComments();
-    mountCommentActions();
     wireInlineControls();
     mountPackWizard();
-    composeAssets(); // 初始时基于已有采纳评阅给出资产候选
+    composeAssets(); // 初始时仅恢复“教师确认支持”的修订候选资产
     setStageStatus("i", `实践包就绪`, false, true);
-    setStageStatus("ii", `待启动`, false, false);
-    setStageStatus("iii", `${state.assets.length} 个资产候选`, false, false);
     // 注：教学实践使用教师真实数据，不再承接 nav 产物。
     // Store 监听已移除——nav 与 practice 现在解耦，仅在写回环节共享 9 个教学环节标签。
 

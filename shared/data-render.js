@@ -1131,7 +1131,7 @@
     try { list = JSON.parse(localStorage.getItem(key) || '[]'); }
     catch (e) { list = []; }
     list.unshift(Object.assign({ at: Date.now() }, entry));
-    localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
+    try { localStorage.setItem(key, JSON.stringify(list.slice(0, 50))); } catch (e) {}
   }
   function showDataActionToast(message) {
     let toast = document.getElementById('dataActionToast');

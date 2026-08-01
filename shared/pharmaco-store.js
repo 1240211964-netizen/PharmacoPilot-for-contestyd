@@ -334,6 +334,8 @@
     if (incoming.version && incoming.version !== state.version) {
       console.warn("[store] importing different version", incoming.version, "→", state.version);
     }
+    // JSON.parse 可产生 "__proto__" 自有键，Object.assign 的 [[Set]] 语义会改原型——先删掉
+    delete incoming.__proto__;
     state = Object.assign(defaultState(), incoming);
     persist();
     emit("store:imported", { judgments: Object.keys(state.judgments).length });

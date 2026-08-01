@@ -1609,17 +1609,17 @@
 </style>
 </head>
 <body>
-<script src="./shared/wendao.js?v=1" defer></script>
-<script src="./shared/fanya.js?v=1" defer></script>
+<script src="./shared/wendao.js?v=3" defer></script>
+<script src="./shared/fanya.js?v=2" defer></script>
 <script src="./shared/live-stats.js?v=1" defer></script>
 <script src="./shared/faq.js?v=1" defer></script>
 <!-- evaluation-framework MUST load before data-render — it provides the dataset & formulas -->
 <script src="./shared/evaluation-framework.js?v=8" defer></script>
 <!-- evaluation-contract: X1-global-coefficient + v2 桥接耦合映射 -->
 <script src="./shared/evaluation-contract.js?v=4" defer></script>
-<script src="./shared/data-render.js?v=12" defer></script>
-<script src="./shared/theory-chips.js?v=31" defer></script>
-<script src="./shared/rerun-bridge.js?v=1" defer></script>
+<script src="./shared/data-render.js?v=13" defer></script>
+<script src="./shared/theory-chips.js?v=32" defer></script>
+<script src="./shared/rerun-bridge.js?v=3" defer></script>
 <script>
 /* ============ Data source drawer wiring ============
  * 真实课堂数据接入：粘贴 JSON → 校验 → 写入 localStorage → 自动重渲染
@@ -1643,7 +1643,7 @@
     const btnDl   = document.getElementById('dsDownload');
     const btnClose= document.getElementById('dsClose');
     const meta    = document.getElementById('dsBadgeMeta');
-    if (!badge || !drawer) return;
+    if (!badge || !drawer || !txt || !msg || !btnApply || !btnClear || !btnDl || !btnClose || !meta) return;
 
     function fmtAgo(ts) {
       if (!ts) return '';
@@ -1658,7 +1658,8 @@
     function refreshBadge() {
       const m = EF.getDataSourceMeta();
       badge.classList.toggle('is-live', m.isLive);
-      badge.querySelector('.ds-text').textContent = m.isLive ? m.label : '样本数据';
+      const dsText = badge.querySelector('.ds-text');
+      if (dsText) dsText.textContent = m.isLive ? m.label : '样本数据';
       meta.textContent = m.isLive ? ` · ${fmtAgo(m.importedAt)}` : '';
     }
     function openDrawer() { drawer.hidden = false; setTimeout(() => txt.focus(), 30); }

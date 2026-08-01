@@ -1,11 +1,18 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { createReadStream, existsSync, realpathSync, statSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, relative as relativePath, resolve, sep } from "node:path";
 import { pipeline } from "node:stream/promises";
-import { PRACTICE_PACK_SYSTEM_PROMPT, TEACHING_AGENTS, publicAgentList } from "./agents.mjs";
+import {
+  PRACTICE_PACK_SYSTEM_PROMPT,
+  PRACTICE_REVIEWERS,
+  TEACHING_AGENTS,
+  publicAgentList,
+} from "./agents.mjs";
 import { RevisionConflictError } from "./db.mjs";
 import { ModelUnavailableError, ModelUpstreamError } from "./model-client.mjs";
+import { anchorAnnotation, anchorCrossReferences } from "../tools/anchor-gate.mjs";
 
 const MIME = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -229,6 +236,112 @@ function buildPracticePackMessages(input) {
   ];
 }
 
+const PRACTICE_REVIEW_TEMPERATURE = 0.2;
+const PRACTICE_REVIEW_MAX_TOKENS = 900;
+
+function validatePracticeReviewRequest(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    fail(400, "INVALID_BODY", "请求体必须是对象");
+  }
+  const reviewer = PRACTICE_REVIEWERS[body.reviewerId];
+  if (!reviewer) fail(400, "UNKNOWN_PRACTICE_REVIEWER", "reviewerId 不存在");
+  const input = validatePracticePackRequest(body);
+  const sourceRevision = Number(body.sourceRevision);
+  if (!Number.isInteger(sourceRevision) || sourceRevision < 0) {
+    fail(400, "INVALID_SOURCE_REVISION", "sourceRevision 必须是非负整数");
+  }
+  return { ...input, reviewer, sourceRevision };
+}
+
+function reviewText(value, name, { max = 1_200, required = true } = {}) {
+  if (typeof value !== "string") return { ok: false, reason: `${name}_not_text` };
+  const text = value.trim();
+  if (required && !text) return { ok: false, reason: `${name}_empty` };
+  if (text.length > max) return { ok: false, reason: `${name}_too_long` };
+  return { ok: true, value: text };
+}
+
+function parsePracticeReviewResponse(payload) {
+  const content = payload?.choices?.[0]?.message?.content;
+  const jsonText = extractFirstJsonObject(content);
+  if (!jsonText) return { ok: false, reason: "missing_json", raw: String(content || "").slice(0, 8_000) };
+  let parsed;
+  try { parsed = JSON.parse(jsonText); }
+  catch { return { ok: false, reason: "invalid_json", raw: String(content || "").slice(0, 8_000) }; }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { ok: false, reason: "invalid_object", raw: String(content || "").slice(0, 8_000) };
+  }
+  const targetEnv = reviewText(parsed.targetEnv, "targetEnv", { max: 16 });
+  const sourceExcerpt = reviewText(parsed.sourceExcerpt, "sourceExcerpt");
+  const issue = reviewText(parsed.issue, "issue");
+  const suggestion = reviewText(parsed.suggestion, "suggestion");
+  const invalid = [targetEnv, sourceExcerpt, issue, suggestion].find((field) => !field.ok);
+  if (invalid) return { ok: false, reason: invalid.reason, raw: String(content || "").slice(0, 8_000) };
+  if (!PRACTICE_PACK_KEYS.includes(targetEnv.value)) {
+    return { ok: false, reason: "unknown_target_env", raw: String(content || "").slice(0, 8_000) };
+  }
+  if (!Array.isArray(parsed.crossReferences) || parsed.crossReferences.length > 3) {
+    return { ok: false, reason: "invalid_cross_references", raw: String(content || "").slice(0, 8_000) };
+  }
+  const crossReferences = [];
+  for (const [index, ref] of parsed.crossReferences.entries()) {
+    const envKey = reviewText(ref?.envKey, `crossReferences_${index}_envKey`, { max: 16 });
+    const excerpt = reviewText(ref?.sourceExcerpt, `crossReferences_${index}_sourceExcerpt`);
+    if (!envKey.ok || !excerpt.ok || !PRACTICE_PACK_KEYS.includes(envKey.value)) {
+      return { ok: false, reason: !envKey.ok ? envKey.reason : !excerpt.ok ? excerpt.reason : "unknown_cross_reference_env", raw: String(content || "").slice(0, 8_000) };
+    }
+    crossReferences.push({ envKey: envKey.value, sourceExcerpt: excerpt.value });
+  }
+  return {
+    ok: true,
+    raw: String(content || "").slice(0, 8_000),
+    annotation: {
+      targetEnv: targetEnv.value,
+      sourceExcerpt: sourceExcerpt.value,
+      issue: issue.value,
+      suggestion: suggestion.value,
+      crossReferences,
+    },
+  };
+}
+
+function gatePracticeReview(parsed, input) {
+  if (!parsed.ok) return { ok: false, reason: parsed.reason, parseFailed: true };
+  if (!input.reviewer.scope.includes(parsed.annotation.targetEnv)) {
+    return { ok: false, reason: "out_of_scope", targetEnv: parsed.annotation.targetEnv };
+  }
+  const primary = anchorAnnotation(parsed.annotation, input.currentPack, input.sourceRevision);
+  if (!primary.ok) return { ok: false, reason: primary.reason, primary };
+  const cross = anchorCrossReferences(parsed.annotation.crossReferences, input.currentPack, input.sourceRevision);
+  if (!cross.allOk) {
+    return { ok: false, reason: "cross_reference_unanchored", primary, crossReferences: cross.results };
+  }
+  return { ok: true, primary, crossReferences: cross.results };
+}
+
+function buildPracticeReviewMessages(input, correction = null) {
+  const base = [
+    { role: "system", content: input.reviewer.systemPrompt },
+    {
+      role: "user",
+      content: `请审校以下当前稿件。\n<teaching_context>\n${JSON.stringify(input.context, null, 2)}\n</teaching_context>\n<current_pack source_revision="${input.sourceRevision}">\n${JSON.stringify(input.currentPack, null, 2)}\n</current_pack>`,
+    },
+  ];
+  if (!correction) return base;
+  return [
+    ...base,
+    { role: "assistant", content: correction.raw || "上一次输出未形成有效 JSON。" },
+    {
+      role: "user",
+      content: `上一次输出未通过机械门禁（${correction.reason}）。请重新输出完整 JSON。targetEnv 必须在 ${input.reviewer.scope.join("、")} 中；所有摘录必须逐字复制当前稿件，并优先复制完整分隔段。不要解释。`,
+    },
+  ];
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
 function authorized(req, expectedToken) {
   if (!expectedToken) return true;
   const bearer = req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.slice(7) : "";
@@ -279,10 +392,24 @@ async function serveStatic(req, res, pathname, webRoot) {
   }
 
   const stat = statSync(canonicalFile);
+  const extension = extname(filePath).toLowerCase();
+  if (extension === ".html") {
+    const source = await readFile(canonicalFile, "utf8");
+    const html = source.replace(/<body\b(?![^>]*\bdata-backend-enabled=)/i, '<body data-backend-enabled="true"');
+    const body = Buffer.from(html);
+    res.writeHead(200, {
+      "content-type": MIME.get(extension),
+      "content-length": body.length,
+      "cache-control": "no-cache",
+    });
+    if (req.method === "HEAD") res.end();
+    else res.end(body);
+    return true;
+  }
   res.writeHead(200, {
-    "content-type": MIME.get(extname(filePath).toLowerCase()) || "application/octet-stream",
+    "content-type": MIME.get(extension) || "application/octet-stream",
     "content-length": stat.size,
-    "cache-control": extname(filePath) === ".html" ? "no-cache" : "public, max-age=300",
+    "cache-control": "public, max-age=300",
   });
   if (req.method === "HEAD") res.end();
   else await pipeline(createReadStream(canonicalFile), res);
@@ -290,6 +417,9 @@ async function serveStatic(req, res, pathname, webRoot) {
 }
 
 export function createPharmacoServer({ config, database, modelClient, logger = console }) {
+  // 仅缓存通过锚定门禁的结果；失败与未定位建议不能因缓存被误当成稳定产物。
+  const practiceReviewCache = new Map();
+
   async function handleApi(req, res, url) {
     if (!authorized(req, config.apiToken)) {
       sendJson(res, 401, { error: { code: "UNAUTHORIZED", message: "API token 无效" } }, { "www-authenticate": "Bearer" });
@@ -408,6 +538,131 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       } finally {
         database.recordInference({
           agentId: "practice-pack-generator",
+          modelName: config.modelName,
+          status,
+          latencyMs: performance.now() - started,
+          inputChars: input.inputChars,
+        });
+      }
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/practice/reviews") {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const input = validatePracticeReviewRequest(body);
+      const manuscriptHash = createHash("sha256").update(JSON.stringify(input.currentPack)).digest("hex");
+      const cacheKey = createHash("sha256").update(JSON.stringify({
+        manuscriptHash,
+        sourceRevision: input.sourceRevision,
+        reviewerId: input.reviewer.id,
+        promptVersion: input.reviewer.promptVersion,
+        model: config.modelName,
+        temperature: PRACTICE_REVIEW_TEMPERATURE,
+        maxTokens: PRACTICE_REVIEW_MAX_TOKENS,
+      })).digest("hex");
+      const cached = practiceReviewCache.get(cacheKey);
+      if (cached) {
+        const payload = cloneJson(cached);
+        payload.cache = { hit: true, key: cacheKey.slice(0, 16) };
+        sendJson(res, 200, payload);
+        return;
+      }
+
+      const started = performance.now();
+      const abortController = new AbortController();
+      const abort = () => abortController.abort();
+      req.once("aborted", abort);
+      res.once("close", () => { if (!res.writableEnded) abort(); });
+      let status = "error";
+      let correction = null;
+      let lastParsed = null;
+      let lastGate = null;
+      let lastModel = config.modelName;
+      try {
+        for (let attempt = 1; attempt <= 2; attempt += 1) {
+          const messages = buildPracticeReviewMessages(input, correction);
+          const upstream = await modelClient.chat({
+            messages,
+            stream: false,
+            temperature: PRACTICE_REVIEW_TEMPERATURE,
+            maxTokens: PRACTICE_REVIEW_MAX_TOKENS,
+            signal: abortController.signal,
+          });
+          let modelPayload;
+          try { modelPayload = await upstream.json(); }
+          catch { modelPayload = null; }
+          lastModel = modelPayload?.model || lastModel;
+          lastParsed = parsePracticeReviewResponse(modelPayload);
+          lastGate = gatePracticeReview(lastParsed, input);
+          if (lastParsed.ok && lastGate.ok) {
+            const payload = {
+              source: "local-model",
+              status: "anchored",
+              reviewer: {
+                id: input.reviewer.id,
+                expertId: input.reviewer.expertId,
+                name: input.reviewer.name,
+                scope: [...input.reviewer.scope],
+              },
+              model: lastModel,
+              generatedAt: new Date().toISOString(),
+              sourceRevision: input.sourceRevision,
+              manuscriptHash,
+              promptVersion: input.reviewer.promptVersion,
+              attempts: attempt,
+              cache: { hit: false, key: cacheKey.slice(0, 16) },
+              annotation: {
+                issue: lastParsed.annotation.issue,
+                suggestion: lastParsed.annotation.suggestion,
+                targetEnv: lastGate.primary.targetEnv,
+                segmentKey: lastGate.primary.segmentKey,
+                sourceExcerpt: lastGate.primary.sourceExcerpt,
+                sourceRevision: lastGate.primary.sourceRevision,
+                sourceHash: lastGate.primary.sourceHash,
+                anchorMethod: lastGate.primary.anchorMethod,
+                anchorBasis: lastGate.primary.anchorBasis,
+                normalizationVersion: lastGate.primary.normalizationVersion,
+                crossReferences: lastGate.crossReferences,
+              },
+            };
+            practiceReviewCache.set(cacheKey, cloneJson(payload));
+            status = "ok";
+            sendJson(res, 200, payload);
+            return;
+          }
+          correction = {
+            reason: lastGate?.reason || lastParsed?.reason || "unknown_gate_failure",
+            raw: lastParsed?.raw,
+          };
+        }
+
+        // 两次都无法定位时仍返回可解释的 200 降级态，前端保留固定种子，
+        // 绝不把模型建议标成“已锚定”。
+        status = "unanchored";
+        sendJson(res, 200, {
+          source: "local-model",
+          status: "unanchored",
+          reviewer: {
+            id: input.reviewer.id,
+            expertId: input.reviewer.expertId,
+            name: input.reviewer.name,
+            scope: [...input.reviewer.scope],
+          },
+          model: lastModel,
+          generatedAt: new Date().toISOString(),
+          sourceRevision: input.sourceRevision,
+          manuscriptHash,
+          promptVersion: input.reviewer.promptVersion,
+          attempts: 2,
+          cache: { hit: false, key: cacheKey.slice(0, 16) },
+          gate: {
+            reason: lastGate?.reason || lastParsed?.reason || "unknown_gate_failure",
+            targetEnv: lastParsed?.annotation?.targetEnv || null,
+          },
+        });
+      } finally {
+        database.recordInference({
+          agentId: `practice-review:${input.reviewer.id}`,
           modelName: config.modelName,
           status,
           latencyMs: performance.now() - started,

@@ -36,7 +36,8 @@
     catch { return null; }
   }
   function saveLastRerun(info) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...info, completedAt: Date.now() }));
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...info, completedAt: Date.now() })); }
+    catch {}
   }
   function timeAgo(ts) {
     const sec = Math.floor((Date.now() - ts) / 1000);
@@ -71,13 +72,24 @@
   function showIncomingBanner(params) {
     const stage3 = document.getElementById('stage-iii');
     if (!stage3) return;
+    // intent/env 来自 location.hash（链接可分享）——一律走 textContent，不拼 innerHTML。
+    // URLSearchParams 已解码过一次，不再 decodeURIComponent（双重解码遇 '%' 会抛 URIError）。
     const banner = document.createElement('div');
     banner.className = 'rerun-banner';
-    banner.innerHTML = `
-      <span class="rb-tag">← 来自教学数据</span>
-      <span class="rb-text">重跑请求：<b>${decodeURIComponent(params.intent || '验证本环节')}</b>（环节 ${params.env}）</span>
-      <a class="rb-back" href="./data-detail.html">返回教学数据</a>
-    `;
+    const tag = document.createElement('span');
+    tag.className = 'rb-tag';
+    tag.textContent = '← 来自教学数据';
+    const text = document.createElement('span');
+    text.className = 'rb-text';
+    text.append('重跑请求：');
+    const intentBold = document.createElement('b');
+    intentBold.textContent = params.intent || '验证本环节';
+    text.append(intentBold, `（环节 ${params.env}）`);
+    const back = document.createElement('a');
+    back.className = 'rb-back';
+    back.href = './data-detail.html';
+    back.textContent = '返回教学数据';
+    banner.append(tag, text, back);
     // Insert before stage iii content
     stage3.insertBefore(banner, stage3.firstChild);
     // Also scroll to it
@@ -107,15 +119,29 @@
 
     const strip = document.getElementById('evidenceStrip');
     if (!strip) return;
+    // last.env/last.intent 源自 hash 参数（见 practice 侧），同样不拼 innerHTML
     const notice = document.createElement('div');
     notice.className = 'rerun-notice';
-    notice.innerHTML = `
-      <span class="rn-tag">✓ 上一次重跑</span>
-      <span class="rn-text">环节 <b>${last.env}</b> · <b>${timeAgo(last.completedAt)}</b> 已写回${last.intent ? `：${decodeURIComponent(last.intent)}` : ''}</span>
-      <button type="button" class="rn-dismiss" aria-label="关闭">×</button>
-    `;
+    const tag = document.createElement('span');
+    tag.className = 'rn-tag';
+    tag.textContent = '✓ 上一次重跑';
+    const text = document.createElement('span');
+    text.className = 'rn-text';
+    text.append('环节 ');
+    const envBold = document.createElement('b');
+    envBold.textContent = last.env;
+    const agoBold = document.createElement('b');
+    agoBold.textContent = timeAgo(last.completedAt);
+    text.append(envBold, ' · ', agoBold, ' 已写回');
+    if (last.intent) text.append(`：${last.intent}`);
+    const dismiss = document.createElement('button');
+    dismiss.type = 'button';
+    dismiss.className = 'rn-dismiss';
+    dismiss.setAttribute('aria-label', '关闭');
+    dismiss.textContent = '×';
+    notice.append(tag, text, dismiss);
     strip.insertBefore(notice, strip.firstChild);
-    notice.querySelector('.rn-dismiss')?.addEventListener('click', () => {
+    dismiss.addEventListener('click', () => {
       notice.style.opacity = '0';
       setTimeout(() => notice.remove(), 200);
     });

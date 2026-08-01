@@ -407,7 +407,7 @@
   line-height: 1.55;
 }
 
-/* ---- Stage iv — Write-back ---- */
+/* ---- Stage iii — Write-back ---- */
 .migrate {
   display: grid; grid-template-columns: 1.1fr 90px 1.1fr; gap: 0; align-items: stretch;
   background: var(--ivory); border: 1px solid var(--ink); border-radius: 16px;
@@ -521,12 +521,12 @@
 /* ============ Restructured stages: 生成 / 互审 / 试错 / 发布 ============ */
 
 /* ---- Stage i — Generate: 4-step selection wizard + pack preview ---- */
-.pack-layout {
-  display: grid; grid-template-columns: 1.05fr 1fr; gap: 24px; align-items: stretch;
-}
+/* v5:选择区与生成结果改为上下两栏 —— 先选 4 项(整栏横排),再由模型产出实践包(整栏铺开) */
+.pack-layout { display: block; }
 .pack-wizard {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-content: start;
 }
+.pack-result { margin-top: 22px; }
 /* —— 步骤指示条：放在 wizard 顶部，显示 ①→②→③→④ —— */
 .wiz-flow {
   grid-column: 1 / -1;
@@ -666,11 +666,11 @@
   display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
   flex: 1;
 }
-/* 9-env override */
-.pack-items.env-grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
-.pack-items.env-grid .pack-item { padding: 8px 10px; }
-.pack-items.env-grid .pack-item .hd { margin-bottom: 3px; }
-.pack-items.env-grid .pack-item .body { font-size: var(--fs-2xs); line-height: 1.5; }
+/* 9-env override —— v5 整栏后每张卡宽度翻倍,放大字号与留白以承载生成内容 */
+.pack-items.env-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pack-items.env-grid .pack-item { padding: 13px 15px; }
+.pack-items.env-grid .pack-item .hd { margin-bottom: 6px; }
+.pack-items.env-grid .pack-item .body { font-size: var(--fs-xs); line-height: 1.65; }
 .env-badge {
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.07em;
   color: var(--ink-soft); font-weight: 600;
@@ -743,13 +743,17 @@
 
 /* ---- Stage ii — Expert review ---- */
 .expert-grid {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;
 }
+.expert-grid .expert-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .expert-card {
   background: var(--ivory); border: 1px solid var(--rule); border-radius: 12px;
   padding: 16px 16px 14px;
   display: flex; flex-direction: column; gap: 10px;
+  transition: border-color .18s, box-shadow .18s, opacity .18s;
 }
+.expert-card.is-candidate { border-color: rgba(77,98,87,.52); box-shadow: inset 3px 0 0 rgba(77,98,87,.72); }
+.expert-card.is-rejected { opacity: .72; }
 .expert-card .ec-head {
   display: flex; align-items: center; gap: 10px;
   padding-bottom: 10px; border-bottom: 1px dashed var(--rule);
@@ -785,6 +789,34 @@
   border-bottom: 1px dashed var(--rule);
   margin-bottom: -4px;
 }
+.ec-live-review {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 7px 10px;
+  padding: 8px 9px; border: 1px solid var(--rule); border-radius: 7px;
+  background: var(--paper-2); color: var(--mute);
+}
+.ec-live-status {
+  min-width: 0; font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.45;
+  letter-spacing: .025em;
+}
+.ec-live-review button {
+  border: 0; border-bottom: 1px solid currentColor; padding: 2px 0;
+  background: transparent; color: var(--amber-deep); cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2xs); white-space: nowrap;
+}
+.ec-live-review button:disabled { color: var(--mute); cursor: not-allowed; opacity: .56; }
+.ec-live-review[data-state="ready"] { border-color: rgba(77,98,87,.34); color: var(--sage); background: rgba(77,98,87,.06); }
+.ec-live-review[data-state="stale"] { border-color: rgba(168,73,42,.42); color: var(--amber-deep); background: var(--amber-wash); }
+.ec-live-review[data-state="error"] { border-color: rgba(155,61,43,.35); color: #8b3c2f; background: rgba(155,61,43,.045); }
+.ec-live-review[data-state="loading"] .ec-live-status {
+  color: var(--ink); animation: ecReviewPulse 1.15s ease-in-out infinite;
+}
+.ec-live-error {
+  grid-column: 1 / -1; font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.5; color: #8b3c2f;
+}
+.ec-live-error[hidden] { display: none !important; }
+@keyframes ecReviewPulse { 50% { opacity: .42; } }
+@media (prefers-reduced-motion: reduce) { .ec-live-review[data-state="loading"] .ec-live-status { animation: none; } }
+.expert-card.has-stale-review .ec-anchor { background: var(--paper-2); color: var(--mute); }
 .expert-card .ec-inject {
   display: flex; flex-direction: column; gap: 6px;
   padding: 8px 10px;
@@ -812,6 +844,7 @@
 .expert-card .ec-who small {
   display: block; font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.04em; margin-top: 2px; font-weight: 400;
+  flex-basis: 100%;
 }
 .expert-card .ec-anchor {
   font-family: var(--mono); font-size: var(--fs-2xs); color: var(--amber-deep);
@@ -823,22 +856,135 @@
   flex: 1;
 }
 .expert-card .ec-body b { color: var(--ink); font-weight: 500; }
-.expert-card .ec-acts {
-  display: flex; gap: 5px; padding-top: 8px; border-top: 1px dashed var(--rule);
+.ec-review-line { display: block; }
+.ec-review-line + .ec-review-line { margin-top: 7px; }
+.ec-review-line b {
+  display: inline-block; min-width: 3.4em; margin-right: 5px;
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .08em; color: var(--mute);
 }
-.expert-card .ec-acts button {
-  flex: 1; font-family: var(--mono); font-size: var(--fs-2xs);
-  padding: 5px 4px; border-radius: 5px;
-  background: var(--paper-2); border: 1px solid var(--rule); color: var(--ink);
-  cursor: pointer; letter-spacing: 0.02em;
+.ec-resolution { display: grid; gap: 7px; padding-top: 9px; border-top: 1px dashed var(--rule); }
+.ec-resolution-label {
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); letter-spacing: .06em;
 }
-.expert-card .ec-acts button.is-adopt {
-  background: var(--amber-deep); color: var(--ivory); border-color: var(--amber-deep);
+.ec-resolution-picker {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden; border: 1px solid var(--rule); border-radius: 7px; background: var(--paper-2);
 }
-.expert-card .ec-acts button:not(.is-adopt):hover {
-  border-color: var(--amber-deep); color: var(--amber-deep);
+.ec-resolution-picker button {
+  min-width: 0; padding: 8px 6px; border: 0; border-right: 1px solid var(--rule);
+  background: transparent; color: var(--ink); cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.35; letter-spacing: .01em;
+  transition: background .18s cubic-bezier(.16,1,.3,1), color .18s cubic-bezier(.16,1,.3,1), transform .12s ease;
 }
-.expert-card.is-done { opacity: 0.7; }
+.ec-resolution-picker button:last-child { border-right: 0; }
+.ec-resolution-picker button:hover { background: var(--ivory); color: var(--amber-deep); }
+.ec-resolution-picker button:active { transform: translateY(1px) scale(.99); }
+.ec-resolution-picker button[aria-pressed="true"] { background: var(--ink); color: var(--ivory); }
+.ec-resolution-picker button:disabled { cursor: not-allowed; color: var(--mute); opacity: .5; }
+.ec-resolution-summary {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px;
+  min-height: 34px; padding: 7px 9px; border: 1px solid rgba(77,98,87,.35); border-radius: 7px;
+  background: rgba(77,98,87,.08); color: var(--sage);
+}
+.ec-resolution-summary[data-state="rejected"] {
+  border-color: var(--rule); background: var(--paper-2); color: var(--mute);
+}
+.ec-resolution-mark { font-family: var(--mono); font-size: var(--fs-2xs); font-weight: 700; }
+.ec-resolution-copy {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.4;
+}
+.ec-resolution-summary button {
+  padding: 3px 0 3px 8px; border: 0; border-left: 1px solid currentColor;
+  background: transparent; color: inherit; cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2xs);
+}
+.ec-resolution-summary button:active { transform: translateY(1px); }
+.ec-resolution-picker[hidden],
+.ec-resolution-summary[hidden],
+.ec-edit-panel[hidden],
+.ec-reject-panel[hidden],
+.ec-inline-error[hidden] { display: none !important; }
+
+.ec-edit-panel,
+.ec-reject-panel {
+  padding: 10px; border: 1px dashed var(--amber-deep); border-radius: 7px;
+  background: var(--amber-wash);
+}
+.ec-edit-panel label,
+.ec-reject-panel label {
+  display: grid; gap: 6px;
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink);
+}
+.ec-edit-panel textarea,
+.ec-reject-panel input,
+.ec-decision-note {
+  width: 100%; box-sizing: border-box; border: 1px solid var(--rule); border-radius: 5px;
+  background: var(--ivory); color: var(--ink); padding: 8px 9px;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.55;
+}
+.ec-edit-panel textarea { min-height: 112px; resize: vertical; }
+.ec-edit-panel > div,
+.ec-reject-panel > div { display: flex; gap: 6px; margin-top: 7px; }
+.ec-edit-panel button,
+.ec-reject-panel button {
+  border: 1px solid var(--rule); border-radius: 5px; background: var(--ivory);
+  color: var(--ink); padding: 5px 9px; font-family: var(--mono); font-size: var(--fs-2xs); cursor: pointer;
+}
+.ec-edit-panel button:first-child,
+.ec-reject-panel button:first-child { background: var(--amber-deep); border-color: var(--amber-deep); color: var(--ivory); }
+.ec-inline-error {
+  display: block; margin-top: 6px; color: #9b3d2b;
+  font-family: var(--mono); font-size: var(--fs-2xs); line-height: 1.45;
+}
+
+.ec-target-picker {
+  border: 1px solid var(--rule); border-radius: 7px; background: var(--paper-2);
+}
+.ec-target-picker > summary {
+  cursor: pointer; list-style: none; padding: 8px 10px;
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink); letter-spacing: .03em;
+  display: flex; justify-content: space-between; gap: 8px;
+}
+.ec-target-picker > summary::-webkit-details-marker { display: none; }
+.ec-target-picker > summary::after { content: "+"; color: var(--amber-deep); font-weight: 700; }
+.ec-target-picker[open] > summary::after { content: "−"; }
+.ec-target-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 5px;
+  padding: 0 9px 9px;
+}
+.ec-target-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.ec-target-chip span {
+  display: block; padding: 5px 4px; border: 1px solid var(--rule); border-radius: 4px;
+  background: var(--ivory); color: var(--mute); text-align: center; cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2xs); white-space: nowrap;
+}
+.ec-target-chip input:checked + span { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+.ec-section-lbl {
+  display: flex; justify-content: space-between; gap: 8px;
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink); letter-spacing: .04em;
+}
+.ec-section-lbl small { color: var(--mute); font-size: inherit; font-weight: 400; }
+.ec-evidence,
+.ec-decision { display: grid; gap: 7px; padding-top: 9px; border-top: 1px dashed var(--rule); }
+.ec-evidence-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.ec-empty { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); }
+.ec-evidence-chip {
+  padding: 5px 7px; border: 1px solid var(--rule); border-radius: 999px;
+  background: var(--ivory); color: var(--mute); cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2xs);
+}
+.ec-evidence-chip.is-suggested { border-style: dashed; border-color: var(--amber-deep); }
+.ec-evidence-chip.is-linked { background: rgba(77,98,87,.13); color: var(--sage); border-style: solid; border-color: var(--sage); }
+.ec-decision-acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.ec-decision-acts button {
+  padding: 6px 4px; border-radius: 5px; border: 1px solid var(--rule);
+  background: var(--paper-2); color: var(--ink); cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2xs);
+}
+.ec-decision-acts button:disabled { cursor: not-allowed; opacity: .42; }
+.ec-decision-acts button.is-active { background: var(--sage); color: var(--ivory); border-color: var(--sage); }
+.ec-decision-note { font-size: var(--fs-2xs); font-family: var(--mono); }
 
 .adopt-bar {
   margin-top: 18px; padding: 14px 20px;
@@ -1005,7 +1151,7 @@
   font-weight: 600; letter-spacing: 0.04em; padding-top: 1px;
 }
 
-/* ---- Stage iv — Publish + sync ---- */
+/* ---- Stage iii — Publish + sync ---- */
 .change-list {
   background: var(--ivory); border: 1px solid var(--rule); border-radius: 10px;
   padding: 14px 18px; margin-bottom: 18px;
@@ -1040,6 +1186,60 @@
   font-family: var(--mono); font-size: var(--fs-2xs); color: var(--sage); letter-spacing: 0.04em;
 }
 
+.decision-empty {
+  padding: 22px 14px; border: 1px dashed var(--rule); border-radius: 8px;
+  background: var(--paper-2); color: var(--mute); text-align: center;
+  font-family: var(--mono); font-size: var(--fs-2xs);
+}
+.decision-row {
+  border-top: 1px solid var(--ink); padding: 14px 0 4px; margin-top: 14px;
+}
+.decision-head {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 9px;
+}
+.decision-head .src {
+  padding: 4px 8px; border-radius: 3px; background: var(--paper-2);
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--ink);
+}
+.decision-head .src.is-pharm { background: rgba(217,119,87,.15); color: var(--amber-deep); }
+.decision-head .src.is-design { background: rgba(77,98,87,.18); color: var(--sage); }
+.decision-head .src.is-law { background: rgba(170,140,40,.2); color: #88701f; }
+.decision-head .src.is-eval { background: rgba(112,82,168,.14); color: var(--violet); }
+.decision-head .src.is-reflect { background: rgba(80,80,80,.12); color: var(--ink); }
+.decision-targets { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); }
+.decision-flow {
+  display: grid; grid-template-columns: repeat(4, minmax(0,1fr));
+  border: 1px solid var(--rule); border-radius: 8px; overflow: hidden;
+}
+.decision-flow > section {
+  min-width: 0; min-height: 126px; padding: 11px 12px;
+  background: var(--ivory); border-right: 1px dashed var(--rule);
+}
+.decision-flow > section:last-child { border-right: 0; background: var(--paper-2); }
+.decision-flow section > small {
+  display: block; margin-bottom: 8px; color: var(--amber-deep);
+  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .07em;
+}
+.decision-flow p,
+.decision-copy {
+  margin: 0; font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: 1.58; color: var(--ink-2);
+}
+.decision-copy { display: grid; gap: 7px; }
+.decision-copy span { display: block; }
+.decision-copy span b {
+  display: inline-block; min-width: 24px; margin-right: 5px;
+  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
+}
+.decision-copy .is-muted { color: var(--mute); font-family: var(--mono); font-size: var(--fs-2xs); }
+.decision-state {
+  display: inline-block; margin-bottom: 8px; padding: 4px 7px; border-radius: 999px;
+  font-family: var(--mono); font-size: var(--fs-2xs); border: 1px solid var(--rule);
+}
+.decision-state.is-supported { color: var(--sage); border-color: var(--sage); background: rgba(77,98,87,.1); }
+.decision-state.is-unsupported { color: var(--amber-deep); border-color: var(--amber-deep); background: var(--amber-wash); }
+.decision-state.is-insufficient { color: #88701f; border-color: #88701f; background: rgba(170,140,40,.1); }
+.decision-state.is-pending { color: var(--mute); }
+
 .publish-bar {
   margin-top: 22px; padding: 20px 24px;
   background: var(--ink); color: var(--ivory); border-radius: 14px;
@@ -1062,6 +1262,7 @@
   border: 1px solid var(--amber-deep); cursor: pointer;
 }
 .publish-bar .btn-publish:hover { background: #8e3d22; }
+.publish-bar .btn-publish:disabled { opacity: .45; cursor: not-allowed; background: var(--mute); border-color: var(--mute); }
 .publish-bar .btn-secondary {
   padding: 10px 18px; border-radius: 8px;
   background: transparent; color: var(--ivory);
@@ -1351,11 +1552,16 @@
 /* 平板 / 横屏:把密集多列(5/4/3 列)先降到 2 列 */
 @media (max-width: 960px) {
   .expert-grid { grid-template-columns: 1fr 1fr; }
+  .decision-flow { grid-template-columns: 1fr 1fr; }
+  .decision-flow > section:nth-child(2) { border-right: 0; }
+  .decision-flow > section:nth-child(-n+2) { border-bottom: 1px dashed var(--rule); }
   .km-grid { grid-template-columns: 1fr 1fr; }
   .sync-tri { grid-template-columns: 1fr 1fr; }
   .wiz-flow { grid-template-columns: 1fr 1fr; }
   /* 平板：实践包 9 环节格 3 列→2 列，避免每格 ~92px 中文逐字断行 */
   .pack-items.env-grid { grid-template-columns: repeat(2, 1fr); }
+  /* 平板：4 项选择横排会挤到每列 ~180px，折成 2×2 */
+  .pack-wizard { grid-template-columns: 1fr 1fr; }
   /* wiz-flow 多行后横向 → 箭头定位失效，隐藏 */
   .wiz-flow .wiz-step:not(:last-child)::after { display: none; }
 }
@@ -1374,14 +1580,16 @@
   .loop-feedback { flex-direction: column; align-items: flex-start; gap: 8px; }
 
   /* 实践包生成区 */
-  .pack-layout { grid-template-columns: 1fr; }
   .pack-wizard { grid-template-columns: 1fr; }
   .wiz-flow { grid-template-columns: 1fr; gap: 6px; }
   .pack-items { grid-template-columns: 1fr; }
-  .pack-items.env-grid { grid-template-columns: 1fr 1fr; }
+  .pack-items.env-grid { grid-template-columns: 1fr; }
+  .pack-cta { flex-direction: column; align-items: stretch; gap: 10px; }
+  .pack-cta .btn-primary { justify-content: center; }
 
-  /* 专家批注:5 列 → 1 列 */
+  /* 五路学科审校:5 列 → 1 列 */
   .expert-grid { grid-template-columns: 1fr; }
+  .expert-grid .expert-card:last-child:nth-child(odd) { grid-column: auto; }
 
   /* 关键时刻卡:3 列 → 1 列 */
   .km-grid { grid-template-columns: 1fr; }
@@ -1395,6 +1603,10 @@
 
   /* 修改清单行:92px 1fr auto → 标签上、内容下 */
   .cl-row { grid-template-columns: 1fr auto; gap: 2px 10px; }
+  .decision-flow { grid-template-columns: 1fr; }
+  .decision-flow > section { min-height: 0; border-right: 0; border-bottom: 1px dashed var(--rule); }
+  .decision-flow > section:last-child { border-bottom: 0; }
+  .decision-head { align-items: flex-start; flex-direction: column; }
 
   /* 小节头三栏 flex(lab 88px + h4 + note 179px) 在窄屏把中文标题挤成逐字竖排 → 改竖排堆叠 */
   .substage-h { flex-direction: column; align-items: flex-start; gap: 6px; }
@@ -1426,7 +1638,7 @@ html.reveal-on [data-reveal]:not([data-reveal="fade"]).is-revealed{ transform: n
   font-family: var(--mono); font-size: var(--fs-2xs);
 }
 .lr-steps{ display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-/* 流水线主轨：实践包 token 沿 生成→盖戳→入库 滑动 */
+/* 流水线主轨：实践包 token 沿 生成→审校与仿真记录→教师确认 滑动 */
 .lr-track{ display: flex; align-items: center; gap: 12px; min-height: 18px; padding: 0 4px; }
 .lr-line{ position: relative; flex: 1; height: 2px; border-radius: 1px; background: var(--rule-2); }
 .lr-token{ position: absolute; top: 50%; left: 0; transform: translate(-50%, -50%); font-size: 14px; line-height: 1; transition: left .5s cubic-bezier(.22,1,.36,1); filter: drop-shadow(0 1px 2px rgba(0,0,0,.22)); will-change: left; }
@@ -1469,7 +1681,7 @@ html.reveal-on [data-reveal]:not([data-reveal="fade"]).is-revealed{ transform: n
 .lc-cta:hover{ background: #8e3d22; }
 @media (max-width: 640px){ .lc-cta{ margin-left: 0; } }
 
-/* ============== Phase 3 · 关键时刻"证据流"：随录播逐条捕获 ============== */
+/* ============== Phase 3 · 关键时刻仿真记录：随录播逐条出现 ============== */
 .km-stream-h{ display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 18px 0 4px; }
 .ksh-lab{ font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .12em; text-transform: uppercase; color: var(--amber-deep); }
 .ksh-hint{ font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); }
@@ -1490,18 +1702,19 @@ html.reveal-on [data-reveal]:not([data-reveal="fade"]).is-revealed{ transform: n
 (function(){ try{ var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; if (!rm && 'IntersectionObserver' in window){ document.documentElement.classList.add('reveal-on'); } }catch(e){} })();
 window.__ANIM = window.__ANIM || { reveal: { step: 75 } };
 </script>
-<!-- 共享脚本统一带 ?v= 防缓存 desync：无版本号时 returning 浏览器可能吃旧缓存→脚本版本对不上→运行时静默 bail（阶段不交互、采纳率停 0）。改文件必须 bump ?v=。 -->
-<script src="./shared/wendao.js?v=1" defer></script>
-<script src="./shared/fanya.js?v=1" defer></script>
+<!-- 共享脚本统一带 ?v= 防缓存 desync：无版本号时 returning 浏览器可能吃旧缓存→脚本版本对不上→运行时静默 bail（阶段不交互、候选数停 0）。改文件必须 bump ?v=。 -->
+<script src="./shared/wendao.js?v=3" defer></script>
+<script src="./shared/fanya.js?v=2" defer></script>
 <script src="./shared/live-stats.js?v=1" defer></script>
 <!-- ===== Practice runtime: 4 stages now actually run ===== -->
-<script src="./shared/pharmaco-store.js?v=30" defer></script>
+<script src="./shared/pharmaco-store.js?v=31" defer></script>
 <script src="./shared/nav-stations-contract.js?v=31" defer></script>
-<script src="./shared/practice-runtime-contract.js?v=3stage" defer></script>
-<script src="./shared/toast.js?v=1" defer></script>
+<script src="./shared/practice-runtime-contract.js?v=discipline-review-v4" defer></script>
+<script src="./shared/toast.js?v=2" defer></script>
 <script src="./shared/faq.js?v=1" defer></script>
-<script src="./shared/practice-runtime.js?v=agents-decide-v6-degrp" defer></script>
-<script src="./shared/rerun-bridge.js?v=1" defer></script>
+<script src="./shared/practice-runtime.js?v=discipline-review-v11" defer></script>
+<script src="./shared/rerun-bridge.js?v=3" defer></script>
+<script src="./shared/backend-client.js?v=5-practice-review" defer></script>
 <!-- ===== 虚拟教室 ===== 优先 3D；core=仿真大脑；2.5D 为回退 -->
 <script>window.__MV_DEFER_2D = true;</script>
 <script src="./shared/mv-classroom-core.js?v=1" defer></script>
@@ -1577,7 +1790,7 @@ window.addEventListener('load', function () {
       <a class="loop-step" href="#stage-ii">
         <span class="seq">ii</span>
         <span class="cn">试错+证据<small>B · TRIAL &amp; EVIDENCE</small></span>
-        <span class="out">产出 · <b>5 类专家批注 · 虚拟班关键时刻 · 风险信号</b></span>
+        <span class="out">产出 · <b>五路学科审校 · 仿真关键时刻 · 教师判断</b></span>
         <span class="arr">→</span>
       </a>
       <a class="loop-step" href="#stage-iii">
@@ -1603,7 +1816,7 @@ window.addEventListener('load', function () {
       <span class="lr-loop" aria-hidden="true">↻</span>
       <a class="lr-node lr-again" href="#stage-i"><b>↻</b><span>再来一轮</span><em>#04</em></a>
     </div>
-    <!-- 流水线主轨：实践包 token 随滚动从 生成→盖戳→入库 滑动 -->
+    <!-- 流水线主轨：实践包 token 随滚动从 生成→审校与仿真记录→教师确认 滑动 -->
     <div class="lr-track" aria-hidden="true">
       <div class="lr-line"><span class="lr-token" id="lrToken">📦</span></div>
       <span class="lr-state" id="lrState">实践包 · <b>待生成</b></span>
@@ -1616,7 +1829,7 @@ window.addEventListener('load', function () {
       <div class="num">i<small>STAGE · 生成实践包</small></div>
       <div>
         <h3 id="stage-i-title">把<span class="it"> 9 个教学环节 </span>导航产物，<br/>合成一份可以上课堂的实践包。</h3>
-        <p>读取课程主题、教学导航段落、学生画像、课时长度，输出一份含"任务 · 角色 · 评价证据 · 资料"的课堂实践包——下一步进入"试错+证据"段并列接受 5 类专家批注与虚拟班关键时刻。</p>
+        <p>读取课程主题、教学导航段落、学生画像、课时长度，输出一份含"任务 · 角色 · 评价证据 · 资料"的课堂实践包——下一步进入"试错+证据"段，接受五路学科审校并关联虚拟班仿真记录。</p>
       </div>
     </div>
 
@@ -1646,11 +1859,19 @@ window.addEventListener('load', function () {
           <div class="wiz-chips"></div>
         </div>
         <div class="wiz-hint" id="wizHint" style="grid-column:1/-1">
-          按 <b>i → ii → iii → iv</b> 顺序选择（默认已自动补选示例）· 选择会即时同步到右上 hero meta 与右侧实践包预览 · 选择会持久化到浏览器
+          按 <b>i → ii → iii → iv</b> 顺序选择（默认已自动补选示例）· 选择会即时同步到右上 hero meta 与下方实践包 · 选择会持久化到浏览器
+        </div>
+
+        <!-- 四项选完后的出口:调用本机模型生成,结果显示在下方独立一栏 -->
+        <div class="pack-cta" style="grid-column:1/-1">
+          <span class="hint">⌥ 四项选定后生成 · 调用本机 Qwen 产出九环节 · 九个环节均可编辑</span>
+          <button type="button" class="btn-primary" id="inline-generate-pack">生成实践包 ↓</button>
         </div>
       </div>
+    </div>
 
-      <!-- RIGHT: pack preview -->
+    <!-- 生成结果:独占整栏,九个教学环节铺开 -->
+    <div class="pack-result" data-reveal>
       <aside class="pack-preview">
         <div class="pack-preview-h">
           <h4>课堂实践包预览<small>由教师真实输入合成 · 待试错+证据</small></h4>
@@ -1699,38 +1920,34 @@ window.addEventListener('load', function () {
           </div>
         </div>
 
-        <div class="pack-cta">
-          <span class="hint">⌥ 修改任一输入将触发重新生成</span>
-          <button type="button" class="btn-primary" id="inline-generate-pack">生成实践包 →</button>
-        </div>
       </aside>
     </div>
   </section>
 
-  <!-- ===== Stage ii — 试错+证据 (5 类专家批注 + 虚拟班级关键时刻并列) ===== -->
+  <!-- ===== Stage ii — 试错+证据 (五路学科审校 + 虚拟班仿真记录关联) ===== -->
   <section class="stage" id="stage-ii" aria-labelledby="stage-ii-title">
     <div class="stage-h" data-reveal>
       <div class="num">ii<small>STAGE · 试错+证据</small></div>
       <div>
-        <h3 id="stage-ii-title">不一人定稿，<br/>把实践包同时暴露给<span class="it"> 5 类专家 </span>与<span class="it"> 虚拟班 </span>。</h3>
-        <p>同一份实践包并行接受两条反馈：A · 5 学科专家批注（药学 / 经管 / 法学 / 教育学 / 数据科学）；B · AI 虚拟班按剧本推进，记录提问、答复、沉默、风险与关键时刻。两路证据并列后，进入"确认写回"。</p>
+        <h3 id="stage-ii-title">不让模板替教师定稿，<br/>让<span class="it">五路学科审校</span>与<span class="it">虚拟班仿真记录</span>并列呈现。</h3>
+        <p>A · 药学、管理、法规、教学设计与数据循证五路视角提出审校建议；B · AI 虚拟班按既定剧本推进并记录提问、答复、沉默、风险与关键时刻。系统只建议关联，是否支持修订由教师判断。</p>
       </div>
     </div>
 
-    <!-- A · 专家批注 -->
-    <div class="substage">
+    <!-- A · 五路学科审校 -->
+    <div class="substage" data-substage="A">
       <div class="substage-h" data-reveal>
-        <span class="lab">A · 5 类专家批注</span>
-        <h4>五条审阅链路并行试错</h4>
-        <span class="note">5 位领域专家并行批注 · 采纳后按 9 个教学环节归位</span>
+        <span class="lab">A · 五路学科审校</span>
+        <h4>五个学科视角并行发现问题</h4>
+        <span class="note">模板化审校视角 · 可编辑候选 · 目标环节可多选</span>
       </div>
 
     <!-- 由 practice-runtime.js · renderExpertCards 按所选章节动态填充 -->
-    <div class="expert-grid" aria-live="polite" data-reveal-stagger></div>
+    <div class="expert-grid" data-ec-role="grid" aria-live="polite" data-reveal-stagger></div>
 
-      <div class="adopt-bar" data-reveal>
-        <span>采纳率 · <span class="pct">3 / 5</span> · 待回应 2 · 修改 0 · 忽略 0</span>
-        <span class="syn">采纳清单已实时同步至教学数据工作台</span>
+      <div class="adopt-bar" data-adopt-bar="review" data-reveal>
+        <span>修订候选 · <span class="pct">0 / 5</span> · 证据已关联 0 · 教师已判断 0</span>
+        <span class="syn">教师决策痕迹将随候选保留</span>
       </div>
     </div>
 
@@ -1738,7 +1955,7 @@ window.addEventListener('load', function () {
     <div class="substage">
       <div class="substage-h" data-reveal>
         <span class="lab">B · 虚拟班关键时刻</span>
-        <h4>AI 虚拟班按剧本推进，<span class="it">同步捕捉证据</span></h4>
+        <h4>AI 虚拟班按剧本推进，<span class="it">同步记录关键时刻</span></h4>
         <span class="note">提问 · 答复 · 沉默 · 风险信号 · 量规歧义</span>
       </div>
 
@@ -1761,10 +1978,10 @@ window.addEventListener('load', function () {
       </div>
     </div>
 
-    <!-- 证据流：关键时刻随录播逐条被捕获（联动 window.PharmacoPilotMV） -->
+    <!-- 仿真记录流：关键时刻随录播逐条出现（联动 window.PharmacoPilotMV） -->
     <div class="km-stream-h" data-reveal>
-      <span class="ksh-lab">证据流 · 随录播浮现</span>
-      <span class="ksh-hint">▶ 播放上方录播 · 关键时刻按发生时间逐条被捕获（回拖则取消）</span>
+      <span class="ksh-lab">仿真记录流 · 随录播浮现</span>
+      <span class="ksh-hint">▶ 播放上方录播 · 关键时刻按发生时间逐条出现（回拖则取消）</span>
     </div>
 
     <!-- Key moments — captured from the simulation run -->
@@ -1775,14 +1992,14 @@ window.addEventListener('load', function () {
           <b>02:05</b>
         </div>
         <h4>立场结构性冲突 · 一致性评价 vs 替代焦虑</h4>
-        <div class="km-quote">"学生 A 引用一致性评价支持替代，学生 B 提出 2 年原研使用者的替代焦虑——Agent 17 秒识别，教师 15 秒采纳介入。"</div>
-        <p>分歧锚点设计有效——可作为"集采替代"类课题的复用片段。</p>
+        <div class="km-quote">"学生 A 引用一致性评价支持替代，学生 B 提出 2 年原研使用者的替代焦虑——Agent 17 秒识别，教师 15 秒后执行分组介入。"</div>
+        <p>系统建议关联「教学设计审校 · 分歧锚点」；是否值得复用，由教师确认。</p>
         <div class="km-tag">
           <span class="pill pill-amber">问题链 #3</span>
-          <span class="pill pill-sage">值得复用</span>
+          <span class="pill pill-sage">待教师判断</span>
         </div>
         <div class="km-meta">
-          <span>写回 <b>05 任务链设计</b></span>
+          <span>相关 <b>05 任务链设计</b></span>
           <span>Δ介入 <b>15 sec</b></span>
         </div>
       </div>
@@ -1793,14 +2010,14 @@ window.addEventListener('load', function () {
           <b>00:48</b>
         </div>
         <h4>"价格 / 厂家 / 患者反应"三选一锚点生效</h4>
-        <div class="km-quote">"教师抛出三选一锚点后，14 秒内 7 位学生响应——专家建议的具体化提问明显比'直觉判断'更易开口。"</div>
-        <p>验证「教学设计对齐」专家批注的修改方向；建议写回 05 任务链设计 作为模板。</p>
+        <div class="km-quote">"教师抛出三选一锚点后，14 秒内 7 位学生响应——这条仿真记录可与具体化提问的修订候选关联。"</div>
+        <p>系统建议关联「教学设计审校 · 问题链修订」；是否构成支持证据，由教师确认。</p>
         <div class="km-tag">
           <span class="pill pill-amber">问题链 #1</span>
           <span class="pill pill-indigo">破冰策略</span>
         </div>
         <div class="km-meta">
-          <span>写回 <b>05 任务链设计</b></span>
+          <span>相关 <b>05 任务链设计</b></span>
           <span>响应 <b>7 / 32</b></span>
         </div>
       </div>
@@ -1812,21 +2029,21 @@ window.addEventListener('load', function () {
         </div>
         <h4>学生引入"长期患者依从性"维度——超出实践包预设</h4>
         <div class="km-quote">"B 组主动提出'已稳定服用 2 年的患者切换风险'——这是预设未覆盖、却真实存在的临床决策维度。"</div>
-        <p>建议作为新维度写回 06 课中调控；同步至教学数据作为"超预设贡献"信号。</p>
+        <p>系统建议与 06 课中调控的修订候选关联；是否构成支持、是否写回，由教师确认。</p>
         <div class="km-tag">
           <span class="pill pill-amber">问题链 #3</span>
           <span class="pill pill-ink">需要决策</span>
         </div>
         <div class="km-meta">
-          <span>写回 <b>06 课中调控</b></span>
+          <span>相关 <b>06 课中调控</b></span>
           <span>待教师确认</span>
         </div>
       </div>
     </div>
 
-      <div class="adopt-bar" style="margin-top:18px;" data-reveal>
+      <div class="adopt-bar" data-adopt-bar="km" style="margin-top:18px;" data-reveal>
         <span>本轮试错 · 关键时刻 <b style="color:var(--ink)">3</b> 处 · 风险信号 <b style="color:var(--ink)">3</b> 项 · 学生表态 <b style="color:var(--ink)">14 / 32</b> · 立场迁移 <b style="color:var(--ink)">+0.7</b></span>
-        <span class="syn">互动数据 · 能力证据 · 教师采纳模式 实时同步至教学数据工作台</span>
+        <span class="syn">互动数据 · 关联记录 · 教师判断轨迹 形成可追溯记录</span>
       </div>
     </div>
   </section>
@@ -1837,50 +2054,26 @@ window.addEventListener('load', function () {
       <div class="num">iii<small>STAGE · 确认写回</small></div>
       <div>
         <h3 id="stage-iii-title">把<span class="it">本轮修改</span>，<br/>按<span class="it"> 9 个教学环节 </span>回写到实践包 · 数据 · 资产库。</h3>
-        <p>本轮专家试错采纳 + 虚拟班捕捉的关键时刻汇总成"修改清单"。教师确认后，整包按 9 个教学环节写回<b>本课实践包</b>（05 任务链设计 / 06 课中调控 直接迭代下一版）、<b>教学数据工作台</b>（采纳率 · 立场迁移 → 进入改进队列）、<b>个人教学资产库</b>（模板 T-集采类 · 09 资产沉淀）。教学导航的方法论框架是上游设计工具，不接收单节课反馈。</p>
+        <p>每条候选按"原内容 → 修订候选 → 仿真证据关联 → 教师判断"展开。只有教师明确判断为"支持"的候选，才按目标教学环节写回<b>本课实践包</b>、<b>教学数据工作台</b>与<b>个人教学资产库</b>；系统不自动宣布验证结论。</p>
       </div>
     </div>
 
-    <!-- Change list — modifications gathered from expert trial + sim -->
+    <!-- Decision dossier — revision candidates + simulation records + teacher judgment -->
     <div class="change-list">
-      <h5><b>本轮修改清单</b><span>共 <span class="ct">5</span> 项 · 已按 9 个教学环节归位</span></h5>
-      <div class="cl-row">
-        <span class="src is-design">设计 · 朱</span>
-        <span class="desc">问题链 #1 改为<b>"价格 / 厂家 / 患者反应"三选一</b>锚点</span>
-        <span class="stat">✓ 试错已验证</span>
-      </div>
-      <div class="cl-row">
-        <span class="src is-pharm">药学 · 章</span>
-        <span class="desc">患者代表角色设为<b>已用原研 2 年的慢病患者</b></span>
-        <span class="stat">✓ 已采纳</span>
-      </div>
-      <div class="cl-row">
-        <span class="src is-law">法规 · 杨</span>
-        <span class="desc">资料补<b>《国办发〔2019〕2号》集采试点方案</b>正式文号</span>
-        <span class="stat">✓ 已采纳</span>
-      </div>
-      <div class="cl-row">
-        <span class="src is-eval">评价 · 史</span>
-        <span class="desc">立场迁移度补 3 级量规锚点</span>
-        <span class="stat">⏵ 待回应</span>
-      </div>
-      <div class="cl-row">
-        <span class="src is-reflect">沉淀 · 邵</span>
-        <span class="desc">沉淀为<b>模板 T-集采类</b>供后续课题复用</span>
-        <span class="stat">⏵ 待回应</span>
-      </div>
+      <h5><b>教师决策卷宗</b><span>共 <span class="ct">0</span> 条修订候选 · 四段证据链</span></h5>
+      <div class="decision-empty">尚无修订候选 · 请先在 ii 段从五路学科审校中加入至少一条候选</div>
     </div>
 
     <div class="migrate" data-reveal>
       <div class="mig-side">
-        <h5>本轮 <b>关键时刻 + 专家批注</b></h5>
+        <h5>本轮 <b>修订候选 + 仿真证据关联</b></h5>
         <div class="mig-card">
           <div class="top">
             <span class="id">KM-01 · 02:05</span>
             <span class="kind">moment</span>
           </div>
           <div class="title">立场结构性冲突 · 一致性评价 vs 替代焦虑</div>
-          <div class="meta"><span>采纳 · 风险 高</span><span><b>可写回</b></span></div>
+          <div class="meta"><span>已关联 · 风险 高</span><span><b>待教师判断</b></span></div>
         </div>
         <div class="mig-card">
           <div class="top">
@@ -1888,7 +2081,7 @@ window.addEventListener('load', function () {
             <span class="kind">expert</span>
           </div>
           <div class="title">"价格 / 厂家 / 患者反应"三选一锚点</div>
-          <div class="meta"><span>来自 教学设计对齐 专家</span><span><b>建议合并</b></span></div>
+          <div class="meta"><span>来自 教学设计审校</span><span><b>待教师判断</b></span></div>
         </div>
         <div class="mig-card">
           <div class="top">
@@ -1896,7 +2089,7 @@ window.addEventListener('load', function () {
             <span class="kind">moment</span>
           </div>
           <div class="title">长期患者依从性 · 超预设维度</div>
-          <div class="meta"><span>来自试错信号</span><span>待教师确认</span></div>
+          <div class="meta"><span>来自虚拟班仿真记录</span><span>系统建议关联</span></div>
         </div>
       </div>
 
@@ -1904,19 +2097,19 @@ window.addEventListener('load', function () {
         <span class="arrow">→</span>
         <span class="label">
           合并打包<br/>
-          <b>P-04-α</b>
+          <b>按目标环节</b>
         </span>
       </div>
 
       <div class="mig-side">
-        <h5>写回 <b>05 任务链设计 · 问题链</b></h5>
+        <h5>教师确认支持后，按 <b>当前 S1–S9</b> 生成资产</h5>
         <div class="mig-card right">
           <div class="top">
-            <span class="id">P-04-α</span>
-            <span class="kind">asset · template</span>
+            <span class="id">待教师确认</span>
+            <span class="kind">asset · pending</span>
           </div>
-          <div class="title">集采替代决策问题链 + 4 方角色卡<br/>"原研 vs 仿制——你优先采购谁？依据什么？"</div>
-          <div class="meta"><span>类型 · 实践包模板</span><span><b>可被引用</b></span></div>
+          <div class="title">尚无可写回资产</div>
+          <div class="meta"><span>需先由教师确认至少一条候选为“支持”</span></div>
         </div>
         <div class="mig-card right is-draft">
           <div class="top">
@@ -1932,26 +2125,26 @@ window.addEventListener('load', function () {
     <!-- Publish bar -->
     <div class="publish-bar" data-reveal>
       <div class="pb-l">
-        <h4>本轮实践包已可写回</h4>
-        <p>5 条修改 · 3 已采纳 · 2 待回应 · 试错信号 3 项 · 关键时刻 3 处 · 按 9 个教学环节归位</p>
+        <h4>教师确认后才可写回</h4>
+        <p>0 条修订候选 · 0 条已关联仿真记录 · 0 条教师确认支持 · 0 条待判断</p>
       </div>
       <div class="pb-r">
         <button type="button" class="btn-secondary" id="inline-diff">查看完整 diff</button>
-        <button type="button" class="btn-publish" id="inline-publish">教师确认写回 →</button>
+        <button type="button" class="btn-publish" id="inline-publish" disabled aria-disabled="true">教师确认写回 →</button>
       </div>
     </div>
 
     <!-- Three-way write-back sync indicators · 按 9 个教学环节回写 -->
     <div class="sync-tri" data-reveal>
-      <div class="sync-cell is-ready">
+      <div class="sync-cell is-pending">
         <div class="sc-lbl">写回 ①<span class="dot"></span></div>
-        <div class="sc-target">本课实践包 · 05 任务链设计 / 06 课中调控</div>
-        <div class="sc-detail">问题链片段 <b>P-04-α</b> 迭代到 04；新增维度<b>"长期依从性"</b>迭代到 07，下一轮直接套用</div>
+        <div class="sc-target">本课实践包 · 等待教师确认支持</div>
+        <div class="sc-detail">教师确认支持的候选才会按目标环节写回，并保留审校、证据关联与判断记录</div>
       </div>
       <div class="sync-cell is-ready">
         <div class="sc-lbl">写回 ②<span class="dot"></span></div>
         <div class="sc-target">教学数据工作台 · 08 复盘与决策</div>
-        <div class="sc-detail">专家采纳率 · 立场迁移度 · 学生画像表态 → <b>同步进入 data-detail 下一轮改进队列</b></div>
+        <div class="sc-detail">修订候选 · 仿真记录关联 · 教师判断 → <b>同步进入 data-detail 下一轮改进队列</b></div>
       </div>
       <div class="sync-cell is-pending">
         <div class="sc-lbl">写回 ③<span class="dot"></span></div>
@@ -1964,10 +2157,10 @@ window.addEventListener('load', function () {
     <div class="loop-close" data-reveal>
       <span class="lc-ring" aria-hidden="true">↻</span>
       <div class="lc-txt">
-        <b>本轮闭环完成 · 产物已按 9 个教学环节回写</b>
-        <span>实践包 / 教学数据 / 个人资产库均已更新 —— 下一轮从「生成实践包」带着本轮沉淀再开始</span>
+        <b>本轮闭环待启动 · 尚未产生教师确认写回</b>
+        <span>先将审校意见加入修订候选，关联仿真记录并完成教师判断</span>
       </div>
-      <a class="lc-cta" href="#stage-i">再来一轮 #04 →</a>
+      <a class="lc-cta" href="#stage-ii">回到审校与仿真 →</a>
     </div>
 
   </section>
@@ -2053,8 +2246,10 @@ window.addEventListener('load', function () {
       meta.querySelectorAll('[data-field]').forEach((el) => {
         out[el.getAttribute('data-field')] = el.innerHTML.trim();
       });
-      localStorage.setItem(STORE_KEY, JSON.stringify(out));
-      localStorage.setItem(UPDATED_KEY, String(Date.now()));
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(out));
+        localStorage.setItem(UPDATED_KEY, String(Date.now()));
+      } catch (e) { /* 无存储权限时静默降级，不打断编辑 */ }
       renderUpdated();
     };
 
@@ -2085,7 +2280,7 @@ window.addEventListener('load', function () {
 
   // 供 practice-runtime 在"教师确认写回"成功后回调，刷新"上次写入"
   window.ppPracticeTouchUpdated = function () {
-    localStorage.setItem(UPDATED_KEY, String(Date.now()));
+    try { localStorage.setItem(UPDATED_KEY, String(Date.now())); } catch (e) { /* 同上，静默降级 */ }
     renderUpdated();
   };
 
@@ -2095,7 +2290,7 @@ window.addEventListener('load', function () {
     setMastH(); window.addEventListener('resize', setMastH); window.addEventListener('load', setMastH);
   })();
 
-  // ===== 流水线主轨：实践包 token 随滚动从 生成→盖戳→入库 滑动 + 状态读出（时间节流，不依赖会被冻结的 rAF） =====
+  // ===== 流水线主轨：仅读出当前浏览阶段，不根据滚动伪造“已验证 / 已入库”业务状态 =====
   (function(){
     var token = document.getElementById('lrToken'), stateEl = document.getElementById('lrState');
     var sI = document.getElementById('stage-i'), sII = document.getElementById('stage-ii'), sIII = document.getElementById('stage-iii');
@@ -2124,13 +2319,13 @@ window.addEventListener('load', function () {
       var curId = (ref < a2) ? 'stage-i' : (ref < a3 ? 'stage-ii' : 'stage-iii');
       if (curId !== prevId){ setActive(curId); prevId = curId; }
       var st;
-      if (ref < a1) st = '实践包 · <b>待生成</b>';
-      else if (ref < a2) st = '实践包 · <b>已生成</b>';
-      else if (ref < a3){ var n = Math.min(5, Math.floor(clamp01((ref - a2) / Math.max(1, a3 - a2)) * 5) + 1); st = '实践包 · <b>盖戳</b> <span class="stamp">证据 ' + n + '/5</span>'; }
-      else { var closeInView = lc && (lc.getBoundingClientRect().top < window.innerHeight * 0.82); st = closeInView ? '实践包 · <span class="stamp">已入库 ✓</span>' : '实践包 · <b>入库中</b>'; }
+      if (ref < a1) st = '当前位置 · <b>流程概览</b>';
+      else if (ref < a2) st = '当前位置 · <b>生成实践包</b>';
+      else if (ref < a3) st = '当前位置 · <b>审校与仿真记录</b>';
+      else { var closeInView = lc && (lc.getBoundingClientRect().top < window.innerHeight * 0.82); st = closeInView ? '当前位置 · <b>闭环出口</b>' : '当前位置 · <b>教师确认写回</b>'; }
       if (st !== prevState){
         stateEl.innerHTML = st;
-        if (/已生成|入库/.test(st)){ token.classList.remove('is-pulse'); void token.offsetWidth; token.classList.add('is-pulse'); }
+        if (/生成实践包|教师确认/.test(st)){ token.classList.remove('is-pulse'); void token.offsetWidth; token.classList.add('is-pulse'); }
         prevState = st;
       }
     }
@@ -2175,7 +2370,7 @@ window.addEventListener('load', function () {
 })();
 </script>
 <script>
-/* ============ Phase 3 · 关键时刻"证据流"：随录播(window.PharmacoPilotMV)逐条捕获；回拖取消（与录播一致） ============ */
+/* ============ Phase 3 · 关键时刻仿真记录：随录播(window.PharmacoPilotMV)逐条出现；回拖取消（与录播一致） ============ */
 (function(){
   var grid = document.getElementById('kmStream');
   if (!grid) return;

@@ -193,7 +193,9 @@
         // Toggle-add: append the chip's label as a tag prefix to the prompt
         const existing = String(ta.value || "");
         if (existing.includes(`#${label}`)) {
-          ta.value = existing.replace(new RegExp(`\\s*#${label}`, "g"), "").trim();
+          // label 来自 chip 文本，可能含正则元字符（如 "C++"）——先转义再进 RegExp
+          const reSafe = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          ta.value = existing.replace(new RegExp(`\\s*#${reSafe}`, "g"), "").trim();
         } else {
           ta.value = (existing ? existing.trim() + "  " : "") + `#${label}`;
         }

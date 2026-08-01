@@ -37,7 +37,7 @@
       catch { return []; }
     }
     function save(list) {
-      localStorage.setItem(STORE_KEY, JSON.stringify(list));
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); } catch {}
     }
 
     function makeChip(item) {
@@ -70,7 +70,7 @@
       catch { return new Set(); }
     }
     function saveHidden(set) {
-      localStorage.setItem(HIDE_KEY, JSON.stringify([...set]));
+      try { localStorage.setItem(HIDE_KEY, JSON.stringify([...set])); } catch {}
     }
     function chipText(chip) {
       return (chip.textContent || '').replace(/\s+/g, ' ').replace('×', '').trim();

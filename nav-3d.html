@@ -155,9 +155,9 @@
       <div id="n3-file-tip" hidden>
         <p><b>3D 路书需要通过本地服务器打开。</b>当前是直接双击文件打开(<code>file://</code>),
         浏览器出于安全策略会拦截 3D 所需的 ES 模块,页面无法渲染。</p>
-        <p>正确打开方式:双击 <b>pharmaco网页/启动3D路书.command</b>(自动起服务并打开本页);
-        或在该目录下运行 <code>python3 -m http.server 8777</code> 后访问
-        <code>http://localhost:8777/nav-3d.html</code>。</p>
+        <p>正确打开方式:双击 <b>pharmaco网页/启动3D路书.command</b>(自动起加固服务并打开本页);
+        或在该目录下运行 <code>npm start</code> 后访问
+        <code>http://127.0.0.1:4173/nav-3d.html</code>。</p>
       </div>
       <p>以下 9 环节清单等价可用(可直接进入 2D 工作台):</p>
       <ol>
@@ -189,8 +189,9 @@
   </script>
 
   <!-- 契约 + Store(经典脚本,与工作台同源同序) -->
-  <script src="./shared/nav-stations-contract.js?v=1"></script>
-  <script src="./shared/pharmaco-store.js?v=1"></script>
+  <script src="./shared/nav-stations-contract.js?v=31"></script>
+  <script src="./shared/pharmaco-store.js?v=31"></script>
+  <script src="./shared/backend-client.js?v=3-status"></script>
   <script type="module" src="./shared/nav-map-3d.js?v=6"></script>
 </body>
 </html>

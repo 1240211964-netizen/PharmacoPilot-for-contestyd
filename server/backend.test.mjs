@@ -13,6 +13,13 @@ test("PharmacoPilot backend contract", async (t) => {
   const generatedPack = Object.fromEntries(
     Array.from({ length: 9 }, (_, index) => [`env${String(index + 1).padStart(2, "0")}`, `环节 ${index + 1} · 可观察产出`]),
   );
+  const anchoredReview = {
+    targetEnv: "env02",
+    sourceExcerpt: "目标：比较集采替代中的质量与可及性权衡",
+    issue: "目标要求比较权衡，但现有量规只记录结论，没有观察学生如何使用证据。",
+    suggestion: "在量规中增加一项：能否引用两类证据解释取舍，并说明证据边界。",
+    crossReferences: [{ envKey: "env05", sourceExcerpt: "任务：用两类证据完成替代决策并说明边界" }],
+  };
   const fakeModel = {
     async status() {
       return { ready: true, endpoint: "http://fake/v1", model: "fake-model", advertisedModels: ["fake-model"] };
@@ -36,6 +43,22 @@ test("PharmacoPilot backend contract", async (t) => {
           id: "practice-pack-test",
           model: "fake-model",
           choices: [{ message: { role: "assistant", content: JSON.stringify(generatedPack) } }],
+        }), { headers: { "content-type": "application/json" } });
+      }
+      if (request.messages[0]?.content.includes("教学设计审校")) {
+        const wrongEnv = request.messages.some((message) => message.content.includes("REVIEW_WRONG_ENV"));
+        const annotation = wrongEnv
+          ? {
+              ...anchoredReview,
+              targetEnv: "env04",
+              sourceExcerpt: "证据：待核实集采政策来源与适用范围",
+              crossReferences: [],
+            }
+          : anchoredReview;
+        return new Response(JSON.stringify({
+          id: "practice-review-test",
+          model: "fake-model",
+          choices: [{ message: { role: "assistant", content: JSON.stringify(annotation) } }],
         }), { headers: { "content-type": "application/json" } });
       }
       return new Response(JSON.stringify({
@@ -69,7 +92,9 @@ test("PharmacoPilot backend contract", async (t) => {
     const page = await fetch(`${base}/`);
     assert.equal(page.status, 200);
     assert.match(page.headers.get("content-type"), /text\/html/);
-    assert.match(await page.text(), /PharmacoPilot/);
+    const pageHtml = await page.text();
+    assert.match(pageHtml, /PharmacoPilot/);
+    assert.match(pageHtml, /<body\s+data-backend-enabled="true"/);
 
     const response = await fetch(`${base}/api/health`);
     assert.equal(response.status, 200);
@@ -242,6 +267,121 @@ test("PharmacoPilot backend contract", async (t) => {
     assert.equal(response.status, 502);
     const body = await response.json();
     assert.equal(body.error.code, "MODEL_OUTPUT_INVALID");
+  });
+
+  await t.test("anchors, canonicalizes and caches a single practice review", async () => {
+    const currentPack = {
+      env01: "诊断：匿名投票识别学生对集采替代的初始判断",
+      env02: "目标：比较集采替代中的质量与可及性权衡 · 量规：能说明结论",
+      env03: "误区：只比较药价而忽略疗效与患者可及性",
+      env04: "证据：待核实集采政策来源与适用范围",
+      env05: "任务：用两类证据完成替代决策并说明边界 · 输出：三方决策备忘录",
+      env06: "调控：追问证据来源并记录沉默节点",
+      env07: "评价：依据量规形成学习画像",
+      env08: "复盘：比较初始判断与最终决策",
+      env09: "沉淀：保存可复用的问题链与量规",
+    };
+    const requestBody = {
+      reviewerId: "instructional-design",
+      sourceRevision: 3,
+      context: {
+        chapterId: "ch5-procurement",
+        courseTitle: "药事管理学",
+        courseLevel: "本科",
+        classTitle: "药管 1 班",
+        studentCount: 32,
+        sessionTitle: "第 7 周",
+        durationMinutes: 45,
+        chapterTitle: "集采制度",
+        topic: "集采后仿制药替代",
+      },
+      currentPack,
+    };
+    const before = calls.length;
+    const response = await fetch(`${base}/api/practice/reviews`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.status, "anchored");
+    assert.equal(body.reviewer.expertId, "expert-edu");
+    assert.equal(body.sourceRevision, 3);
+    assert.equal(body.annotation.targetEnv, "env02");
+    assert.equal(body.annotation.segmentKey, "目标");
+    assert.equal(body.annotation.sourceExcerpt, anchoredReview.sourceExcerpt);
+    assert.equal(body.annotation.crossReferences[0].sourceExcerpt, anchoredReview.crossReferences[0].sourceExcerpt);
+    assert.match(body.manuscriptHash, /^[a-f0-9]{64}$/);
+    assert.equal(body.cache.hit, false);
+    assert.equal(calls.length, before + 1);
+    assert.match(calls.at(-1).messages[0].content, /只在 env02/);
+
+    const cachedResponse = await fetch(`${base}/api/practice/reviews`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+    const cached = await cachedResponse.json();
+    assert.equal(cached.status, "anchored");
+    assert.equal(cached.cache.hit, true);
+    assert.equal(calls.length, before + 1, "缓存命中不应再次调用模型");
+  });
+
+  await t.test("retries once and degrades when a review stays outside its discipline scope", async () => {
+    const currentPack = {
+      env01: "诊断：匿名投票识别学生的初始判断",
+      env02: "目标：比较两种管理方案并说明证据边界",
+      env03: "误区：把价格下降直接等同于治疗价值提升",
+      env04: "证据：待核实集采政策来源与适用范围",
+      env05: "任务：REVIEW_WRONG_ENV 条件下完成多方决策",
+      env06: "调控：追问证据并记录沉默节点",
+      env07: "评价：按量规形成可观察学习画像",
+      env08: "复盘：比较初始判断与最终决策",
+      env09: "沉淀：保存可复用的问题链与量规",
+    };
+    const before = calls.length;
+    const response = await fetch(`${base}/api/practice/reviews`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        reviewerId: "instructional-design",
+        sourceRevision: 4,
+        context: {
+          chapterId: "wrong-scope",
+          courseTitle: "药事管理学",
+          courseLevel: "本科",
+          classTitle: "测试班",
+          studentCount: 30,
+          sessionTitle: "测试课时",
+          durationMinutes: 45,
+          chapterTitle: "测试章节",
+          topic: "REVIEW_WRONG_ENV",
+        },
+        currentPack,
+      }),
+    });
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.status, "unanchored");
+    assert.equal(body.gate.reason, "out_of_scope");
+    assert.equal(body.attempts, 2);
+    assert.equal(body.cache.hit, false);
+    assert.equal(calls.length, before + 2);
+    assert.match(calls.at(-1).messages.at(-1).content, /机械门禁/);
+  });
+
+  await t.test("rejects an unknown practice reviewer before inference", async () => {
+    const before = calls.length;
+    const response = await fetch(`${base}/api/practice/reviews`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ reviewerId: "expert-edu", sourceRevision: 0, context: {}, currentPack: {} }),
+    });
+    assert.equal(response.status, 400);
+    const body = await response.json();
+    assert.equal(body.error.code, "UNKNOWN_PRACTICE_REVIEWER");
+    assert.equal(calls.length, before);
   });
 });
 

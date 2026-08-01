@@ -8,6 +8,7 @@ node_modules/
 .pharmaco-data/
 .deploy-stage/
 .playwright-cli/
+output/playwright/
 
 # 申报 / 内部文档（非网页代码）
 *.docx
