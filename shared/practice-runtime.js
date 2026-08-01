@@ -2796,7 +2796,7 @@
       .slice(0, 8);
   }
 
-  async function runLiveReview(entry, chapter, { silent = false } = {}) {
+  async function runLiveReview(entry, chapter, { silent = false, avoidAnchors: presetAvoid = null } = {}) {
     const reviewerId = entry.expert?.reviewerId;
     const roleName = entry.expert?.role || "学科审校";
     if (!reviewerId || entry.state !== "pending" || entry.liveReviewPhase === "loading") return "skipped";
@@ -2818,7 +2818,9 @@
 
     const requestedChapterId = selectedChapter.id;
     const sourceRevision = getPackRevision(requestedChapterId);
-    const avoidAnchors = collectAvoidAnchors(entry.expertId);
+    // 批量模式传入批次开始时的快照:避让列表不随完成顺序演化,同一稿件两次
+    // 批跑的缓存键完全一致,答辩预热才可靠。单卡重审仍用实时列表。
+    const avoidAnchors = presetAvoid || collectAvoidAnchors(entry.expertId);
     entry.liveReviewPhase = "loading";
     entry.liveReviewError = "";
     syncLiveReviewVisual(entry);
@@ -2944,6 +2946,8 @@
     setStageStatus("ii", "五路学科审校进行中", true, false);
     const chapterId = chapter.id;
     const queue = [...targets];
+    // 批次开始时快照避让列表(目标卡均为待审/过期,自身旧锚点不会混入)
+    const batchAvoid = collectAvoidAnchors(null);
     const tally = { anchored: 0, unanchored: 0, error: 0, skipped: 0 };
     let done = 0;
     const worker = async () => {
@@ -2951,7 +2955,7 @@
         if (getSelected("chapter")?.id !== chapterId) { tally.skipped += queue.length; queue.length = 0; return; }
         const entry = queue.shift();
         setBatchStatus(`审校中 ${Math.min(done + 1, targets.length)}/${targets.length} · ${entry.expert?.role || "学科审校"} · 已锚定 ${tally.anchored}`);
-        const outcome = await runLiveReview(entry, chapter, { silent: true });
+        const outcome = await runLiveReview(entry, chapter, { silent: true, avoidAnchors: batchAvoid });
         tally[outcome] = (tally[outcome] || 0) + 1;
         done += 1;
       }

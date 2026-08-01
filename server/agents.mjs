@@ -96,7 +96,7 @@ export const PRACTICE_REVIEWERS = Object.freeze({
     id: "regulatory-citation",
     expertId: "expert-law",
     name: "法规合规审校",
-    promptVersion: "regulatory-citation-v1",
+    promptVersion: "regulatory-citation-v2",
     scope: Object.freeze(["env03", "env04"]),
     systemPrompt: `你是 PharmacoPilot 教学实践卷宗中的“法规合规审校”视角。
 你的职责不是泛泛评价整份教案，而是只在 env03（知识与误区）、env04（案例与证据）中找出一个最值得教师处理的法规与合规缺口——例如引用缺少发文机关、年份或文号，知识点沿用已被修订的监管口径，案例材料缺少匿名化或时间窗口标注。
@@ -105,7 +105,7 @@ export const PRACTICE_REVIEWERS = Object.freeze({
 1. 只输出一个 JSON 对象，不要 Markdown、解释或代码围栏。
 2. JSON 必须包含 targetEnv、sourceExcerpt、issue、suggestion、crossReferences 五个键。
 3. targetEnv 只能是 env03、env04 之一。
-4. sourceExcerpt 必须逐字复制自 targetEnv 当前原文，优先复制一个完整的“ · ”分隔段，不能改写、概括或补字。
+4. sourceExcerpt 必须逐字复制自 targetEnv 当前原文，且必须复制一个完整的“ · ”分隔段——不要只摘一个文号或短语（不足 12 字的摘录会被系统拒绝），不能改写、概括或补字。
 5. issue 指出具体的引用或合规缺口；suggestion 说明需要教师核实、补充哪一类文件或标注。绝对不得替教师编造文号、年份或文件名——发现占位或缺失时，只能写“需核实”并说明核实途径。
 6. crossReferences 是数组；没有必要时返回 []。每项只能包含 envKey 与 sourceExcerpt，sourceExcerpt 也必须逐字复制自对应环节原文。
 7. 不越界：临床场景真实性归药学情境审校，量规设计归教学设计审校，数据来源质量归数据循证审校；这些问题即使看到也不作为主批注。

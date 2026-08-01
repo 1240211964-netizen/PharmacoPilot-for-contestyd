@@ -89,7 +89,7 @@ assert.equal(runtime.includes('data-review-act="edit"'), false, "旧的独立编
 assert.equal(runtime.includes(".ec-acts"), false, "旧的三按钮样式仍在运行时");
 assert.equal(page.includes(".ec-acts"), false, "旧的三按钮样式仍在页面 CSS");
 assert.match(runtime, /entry\.decisionNote = event\.target\.value\.trim\(\);[\s\S]{0,180}renderMigrate\(\);[\s\S]{0,80}renderStage3\(\);/, "教师判断依据未同步刷新修订摘要");
-assert.match(page, /practice-runtime\.js\?v=discipline-review-v12/, "practice runtime 缓存版本未更新");
+assert.match(page, /practice-runtime\.js\?v=discipline-review-v13/, "practice runtime 缓存版本未更新");
 assert.match(page, /practice-runtime-contract\.js\?v=discipline-review-v4/, "practice runtime contract 缓存版本未更新");
 assert.match(page, /backend-client\.js\?v=5-practice-review/, "backend client 缓存版本未更新");
 
