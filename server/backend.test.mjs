@@ -455,6 +455,62 @@ test("PharmacoPilot backend contract", async (t) => {
     assert.equal(calls.length, before + 2, "非法 avoidAnchors 不应触发模型调用");
   });
 
+  await t.test("serves anchored reviews from sqlite after a server restart", async () => {
+    // 与 "anchors, canonicalizes and caches" 用例完全相同的请求体 → 相同 cacheKey
+    const currentPack = {
+      env01: "诊断：匿名投票识别学生对集采替代的初始判断",
+      env02: "目标：比较集采替代中的质量与可及性权衡 · 量规：能说明结论",
+      env03: "误区：只比较药价而忽略疗效与患者可及性",
+      env04: "证据：待核实集采政策来源与适用范围",
+      env05: "任务：用两类证据完成替代决策并说明边界 · 输出：三方决策备忘录",
+      env06: "调控：追问证据来源并记录沉默节点",
+      env07: "评价：依据量规形成学习画像",
+      env08: "复盘：比较初始判断与最终决策",
+      env09: "沉淀：保存可复用的问题链与量规",
+    };
+    const requestBody = {
+      reviewerId: "instructional-design",
+      sourceRevision: 3,
+      context: {
+        chapterId: "ch5-procurement",
+        courseTitle: "药事管理学",
+        courseLevel: "本科",
+        classTitle: "药管 1 班",
+        studentCount: 32,
+        sessionTitle: "第 7 周",
+        durationMinutes: 45,
+        chapterTitle: "集采制度",
+        topic: "集采后仿制药替代",
+      },
+      currentPack,
+    };
+    const strictModel = {
+      async status() {
+        return { ready: true, endpoint: "http://fake/v1", model: "fake-model", advertisedModels: ["fake-model"] };
+      },
+      async chat() {
+        throw new Error("持久缓存命中时不得调用模型");
+      },
+    };
+    const restarted = createPharmacoServer({ config, database, modelClient: strictModel, logger: { error() {} } });
+    await new Promise((resolveListen) => restarted.listen(0, "127.0.0.1", resolveListen));
+    const restartedBase = `http://127.0.0.1:${restarted.address().port}`;
+    try {
+      const response = await fetch(`${restartedBase}/api/practice/reviews`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+      assert.equal(response.status, 200);
+      const body = await response.json();
+      assert.equal(body.status, "anchored");
+      assert.equal(body.cache.hit, true);
+      assert.equal(body.annotation.targetEnv, "env02");
+    } finally {
+      await new Promise((resolveClose) => restarted.close(resolveClose));
+    }
+  });
+
   await t.test("rejects an unknown practice reviewer before inference", async () => {
     const before = calls.length;
     const response = await fetch(`${base}/api/practice/reviews`, {

@@ -48,6 +48,7 @@ curl http://127.0.0.1:4173/api/model/status
 | `GET/PUT` | `/api/workspaces/:id/state` | 按 ETag/版本号读写教学状态 |
 | `POST` | `/api/chat` | 非流式 JSON 或流式 SSE 模型对话 |
 | `POST` | `/api/practice/generate` | 按课程上下文生成并校验九环节实践包 |
+| `POST` | `/api/practice/reviews` | 按学科视角审校实践包，机械锚定门禁 + SQLite 持久缓存 |
 
 `POST /api/chat` 示例：
 
@@ -60,6 +61,8 @@ curl http://127.0.0.1:4173/api/chat \
 可用的工作流 `agentId`：`pharmacy-scenario`、`instructional-designer`、`evaluation-diagnostician`、`evidence-verifier`、`teaching-reflector`。它们描述的是工作流能力，不等同于教学实践页的药学、经管、法学、教育学、数据科学五类学科专家。
 
 “教学实践”页的“生成实践包”按钮已接入 `/api/practice/generate`。后端只接受完整的课程、班级、课时、章节与九环节草稿，并只在模型返回 `env01`–`env09` 九个非空字段时写入页面。后端或模型不可用、响应结构不合格时，网页保留当前模板，不做空白覆盖。
+
+“教学实践”页的五路学科审校（药学情境 / 管理决策 / 法规合规 / 教学设计 / 数据循证）走 `/api/practice/reviews`：每路只在自己的主责环节提一条批注，摘录必须逐字命中当前稿件（机械锚定门禁），未通过时返回 `unanchored`，前端保留固定审校种子。五路批量运行时前端并发上限 2，并把已锚定批注的位置作为 `avoidAnchors` 传给后续请求以避免同段扎堆。已锚定结果按“稿件哈希 + 修订号 + 审校者 + prompt 版本”持久缓存到 SQLite——**答辩彩排提示**：演示前对目标章节跑一遍五路审校，此后即使重启后端，相同稿件的审校仍是秒回；现场改稿会改变稿件哈希，自动走真实推理。
 
 ## 数据与安全边界
 

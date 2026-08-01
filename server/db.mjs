@@ -49,6 +49,12 @@ export class PharmacoDatabase {
         input_chars INTEGER NOT NULL,
         created_at TEXT NOT NULL
       ) STRICT;
+
+      CREATE TABLE IF NOT EXISTS practice_review_cache (
+        cache_key TEXT PRIMARY KEY,
+        payload_json TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      ) STRICT;
     `);
 
     this.selectState = this.db.prepare(
@@ -65,6 +71,13 @@ export class PharmacoDatabase {
     );
     this.insertInference = this.db.prepare(
       "INSERT INTO inference_events(id, agent_id, model_name, status, latency_ms, input_chars, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    );
+    this.selectPracticeReview = this.db.prepare(
+      "SELECT payload_json FROM practice_review_cache WHERE cache_key = ?",
+    );
+    this.upsertPracticeReview = this.db.prepare(
+      "INSERT INTO practice_review_cache(cache_key, payload_json, created_at) VALUES (?, ?, ?)"
+        + " ON CONFLICT(cache_key) DO UPDATE SET payload_json = excluded.payload_json, created_at = excluded.created_at",
     );
   }
 
@@ -112,6 +125,17 @@ export class PharmacoDatabase {
       this.db.exec("ROLLBACK");
       throw error;
     }
+  }
+
+  getPracticeReview(cacheKey) {
+    const row = this.selectPracticeReview.get(cacheKey);
+    if (!row) return null;
+    try { return JSON.parse(row.payload_json); }
+    catch { return null; }
+  }
+
+  savePracticeReview(cacheKey, payload) {
+    this.upsertPracticeReview.run(cacheKey, JSON.stringify(payload), new Date().toISOString());
   }
 
   recordInference({ agentId, modelName, status, latencyMs, inputChars }) {

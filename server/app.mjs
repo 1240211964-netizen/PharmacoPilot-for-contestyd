@@ -436,6 +436,8 @@ async function serveStatic(req, res, pathname, webRoot) {
 
 export function createPharmacoServer({ config, database, modelClient, logger = console }) {
   // 仅缓存通过锚定门禁的结果；失败与未定位建议不能因缓存被误当成稳定产物。
+  // L1 内存 + SQLite 持久层：答辩前在真页面对演示章节跑一遍五路审校，
+  // 之后即使后端重启，相同稿件+修订号+审校者仍然秒回。
   const practiceReviewCache = new Map();
 
   async function handleApi(req, res, url) {
@@ -579,8 +581,9 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         temperature: PRACTICE_REVIEW_TEMPERATURE,
         maxTokens: PRACTICE_REVIEW_MAX_TOKENS,
       })).digest("hex");
-      const cached = practiceReviewCache.get(cacheKey);
+      const cached = practiceReviewCache.get(cacheKey) || database.getPracticeReview(cacheKey);
       if (cached) {
+        practiceReviewCache.set(cacheKey, cloneJson(cached));
         const payload = cloneJson(cached);
         payload.cache = { hit: true, key: cacheKey.slice(0, 16) };
         sendJson(res, 200, payload);
@@ -645,6 +648,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
               },
             };
             practiceReviewCache.set(cacheKey, cloneJson(payload));
+            database.savePracticeReview(cacheKey, cloneJson(payload));
             status = "ok";
             sendJson(res, 200, payload);
             return;
