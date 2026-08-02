@@ -48,7 +48,7 @@
         { q: "Q1 · SWOT 中 W 指什么", correctPct: 65, status: "ok",   commonMisconception: null },
         { q: "Q2 · S 与 W 的判定边界", correctPct: 32, status: "warn", commonMisconception: "误把外部威胁当成内部劣势" },
         { q: "Q3 · O / T 来自内 / 外部",correctPct: 41, status: "warn", commonMisconception: "认为政策一定是 O 而非 T" },
-        { q: "Q4 · 同时为 S 与 T 的情景",correctPct: 19, status: "miss", commonMisconception: "认为 S 与 T 互斥（38% 学生）" },
+        { q: "Q4 · 根据分析对象区分 W 与 T", correctPct: 19, status: "miss", commonMisconception: "38% 的学生将外部威胁误判为内部劣势" },
       ],
 
       // 经验入口（药事管理学科特有）
@@ -59,12 +59,12 @@
         { type: "无任何药事接触",   pct: 12, evidenceSrc: "需补充情境锚" },
       ],
 
-      // 参与度二维分群（高/低 × 主动/被动）
+      // 当前任务中的暂时性分组：只描述本次响应与掌握表现，不推断稳定主动性或人格。
       participationQuadrants: [
-        { label: "主动 + 高知",  pct: 22, color: "#3a8a4e" },
-        { label: "主动 + 低知",  pct: 28, color: "#b8860b" },
-        { label: "被动 + 高知",  pct: 18, color: "#5a7090" },
-        { label: "被动 + 低知",  pct: 32, color: "#a8492a" },
+        { label: "高响应 + 掌握较好",  pct: 22, color: "#3a8a4e" },
+        { label: "高响应 + 基础待巩固", pct: 28, color: "#b8860b" },
+        { label: "低响应 + 掌握较好",  pct: 18, color: "#5a7090" },
+        { label: "低响应 + 基础待巩固", pct: 32, color: "#a8492a" },
       ],
 
       // 兼容 figureStation02 的 bars 写法（条形图渲染）
@@ -72,7 +72,7 @@
         ["Q1 · W 含义",          65, { status: "ok"   }],
         ["Q2 · S/W 边界",        32, { status: "warn" }],
         ["Q3 · 内外来源",        41, { status: "warn" }],
-        ["Q4 · S 与 T 并存",     19, { status: "miss" }],
+        ["Q4 · W/T 分类边界",    19, { status: "miss" }],
       ],
 
       flow: ["看分布", "找断层", "定支架"],
@@ -84,7 +84,7 @@
         {
           key: "evidence",
           label: "学生会填表但证据链表达不足",
-          rationale: "最容易被忽略的高风险问题。Q4 仅 19% 正确率反映「证据 vs 立场」混淆。建议前置证据引用训练。",
+          rationale: "最容易被忽略的高风险问题。Q4 仅 19% 正确率，说明学生尚未稳定依据分析对象和证据来源完成 W/T 分类。建议前置证据引用训练。",
           score: 3.7,
           meta: { recommended: true, lintTriggers: ["pre-test-low"] },
         },
@@ -103,8 +103,8 @@
         },
         {
           key: "participation",
-          label: "低参与学生无法进入任务",
-          rationale: "32% 被动 + 低知象限学生需要低门槛入口和小组角色支持。",
+          label: "低响应且基础待巩固学生缺少任务入口",
+          rationale: "当前任务中 32% 的学生呈现低响应且基础待巩固，需要低门槛入口和小组角色支持；该分组不外推到其他课时。",
           score: 3.0,
         },
       ],
@@ -125,7 +125,7 @@
         outputTitle: "学情分析 v1 · 双入口诊断",
         outputCue: "把前测数据 + 经验分布合并为一段可挂教案首页的学情诊断。",
         artifactLines: {
-          evidence: "Q4 正确率 19% · 38% 学生认为 S 与 T 互斥；12% 学生无任何药事接触经验。",
+          evidence: "Q4 正确率 19% · 38% 的学生将外部威胁误判为内部劣势；12% 学生无任何药事接触经验。",
           action: "前置「证据出处训练」+ 为 12% 无经验学生准备「家人慢病情境锚」阅读。",
           constraints: [
             "学情诊断须同时含认知前测与经验入口",

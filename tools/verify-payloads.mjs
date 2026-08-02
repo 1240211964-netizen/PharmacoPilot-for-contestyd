@@ -135,7 +135,7 @@ try {
     /class="intro-rationale"/.test(navRender) &&
       /设计依据 · 为什么这样做/.test(navRender) &&
       /\.station-intro\s*\{[^}]*repeat\(2,/s.test(navHtml) &&
-      /nav-detail\.bundle\.js\?v=21-swot-guide-dedupe/.test(navHtml),
+      /nav-detail\.bundle\.js\?v=23-s1-decision-sheet/.test(navHtml),
     '为什么应降级为折叠设计依据，两张主卡应保持两列并刷新缓存版本'
   );
   assert(

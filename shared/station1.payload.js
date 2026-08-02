@@ -70,7 +70,7 @@
             { dim: "课程主线对齐",   score: 18, max: 20, note: "直接对应「循证决策能力」主线" },
             { dim: "高阶能力培养",   score: 20, max: 20, note: "强制学生做判断,而非记 SWOT 定义" },
             { dim: "避免工具化退化", score: 16, max: 20, note: "仍可能落入「教 SWOT 工具」陷阱" },
-            { dim: "学情起点适配",   score: 14, max: 20, note: "Q4 仅 19% 正确,部分学生跟不上高阶" },
+            { dim: "学情起点适配",   score: 14, max: 20, note: "Q4 仅 19% 正确，需先检验 W/T 分类边界误解" },
             { dim: "前后节承接",     score: 14, max: 20, note: "推到 PESTLE/Porter 自然" },
           ],
         }],
@@ -155,10 +155,80 @@
       "policy":        { summary: "△ 张力维度被放大",          riskBadges: ["政治化风险"],          detail: "若学生议程已经偏向政策（学习者议程 显示集采伦理为最高票），叠加此定位会让 SWOT 退化为政策辩论。" },
     },
 
+    // S1 的结构化事实源。适用课程、班级、课时与样本量由渲染层读取当前教学选择后补入；
+    // 本对象只提供课例证据、诊断边界、行动模板与可追溯写回目标。
+    decisionArtifactSeed: {
+      id: "s1-learner-context-decision",
+      nodeId: "S1",
+      artifactType: "learner_context_decision",
+      version: 1,
+      status: "pending_teacher_review",
+      scope: {
+        course: null,
+        className: null,
+        lesson: null,
+        task: "区分内部条件与外部环境，重点辨析内部劣势 W 与外部威胁 T",
+        sampleSize: null,
+        evidenceStage: "课前",
+        demoData: true,
+      },
+      evidenceSummary: [
+        {
+          id: "evidence-q4",
+          category: "common_misconception",
+          title: "内部条件与外部环境的分类边界不清",
+          finding: "Q4 正确率为 19%；38% 的学生将外部威胁误判为内部劣势。",
+          source: "课前诊断题 Q4（演示数据）",
+          timepoint: "课前",
+          limitations: "只反映本次题目与当前课时，不能据此推断稳定能力。",
+        },
+        {
+          id: "evidence-group",
+          category: "group_difference",
+          title: "部分学生需要更显性的基础支持",
+          finding: "低响应＋基础待巩固学生占 32%，属于当前任务中的暂时性分组。",
+          source: "前测作答与响应记录（演示数据）",
+          timepoint: "课前",
+          limitations: "响应表现来自一次课前任务，不能解释为长期学习主动性。",
+        },
+      ],
+      aiSuggestion: {
+        diagnosis: "学生已能识别部分 SWOT 基本术语，但尚未普遍建立‘先确定分析对象，再判断证据来源，最后判断正负影响’的分类规则。",
+        suggestedAction: "增加 W/T 对比案例，为基础待巩固学生提供三步分类支架，并在课堂中设置两次即时检查。",
+        confidenceLabel: "待教师确认",
+        disclaimer: "这是基于当前演示证据形成的建议，不代表已经证明学生能力不足，也不代表教学调整已经有效。",
+      },
+      teacherDecision: {
+        decision: null,
+        judgment: "当前证据可支持‘SWOT 分类边界存在共性误解’的暂时性判断，但学生分组只适用于本课时，仍需在课堂活动中继续验证。",
+        rationale: "题目作答分布与前测响应表现能够相互补充，但一次前测不足以判断学生的稳定学习特征。",
+        scopeLimit: ["本班", "本课时", "当前 SWOT 分类任务"],
+        unresolvedQuestion: "更换案例和分析对象后，学生能否继续正确区分内部条件与外部环境？",
+        confirmedBy: null,
+        confirmedAt: null,
+      },
+      teachingActions: {
+        wholeClass: "增加 W 与 T 的对比案例，显性讲解‘分析对象—证据来源—正负影响’判断路径。",
+        targetGroup: "为低响应＋基础待巩固学生提供三步分类卡和低门槛对比案例。",
+        teacherActions: "在概念讲解后和案例迁移时各设置一次即时分类检查。",
+      },
+      hypothesis: {
+        statement: "若在 S5 增加三步分类支架，并在 S6 设置即时反馈，学生的 W/T 区分准确率与当前重点群体的任务响应表现可能改善。",
+        status: "pending_validation",
+        disclaimer: "待验证假设，不代表已经产生教学效果。",
+      },
+      downstreamWrites: [
+        { targetNode: "S3", targetName: "教学内容结构化与前概念诊断", action: "将内部条件与外部环境的分类边界列为重点前概念和常见误解。", status: "pending" },
+        { targetNode: "S5", targetName: "学习活动与教学支架设计", action: "增加‘分析对象—证据来源—类别判断’三步分类卡、W/T 对比案例和分层任务。", status: "pending" },
+        { targetNode: "S6", targetName: "形成性评价与适应性调控", action: "增加两次课堂即时分类检查，记录错误类型、修正情况和学生响应表现。", status: "pending" },
+        { targetNode: "S7", targetName: "表现性评价与学习成效诊断", action: "比较支架使用前后的分类正确率、错误结构及案例迁移表现。", status: "pending" },
+      ],
+    },
+
     artifacts: [
       {
         id: "positioning-statement",
-        buttonLabel: "⬇ 生成课程任务定位段落 + 课程位置说明",
+        buttonLabel: "生成课程任务定位段落 + 课程位置说明",
         outputTitle: "课程任务定位 v1",
         outputCue: "把本节课的定位类型 + 前后节承接上下文写成可挂在教案首页的一段话。",
         artifactLines: {

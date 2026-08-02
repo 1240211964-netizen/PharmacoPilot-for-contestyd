@@ -54,6 +54,88 @@ for (const abs of files) {
 
 assert.deepEqual(violations, [], `样式 token 门禁失败:\n${violations.join("\n")}`);
 
+// ── 字号必须来自 token(存量基线制) ──────────────────────────────────────
+// 上面的循环只守 12px 地板；≥12px 的裸 px 一律放行,所以 TYPOGRAPHY.md 写的
+// "禁裸 px" 一直没有门禁。五路审校抽屉就是这样漂走的:同一个
+// `.review-drawer-head h4` 叠了 var(--fs-xl) / clamp(25px,2.3vw,34px) / 30px
+// 三条声明,clamp 胜出渲染成 33.12px,而同页其它 h4 是 18/22px。
+//
+// 存量 17 处不阻塞,登记进基线;新增的一律红。基线只许缩小:改好后从下表删掉
+// 对应条目,否则本门禁会提示"基线该收窄了",防止它变成永久豁免。
+const FONT_SIZE_SKIP = new Set([
+  "gsap-demo.html", // 内部演示,make-deploy 明确不上线
+]);
+const FONT_SIZE_EXEMPT = new Set([
+  // 生成教师下载的独立文档(固定 760px 纸张 + Songti SC),不套用屏幕字号刻度
+  "shared/practice-export-entry.js",
+]);
+// 允许:token / 关键字 / 相对单位(随上下文缩放,不是硬编码刻度)
+const FONT_SIZE_OK = /^(?:0|inherit|initial|unset|revert|smaller|larger)$/i;
+const FONT_SIZE_REL = /^[\d.]+(?:em|rem|%|ch)$/i;
+
+const FONT_SIZE_BASELINE = {
+  "data-detail.html": ["14px"],
+  "nav-3d.html": ["20px"],
+  "nav-detail.html": ["32px"],
+  // 首屏大字用流体排版。要留就该在 tokens.css 里立成 --fs-hero-fluid 之类的
+  // token,而不是散在页面里。
+  "opening-story.html": [
+    "clamp(34px, 4.3vw, 60px)",
+    "clamp(34px, 4.3vw, 60px)",
+    "clamp(42px, 6vw, 82px)",
+  ],
+  // 审校抽屉(Stage 2b)自成一套刻度。清理时注意 .review-drawer-head h4 与
+  // .review-env-no 各有两处重复声明,删掉后写的那条即可。
+  "practice-detail.html": [
+    "14px", "22px", "26px", "27px", "30px", "32px", "38px",
+  ],
+  "shared/metaverse-classroom-3d.js": ["15px", "20px"],
+};
+
+const fontSizeFound = {};
+for (const abs of files) {
+  const rel = path.relative(root, abs);
+  if (FONT_SIZE_SKIP.has(path.basename(rel)) || FONT_SIZE_EXEMPT.has(rel)) continue;
+  const source = fs.readFileSync(abs, "utf8");
+  const bad = [];
+  for (const match of source.matchAll(/\bfont-size\s*:\s*([^;}\n]+)/gi)) {
+    const value = match[1].trim().replace(/\s+/g, " ");
+    if (value.includes("var(--") || FONT_SIZE_OK.test(value) || FONT_SIZE_REL.test(value)) continue;
+    bad.push(value);
+  }
+  if (bad.length) fontSizeFound[rel] = bad.sort();
+}
+
+const fontSizeProblems = [];
+for (const rel of new Set([...Object.keys(fontSizeFound), ...Object.keys(FONT_SIZE_BASELINE)])) {
+  const found = fontSizeFound[rel] || [];
+  const allowed = [...(FONT_SIZE_BASELINE[rel] || [])].sort();
+  const remaining = [...allowed];
+  const added = [];
+  for (const value of found) {
+    const at = remaining.indexOf(value);
+    if (at === -1) added.push(value);
+    else remaining.splice(at, 1);
+  }
+  if (added.length) {
+    fontSizeProblems.push(
+      `${rel} 新增裸字号 ${added.join(", ")}\n` +
+      `    → 改用 var(--fs-*) / var(--text-*);确有理由才加进 FONT_SIZE_BASELINE`
+    );
+  }
+  if (remaining.length) {
+    fontSizeProblems.push(
+      `${rel} 基线该收窄了:${remaining.join(", ")} 已不在文件里\n` +
+      `    → 从 verify-style-tokens.mjs 的 FONT_SIZE_BASELINE 删掉这几条`
+    );
+  }
+}
+
+assert.deepEqual(
+  fontSizeProblems, [],
+  `字号 token 门禁失败:\n${fontSizeProblems.map((p) => "  " + p).join("\n")}`
+);
+
 const tokens = fs.readFileSync(path.join(root, "shared/tokens.css"), "utf8");
 const typography = fs.readFileSync(path.join(root, "TYPOGRAPHY.md"), "utf8");
 // ── 文档 ⇄ Token 同步门禁 ────────────────────────────────────────────────
@@ -117,5 +199,21 @@ for (const page of ["nav-detail.html", "practice-detail.html", "data-detail.html
   const source = fs.readFileSync(path.join(root, page), "utf8");
   assert.match(source, /<body\s+class="[^"]*is-readable-detail[^"]*">/, `${page} 未启用笔记本可读模式`);
 }
+
+// ⑤ 主题所有权：暗色只服务教学导航工作台。
+// 共享 CSS 不得再出现全站暗色覆盖；否则纸色内容页会只变顶栏、不变主体。
+const sharedChrome = fs.readFileSync(path.join(root, "shared/bc-chrome.css"), "utf8");
+const navTheme = fs.readFileSync(path.join(root, "shared/nav-theme.css"), "utf8");
+const navPage = fs.readFileSync(path.join(root, "nav-detail.html"), "utf8");
+const themeBridge = fs.readFileSync(path.join(root, "shared/nav-render-store-bridge.js"), "utf8");
+assert.doesNotMatch(sharedChrome, /html\[data-theme=["']dark["']\]/, "bc-chrome.css 不得携带全站暗色规则");
+assert.match(navTheme, /html\[data-theme=["']dark["']\]/, "nav-theme.css 缺少导航暗色规则");
+assert.match(navPage, /<link[^>]+shared\/nav-theme\.css/, "nav-detail.html 未加载导航专属主题");
+for (const page of ["index.html", "login.html", "opening-story.html", "nav-3d.html", "practice-detail.html", "data-detail.html"]) {
+  const source = fs.readFileSync(path.join(root, page), "utf8");
+  assert.doesNotMatch(source, /shared\/nav-theme\.css/, `${page} 不得加载导航专属主题`);
+}
+assert.match(themeBridge, /localStorage\.getItem\(THEME_KEY\)\s*\|\|\s*["']light["']/,
+  "教学导航首次访问必须默认纸色，不得暗中跟随系统主题");
 
 console.log(`verify-style-tokens: ok (${files.length} production files)`);

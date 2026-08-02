@@ -637,8 +637,8 @@
     // -------- O · 主题管理（dark/light/auto） --------
     const THEME_KEY = "pharmacoPilot.theme.v1";
     function getTheme() {
-      // 隐私模式/阻止 Cookie 时 localStorage 会抛 SecurityError — 降级为 auto,不中断脚本
-      try { return localStorage.getItem(THEME_KEY) || "auto"; } catch (e) { return "auto"; }
+      // 首次访问与无存储权限时固定为纸色，避免评审机器跟随系统暗色意外切换。
+      try { return localStorage.getItem(THEME_KEY) || "light"; } catch (e) { return "light"; }
     }
     function effectiveTheme() {
       const t = getTheme();
@@ -1149,6 +1149,11 @@
       const dock = document.querySelector(".decision-dock");
       if (!dock) return;
       const existing = dock.querySelector(".ppl-artifact-zone");
+      // S1 使用结构化“学情诊断与教学情境判断单”，不再注入通用 Markdown 产物按钮。
+      if (currentStation === 1) {
+        if (existing) existing.remove();
+        return;
+      }
       if (existing && !(opts && opts.force)) return;
       if (existing) existing.remove();
 

@@ -4,6 +4,14 @@
    见 audit-report 跨页问题#1。 */
 
 :root {
+  /* 浅色是默认态。不声明的话,暗色 OS 下浏览器会把滚动条与原生控件按暗色渲染,
+     压在纸色页面上割裂。教学导航暗色主题的反向声明见 nav-theme.css。 */
+  color-scheme: light;
+  /* 原生 checkbox 是 appearance:auto,不声明就是系统蓝,与暖色体系冲突。
+     accent-color 可继承,放 :root 即可覆盖全站(含各页内联 <style> 里的控件)。
+     深底上换 --amber,同样见 bc-chrome.css §P。 */
+  accent-color: var(--amber-deep);
+
   /* Surface palette — warm paper */
   --paper:        #faf7f0;
   --paper-2:      #f3eee2;
@@ -12,8 +20,8 @@
   --ink:          #1b1916;
   --ink-2:        #2c2925;
   --ink-soft:     #4a463f;
-  --mute:         #6a655e; /* a11y: 由 #76716a(4.52:1·踩线) 加深到 ~5.4:1 留余量；暗色模式见 bc-chrome.css 反向提亮 */
-  --mute-2:       #6f6a64; /* a11y: 原 #7a7470 实测仅 3.98:1(未达标),加深至 4.6:1 on --paper-2；仍略浅于 --mute 保留弱化层级；暗色模式见 bc-chrome.css:520 反向提亮 */
+  --mute:         #6a655e; /* a11y: 由 #76716a(4.52:1·踩线) 加深到 ~5.4:1 留余量；导航暗色模式见 nav-theme.css 反向提亮 */
+  --mute-2:       #6f6a64; /* a11y: 原 #7a7470 实测仅 3.98:1(未达标),加深至 4.6:1 on --paper-2；仍略浅于 --mute 保留弱化层级；导航暗色模式见 nav-theme.css */
   --rule:         rgba(27, 25, 22, 0.10);
   --rule-2:       rgba(27, 25, 22, 0.18);
   --rule-3:       rgba(27, 25, 22, 0.28);

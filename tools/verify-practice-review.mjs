@@ -165,7 +165,7 @@ assert.match(runtime, /data-source-act="toggle"/, "完整审校建议缺少按�
 assert.match(runtime, /data-note-act="toggle"/, "可选补充说明仍未改为按需展开");
 assert.match(runtime, /class="review-verdict-workspace"/, "五路审校仍未收束为主从式工作台");
 assert.match(runtime, /data-review-select=/, "审校工作台缺少可切换的五路索引");
-assert.match(runtime, /state\.activeVerdictExpertId/, "审校工作台未记录当前聚焦意见");
+assert.match(runtime, /state\.activeVerdictFocus/, "审校工作台未记录当前聚焦组");
 assert.match(runtime, /reviewVerdictPriority\(/, "默认聚焦未优先考虑待处理且已有证据的建议");
 assert.match(runtime, /detail\.hidden = !selected/, "切换审校时未保证只展开当前一路");
 assert.match(page, /\.review-verdict-row\.is-posttrial\[hidden\]/, "非当前审校缺少可靠的隐藏样式");
@@ -183,7 +183,28 @@ assert.equal(runtime.includes('data-review-act="edit"'), false, "旧的独立编
 assert.equal(runtime.includes(".ec-acts"), false, "旧的三按钮样式仍在运行时");
 assert.equal(page.includes(".ec-acts"), false, "旧的三按钮样式仍在页面 CSS");
 assert.match(runtime, /entry\.decisionNote = event\.target\.value\.trim\(\);[\s\S]{0,180}renderMigrate\(\);[\s\S]{0,80}renderStage3\(\);/, "教师判断依据未同步刷新修订摘要");
-assert.match(page, /practice-runtime\.js\?v=41-env-hotspot/, "practice runtime 缓存版本未更新");
+assert.match(page, /practice-runtime\.js\?v=43-stage3-handoff/, "practice runtime 缓存版本未更新");
+// Stage II 二期：统一判断 → 最终写回接缝（C 区小结条 / 卷宗分组 / 写回清单口径 / 闭环再审校）
+assert.match(runtime, /data-review-handoff/, "C 区缺少本轮判断小结条");
+assert.match(runtime, /data-handoff="original"/, "判断小结缺少按建议修改计数");
+assert.match(runtime, /data-handoff="modified"/, "判断小结缺少调整后修改计数");
+assert.match(runtime, /data-handoff-link/, "判断小结缺少直达第三步的锚点");
+assert.match(runtime, /待写回 \$\{writable\} 条 · 前往确认写回/, "有待写回候选时小结条未给出强调提示");
+assert.match(runtime, /className = "decision-env-group"/, "决策卷宗未按教学环节分组");
+assert.match(runtime, /decision-env-head/, "决策卷宗分组缺少环节组头");
+assert.match(runtime, /targetEnvKeys\[0\] \|\| "unassigned"/, "多目标候选未固定归入首个目标环节组");
+assert.match(page, /\.decision-env-group \.decision-row \+ \.decision-row/, "卷宗分组内相邻候选缺少分隔样式");
+assert.match(page, /判断已在第二步完成/, "Stage III 仍未改为确认写回清单口径");
+assert.equal(page.includes("只有教师明确判断为"), false, "Stage III 仍保留旧的教师判断口径");
+assert.match(runtime, /确认写回清单 · \$\{writable\} 条待写回/, "publish-bar 待写回态未改为确认写回清单口径");
+assert.match(runtime, /本轮写回已完成 · 修订与判断记录已保留/, "publish-bar 写回完成态文案缺失");
+assert.match(runtime, /写回清单为空 · 请先在第二步完成判断/, "publish-bar 空态未引导回第二步");
+assert.match(runtime, /回到第二步重新审校 →/, "闭环完成后缺少重新审校引导");
+assert.match(runtime, /hasStaleReviews[\s\S]{0,240}getPackRevision/, "闭环文案未在审校转旧稿时显示新版本号");
+assert.match(runtime, /renderMigrate\(\);[\s\S]{0,140}renderReviewSurfaces\(getSelected\("chapter"\), \{ autoLink: false \}\);[\s\S]{0,80}toast\(`教师已确认写回/, "写回后 C 区审校卡未立即转入旧稿态");
+assert.match(runtime, /saveGeneratedSection\(chapterId, envKey, next, \{ bump: false \}\)[\s\S]{0,260}bumpPackRevision\(chapterId\)/, "一轮写回未收敛为只升一版");
+assert.equal(page.includes("同段"), false, "页面仍出现“同段”表述");
+assert.equal(runtime.includes("同段"), false, "运行时仍出现“同段”表述");
 assert.match(page, /practice-runtime-contract\.js\?v=trial-first-v6-single-decision/, "practice runtime contract 缓存版本未更新");
 assert.match(page, /mv-classroom-core\.js\?v=2-swot-context/, "虚拟班核心缓存版本未更新");
 assert.match(page, /metaverse-classroom\.js\?v=21-recovery-first/, "2.5D 虚拟班缓存版本未更新");
@@ -261,6 +282,18 @@ assert.equal(page.includes("同段"), false, "页面仍含“同段”旧口径"
 assert.match(runtime, /readyReviewCount === total[\s\S]{0,200}各学科关注点分布在不同环节/, "全部完成无热点时缺少分散态文案");
 assert.match(runtime, /路显示预置观察重点/, "降级路未与实时审校完成数分轨");
 assert.match(page, /review-focus-env/, "右栏缺少环节热点展开结构");
+
+// Stage II 重组一期：C 区聚焦单位从单路线改为环节热点组；组内仍每路三选，
+// 组级只做呈现与聚焦；右栏热点可深链到处理区组卡。
+assert.match(runtime, /function buildVerdictGroups\(/, "缺少 C 区判定分组函数");
+assert.match(runtime, /activeVerdictFocus/, "C 区聚焦状态未切换为组键");
+assert.equal(runtime.includes("activeVerdictExpertId"), false, "旧的单路聚焦状态仍在运行时");
+assert.match(runtime, /function selectVerdictFocus\(/, "缺少组选中切换函数");
+assert.match(runtime, /verdictGroupEvidenceUnion/, "组卡缺少证据并集只读投影");
+assert.match(runtime, /data-focus-goto/, "右栏热点缺少处理区深链");
+assert.match(runtime, /focusKey: `env:\$\{key\}`/, "env 组键未按 envId 生成");
+assert.match(page, /review-verdict-group\{/, "页面缺少组卡样式");
+assert.match(page, /review-verdict-row\.is-posttrial\.is-in-group/, "页面缺少组内子区样式");
 assert.match(runtime, /entry\.expert\?\.scopeCopy/, "各卡重审按钮未标注学科主责范围");
 assert.match(runtime, /getPackRevision\(entry\.chapterId/, "真实审校未比较稿件修订号");
 assert.match(runtime, /该批注针对旧版稿件/, "旧版批注未被阻止进入候选");

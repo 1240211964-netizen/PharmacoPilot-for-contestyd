@@ -128,11 +128,11 @@
     mount.innerHTML = `
       <div class="mv3-head">
         <div class="mv3-head-l">
-          <h4>虚拟班级试错 · 3D 课堂<small>AI 虚拟班 32 人 · P-2024-Q3 v0.5 · 真 3D 教室 · 45 min</small></h4>
+          <h4>虚拟班级试错 · 3D 课堂<small>AI 虚拟班 32 人 · P-2024-Q3 v0.5 · 真 3D 教室 · 45 分钟</small></h4>
         </div>
         <div class="mv3-head-r">
           <span class="mv3-mode" id="mv3-modelbl">录播回放</span>
-          <span class="mv3-live"><i></i>LIVE · <b id="mv3-timer">00:00</b> / 45:00</span>
+          <span class="mv3-live"><i></i>实时 · <b id="mv3-timer">00:00</b> / 45:00</span>
           <span class="mv3-sess">会话 #3417</span>
         </div>
       </div>
@@ -517,7 +517,7 @@
       this.teacher.add(this._labelObj(tlab, 3.3));
       this.agent = this.makeFigure("__A", { skin: "#cdd6e6", hair: "#1b2536", torso: COL.ink, pants: "#2c2925", build: 1.0, hairStyle: 3, robot: true });
       this.agent.position.set(-2.1, 0, -8.4); this.scene.add(this.agent);
-      const alab = document.createElement("div"); alab.className = "mv3-name mv3-name-A"; alab.textContent = "AI Agent";
+      const alab = document.createElement("div"); alab.className = "mv3-name mv3-name-A"; alab.textContent = "AI 助手";
       this.agent.add(this._labelObj(alab, 3.3));
     }
 
@@ -858,7 +858,7 @@
       if (cap) {
         if (active) {
           if (this._capText !== cur.text) {
-            const role = cur.role === "T" ? "教师" : cur.role === "A" ? "AI Agent" : (this.MV.byId[(cur.who || "").split("·")[0]] || {}).name || "学生";
+            const role = cur.role === "T" ? "教师" : cur.role === "A" ? "AI 助手" : (this.MV.byId[(cur.who || "").split("·")[0]] || {}).name || "学生";
             cap.querySelector(".mv3-cap-ts").textContent = fmt(cur.t);
             const r = cap.querySelector(".mv3-cap-role"); r.textContent = role; r.className = "mv3-cap-role role-" + (cur.role || "S");
             cap.querySelector(".mv3-cap-text").textContent = cur.text || "";

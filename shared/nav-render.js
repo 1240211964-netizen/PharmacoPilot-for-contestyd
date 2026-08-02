@@ -1619,6 +1619,123 @@
       document.head.appendChild(st);
     })();
 
+    // S1 结构化判断单：证据、教师决定、教学行动与写回共用一份视觉层级。
+    (function ensureS1DecisionSheetStyles() {
+      if (document.getElementById("ppl-s1-decision-sheet-styles")) return;
+      const st = document.createElement("style");
+      st.id = "ppl-s1-decision-sheet-styles";
+      st.textContent = `
+        .s1-sheet {
+          margin-top: 20px; border: 1px solid var(--ink); border-radius: 14px;
+          background: var(--paper); box-shadow: 5px 5px 0 var(--ink); overflow: hidden;
+        }
+        .s1-sheet-head { padding: 20px 22px 17px; border-bottom: 1px solid var(--rule); }
+        .s1-sheet-kicker { font: 500 var(--fs-2xs)/1.2 var(--mono); letter-spacing: .09em; color: var(--amber-deep); }
+        .s1-sheet-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-top: 6px; }
+        .s1-sheet-title-row h4 { margin: 0; font: 600 var(--fs-xl)/1.35 var(--serif-cn); color: var(--ink); }
+        .s1-status { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; padding: 5px 9px; border: 1px solid var(--rule-2); border-radius: 999px; font: var(--fs-2xs)/1.2 var(--mono); color: var(--ink-soft); background: var(--ivory); }
+        .s1-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--amber-deep); }
+        .s1-status.is-confirmed::before, .s1-status.is-written::before { background: var(--sage); }
+        .s1-status.is-rejected::before, .s1-status.is-deferred::before { background: var(--mute); }
+        .s1-scope { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 16px; margin-top: 15px; }
+        .s1-scope div { min-width: 0; }
+        .s1-scope dt { margin: 0 0 2px; font: var(--fs-2xs)/1.3 var(--mono); color: var(--mute); }
+        .s1-scope dd { margin: 0; font: var(--fs-xs)/1.45 var(--serif-cn); color: var(--ink); overflow-wrap: anywhere; }
+        .s1-boundary { margin: 13px 0 0; padding: 9px 11px; border-left: 3px solid var(--amber-deep); background: var(--amber-wash); color: var(--ink-soft); font: var(--fs-xs)/1.6 var(--serif-cn); }
+        .s1-boundary b { color: var(--amber-deep); }
+        .s1-sheet-grid { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); }
+        .s1-sheet-section { padding: 20px 22px; min-width: 0; }
+        .s1-sheet-section + .s1-sheet-section { border-left: 1px solid var(--rule); }
+        .s1-section-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 13px; }
+        .s1-section-no { font: 500 var(--fs-sm)/1 var(--mono); color: var(--amber-deep); }
+        .s1-section-head h5 { margin: 0; font: 600 var(--fs-md)/1.35 var(--serif-cn); color: var(--ink); }
+        .s1-section-head small { margin-left: auto; color: var(--mute); font: var(--fs-2xs)/1.2 var(--mono); }
+        .s1-evidence-list { display: grid; gap: 12px; }
+        .s1-evidence-item { padding-bottom: 11px; border-bottom: 1px dashed var(--rule); }
+        .s1-evidence-item:last-child { padding-bottom: 0; border-bottom: 0; }
+        .s1-evidence-type { display: block; margin-bottom: 4px; font: var(--fs-2xs)/1.2 var(--mono); color: var(--sage); }
+        .s1-evidence-item b { display: block; color: var(--ink); font: 600 var(--fs-sm)/1.45 var(--serif-cn); }
+        .s1-evidence-item p { margin: 4px 0; color: var(--ink-soft); font: var(--fs-xs)/1.6 var(--serif-cn); }
+        .s1-evidence-meta { color: var(--mute); font: var(--fs-2xs)/1.55 var(--mono); }
+        .s1-ai-diagnosis { margin-top: 15px; padding: 13px 14px; background: color-mix(in srgb, var(--sage) 9%, transparent); border-top: 2px solid var(--sage); }
+        .s1-ai-diagnosis strong { display: block; margin-bottom: 6px; color: var(--ink); font: 600 var(--fs-sm)/1.4 var(--serif-cn); }
+        .s1-ai-diagnosis p { margin: 0; color: var(--ink-soft); font: var(--fs-xs)/1.65 var(--serif-cn); }
+        .s1-ai-diagnosis p + p { margin-top: 7px; }
+        .s1-ai-note { color: var(--mute) !important; font-size: var(--fs-2xs) !important; }
+        .s1-choice-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+        .s1-choice { position: relative; }
+        .s1-choice input { position: absolute; opacity: 0; pointer-events: none; }
+        .s1-choice span { display: flex; justify-content: center; padding: 8px 6px; border: 1px solid var(--rule-2); border-radius: 6px; background: var(--ivory); color: var(--ink-soft); font: var(--fs-xs)/1.35 var(--serif-cn); cursor: pointer; }
+        .s1-choice input:focus-visible + span { outline: 2px solid var(--amber-deep); outline-offset: 2px; }
+        .s1-choice input:checked + span { border-color: var(--amber-deep); background: var(--amber-wash); color: var(--amber-deep); font-weight: 600; }
+        .s1-field { display: block; margin-top: 11px; }
+        .s1-field > span { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 5px; color: var(--ink-soft); font: var(--fs-xs)/1.3 var(--serif-cn); }
+        .s1-field small { color: var(--mute); font: var(--fs-2xs)/1.3 var(--mono); }
+        .s1-field textarea, .s1-field input[type="text"] { width: 100%; box-sizing: border-box; border: 1px solid var(--rule-2); border-radius: 6px; background: var(--ivory); color: var(--ink); padding: 9px 10px; font: var(--fs-xs)/1.6 var(--serif-cn); }
+        .s1-field textarea { min-height: 76px; resize: vertical; }
+        .s1-field textarea:focus, .s1-field input:focus { outline: none; border-color: var(--amber-deep); box-shadow: 0 0 0 2px color-mix(in srgb, var(--amber-deep) 12%, transparent); }
+        .s1-scope-checks { display: flex; flex-wrap: wrap; gap: 10px 16px; padding: 8px 0 2px; }
+        .s1-scope-checks label { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-soft); font: var(--fs-xs)/1.4 var(--serif-cn); }
+        .s1-form-error { margin-top: 10px; padding: 7px 9px; border-left: 3px solid var(--amber-deep); background: var(--amber-wash); color: var(--amber-deep); font: var(--fs-xs)/1.5 var(--serif-cn); }
+        .s1-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 13px; }
+        .s1-sheet-band { padding: 20px 22px; border-top: 1px solid var(--rule); }
+        .s1-actions-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+        .s1-action-col { padding-left: 12px; border-left: 2px solid var(--rule); }
+        .s1-action-col b { display: block; margin-bottom: 5px; color: var(--amber-deep); font: var(--fs-2xs)/1.3 var(--mono); }
+        .s1-action-col textarea { width: 100%; box-sizing: border-box; min-height: 76px; resize: vertical; border: 0; padding: 0; background: transparent; color: var(--ink); font: var(--fs-xs)/1.6 var(--serif-cn); }
+        .s1-action-col textarea:focus { outline: 1px solid var(--amber-deep); outline-offset: 5px; }
+        .s1-hypothesis { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; background: var(--ink); color: var(--ivory); }
+        .s1-hypothesis .s1-section-no, .s1-hypothesis h5 { color: var(--amber); }
+        .s1-hypothesis textarea { width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; border: 1px solid var(--on-dark-veil); border-radius: 6px; padding: 9px 10px; background: color-mix(in srgb, var(--ivory) 5%, transparent); color: var(--ivory); font: var(--fs-xs)/1.6 var(--serif-cn); }
+        .s1-hypothesis-note { max-width: 220px; color: var(--on-dark-mute); font: var(--fs-2xs)/1.55 var(--mono); }
+        .s1-writeback-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+        .s1-writeback-item { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 13px 14px; background: var(--paper); }
+        .s1-writeback-target { display: flex; align-items: baseline; gap: 8px; }
+        .s1-writeback-target b { color: var(--amber-deep); font: 600 var(--fs-xs)/1.4 var(--mono); }
+        .s1-writeback-target span { color: var(--ink); font: 600 var(--fs-sm)/1.4 var(--serif-cn); }
+        .s1-writeback-copy { margin: 5px 0 0; color: var(--ink-soft); font: var(--fs-xs)/1.55 var(--serif-cn); }
+        .s1-writeback-meta { margin-top: 4px; color: var(--mute); font: var(--fs-2xs)/1.4 var(--mono); }
+        .s1-writeback-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 6px; }
+        .s1-writeback-edit { grid-column: 1 / -1; }
+        .s1-writeback-edit textarea { width: 100%; box-sizing: border-box; min-height: 72px; padding: 9px 10px; border: 1px solid var(--amber-deep); border-radius: 6px; background: var(--ivory); color: var(--ink); font: var(--fs-xs)/1.6 var(--serif-cn); }
+        .s1-writeback-edit-actions { display: flex; justify-content: flex-end; gap: 7px; margin-top: 7px; }
+        .s1-audit { margin-top: 12px; }
+        .s1-audit summary { cursor: pointer; color: var(--mute); font: var(--fs-2xs)/1.4 var(--mono); }
+        .s1-audit ol { margin: 9px 0 0; padding-left: 20px; color: var(--ink-soft); font: var(--fs-xs)/1.55 var(--serif-cn); }
+        .s1-source-write { margin: 0 0 14px; padding: 12px 15px; border: 1px solid var(--sage); border-left-width: 4px; border-radius: 8px; background: color-mix(in srgb, var(--sage) 7%, transparent); }
+        .s1-source-write b { display: block; color: var(--sage); font: var(--fs-2xs)/1.3 var(--mono); }
+        .s1-source-write p { margin: 5px 0 0; color: var(--ink); font: var(--fs-xs)/1.55 var(--serif-cn); }
+        @media (max-width: 920px) {
+          .s1-scope { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .s1-sheet-grid { grid-template-columns: 1fr; }
+          .s1-sheet-section + .s1-sheet-section { border-left: 0; border-top: 1px solid var(--rule); }
+          .s1-actions-grid { grid-template-columns: 1fr; }
+          .s1-writeback-list { grid-template-columns: 1fr; }
+          .s1-writeback-item { grid-template-columns: 1fr; }
+          .s1-writeback-actions { justify-content: flex-start; }
+        }
+        @media (max-width: 620px) {
+          .s1-sheet { border-radius: 9px; box-shadow: 3px 3px 0 var(--ink); }
+          .s1-sheet-head, .s1-sheet-section, .s1-sheet-band { padding: 16px; }
+          .s1-sheet-title-row { flex-direction: column; gap: 10px; }
+          .s1-scope { grid-template-columns: 1fr; }
+          .s1-choice-grid { grid-template-columns: repeat(2, 1fr); }
+          .s1-hypothesis { grid-template-columns: 1fr; }
+          .s1-hypothesis-note { max-width: none; }
+          .s1-form-actions { flex-direction: column-reverse; }
+          .s1-form-actions .btn-s { width: 100%; }
+        }
+        html[data-theme="dark"] .s1-sheet, html[data-theme="dark"] .s1-writeback-item { background: var(--ink); }
+        html[data-theme="dark"] .s1-sheet { border-color: var(--ivory); box-shadow: 5px 5px 0 color-mix(in srgb, var(--ivory) 45%, transparent); }
+        html[data-theme="dark"] .s1-sheet-title-row h4, html[data-theme="dark"] .s1-scope dd, html[data-theme="dark"] .s1-section-head h5, html[data-theme="dark"] .s1-evidence-item b, html[data-theme="dark"] .s1-writeback-target span { color: var(--ivory); }
+        html[data-theme="dark"] .s1-status, html[data-theme="dark"] .s1-choice span, html[data-theme="dark"] .s1-field textarea, html[data-theme="dark"] .s1-field input, html[data-theme="dark"] .s1-writeback-edit textarea { background: var(--ink-2); color: var(--on-dark); border-color: var(--on-dark-veil); }
+        html[data-theme="dark"] .s1-ai-diagnosis { background: color-mix(in srgb, var(--sage) 10%, transparent); }
+        html[data-theme="dark"] .s1-evidence-item p, html[data-theme="dark"] .s1-writeback-copy, html[data-theme="dark"] .s1-audit ol { color: var(--on-dark-mute); }
+        html[data-theme="dark"] .s1-action-col textarea { color: var(--ivory); }
+      `;
+      document.head.appendChild(st);
+    })();
+
     const TOTAL = STATIONS.length; // 11
 
     // ---- Presentation labels (not in contract — display choices) ----
@@ -1880,7 +1997,7 @@
       if (!s) return;
       const gate = evidenceGateState();
       el.classList.toggle("is-evidence-locked", gate.blocked);
-      el.innerHTML = renderEvidenceGate(gate) + renderChainTopcard(s) + renderSubPassBanner() + renderStationBody(s) + renderMergedAppendix();
+      el.innerHTML = renderEvidenceGate(gate) + renderChainTopcard(s) + renderS1WritebackSource(currentStageId()) + renderSubPassBanner() + renderStationBody(s) + renderMergedAppendix();
     }
 
     // 子节点回写/合并 banner：在 stationBody 上方显式说明当前是 v1 修订 pass 或合并节点
@@ -2577,7 +2694,10 @@
       //   已决策 → 换成教师真实决策的草稿（判断 / 理由 / 流向）
       const judgmentNow = (typeof lookupChainJudgment === "function") ? lookupChainJudgment(s) : null;
       const cpNow = (store && store.getChainProgress) ? store.getChainProgress(s.id) : { reflections: {} };
-      const artsNow = (store && store.getArtifacts) ? (store.getArtifacts(s.id) || []) : [];
+      // 来自其他环节的结构化写回只是输入证据，不能冒充本站产物“已生成”。
+      const artsNow = (store && store.getArtifacts)
+        ? (store.getArtifacts(s.id) || []).filter((item) => item && item.data && item.data.kind !== "s1-diagnostic-writeback" && item.data.kind !== "trainmap-writeback")
+        : [];
 
       let stateLabel = "待生成";
       if (artsNow.length) {
@@ -2696,7 +2816,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
     function figureScaffold(s) {
       return `
         <div class="figure-card scaffold">
-          <div class="fcard-lbl"><span>FIGURE · 图示设计中</span><b>${esc(s.evidenceFigure.split(/\s*[\/＋+]\s*/)[0])}</b></div>
+          <div class="fcard-lbl"><span>图示设计中</span><b>${esc(s.evidenceFigure.split(/\s*[\/＋+]\s*/)[0])}</b></div>
           <div class="scaffold-body" aria-label="图示占位">
             <div class="scaffold-mark">◇</div>
             <p class="scaffold-lead">本节点证据图正在设计中：</p>
@@ -2744,7 +2864,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         ['Q1 · SWOT 中 W 指什么', 65, 18, 14, 3],
         ['Q2 · S 与 W 的判定边界', 32, 30, 30, 8],
         ['Q3 · O / T 来自内 / 外部', 41, 16, 36, 7],
-        ['Q4 · 同时为 S 与 T 的情景', 19, 30, 38, 13],
+        ['Q4 · 根据分析对象区分 W 与 T', 19, 30, 38, 13],
       ];
       // payload.preTest 形式：[{q, correctPct, status, commonMisconception}]
       // 构造与默认 rows 兼容的 [q, good, partial, misc, none] 形式
@@ -2765,7 +2885,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         : null;
       return `
         <div class="figure-card rich-02">
-          <div class="fcard-lbl"><span>FIGURE · 学情分布</span><b>前测 4 题 · N=32</b></div>
+          <div class="fcard-lbl"><span>学情分布</span><b>前测 4 题 · N=${esc(String(resolveS1TeachingContext().sampleSize || 32))}</b></div>
           <div class="pre-legend">
             <span class="leg"><i class="seg-good"></i>掌握</span>
             <span class="leg"><i class="seg-part"></i>部分</span>
@@ -2788,18 +2908,17 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           </div>
           <div class="pre-callout">
             <span class="pre-mark">★</span>
-            <span><b>怎么用</b> · 最低正确率题背后藏的不是"基础差"而是具体误区(本班 → <b>${esc(topMisconception ? topMisconception.commonMisconception : "S 与 T 互斥")}</b>) — 本节问题链要专门做这个边界的澄清。</span>
+            <span><b>怎么用</b> · 最低正确率题背后藏的不是“基础差”，而是具体误解（本班 → <b>${esc(topMisconception ? topMisconception.commonMisconception : "内部条件与外部环境分类边界不清")}</b>）— 本节问题链要专门检验并澄清这个边界。</span>
           </div>
           ${(() => {
-            // v6.4: 参与度 2×2 象限图 — 还原"主动/被动 × 高知/低知"二维诊断
+            // 当前任务二维分组：只描述响应表现与知识掌握，不解释为稳定主动性。
             const quads = (e2 && e2.participationQuadrants) || [];
             if (!quads.length) return "";
-            // 4 象限按位置定位:[主动+高知, 主动+低知, 被动+高知, 被动+低知]
-            const getQuad = (label) => quads.find((q) => q.label === label) || { pct: 0, color: "#888" };
-            const topRight = getQuad("主动 + 高知");
-            const topLeft  = getQuad("被动 + 高知");
-            const botRight = getQuad("主动 + 低知");
-            const botLeft  = getQuad("被动 + 低知");
+            const getQuad = (label) => quads.find((q) => q.label === label) || { pct: 0, color: "#888", label };
+            const topRight = getQuad("高响应 + 掌握较好");
+            const topLeft  = getQuad("低响应 + 掌握较好");
+            const botRight = getQuad("高响应 + 基础待巩固");
+            const botLeft  = getQuad("低响应 + 基础待巩固");
             const renderBubble = (q) => `
               <div class="pq-cell">
                 <div class="pq-bubble" style="background:${esc(q.color || "#888")}">${q.pct}%</div>
@@ -2807,18 +2926,18 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
               </div>
             `;
             return `
-              <div class="pq-h">参与度 2 维分群 · 主动性 × 知识水平 · N=32</div>
-              <div class="participation-quads" aria-label="参与度二维象限">
+              <div class="pq-h">当前任务暂时性分组 · 响应表现 × 知识掌握 · N=${esc(String(resolveS1TeachingContext().sampleSize || 32))}</div>
+              <div class="participation-quads" aria-label="当前任务响应与知识掌握二维分组">
                 ${renderBubble(topLeft)}
                 ${renderBubble(topRight)}
                 ${renderBubble(botLeft)}
                 ${renderBubble(botRight)}
-                <span class="pq-axis-x is-left">← 被动</span>
-                <span class="pq-axis-x is-right">主动 →</span>
-                <span class="pq-axis-y is-top">↑ 高知识</span>
-                <span class="pq-axis-y is-bot">↓ 低知识</span>
+                <span class="pq-axis-x is-left">← 低响应</span>
+                <span class="pq-axis-x is-right">高响应 →</span>
+                <span class="pq-axis-y is-top">↑ 掌握较好</span>
+                <span class="pq-axis-y is-bot">↓ 基础待巩固</span>
               </div>
-              <p class="pq-meta">气泡大小 ~ 该象限学生比例 · ${botLeft.pct}% 被动低知组需低门槛入口 + 角色支持</p>
+              <p class="pq-meta">气泡大小表示本次任务占比 · ${botLeft.pct}% 的学生当前需要低门槛入口与角色支持；不外推到其他课时。</p>
             `;
           })()}
           <div class="figure-foot">
@@ -2867,7 +2986,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const PYRAMID_MAX = 240;
       return `
         <div class="figure-card rich-04">
-          <div class="fcard-lbl"><span>FIGURE · 认知层级金字塔</span><b>Bloom 6 层 × 证据覆盖</b></div>
+          <div class="fcard-lbl"><span>认知层级金字塔</span><b>Bloom 6 层 × 证据覆盖</b></div>
           <div class="bloom-pyramid">
             ${rows.map(([lv, cn, pct, cov]) => {
               // 颜色梯度:L5/L6 高阶(amber-deep),L3/L4 中阶(amber),L1/L2 基础(sage)
@@ -2965,7 +3084,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       };
       return `
         <div class="figure-card rich-04b">
-          <div class="fcard-lbl"><span>FIGURE · 5 维评价标准矩阵</span><b>5 维 × 4 等级 · 证据覆盖热图</b></div>
+          <div class="fcard-lbl"><span>5 维评价标准矩阵</span><b>5 维 × 4 等级 · 证据覆盖热图</b></div>
           <div style="display:flex;gap:10px;font-size: var(--fs-2xs);color:var(--mute);letter-spacing:.04em;margin:2px 0 6px;">
             <span><i style="display:inline-block;width:8px;height:8px;border:1px solid var(--amber-deep);border-radius:2px;background:rgba(217,119,87,.12);vertical-align:middle;"></i> 当前设计等级</span>
             <span style="margin-left:auto;"><i style="display:inline-block;width:8px;height:8px;background:var(--amber-deep);border-radius:1px;vertical-align:middle;"></i> 证据覆盖 /3</span>
@@ -3010,7 +3129,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       };
       return `
         <div class="figure-card rich-06">
-          <div class="fcard-lbl"><span>FIGURE · 案例证据密度</span><b>${esc(subject)} · ${bars.length} 维证据</b></div>
+          <div class="fcard-lbl"><span>案例证据密度</span><b>${esc(subject)} · ${bars.length} 维证据</b></div>
           ${dataNotice ? `
             <div class="evd-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber);font-size: var(--fs-2xs);color:var(--amber-deep);line-height:1.45;border-radius:0 4px 4px 0;">
               ${esc(dataNotice.text || "⚠ 当前为示例数据")}
@@ -3085,7 +3204,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const roleTimeBudget = (e8 && e8.roleTimeBudget) || null;
       return `
         <div class="figure-card rich-08">
-          <div class="fcard-lbl"><span>FIGURE · 探究泳道</span><b>4 组 × 13 分钟微实战</b></div>
+          <div class="fcard-lbl"><span>探究泳道</span><b>4 组 × 13 分钟微实战</b></div>
           <div class="swim-body">
             <div class="swim-axis">
               <span>0'</span><span>4'</span><span>9'</span><span>13'</span>
@@ -3230,7 +3349,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const tickVals = [0, totalMin / 3, (totalMin * 2) / 3, totalMin].map((v) => Math.round(v));
       return `
         <div class="figure-card rich-09">
-          <div class="fcard-lbl"><span>FIGURE · 反馈触发</span><b>理解曲线 + ${anchors.length} 学情校准点${activeAnchor ? ` · 当前 ${esc(activeAnchor)}` : ""} · 总 ${totalMin}'</b></div>
+          <div class="fcard-lbl"><span>反馈触发</span><b>理解曲线 + ${anchors.length} 学情校准点${activeAnchor ? ` · 当前 ${esc(activeAnchor)}` : ""} · 总 ${totalMin}'</b></div>
           <div class="pulse-wrap">
             <svg class="pulse-svg" viewBox="0 0 320 200" aria-label="理解曲线">
               <line x1="40" y1="20" x2="40" y2="160" stroke="var(--rule)"/>
@@ -3357,7 +3476,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
 
       return `
         <div class="figure-card rich-10">
-          <div class="fcard-lbl"><span>FIGURE · 评价雷达图</span><b>${N} 个评价维度 · ${dataSourceLabel}</b></div>
+          <div class="fcard-lbl"><span>评价雷达图</span><b>${N} 个评价维度 · ${dataSourceLabel}</b></div>
           ${!hasUserScore ? `
             <div class="rubric-data-notice" style="margin:6px 0 10px;padding:7px 10px;background:rgba(184,134,11,.08);border-left:3px solid var(--amber);font-size: var(--fs-2xs);color:var(--amber-deep);line-height:1.45;border-radius:0 4px 4px 0;">
               ⚠ 当前为样例评分。在子节点 10-a 完成 5 个评价维度的评分后，能力画像将基于实测数据重新生成。
@@ -3449,7 +3568,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const lowest = pareto[0] || { dim: "—", mean: "—" };
       return `
         <div class="figure-card rich-10a">
-          <div class="fcard-lbl"><span>FIGURE · 评分采集</span><b>5 维原始评分 · 低分维度 Pareto</b></div>
+          <div class="fcard-lbl"><span>评分采集</span><b>5 维原始评分 · 低分维度 Pareto</b></div>
           <div style="font-size: var(--fs-2xs);color:var(--mute);letter-spacing:.04em;margin:2px 0 6px;">5 组作品均分 · 只采集数据，不做定性、不写反馈</div>
           ${bars.map(barRow).join("")}
           <div style="margin-top:9px;font-size: var(--fs-2xs);color:var(--mute);letter-spacing:.04em;">低分维度 Pareto · 排下一轮优先项</div>
@@ -3479,7 +3598,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         </div>`;
       return `
         <div class="figure-card rich-10c">
-          <div class="fcard-lbl"><span>FIGURE · 评价标准反向修订</span><b>低分维 → 修订项 → 回写 S2</b></div>
+          <div class="fcard-lbl"><span>评价标准反向修订</span><b>低分维 → 修订项 → 回写 S2</b></div>
           <div style="font-size: var(--fs-2xs);color:var(--mute);letter-spacing:.04em;margin:2px 0 6px;">把本轮评价标准暴露的问题反向修订到「环节 02 预期学习结果与评价证据设计」</div>
           ${proposals.map(row).join("")}
           <div class="bloom-gap" style="margin-top:6px;"><b>↩ 回写通道</b> · 确认后经 rubricRevision 通道送回 S2；S2 须显式确认或驳回后方可继续（教学评一体化闭环）</div>
@@ -3585,7 +3704,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
 
       return `
         <div class="figure-card rich-11 s8-view">
-          <div class="fcard-lbl"><span>FIGURE · 复盘视图</span><b>S8 · 议程轨迹 + 学情触发摘要</b></div>
+          <div class="fcard-lbl"><span>复盘视图</span><b>S8 · 议程轨迹 + 学情触发摘要</b></div>
 
           <div class="ar-section">
             <div class="ar-head">
@@ -3630,7 +3749,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
 
       return `
         <div class="figure-card rich-11 s9-view">
-          <div class="fcard-lbl"><span>FIGURE · 资产价值</span><b>S9 · ${valuable}/${total} 类值得沉淀</b></div>
+          <div class="fcard-lbl"><span>资产价值</span><b>S9 · ${valuable}/${total} 类值得沉淀</b></div>
           <div class="evdensity-bars" style="padding-top:6px">
             ${bars.map((b) => {
               const meta = b[2] || {};
@@ -3664,8 +3783,8 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       return `
         <div class="agent-banner">
           <span class="agent-banner-meta">
-            <span class="agent-banner-lbl">本节点协同 · LIVE</span>
-            <span class="agent-banner-time">${esc(a.time)} · Agent 提议</span>
+            <span class="agent-banner-lbl">本节点协同 · 实时</span>
+            <span class="agent-banner-time">${esc(a.time)} · AI 助手提议</span>
           </span>
           <p class="agent-banner-body">${a.body}</p>
         </div>
@@ -3724,7 +3843,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const figure = `
         <div class="figure-card">
           <div class="fcard-lbl">
-            <span>FIGURE · 方法论严谨链</span>
+            <span>方法论严谨链</span>
             <b>${chain.length} 层 × ${misc.length} 类误区</b>
           </div>
           <div class="chain-rows">
@@ -3778,6 +3897,226 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
     }
 
     // ---- Station 01 · 课程任务定位 — 三角图 + 前后节承接上下文卡 ----
+    function resolveS1TeachingContext() {
+      const defaults = { course: "management-principles", class: "2025-pm-1", session: "mp-w05", chapter: "mp-ch3-environment" };
+      let selection = defaults;
+      try {
+        const saved = JSON.parse(localStorage.getItem("pp.practice.wizardSelection") || "{}");
+        selection = Object.assign({}, defaults, saved && typeof saved === "object" ? saved : {});
+      } catch (e) {}
+      const courses = {
+        "pharm-admin": "《药事管理学》", "clinical-pharm": "《临床药学》",
+        "pharm-regulation": "《药事法规与监管》", "management-principles": "《管理学原理》",
+        "pharmacy-retail": "《药店经营管理》", "gxp-practicum": "《GXP实训》",
+      };
+      const classSizes = {
+        "2023-pm-1": 31, "2023-pm-2": 30, "2024-pm-1": 34,
+        "2024-pm-2": 32, "2025-pm-1": 33, "2025-pm-2": 31,
+      };
+      const chapterLabels = {
+        "mp-ch1-intro": "第 1 章 · 管理与管理者", "mp-ch2-theory": "第 2 章 · 管理理论演进",
+        "mp-ch3-environment": "第 3 章 · 管理环境与战略分析（SWOT/TOWS）",
+        "mp-ch4-decision": "第 4 章 · 决策", "mp-ch5-planning": "第 5 章 · 计划",
+        "mp-ch6-organization": "第 6 章 · 组织", "mp-ch7-staffing": "第 7 章 · 人员配置",
+        "mp-ch8-leadership": "第 8 章 · 领导", "mp-ch9-control-innovation": "第 9 章 · 控制与创新",
+      };
+      const scheduleByPrefix = {
+        pa: "周三 3-4 节", cp: "周二 1-2 节", rg: "周五 5-6 节",
+        mp: "周一 1-2 节", rm: "周四 1-2 节", gxp: "周四 1-4 节",
+      };
+      const classMatch = String(selection.class || "").match(/^(\d{4})-pm-(\d+)$/);
+      const sessionMatch = String(selection.session || "").match(/^([a-z]+)-w(\d+)$/);
+      const className = classMatch
+        ? `${classMatch[1]} 级药事管理 ${Number(classMatch[2])} 班`
+        : (selection.class || "当前药事管理班级");
+      const session = sessionMatch
+        ? `第 ${Number(sessionMatch[2])} 周 · ${scheduleByPrefix[sessionMatch[1]] || "当前课时"}`
+        : (selection.session || "当前课时");
+      return {
+        course: courses[selection.course] || selection.course || "当前课程",
+        className,
+        lesson: chapterLabels[selection.chapter] || selection.chapter || "当前章节",
+        session,
+        sampleSize: classSizes[selection.class] || null,
+        selectionFingerprint: [selection.course, selection.class, selection.session, selection.chapter].join("|")
+      };
+    }
+
+    function getS1DecisionArtifact() {
+      const store = window.PharmacoPilotStore;
+      const payload = payloadOf(1);
+      if (!store || !store.ensureS1DecisionArtifact || !payload || !payload.decisionArtifactSeed) return null;
+      const seed = JSON.parse(JSON.stringify(payload.decisionArtifactSeed));
+      const context = resolveS1TeachingContext();
+      seed.scope = Object.assign({}, seed.scope || {}, context);
+      if (context.sampleSize && seed.evidenceSummary && seed.evidenceSummary[1]) {
+        const groupN = Math.max(1, Math.round(context.sampleSize * 0.32));
+        seed.evidenceSummary[1].finding = `低响应＋基础待巩固学生占 32%，约 ${groupN} 人，属于当前任务中的暂时性分组。`;
+      }
+      return store.ensureS1DecisionArtifact(seed);
+    }
+
+    function s1StatusMeta(status) {
+      return {
+        pending_teacher_review: ["待教师确认", ""],
+        teacher_revised: ["教师已调整 · 待确认", ""],
+        confirmed_provisional: ["教师已确认 · 待课堂验证", "is-confirmed"],
+        written_back: ["已写回后续环节 · 待课堂验证", "is-written"],
+        deferred: ["教师已暂缓", "is-deferred"],
+        rejected: ["教师已驳回", "is-rejected"],
+      }[status] || ["待教师确认", ""];
+    }
+
+    function s1WriteStatus(status) {
+      return {
+        pending: "待确认", accepted: "已接受写回", edited: "编辑后已写回", deferred: "本轮暂不写回",
+      }[status] || "待确认";
+    }
+
+    function formatS1Time(value) {
+      if (!value) return "";
+      try { return new Date(value).toLocaleString("zh-CN", { hour12: false }); }
+      catch (e) { return String(value); }
+    }
+
+    function renderS1WritebackSource(stageId) {
+      if (!stageId || stageId === "S1") return "";
+      const store = window.PharmacoPilotStore;
+      const artifact = store && store.getS1DecisionArtifact ? store.getS1DecisionArtifact() : null;
+      if (!artifact) return "";
+      const item = (artifact.downstreamWrites || []).find((entry) => entry.targetNode === stageId && (entry.status === "accepted" || entry.status === "edited"));
+      if (!item) return "";
+      return `
+        <aside class="s1-source-write" aria-label="来自 S1 的写回建议">
+          <b>来源：S1 学情诊断与教学情境判断单 V${esc(String(item.sourceVersion || artifact.version || 1))}</b>
+          <p>${esc(item.action)}</p>
+        </aside>
+      `;
+    }
+
+    function renderS1DecisionSheet() {
+      const artifact = getS1DecisionArtifact();
+      if (!artifact) return "";
+      const status = s1StatusMeta(artifact.status);
+      const scope = artifact.scope || {};
+      const teacher = artifact.teacherDecision || {};
+      const actions = artifact.teachingActions || {};
+      const hypothesis = artifact.hypothesis || {};
+      const chosenScope = Array.isArray(teacher.scopeLimit) ? teacher.scopeLimit : [];
+      const choiceLabels = [
+        ["accept", "采纳"], ["accept_with_revision", "调整后采纳"], ["defer", "暂缓"], ["reject", "驳回"],
+      ];
+      const canWrite = artifact.status === "confirmed_provisional" || artifact.status === "written_back";
+      const canExport = canWrite || artifact.status === "rejected" || artifact.status === "deferred";
+      const audit = (artifact.provenance && artifact.provenance.auditTrail) || [];
+      return `
+        <section class="s1-sheet" id="s1DecisionSheet" aria-labelledby="s1DecisionTitle">
+          <header class="s1-sheet-head">
+            <span class="s1-sheet-kicker">结构化产物 · 证据由教师作最终解释</span>
+            <div class="s1-sheet-title-row">
+              <h4 id="s1DecisionTitle">S1 学情诊断与教学情境判断单</h4>
+              <span class="s1-status ${esc(status[1])}">${esc(status[0])}</span>
+            </div>
+            <dl class="s1-scope">
+              <div><dt>课程</dt><dd>${esc(scope.course || "当前课程")}</dd></div>
+              <div><dt>班级与样本</dt><dd>${esc(scope.className || "当前班级")}${scope.sampleSize ? ` · N=${esc(String(scope.sampleSize))}` : ""}</dd></div>
+              <div><dt>课时</dt><dd>${esc(scope.session || "当前课时")}</dd></div>
+              <div><dt>章节</dt><dd>${esc(scope.lesson || "当前章节")}</dd></div>
+            </dl>
+            <p class="s1-boundary"><b>演示数据 · 适用边界</b>　本判断只适用于当前班级、课时和 SWOT 分类任务，不构成对学生稳定能力、态度或人格特征的判断。</p>
+          </header>
+
+          <div class="s1-sheet-grid">
+            <section class="s1-sheet-section" id="s1EvidenceSummary">
+              <div class="s1-section-head"><span class="s1-section-no">01</span><h5>证据摘要</h5><small>${esc(String((artifact.evidenceSummary || []).length))} 组演示证据</small></div>
+              <div class="s1-evidence-list">
+                ${(artifact.evidenceSummary || []).map((item) => `
+                  <article class="s1-evidence-item">
+                    <span class="s1-evidence-type">${item.category === "group_difference" ? "当前任务中的群体差异" : "共性误解"}</span>
+                    <b>${esc(item.title)}</b>
+                    <p>${esc(item.finding)}</p>
+                    <div class="s1-evidence-meta">来源：${esc(item.source)} · ${esc(item.timepoint)}<br/>边界：${esc(item.limitations)}</div>
+                  </article>
+                `).join("")}
+              </div>
+              <button type="button" class="btn-s" data-s1-act="view-evidence" style="margin-top:13px;">查看原始证据</button>
+              <div class="s1-ai-diagnosis">
+                <strong>02　系统建议的诊断 · 待教师确认</strong>
+                <p>${esc(artifact.aiSuggestion && artifact.aiSuggestion.diagnosis)}</p>
+                <p><b>建议行动：</b>${esc(artifact.aiSuggestion && artifact.aiSuggestion.suggestedAction)}</p>
+                <p class="s1-ai-note">${esc(artifact.aiSuggestion && artifact.aiSuggestion.disclaimer)}</p>
+              </div>
+            </section>
+
+            <section class="s1-sheet-section" id="s1TeacherDecision">
+              <div class="s1-section-head"><span class="s1-section-no">03</span><h5>教师确认</h5><small>教师拥有最终决定权</small></div>
+              <div class="s1-choice-grid" role="radiogroup" aria-label="教师处理决定">
+                ${choiceLabels.map(([value, label]) => `
+                  <label class="s1-choice"><input type="radio" name="s1-decision" value="${value}"${teacher.decision === value ? " checked" : ""}/><span>${label}</span></label>
+                `).join("")}
+              </div>
+              <label class="s1-field"><span>教师判断 <small>不能只写结论</small></span><textarea name="s1-judgment" maxlength="360">${esc(teacher.judgment || "")}</textarea></label>
+              <label class="s1-field"><span>判断理由 <small>不少于 10 个字符</small></span><textarea name="s1-rationale" maxlength="360">${esc(teacher.rationale || "")}</textarea></label>
+              <div class="s1-field"><span>适用范围 <small>至少选择一项</small></span><div class="s1-scope-checks">
+                ${["本班", "本课时", "当前 SWOT 分类任务"].map((value) => `<label><input type="checkbox" name="s1-scope" value="${value}"${chosenScope.includes(value) ? " checked" : ""}/> ${value}</label>`).join("")}
+              </div></div>
+              <label class="s1-field"><span>尚待确认的问题 <small>作为课堂验证入口</small></span><textarea name="s1-unresolved" maxlength="260">${esc(teacher.unresolvedQuestion || "")}</textarea></label>
+              <div class="s1-form-error" data-s1-form-error role="alert" hidden></div>
+              <div class="s1-form-actions">
+                <button type="button" class="btn-s" data-s1-act="save-draft">保存调整草稿</button>
+                <button type="button" class="btn-s fill" data-s1-act="confirm">确认本轮判断</button>
+              </div>
+            </section>
+          </div>
+
+          <section class="s1-sheet-band" id="s1TeachingActions">
+            <div class="s1-section-head"><span class="s1-section-no">04</span><h5>拟采取的教学行动</h5><small>可由教师改写</small></div>
+            <div class="s1-actions-grid">
+              <label class="s1-action-col"><b>面向全班</b><textarea name="s1-action-whole" maxlength="320">${esc(actions.wholeClass || "")}</textarea></label>
+              <label class="s1-action-col"><b>面向当前重点群体</b><textarea name="s1-action-group" maxlength="320">${esc(actions.targetGroup || "")}</textarea></label>
+              <label class="s1-action-col"><b>教师课堂行动</b><textarea name="s1-action-teacher" maxlength="320">${esc(actions.teacherActions || "")}</textarea></label>
+            </div>
+          </section>
+
+          <section class="s1-sheet-band s1-hypothesis">
+            <div>
+              <div class="s1-section-head"><span class="s1-section-no">05</span><h5>待验证假设</h5></div>
+              <textarea name="s1-hypothesis" maxlength="420">${esc(hypothesis.statement || "")}</textarea>
+            </div>
+            <p class="s1-hypothesis-note">${esc(hypothesis.disclaimer || "待验证假设，不代表已经产生教学效果。")}</p>
+          </section>
+
+          <section class="s1-sheet-band" id="s1WritebackPreview">
+            <div class="s1-section-head"><span class="s1-section-no">06</span><h5>写回后续教学环节</h5><small>${canWrite ? "逐项确认 · 保留来源版本" : "教师确认前不可正式写回"}</small></div>
+            <div class="s1-writeback-list">
+              ${(artifact.downstreamWrites || []).map((item) => `
+                <article class="s1-writeback-item" data-s1-writeback-item="${esc(item.targetNode)}">
+                  <div>
+                    <div class="s1-writeback-target"><b>${esc(item.targetNode)}</b><span>${esc(item.targetName)}</span></div>
+                    <p class="s1-writeback-copy">${esc(item.action)}</p>
+                    <div class="s1-writeback-meta">${esc(s1WriteStatus(item.status))} · 来源 V${esc(String(item.sourceVersion || artifact.version || 1))}${item.writtenAt ? ` · ${esc(formatS1Time(item.writtenAt))}` : ""}</div>
+                  </div>
+                  <div class="s1-writeback-actions">
+                    <button type="button" class="btn-s" data-s1-write="edit" data-target="${esc(item.targetNode)}"${canWrite ? "" : " disabled"}>编辑</button>
+                    <button type="button" class="btn-s" data-s1-write="accept" data-target="${esc(item.targetNode)}"${canWrite ? "" : " disabled"}>接受写回</button>
+                    <button type="button" class="btn-s" data-s1-write="defer" data-target="${esc(item.targetNode)}"${canWrite ? "" : " disabled"}>暂不写回</button>
+                  </div>
+                  <div class="s1-writeback-edit" hidden>
+                    <textarea maxlength="420">${esc(item.action)}</textarea>
+                    <div class="s1-writeback-edit-actions"><button type="button" class="btn-s" data-s1-write="cancel-edit">取消</button><button type="button" class="btn-s fill" data-s1-write="save-edit" data-target="${esc(item.targetNode)}">编辑后写回</button></div>
+                  </div>
+                </article>
+              `).join("")}
+            </div>
+            <div class="s1-form-actions">
+              <button type="button" class="btn-s" data-s1-act="export"${canExport ? "" : " disabled"}>导出判断单</button>
+            </div>
+            <details class="s1-audit"><summary>查看变更记录 · ${audit.length} 条</summary><ol>${audit.slice().reverse().map((entry) => `<li>${esc(formatS1Time(entry.at))} · ${esc(entry.detail || entry.type)}</li>`).join("")}</ol></details>
+          </section>
+        </section>
+      `;
+    }
+
     function richStation01(s) {
       const decisions = DB[s.id] || [];
       const e1 = efigOf(1);
@@ -3813,7 +4152,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const figure = `
         <div class="figure-card rich-01">
           <div class="fcard-lbl">
-            <span>FIGURE · 课程对齐</span>
+            <span>课程对齐</span>
             <b>本节推荐定位 · ${esc(topType)}</b>
           </div>
 
@@ -3878,7 +4217,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         `<div class="core-grid">${figure}${renderQuestionCardScaffold(s, decisions)}</div>` +
         renderAgentSuggestion(s) +
         renderDecisionDock(s, decisions) +
-        renderArtifactScaffold(s);
+        renderS1DecisionSheet();
     }
 
     // ---- Station 03 · 学生议程协商 — 议程雷达 (学生 vs 教师预设) ----
@@ -3899,7 +4238,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
 
       const figure = `
         <div class="figure-card rich-03">
-          <div class="fcard-lbl"><span>FIGURE · 议程聚类</span><b>${clusters.length} 类 · ${total} 票 · N=${sampleN}</b></div>
+          <div class="fcard-lbl"><span>议程聚类</span><b>${clusters.length} 类 · ${total} 票 · N=${sampleN}</b></div>
           <div class="agenda-cluster-wrap">
             ${sorted.map((c, i) => {
               const pct = ((c.studentVotes || 0) / total * 100);
@@ -3982,7 +4321,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
 
       const figure = `
         <div class="figure-card rich-07">
-          <div class="fcard-lbl"><span>FIGURE · 课堂时间线</span><b>${totalMin}' · ${anchors.length} 学情校准点</b></div>
+          <div class="fcard-lbl"><span>课堂时间线</span><b>${totalMin}' · ${anchors.length} 学情校准点</b></div>
           <div class="tl-wrap">
             <div class="tl-axis">
               ${ticks.map((t) => `<span>${esc(t)}</span>`).join("")}
@@ -4029,21 +4368,18 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
     function productFilename(s) {
       const stem = (TILE_LABELS[s.id] || {}).cn || "station";
       const map = {
-        1: "positioning.md", 2: "learner-profile.md", 3: "agenda.md",
+        1: "S1-学情诊断与教学情境判断单.md", 2: "learner-profile.md", 3: "agenda.md",
         4: "objectives.md", 5: "question-chain.md", 6: "case-evidence.md",
         7: "lesson-timeline.md", 8: "collab-tasks.md", 9: "trigger-rules.md",
         10: "rubric.md", 11: "retrospective.md",
       };
       // 子节点上下文：合并节点(2-3) → 合并产物名；v1 回写(1b) → 锁定版定位
       const subKey = effectiveSubKey();
+      if (s.id === 1) {
+        return "S1-学情诊断与教学情境判断单.md";
+      }
       if (subKey === "2-3" && (s.id === 2 || s.id === 3)) {
         return "learner-profile-and-agenda.md";
-      }
-      if (subKey === "1b" && s.id === 1) {
-        return "positioning.locked.md";
-      }
-      if (subKey === "1" && s.id === 1) {
-        return "positioning.md";
       }
       // S6 锚点细分：每个 学情校准点独立文件
       if (s.id === 9 && subKey && /^9-z[1-3]$/.test(subKey)) {
@@ -4122,6 +4458,22 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
         ? ` onclick="window.__navSetStation(${nextStationId}, '${esc(nextStageId || "")}', '${esc(String(nextSubKey || ""))}')"`
         : ' disabled';
 
+      if (activeId === 1) {
+        const artifact = getS1DecisionArtifact();
+        const exportReady = artifact && ["confirmed_provisional", "written_back", "deferred", "rejected"].includes(artifact.status);
+        const status = artifact ? s1StatusMeta(artifact.status)[0] : "待教师确认";
+        el.innerHTML = `
+          <span>结构化判断单 · <b>${esc(status)}</b> · V${esc(String((artifact && artifact.version) || 1))}</span>
+          <div class="save-actions">
+            <button class="btn-s" data-s1-act="view-evidence">查看原始证据</button>
+            <button class="btn-s" data-s1-act="preview-writeback">预览写回内容</button>
+            <button class="btn-s" data-s1-act="export"${exportReady ? "" : " disabled"}>导出判断单</button>
+            <button class="btn-s fill"${clickHandler}>${esc(nextLabel)}</button>
+          </div>
+        `;
+        return;
+      }
+
       el.innerHTML = `
         <span>已自动保存 · <b>${activeId === 5 ? "2 分钟前" : "未开始"}</b> · ${esc(fn)}${activeId === 5 ? " v0.2" : ""}</span>
         <div class="save-actions">
@@ -4130,6 +4482,238 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
           <button class="btn-s fill"${clickHandler}>${esc(nextLabel)}</button>
         </div>
       `;
+    }
+
+    function collectS1DecisionForm() {
+      const root = document.getElementById("s1DecisionSheet");
+      if (!root) return null;
+      const value = (name) => {
+        const field = root.querySelector(`[name="${name}"]`);
+        return field ? field.value.trim() : "";
+      };
+      const decision = root.querySelector('[name="s1-decision"]:checked');
+      return {
+        teacherDecision: {
+          decision: decision ? decision.value : null,
+          judgment: value("s1-judgment"),
+          rationale: value("s1-rationale"),
+          scopeLimit: Array.from(root.querySelectorAll('[name="s1-scope"]:checked')).map((field) => field.value),
+          unresolvedQuestion: value("s1-unresolved"),
+        },
+        teachingActions: {
+          wholeClass: value("s1-action-whole"),
+          targetGroup: value("s1-action-group"),
+          teacherActions: value("s1-action-teacher"),
+        },
+        hypothesis: {
+          statement: value("s1-hypothesis"),
+          status: "pending_validation",
+          disclaimer: "待验证假设，不代表已经产生教学效果。",
+        },
+      };
+    }
+
+    function validateS1DecisionForm(data) {
+      if (!data || !data.teacherDecision.decision) return "请选择采纳、调整后采纳、暂缓或驳回。";
+      if (!data.teacherDecision.judgment) return "请填写教师判断。";
+      if (data.teacherDecision.rationale.replace(/\s/g, "").length < 10) return "判断理由至少需要 10 个有效字符。";
+      if (!data.teacherDecision.scopeLimit.length) return "请至少选择一项适用范围。";
+      if (data.teacherDecision.unresolvedQuestion.replace(/\s/g, "").length < 6) return "请填写一个可在后续课堂中继续验证的问题。";
+      if (data.teacherDecision.decision === "accept" || data.teacherDecision.decision === "accept_with_revision") {
+        if (!data.teachingActions.wholeClass || !data.teachingActions.targetGroup || !data.teachingActions.teacherActions) {
+          return "确认采纳前，请补齐三类教学行动。";
+        }
+        if (!data.hypothesis.statement) return "请填写待验证假设。";
+      }
+      return "";
+    }
+
+    function showS1FormError(message) {
+      const field = document.querySelector("[data-s1-form-error]");
+      if (!field) return;
+      field.textContent = message || "";
+      field.hidden = !message;
+      if (message) field.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function s1DecisionMarkdown(artifact) {
+      const scope = artifact.scope || {};
+      const teacher = artifact.teacherDecision || {};
+      const actions = artifact.teachingActions || {};
+      const decisionLabel = {
+        accept: "采纳", accept_with_revision: "调整后采纳", defer: "暂缓", reject: "驳回",
+      }[teacher.decision] || "尚未确认";
+      const evidence = (artifact.evidenceSummary || []).map((item, index) => [
+        `### ${index + 1}. ${item.title}`,
+        "",
+        item.finding,
+        "",
+        `- 来源：${item.source}`,
+        `- 时间点：${item.timepoint}`,
+        `- 证据边界：${item.limitations}`,
+      ].join("\n")).join("\n\n");
+      const writes = (artifact.downstreamWrites || []).map((item) => [
+        `### ${item.targetNode} ${item.targetName}`,
+        "",
+        item.action,
+        "",
+        `- 处理状态：${s1WriteStatus(item.status)}`,
+        `- 来源版本：V${item.sourceVersion || artifact.version || 1}`,
+        item.writtenAt ? `- 写回时间：${formatS1Time(item.writtenAt)}` : "",
+      ].filter(Boolean).join("\n")).join("\n\n");
+      return [
+        "# S1 学情诊断与教学情境判断单",
+        "",
+        `> 状态：${s1StatusMeta(artifact.status)[0]}　|　版本：V${artifact.version || 1}`,
+        "",
+        "## 1. 适用范围",
+        "",
+        `- 课程：${scope.course || "当前课程"}`,
+        `- 班级：${scope.className || "当前班级"}`,
+        `- 课时：${scope.session || "当前课时"}`,
+        `- 章节：${scope.lesson || "当前章节"}`,
+        `- 教学任务：${scope.task || "当前 SWOT 分类任务"}`,
+        `- 样本：${scope.sampleSize ? "N=" + scope.sampleSize : "未记录"}`,
+        `- 证据时间：${scope.evidenceStage || "课前"}`,
+        `- 数据属性：${scope.demoData ? "演示数据" : "教师提供数据"}`,
+        "",
+        "> 本判断只适用于上述班级、课时和任务，不构成对学生稳定能力、态度或人格特征的判断。",
+        "",
+        "## 2. 证据摘要",
+        "",
+        evidence,
+        "",
+        "## 3. 系统建议",
+        "",
+        artifact.aiSuggestion && artifact.aiSuggestion.diagnosis || "",
+        "",
+        `建议行动：${artifact.aiSuggestion && artifact.aiSuggestion.suggestedAction || ""}`,
+        "",
+        `> ${artifact.aiSuggestion && artifact.aiSuggestion.disclaimer || "系统建议需经教师确认。"}`,
+        "",
+        "## 4. 教师判断",
+        "",
+        `- 处理：${decisionLabel}`,
+        `- 判断：${teacher.judgment || "未填写"}`,
+        `- 理由：${teacher.rationale || "未填写"}`,
+        `- 适用范围：${(teacher.scopeLimit || []).join("、") || "未填写"}`,
+        `- 尚待确认：${teacher.unresolvedQuestion || "未填写"}`,
+        `- 确认人：${teacher.confirmedBy || "未确认"}`,
+        `- 确认时间：${formatS1Time(teacher.confirmedAt) || "未确认"}`,
+        "",
+        "## 5. 教学行动",
+        "",
+        `- 面向全班：${actions.wholeClass || "未填写"}`,
+        `- 面向当前重点群体：${actions.targetGroup || "未填写"}`,
+        `- 教师课堂行动：${actions.teacherActions || "未填写"}`,
+        "",
+        "## 6. 待验证假设",
+        "",
+        artifact.hypothesis && artifact.hypothesis.statement || "未填写",
+        "",
+        `> ${artifact.hypothesis && artifact.hypothesis.disclaimer || "待验证假设，不代表已经产生教学效果。"}`,
+        "",
+        "## 7. 后续环节写回",
+        "",
+        writes,
+        "",
+        "## 8. 版本与追溯",
+        "",
+        `- 产物 ID：${artifact.id}`,
+        `- 当前版本：V${artifact.version || 1}`,
+        `- 创建时间：${formatS1Time(artifact.provenance && artifact.provenance.createdAt) || "未记录"}`,
+        `- 更新时间：${formatS1Time(artifact.provenance && artifact.provenance.updatedAt) || "未记录"}`,
+      ].join("\n");
+    }
+
+    function exportS1DecisionSheet() {
+      const store = window.PharmacoPilotStore;
+      const artifact = store && store.getS1DecisionArtifact ? store.getS1DecisionArtifact() : null;
+      if (!artifact || !["confirmed_provisional", "written_back", "deferred", "rejected"].includes(artifact.status)) {
+        if (window.showDemoToast) window.showDemoToast("请先确认本轮教师判断，再导出判断单");
+        return;
+      }
+      const blob = new Blob(["\uFEFF" + s1DecisionMarkdown(artifact)], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "S1-学情诊断与教学情境判断单.md";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+      if (window.showDemoToast) window.showDemoToast("判断单已由结构化数据生成并下载");
+    }
+
+    function bindS1DecisionSheetEvents() {
+      const store = window.PharmacoPilotStore;
+      if (!store) return;
+      document.addEventListener("click", (event) => {
+        const actionButton = event.target.closest("[data-s1-act]");
+        if (actionButton) {
+          const action = actionButton.getAttribute("data-s1-act");
+          if (action === "view-evidence") {
+            if (window.__navSetStation) window.__navSetStation(2, "S1", "2-3");
+            return;
+          }
+          if (action === "preview-writeback") {
+            const target = document.getElementById("s1WritebackPreview");
+            if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+          if (action === "export") {
+            exportS1DecisionSheet();
+            return;
+          }
+          if (action === "save-draft" || action === "confirm") {
+            const data = collectS1DecisionForm();
+            if (!data) return;
+            if (action === "confirm") {
+              const error = validateS1DecisionForm(data);
+              showS1FormError(error);
+              if (error) return;
+            }
+            const result = action === "confirm"
+              ? store.confirmS1Decision(data)
+              : store.saveS1DecisionDraft(data);
+            if (!result || !result.ok) {
+              showS1FormError(result && result.error || "保存失败，请重试。");
+              return;
+            }
+            renderDetail();
+            renderSaveStrip();
+            if (window.showDemoToast) window.showDemoToast(action === "confirm" ? "教师判断已确认，写回建议现可逐项处理" : "教师调整草稿已保存");
+            return;
+          }
+        }
+
+        const writeButton = event.target.closest("[data-s1-write]");
+        if (!writeButton) return;
+        const item = writeButton.closest("[data-s1-writeback-item]");
+        if (!item) return;
+        const action = writeButton.getAttribute("data-s1-write");
+        const targetNode = writeButton.getAttribute("data-target") || item.getAttribute("data-s1-writeback-item");
+        const editor = item.querySelector(".s1-writeback-edit");
+        if (action === "edit") {
+          if (editor) editor.hidden = false;
+          return;
+        }
+        if (action === "cancel-edit") {
+          if (editor) editor.hidden = true;
+          return;
+        }
+        let resolution = action === "accept" ? "accepted" : (action === "defer" ? "deferred" : "edited");
+        let content = item.querySelector(".s1-writeback-copy")?.textContent || "";
+        if (action === "save-edit") content = editor?.querySelector("textarea")?.value.trim() || "";
+        const result = store.resolveS1DownstreamWrite(targetNode, resolution, content);
+        if (!result || !result.ok) {
+          if (window.showDemoToast) window.showDemoToast(result && result.error || "写回处理失败");
+          return;
+        }
+        renderDetail();
+        renderSaveStrip();
+        if (window.showDemoToast) window.showDemoToast(`${targetNode} 写回建议已处理：${s1WriteStatus(resolution)}`);
+      });
     }
 
     // ---- Bind interactions ----
@@ -4795,6 +5379,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
     } catch (e) {}
     renderAll();
     bindClicks();
+    bindS1DecisionSheetEvents();
     bindNavigationDrawer();
     bindChainEvents();
   });

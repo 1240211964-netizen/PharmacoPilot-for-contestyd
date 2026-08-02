@@ -81,11 +81,18 @@
   }
 
   function flash(stationId, artifactId) {
+    const artifacts = Store.getArtifacts(stationId) || [];
+    const record = artifacts.slice().reverse().find((item) => item.artifactId === artifactId);
+    const fromS1 = record && record.data && record.data.kind === "s1-diagnostic-writeback";
+    const sourceLabel = fromS1 ? "来自 S1 判断单 · 结构化写回" : "来自教学实践 · 实时写回";
+    const sourceText = fromS1
+      ? `环节 ${record.data.targetNode || "后续"} 收到 V${record.data.sourceVersion || 1} 写回建议`
+      : `站 ${stationId} 收到了新的沉淀片段 ${artifactId}`;
     const t = document.createElement("div");
     t.className = "pr-feedback-toast";
     t.innerHTML = `
-      <span class="lbl">来自 practice · 实时写回</span>
-      <div>站 ${stationId} 收到了新的沉淀片段 <b>${artifactId}</b>。
+      <span class="lbl">${sourceLabel}</span>
+      <div>${sourceText}。
       <br/><a data-anchor="${stationId}">↓ 跳到这个站</a></div>
     `;
     document.body.appendChild(t);

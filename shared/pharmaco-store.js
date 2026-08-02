@@ -58,6 +58,8 @@
       transferLog: {},             // { [stationId]: [{ ts, text, axis }] }
       consentSampleCollection: { enabled: false, consentedAt: null },
       chainProgress: {},           // { [stationId]: { currentStep: 1-4, q1Done, q2Done, q3Done, q4Done, reflections: {} } }
+      // S1 结构化产物：Markdown 仅由本对象导出，不再作为事实源。
+      s1DecisionArtifact: null,
     };
   }
 
@@ -304,6 +306,160 @@
     return JSON.parse(JSON.stringify(state.transferLog || {}));
   }
 
+  // ── S1 · 学情诊断与教学情境判断单 ─────────────────────────────
+  function clone(value) {
+    return value == null ? value : JSON.parse(JSON.stringify(value));
+  }
+
+  function s1Audit(artifact, type, detail) {
+    if (!artifact.provenance) artifact.provenance = {};
+    if (!Array.isArray(artifact.provenance.auditTrail)) artifact.provenance.auditTrail = [];
+    artifact.provenance.auditTrail.push({
+      id: "s1-audit-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
+      type,
+      detail: detail || "",
+      at: new Date().toISOString(),
+    });
+    artifact.provenance.updatedAt = new Date().toISOString();
+  }
+
+  function ensureS1DecisionArtifact(seed) {
+    if (!state.s1DecisionArtifact) {
+      const now = new Date().toISOString();
+      state.s1DecisionArtifact = clone(seed) || {};
+      state.s1DecisionArtifact.provenance = Object.assign({
+        sourceNode: "S1",
+        sourceVersion: state.s1DecisionArtifact.version || 1,
+        createdAt: now,
+        updatedAt: now,
+        auditTrail: [],
+      }, state.s1DecisionArtifact.provenance || {});
+      s1Audit(state.s1DecisionArtifact, "ai_suggestion_created", "系统基于当前课例证据形成待确认诊断");
+      persist();
+      emit("s1:diagnosisChanged", { action: "created" });
+    }
+    return clone(state.s1DecisionArtifact);
+  }
+
+  function getS1DecisionArtifact() {
+    return clone(state.s1DecisionArtifact);
+  }
+
+  function saveS1DecisionDraft(patch) {
+    const artifact = state.s1DecisionArtifact;
+    if (!artifact) return { ok: false, error: "S1 判断单尚未初始化" };
+    const wasConfirmed = artifact.status === "confirmed_provisional" || artifact.status === "written_back";
+    if (patch && patch.teacherDecision) {
+      artifact.teacherDecision = Object.assign({}, artifact.teacherDecision || {}, clone(patch.teacherDecision));
+    }
+    if (patch && patch.teachingActions) {
+      artifact.teachingActions = Object.assign({}, artifact.teachingActions || {}, clone(patch.teachingActions));
+    }
+    if (patch && patch.hypothesis) {
+      artifact.hypothesis = Object.assign({}, artifact.hypothesis || {}, clone(patch.hypothesis));
+    }
+    if (wasConfirmed) {
+      artifact.version = (artifact.version || 1) + 1;
+      artifact.teacherDecision.confirmedAt = null;
+      artifact.teacherDecision.confirmedBy = null;
+      (artifact.downstreamWrites || []).forEach((item) => {
+        item.status = "pending";
+        item.writtenAt = null;
+        item.sourceVersion = artifact.version;
+      });
+    }
+    if (!artifact.provenance) artifact.provenance = {};
+    artifact.provenance.sourceVersion = artifact.version || 1;
+    artifact.status = "teacher_revised";
+    s1Audit(artifact, "teacher_draft_saved", wasConfirmed
+      ? "教师修改已确认版本，原写回决议失效并进入新版本复核"
+      : "教师保存结构化判断草稿");
+    persist();
+    emit("s1:diagnosisChanged", { action: "draft_saved", version: artifact.version });
+    return { ok: true, artifact: clone(artifact) };
+  }
+
+  function confirmS1Decision(payload) {
+    const artifact = state.s1DecisionArtifact;
+    if (!artifact) return { ok: false, error: "S1 判断单尚未初始化" };
+    const data = payload || {};
+    artifact.teacherDecision = Object.assign({}, artifact.teacherDecision || {}, clone(data.teacherDecision || {}));
+    artifact.teachingActions = Object.assign({}, artifact.teachingActions || {}, clone(data.teachingActions || {}));
+    artifact.hypothesis = Object.assign({}, artifact.hypothesis || {}, clone(data.hypothesis || {}));
+    const choice = artifact.teacherDecision.decision;
+    if (choice === "reject") artifact.status = "rejected";
+    else if (choice === "defer") artifact.status = "deferred";
+    else artifact.status = "confirmed_provisional";
+    artifact.teacherDecision.confirmedBy = "当前教师";
+    artifact.teacherDecision.confirmedAt = new Date().toISOString();
+    (artifact.downstreamWrites || []).forEach((item) => {
+      item.status = "pending";
+      item.writtenAt = null;
+      item.sourceVersion = artifact.version || 1;
+    });
+    if (!artifact.provenance) artifact.provenance = {};
+    artifact.provenance.sourceVersion = artifact.version || 1;
+    s1Audit(artifact, "teacher_decision_confirmed", "教师选择：" + (choice || "未填写"));
+    persist();
+    emit("s1:diagnosisChanged", { action: "confirmed", status: artifact.status, version: artifact.version });
+    return { ok: true, artifact: clone(artifact) };
+  }
+
+  function resolveS1DownstreamWrite(targetNode, resolution, content) {
+    const artifact = state.s1DecisionArtifact;
+    if (!artifact) return { ok: false, error: "S1 判断单尚未初始化" };
+    if (artifact.status !== "confirmed_provisional" && artifact.status !== "written_back") {
+      return { ok: false, error: "需先由教师确认 S1 判断，才能写回后续环节" };
+    }
+    const item = (artifact.downstreamWrites || []).find((entry) => entry.targetNode === targetNode);
+    if (!item) return { ok: false, error: "未找到写回目标" };
+    const allowed = ["accepted", "edited", "deferred"];
+    if (!allowed.includes(resolution)) return { ok: false, error: "无效的写回处理" };
+    const nextContent = String(content == null ? item.action : content).trim();
+    if ((resolution === "accepted" || resolution === "edited") && !nextContent) {
+      return { ok: false, error: "写回内容不能为空" };
+    }
+    item.action = nextContent || item.action;
+    item.status = resolution;
+    item.writtenAt = new Date().toISOString();
+    item.sourceVersion = artifact.version || 1;
+
+    if (resolution === "accepted" || resolution === "edited") {
+      const targetStationMap = { S3: 5, S5: 7, S6: 9, S7: 10 };
+      const stationId = targetStationMap[targetNode];
+      if (stationId) {
+        if (!state.artifacts[stationId]) state.artifacts[stationId] = [];
+        const artifactId = "s1-diagnostic-writeback-" + targetNode.toLowerCase();
+        const record = {
+          artifactId,
+          data: {
+            kind: "s1-diagnostic-writeback",
+            title: "来源：S1 学情诊断与教学情境判断单 V" + (artifact.version || 1),
+            sourceArtifactId: artifact.id,
+            sourceNode: "S1",
+            sourceVersion: artifact.version || 1,
+            targetNode,
+            content: item.action,
+            resolution,
+            writtenAt: item.writtenAt,
+          },
+          savedAt: Date.now(),
+        };
+        const existingIndex = state.artifacts[stationId].findIndex((entry) => entry.artifactId === artifactId);
+        if (existingIndex >= 0) state.artifacts[stationId][existingIndex] = record;
+        else state.artifacts[stationId].push(record);
+        emit("artifact:saved", { stationId, artifactId });
+      }
+    }
+
+    const resolved = (artifact.downstreamWrites || []).every((entry) => entry.status !== "pending");
+    artifact.status = resolved ? "written_back" : "confirmed_provisional";
+    s1Audit(artifact, "downstream_write_resolved", targetNode + "：" + resolution);
+    persist();
+    emit("s1:diagnosisChanged", { action: "writeback_resolved", targetNode, resolution, status: artifact.status });
+    return { ok: true, artifact: clone(artifact) };
+  }
+
   // 题链进度跟踪（独立于 judgments；judgments 仍由 Q3 决策保存触发）
   function setChainStep(stationId, step, fields) {
     if (!state.chainProgress[stationId]) {
@@ -359,6 +515,8 @@
     saveTransfer, skipTransfer, getTransfer, getAllTransfers,
     resetChainProgress,
     setChainStep, getChainProgress, saveChainReflection,
+    ensureS1DecisionArtifact, getS1DecisionArtifact,
+    saveS1DecisionDraft, confirmS1Decision, resolveS1DownstreamWrite,
     getProgress, setActiveStation, getActiveStation,
     reset, dump, importState,
   };

@@ -186,7 +186,7 @@
     const measuredEnvs = new Set(bridges.map(b => b.envId)).size;
     const measuredEvents = new Set(bridges.map(b => b.eventId)).size;
     svg.setAttribute('aria-label',
-      `COUPLING 连线图：教师 9 个教学环节中 ${measuredEnvs} 个有局部评价指标的环节，通过 ${bridges.length} 条连线连接到 ${measuredEvents} 个当前可测学生节点；EV0 基线与 EV4 待接入节点不画线。` +
+      `环节关联图：教师 9 个教学环节中 ${measuredEnvs} 个有局部评价指标的环节，通过 ${bridges.length} 条连线连接到 ${measuredEvents} 个当前可测学生节点；模拟基线与迁移验证节点不画线。` +
       (strongest.length ? `最强连线：${strongest.join('；')}。` : '') +
       `各连线强度见对应节点 tooltip。`);
   }
@@ -217,7 +217,7 @@
         if (isMissing) {
           deltaEl.textContent = '未测';
         } else if (ev.id === 'EV0') {
-          deltaEl.textContent = '基线';
+          deltaEl.textContent = '参照点';
         } else if (ev.delta != null) {
           deltaEl.textContent = (isPredicted ? '≈' : '') + fmtDelta(ev.delta);
         } else {
@@ -246,7 +246,7 @@
         evEl.setAttribute('aria-label', `证据等级 ${ev.evidence}：${evidenceLabel}` +
           (isPredicted ? '，虚拟演练模型推演' : ''));
       }
-      const parts = [`${ev.num} ${ev.name}`];
+      const parts = [ev.name];
       if (ev.whenLabel) parts.push(ev.whenLabel);
       if (isMissing) parts.push('未导入节点观测');
       if (ev.composite != null) parts.push(`综合 ${ev.composite.toFixed(1)}/10`);
@@ -512,13 +512,13 @@
   }
 
   function dataLabel(data, mode) {
-    const base = data?.isLive ? (data.label || 'LIVE 数据') : (data?.label || modeLabel(mode));
+    const base = data?.isLive ? (data.label || '实时数据') : (data?.label || modeLabel(mode));
     return data?.isLive ? `${base} · ${modeLabel(mode)}` : base;
   }
 
   function bridgeTargetName(bridge) {
     const ev = EF?.STUDENT_EVENTS?.find(e => e.id === bridge.eventId);
-    return ev ? `${ev.num} ${ev.name}` : bridge.eventId;
+    return ev ? ev.name : '学生证据';
   }
 
   function rubricEquation(bridge) {
@@ -539,12 +539,12 @@
     if (!row) return;
     const tag = document.querySelector('.atlas-lede .lede-h .tag');
     const hint = document.querySelector('.atlas-lede .lede-h .hint');
-    if (tag) tag.textContent = `${modeLabel(mode)} · 三条值得关注的 COUPLING 连线`;
+    if (tag) tag.textContent = `${modeLabel(mode)} · 三条值得关注的环节关联线`;
     if (hint) hint.textContent = data?.isLive
       ? (data.couplingStatus?.available
           ? '当前按接入的评价指标和统一契约计算 · 建议优先核查强耦合或低证据链路'
           : data.couplingStatus?.reason || '当前接入数据未提供耦合评价指标')
-      : '下方图谱：5 个有评价指标的环节 → 3 个当前可测学生节点；基线与待接入迁移节点不画线 ↓';
+      : '下方图谱：教师环节连接课中证据、作品评价与反思证据；模拟基线和迁移验证不画关联线 ↓';
 
     const top = (bridges || [])
       .filter(b => typeof b.strength === 'number' && b.strength > 0)
@@ -576,7 +576,7 @@
         <div class="lede-card">
           <div class="lc-h">
             <span class="num">${escHtml(env?.num || '--')}<span class="cn">${escHtml(env?.short || '')}</span></span>
-            <span class="env">${arrow} ${escHtml(ev?.num || b.eventId)} · ${Number(b.strength).toFixed(1)}</span>
+            <span class="env">${arrow} ${escHtml(ev?.name || '学生证据')} · ${Number(b.strength).toFixed(1)}</span>
           </div>
           <div class="lc-b">
             同期观测（不作为公式输入）：<span class="t-em">教师 ${escHtml(env?.short || '')} ${fmtDelta(tVal)}</span>；
@@ -616,7 +616,7 @@
     if (!candidates.length) {
       const emptyReason = data?.couplingStatus?.available === false
         ? data.couplingStatus.reason
-        : `当前 ${dataLabel(data, mode)} 未检测到正向 COUPLING`;
+        : `当前 ${dataLabel(data, mode)} 未检测到正向环节关联`;
       list.innerHTML = `
         <div class="queue-empty">
           <div class="qe-tag">暂无待写回建议</div>
@@ -638,24 +638,24 @@
         <div class="queue-item${p.label === 'P1' ? ' is-priority' : ''}" data-env="${escHtml(item.env.num)}" data-env-id="${escHtml(item.env.id)}">
           <span class="queue-prio ${p.cls}">${p.label}</span>
           <div class="queue-field">
-            <span class="lbl">问题来源 · SOURCE</span>
+            <span class="lbl">问题来源</span>
             <span class="v">教学数据 · ${escHtml(modeLabel(mode))}<br/><b>${escHtml(source)}</b></span>
           </div>
           <div class="queue-field">
-            <span class="lbl">证据 · EVIDENCE</span>
-            <span class="v">同期观测：教师 ${escHtml(item.env.short)} ${fmtDelta(data.teacher?.[item.idx])}；${escHtml(evName)} ${fmtDelta(item.evData?.delta)}。评价指标 COUPLING <b>${item.coupling.toFixed(1)}</b>。${data.isLive ? '源自当前接入数据。' : '源自虚拟演练样本。'}</span>
+            <span class="lbl">支持证据</span>
+            <span class="v">同期观测：教师 ${escHtml(item.env.short)} ${fmtDelta(data.teacher?.[item.idx])}；${escHtml(evName)} ${fmtDelta(item.evData?.delta)}。关联强度 <b>${item.coupling.toFixed(1)}</b>。${data.isLive ? '源自当前接入数据。' : '源自虚拟演练样本。'}</span>
           </div>
           <div class="queue-field">
-            <span class="lbl">建议动作 · ACTION</span>
+            <span class="lbl">建议动作</span>
             <span class="v">${escHtml(action)}</span>
           </div>
           <div class="queue-field">
-            <span class="lbl">写回位置 · WRITE-BACK</span>
+            <span class="lbl">写回位置</span>
             <span class="v"><span class="env">${escHtml(item.env.num)}</span> ${escHtml(item.env.short)}<small class="queue-writeback-sync">同步至本课实践包 + 教学数据记录</small></span>
           </div>
           <div class="queue-field is-verify">
-            <span class="lbl">验证设计 · VERIFY</span>
-            <span class="v">重跑 ${escHtml(item.env.num)} ${escHtml(item.env.short)}，只改变本条建议动作，比较重跑前后的教师维度、学生节点增量与 COUPLING，避免把同期熟练度或话题显著性误判为设计效应。</span>
+            <span class="lbl">验证设计</span>
+            <span class="v">重跑 ${escHtml(item.env.num)} ${escHtml(item.env.short)}，只改变本条建议动作，比较重跑前后的教师维度、学生节点增量与关联强度，避免把同期熟练度或话题显著性误判为设计效应。</span>
           </div>
           <div class="queue-actions">
             <span class="src-tag">${escHtml(p.text)}</span>
@@ -752,14 +752,14 @@
       setSlot(keepRoot, 'name', env.short);
       const tBit = tTop ? `教师 ${tTop.id} Δ${fmtDelta(tTop.delta)}` : null;
       const sBit = sTop ? `学生 ${sTop.id} Δ${fmtDelta(sTop.delta)}` : null;
-      const desc = `同期观测：${[tBit, sBit].filter(Boolean).join(' · ')}；评价指标 COUPLING ${couplingArr[keepIdx].toFixed(1)}`;
+      const desc = `同期观测：${[tBit, sBit].filter(Boolean).join(' · ')}；关联强度 ${couplingArr[keepIdx].toFixed(1)}`;
       setSlot(keepRoot, 'desc', desc);
       const sp = buildSnapshotPoints(keepIdx, couplingArr);
       setSpark(keepRoot, sp.linePts, sp.areaPath, `当前快照：${env.num} ${env.short} · 环节关联 ${couplingArr[keepIdx].toFixed(1)} / 4（无连续时间序列）`);
       const chips = [];
       if (tTop) chips.push(`<span class="basis-chip">${tTop.short} <small>${tTop.id} 教师维度</small></span>`);
       if (sTop) chips.push(`<span class="basis-chip">${sTop.short} <small>${sTop.id} 学生维度</small></span>`);
-      chips.push(`<span class="basis-chip is-coupling">COUPLING ${couplingArr[keepIdx].toFixed(1)} <small>评价指标计算 · ${data.label || mode}</small></span>`);
+      chips.push(`<span class="basis-chip is-coupling">关联强度 ${couplingArr[keepIdx].toFixed(1)} <small>评价指标计算 · ${data.label || mode}</small></span>`);
       // 副信号：教师独立改动里最值得保留的（solo 池 teacher delta top）
       const soloIdx = pickSoloDesignBest(data.teacher, true);
       if (soloIdx != null) {
@@ -772,7 +772,7 @@
       setSlot(keepRoot, 'num', '—');
       setSlot(keepRoot, 'name', '暂无可保留项');
       setSlot(keepRoot, 'desc', '当前数据未形成正向师生共在耦合。');
-      setChips(keepRoot, ['<span class="basis-chip">先补齐课堂证据 <small>LIVE 数据</small></span>']);
+      setChips(keepRoot, ['<span class="basis-chip">先补齐课堂证据 <small>实时数据</small></span>']);
       setSpark(keepRoot, '0,30 200,30', 'M0,30 L200,30 L200,36 L0,36 Z', '当前未计算环节关联');
     }
 
@@ -788,20 +788,20 @@
       const issueBits = [];
       if (tTop) issueBits.push(`${tTop.short}分差 ${fmtDelta(tTop.delta)}`);
       if (sTop) issueBits.push(`${sTop.short} ${sTop.id} 分差可能被遮蔽`);
-      issueBits.push(`COUPLING ${couplingArr[fixIdx].toFixed(1)} 本轮最强但评价标准存在歧义`);
+      issueBits.push(`关联强度 ${couplingArr[fixIdx].toFixed(1)} 本轮最强但评价标准存在歧义`);
       setSlot(fixRoot, 'desc', issueBits.join(' · '));
       const sp = buildSnapshotPoints(fixIdx, couplingArr);
       setSpark(fixRoot, sp.linePts, sp.areaPath, `当前快照：${env.num} ${env.short} · 环节关联 ${couplingArr[fixIdx].toFixed(1)} / 4，局部评价标准歧义未解`);
       const chips = [];
       if (tTop) chips.push(`<span class="basis-chip">${tTop.short} <small>${tTop.id} 教师维度</small></span>`);
       if (sTop) chips.push(`<span class="basis-chip">${sTop.short} <small>${sTop.id} 学生维度</small></span>`);
-      chips.push(`<span class="basis-chip is-coupling">COUPLING ${couplingArr[fixIdx].toFixed(1)} <small>评价指标计算 · 歧义待修</small></span>`);
+      chips.push(`<span class="basis-chip is-coupling">关联强度 ${couplingArr[fixIdx].toFixed(1)} <small>评价指标计算 · 歧义待修</small></span>`);
       // 副信号：教师独立带 FIX 信号的环节（如 E08 复盘评价标准）
       const soloFixIdx = pickSoloFixBest(data.teacher);
       if (soloFixIdx != null) {
         const sEnv = envs[soloFixIdx];
         const sVal = data.teacher[soloFixIdx];
-        chips.push(`<span class="basis-chip is-solo-aside">同期教师独立 · <b>${sEnv.num} ${sEnv.short}</b> Δ${fmtDelta(sVal)} <small>延迟相关 · FIX</small></span>`);
+        chips.push(`<span class="basis-chip is-solo-aside">同期教师独立 · <b>${sEnv.num} ${sEnv.short}</b> Δ${fmtDelta(sVal)} <small>延迟相关 · 待修正</small></span>`);
       } else {
         chips.push(`<span class="basis-chip">评价标准歧义建议修正 <small>Biggs 1996</small></span>`);
       }
@@ -810,7 +810,7 @@
       setSlot(fixRoot, 'num', '—');
       setSlot(fixRoot, 'name', '暂无高风险项');
       setSlot(fixRoot, 'desc', '当前数据未检测到需要优先修正的师生共在耦合。');
-      setChips(fixRoot, ['<span class="basis-chip">持续观察 <small>无 FIX 信号</small></span>']);
+      setChips(fixRoot, ['<span class="basis-chip">持续观察 <small>无需优先修正</small></span>']);
       setSpark(fixRoot, '0,30 200,30', 'M0,30 L200,30 L200,36 L0,36 Z', '当前未计算环节关联');
     }
 
@@ -899,29 +899,29 @@
     const crosswalk = EF.RUBRIC_CROSSWALK;
     const crosswalkTypeLabel = { direct: '可重编码', supporting: '仅旁证', 'task-only': '仅任务级' };
     const crosswalkRows = (crosswalk?.mappings || []).map(row =>
-      `<tr><td>${escHtml(row.source)}</td><td>${escHtml(row.target || '不进入能力分')}</td><td>${escHtml(crosswalkTypeLabel[row.mappingType] || row.mappingType)}</td><td>${escHtml(row.note)}</td></tr>`
+      `<tr><td>${escHtml(row.sourceLabel || row.source)}</td><td>${escHtml(row.target || '不进入能力分')}</td><td>${escHtml(crosswalkTypeLabel[row.mappingType] || row.mappingType)}</td><td>${escHtml(row.note)}</td></tr>`
     ).join('');
     host.innerHTML = `
       <div class="fp-section">
-        <h5>§ 1 量程 · SCALE<small>${escHtml(EF.SCALE.name)}</small></h5>
+        <h5>§ 1 评分量程<small>${escHtml(EF.SCALE.name)}</small></h5>
         <p>每维度 <code>0–${EF.SCALE.perDimension.max}</code> 分；维度 Δ 如 <b>+5.7</b> = 该维度从基线到当前涨了 5.7 分。环节 Δ 如 <b>+4.7</b> = 该环节涉及的多维加权平均（见 §4）。</p>
         <p style="margin-top:6px;"><b>总览口径</b>：教师与学生都显示<b>已测维度的平均绝对分差 / 10</b>；缺失维度不按 0 计入分母，负向变化保留负号。分差既不是相对提升百分比，也不能直接换算为标准化效应量。</p>
         ${refsHtml(EF.SCALE.refs)}
       </div>
 
       <div class="fp-section is-full">
-        <h5>§ 3B 双时间轴 · DUAL TIMELINE<small>教师 9 环节（过程）× 学生 5 节点（结果）</small></h5>
-        <p><b>为什么不同列对齐</b>：教师轴是过程性的（描述教师在每个环节做什么），学生能力是结果性的、螺旋上升的——并不沿教学环节平均产生。课前 01-05 是教师独立设计环节（<code>co: solo</code>），学生不在场，按列伪造学生增量在认识论上站不住脚。故学生轴折叠为 <b>5 个产出节点</b>：</p>
-        <p style="margin-top:6px;font-size: var(--fs-2xs);color:var(--mute);">${(EF.STUDENT_EVENTS||[]).map(e => `<b>${escHtml(e.num)}</b>${escHtml(e.name)} <i>(${escHtml(e.whenLabel||'')})</i>`).join(' → ')}</p>
-        <p style="margin-top:6px;"><b>注意</b>：每个节点测的是<b>不同维度子集</b>（如 E1 测 S3·S6·S2、E3 测 S7·S1），是不同时点的<b>能力切面</b>，<b>不是同一条能力曲线</b>——故节点数字横向不可直接比大小；E4 为综合 7 维后测。</p>
-        <p style="margin-top:6px;">两轴节奏不同，通过 COUPLING 连线（§6）在交汇点连接，而非强行同列。</p>
+        <h5>§ 3B 双时间轴<small>教师 9 环节（过程）× 学生 5 节点（结果）</small></h5>
+        <p><b>为什么不同列对齐</b>：教师轴是过程性的（描述教师在每个环节做什么），学生能力是结果性的、螺旋上升的——并不沿教学环节平均产生。课前 01-05 是教师独立设计环节，学生不在场，按列伪造学生增量在认识论上站不住脚。故学生轴折叠为 <b>5 个产出节点</b>：</p>
+        <p style="margin-top:6px;font-size: var(--fs-2xs);color:var(--mute);"><b>内部数据编号：</b>${(EF.STUDENT_EVENTS||[]).map(e => `<b>${escHtml(e.num)}</b> ${escHtml(e.name)} <i>(${escHtml(e.whenLabel||'')})</i>`).join(' → ')}</p>
+        <p style="margin-top:6px;"><b>注意</b>：每个节点测的是<b>不同维度子集</b>（如课中证据测 S3·S6·S2、反思证据测 S7·S1），是不同时点的<b>能力切面</b>，<b>不是同一条能力曲线</b>——故节点数字横向不可直接比大小；迁移验证为综合 7 维后测。</p>
+        <p style="margin-top:6px;">两轴节奏不同，通过环节关联线（§6）在交汇点连接，而非强行同列。</p>
       </div>
 
       <div class="fp-section is-full">
-        <h5>§ 6 COUPLING 公式 · 双时间轴版</h5>
-        <p><span class="fp-formula">COUPLING(env) = mean(applicable X2–X5 rubric) × evidenceCoef × x1GlobalCoef</span></p>
-        <p>样本与 LIVE 使用同一份 <code>evaluation-contract.js</code>。LIVE 必须导入绝对 <code>baseline / current</code>，系统再派生 Δ；缺少学生节点观测时显示“未测”，不套用样本进度曲线。必须同时提供三时段 <code>couplingRubric</code> 才计算环节关联。</p>
-        <p style="margin-top:6px;"><b>T2 与 X1 的双重角色已显式区分</b>：T2 是教师能力维度，进入教师 lane；X1 是目标—任务—评价一致性的全局可信度折扣，只进入 COUPLING，且不在抽屉逐环节重复计分。两者同时偏低会分别影响能力画像和耦合置信度，这是有意的双层呈现，不是同一公式内的重复扣分。</p>
+        <h5>§ 6 环节关联强度公式 · 双时间轴版</h5>
+        <p><span class="fp-formula">环节关联强度 = 适用的 X2–X5 评分均值 × 证据系数 × X1 全局系数</span></p>
+        <p>样本与实时数据使用同一份评价契约。实时数据必须导入绝对基线值和当前值，系统再派生 Δ；缺少学生节点观测时显示“未测”，不套用样本进度曲线。必须同时提供三时段局部评分才计算环节关联。</p>
+        <p style="margin-top:6px;"><b>T2 与 X1 的双重角色已显式区分</b>：T2 是教师能力维度，进入教师能力画像；X1 是目标—任务—评价一致性的全局可信度折扣，只进入环节关联强度，且不在抽屉逐环节重复计分。两者同时偏低会分别影响能力画像和关联置信度，这是有意的双层呈现，不是同一公式内的重复扣分。</p>
         <p style="margin-top:6px;">X1 映射为 0→0.50 / 1→0.70 / 2→0.85 / 3→0.95 / 4→1.00；单环节关联 ≥ <b>1.5</b> 仅标记“建议优先验证”，不宣称因果。跨环节总览报告<b>已测环节均值 + 覆盖率</b>，不再求和。</p>
         ${refsHtml(EF.COUPLING_REFS)}
       </div>
@@ -936,19 +936,19 @@
       </div>
 
       <div class="fp-section is-full">
-        <h5>§ 8 数据来源 · DATA SOURCE<small>15 维各自的原始信号</small></h5>
+        <h5>§ 8 数据来源<small>15 维各自的原始信号</small></h5>
         <p style="margin-bottom:8px;"><b>编码边界</b>：S3 与 S6 可来自同一段讨论录音，但必须分别使用“利益相关者实体/关系”和“论证结构/轮次质量”两张独立编码表，禁止一次编码两次计分。AI 采纳率、退回次数已移出 T8，只作为工具使用过程指标。</p>
         <ul class="fp-sources">${sourcesHtml}</ul>
       </div>
 
       <div class="fp-section is-full">
-        <h5>§ 8B 三套评分体系 CROSSWALK<small>${escHtml(crosswalk?.version || '未定义')}</small></h5>
+        <h5>§ 8B 三套评分体系对照<small>${escHtml(crosswalk?.version || '未定义')}</small></h5>
         <p>${escHtml(crosswalk?.rule || '')}</p>
         <div style="overflow-x:auto;margin-top:8px;"><table class="fp-crosswalk"><thead><tr><th>来源指标</th><th>目标维度</th><th>关系</th><th>使用边界</th></tr></thead><tbody>${crosswalkRows}</tbody></table></div>
       </div>
 
       <div class="fp-section is-full">
-        <h5>§ 7 时段基线 · BASELINE</h5>
+        <h5>§ 7 时段基线</h5>
         <p><b>累计</b>：${escHtml(EF.BASELINES.cumulative.detail)}（${EF.BASELINES.cumulative.sessionCount} 次模拟）</p>
         <p><b>本周</b>：${escHtml(EF.BASELINES.weekly.detail)}（${EF.BASELINES.weekly.sessionCount} 次）</p>
         <p><b>单节课</b>：${escHtml(EF.BASELINES.single.detail)}</p>
@@ -976,8 +976,8 @@
     const replacements = {
       '{{BASELINE_MEAN}}': baselineMean == null ? '—' : baselineMean.toFixed(1),
       '{{COUPLING}}': couplingValue == null
-        ? '<b>COUPLING —（未配置或缺少局部评价指标）</b>'
-        : `<b>COUPLING ${Number(couplingValue).toFixed(1)}</b> · 证据等级 <b>${escHtml(data?.evidenceLevel || '—')}</b>`,
+        ? '<b>关联强度 —（未配置或缺少局部评价指标）</b>'
+        : `<b>关联强度 ${Number(couplingValue).toFixed(1)}</b> · 证据等级 <b>${escHtml(data?.evidenceLevel || '—')}</b>`,
       '{{T6}}': dimToken('T6', teacherDims),
       '{{T7}}': dimToken('T7', teacherDims),
       '{{S2}}': dimToken('S2', studentDims),
@@ -1096,8 +1096,8 @@
     }
     if (couplingEl) {
       const couplingTxt = cVal == null
-        ? (data?.couplingStatus?.available === false ? 'COUPLING — · 未计算' : 'COUPLING — · 本环节无局部评价指标')
-        : (cVal >= 1.5 ? `★ COUPLING ${cVal} · 建议优先验证` : `COUPLING ${cVal}`);
+        ? (data?.couplingStatus?.available === false ? '关联强度 — · 未计算' : '关联强度 — · 本环节无局部评价指标')
+        : (cVal >= 1.5 ? `★ 关联强度 ${cVal} · 建议优先验证` : `关联强度 ${cVal}`);
       couplingEl.textContent = couplingTxt;
     }
 
@@ -1170,20 +1170,20 @@
       bodyEl.innerHTML = `
         ${dataSnippet}
         <div class="ed-section is-rubric">
-          <h4>评分锚点 · SCORING ANCHORS</h4>
+          <h4>评分锚点</h4>
           <p class="ed-rubric-intro">仅列出本环节加权矩阵涉及的维度，默认收起。锚点用于绝对能力评分，不能用页面上的增量 Δ 直接反推当前档位。</p>
           <div class="ed-rubric-list">${rubricPanelHtml}</div>
         </div>
         <div class="ed-section is-teacher">
-          <h4>教师证据 · TEACHER</h4>
+          <h4>教师证据</h4>
           ${formatBullets(evidence?.teacher)}
         </div>
         <div class="ed-section is-student">
-          <h4>学生证据 · STUDENT</h4>
+          <h4>学生证据</h4>
           ${formatBullets(evidence?.student)}
         </div>
         <div class="ed-section is-coupling">
-          <h4>耦合解释 · COUPLING</h4>
+          <h4>关联解释</h4>
           ${evidence?.coupling
             ? `<div class="ed-coupling-text">${hydrate(evidence.coupling)}</div>`
             : '<p style="font-family:var(--mono);font-size: var(--fs-2xs);color:var(--mute);">（暂无）</p>'}
@@ -1195,27 +1195,27 @@
           ` : ''}
         </div>
         <div class="ed-section is-writeback">
-          <h4>写回建议 · WRITE-BACK</h4>
+          <h4>写回建议</h4>
           ${writebackHtml}
         </div>
         ${evidence?.academic ? `
         <details class="ed-academic">
           <summary class="ed-academic-summary">
-            <span class="ed-academic-tag">研究者视角 · METHODOLOGY</span>
+            <span class="ed-academic-tag">研究者视角</span>
             <span class="ed-academic-preview">观测摘要 + 机制假设 + 竞争解释</span>
             <span class="ed-academic-caret">⌄</span>
           </summary>
           <div class="ed-academic-body">
             <div class="ed-academic-block is-obs">
-              <h5>① 观测摘要 · OBSERVATION</h5>
+              <h5>① 观测摘要</h5>
               <p>${hydrate(evidence.academic.observation)}</p>
             </div>
             <div class="ed-academic-block is-hypo">
-              <h5>② 机制假设 · HYPOTHESIS</h5>
+              <h5>② 机制假设</h5>
               <p>${hydrate(evidence.academic.hypothesis)}</p>
             </div>
             <div class="ed-academic-block is-rival">
-              <h5>③ 竞争解释 · RIVAL EXPLANATIONS</h5>
+              <h5>③ 竞争解释</h5>
               <p>${hydrate(evidence.academic.rival)}</p>
             </div>
           </div>

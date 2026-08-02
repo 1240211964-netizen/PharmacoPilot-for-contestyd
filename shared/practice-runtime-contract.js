@@ -35,7 +35,7 @@
       key: "generate",
       seq: "i",
       cn: "生成实践包",
-      en: "GENERATE",
+      en: "生成实践包",
       anchor: "#stage-i",
       reads: {
         inputs: ["course", "class", "session", "chapter", "designBriefs.env01-env09"],
@@ -53,7 +53,7 @@
       key: "trial-evidence",
       seq: "ii",
       cn: "试错+证据",
-      en: "TRIAL & EVIDENCE",
+      en: "试错与证据",
       anchor: "#stage-ii",
       reads: { from: "i.practicePack", plan: "store.artifacts" },
       produces: {
@@ -72,7 +72,7 @@
       key: "writeback",
       seq: "iii",
       cn: "确认写回",
-      en: "WRITE-BACK",
+      en: "确认写回",
       anchor: "#stage-iii",
       reads: { from: ["ii.keyMoments", "ii.reviewCandidates", "ii.teacherDecisions"] },
       produces: {
@@ -145,7 +145,7 @@
     },
     {
       id: "agent-intervention-adopted",
-      cn: "Agent 介入后教师执行了对应动作",
+      cn: "AI 助手介入后教师执行了对应动作",
       detectRule: "Agent 发出 agentSuggest 后，≤ 60 秒内教师执行对应动作（breakout/重述等）",
       suggestStation: 9, // 形成性评价 / ZPD 锚点学情触发规则
       suggestSlot: "pulseRule.ifThen",
@@ -319,7 +319,7 @@
       from: { km: "agent-intervention-adopted" },
       assetPrefix: "P-09-",
       packages: ["pulseRule.ifThen"],
-      copyHint: "Agent 介入后的教师执行动作可由教师确认为「如果 X 则 Y」候选规则",
+      copyHint: "AI 助手介入后的教师执行动作可由教师确认为「如果 X 则 Y」候选规则",
     },
     {
       from: { km: "silence-cliff" },
@@ -334,7 +334,7 @@
   // 不依赖任何外部 plan.md 文件；让 practice 在 nav 未跑过任何站时也能跑。
   const DEFAULT_SCRIPT = {
     plan: {
-      title: "《管理学原理》— SWOT · 45 min · v 0.3",
+      title: "《管理学原理》— SWOT · 45 分钟 · v 0.3",
       version: "0.3",
       durationMin: 45,
       blocks: [

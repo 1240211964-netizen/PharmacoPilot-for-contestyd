@@ -145,7 +145,7 @@
   //   evidence  — 默认证据等级
   const STUDENT_EVENTS = [
     {
-      id: 'EV0', num: 'E0', name: '入学基线', short: '基线',
+      id: 'EV0', num: 'E0', name: '模拟基线', short: '模拟基线',
       timing: 'pre-course', whenLabel: '第 1 周 · 课前',
       anchor: 'pre', anchorEnv: null, spanEnvs: [],
       dims: ['S1','S2','S3','S4','S5','S6','S7'],   // 7 维全测，作为基线
@@ -154,7 +154,7 @@
       role: '基线（无增量，作为后续节点的对照参考）',
     },
     {
-      id: 'EV1', num: 'E1', name: '课中表现', short: '课中',
+      id: 'EV1', num: 'E1', name: '课中证据', short: '课中证据',
       timing: 'in-class', whenLabel: '第 7 周 · 课中',
       anchor: 'inline', anchorEnv: 'E06', spanEnvs: ['E03','E04','E05','E06'],
       dims: ['S3','S6','S2'],                       // 课中讨论主要显化：利益相关者识别 / 协作论证 / 政策识读
@@ -163,7 +163,7 @@
       role: '课中即时产出（教师 E03-E05 设计 + E06 调控的兑现点）',
     },
     {
-      id: 'EV2', num: 'E2', name: '评价画像', short: '评价',
+      id: 'EV2', num: 'E2', name: '作品评价', short: '作品评价',
       timing: 'post-class', whenLabel: '课后 1-3 天',
       anchor: 'inline', anchorEnv: 'E07', spanEnvs: ['E02','E04','E07'],
       dims: ['S2','S4','S5'],                       // 表现性评价主要显化：政策识读 / 风险合规 / 方案可行性
@@ -172,7 +172,7 @@
       role: '课后表现性评价（教师 E02 目标 + E07 评价证据的兑现点）',
     },
     {
-      id: 'EV3', num: 'E3', name: '反思迁移', short: '反思',
+      id: 'EV3', num: 'E3', name: '反思证据', short: '反思证据',
       timing: 'post-class', whenLabel: '课后 7 天',
       anchor: 'inline', anchorEnv: 'E08', spanEnvs: ['E08'],
       dims: ['S7','S1'],                            // 反思文本主要显化：反思迁移 / 工具迁移
@@ -181,13 +181,13 @@
       role: '反思产物（教师 E08 复盘前后学生侧的对位证据）',
     },
     {
-      id: 'EV4', num: 'E4', name: '迁移测试', short: '迁移',
+      id: 'EV4', num: 'E4', name: '迁移验证', short: '迁移验证',
       timing: 'post-course', whenLabel: '课后 +30 天',
       anchor: 'post', anchorEnv: null, spanEnvs: [],
       dims: ['S1','S2','S3','S4','S5','S6','S7'],   // 7 维综合后测
       evidence: 'C',                                // 待真实课堂数据接入前默认 C
       source: '新情境迁移任务 · 待接入真实课堂',
-      role: '远迁移测试（最终能力检验，与 EV0 形成完整前-后测对照）',
+      role: '远迁移验证（最终能力检验，与 EV0 形成完整前-后测对照）',
     },
   ];
 
@@ -197,12 +197,12 @@
   const ENV_TO_EVENT = {
     E01: { primary: null,  secondary: null,  role: '基线定义环节，不计算本轮 COUPLING' },
     E02: { primary: null,  secondary: null,  role: '目标对齐由 X1 全局系数表达，不重复计算局部 COUPLING' },
-    E03: { primary: 'EV1', secondary: 'EV2', role: '教学内容结构化与前概念诊断 → 课中表现 / 评价画像' },
-    E04: { primary: 'EV1', secondary: 'EV2', role: '真实性学习情境与资源设计 → 课中表现 / 评价画像' },
+    E03: { primary: 'EV1', secondary: 'EV2', role: '教学内容结构化与前概念诊断 → 课中证据 / 作品评价' },
+    E04: { primary: 'EV1', secondary: 'EV2', role: '真实性学习情境与资源设计 → 课中证据 / 作品评价' },
     E05: { primary: null,  secondary: null,  role: '当前未配置局部耦合评价指标' },
-    E06: { primary: 'EV1', secondary: null,  role: '形成性评价与适应性调控 ↔ 课中表现' },
-    E07: { primary: 'EV2', secondary: null,  role: '表现性评价与学习成效诊断 ↔ 评价画像' },
-    E08: { primary: 'EV3', secondary: null,  role: '反思性实践与教学改进 → 反思迁移' },
+    E06: { primary: 'EV1', secondary: null,  role: '形成性评价与适应性调控 ↔ 课中证据' },
+    E07: { primary: 'EV2', secondary: null,  role: '表现性评价与学习成效诊断 ↔ 作品评价' },
+    E08: { primary: 'EV3', secondary: null,  role: '反思性实践与教学改进 → 反思证据' },
     E09: { primary: null,  secondary: null,  role: '跨课程资产沉淀，不计入本轮 COUPLING' },
   };
 
@@ -273,9 +273,9 @@
   };
   // ============ § 7 · 时段基线 ============
   const BASELINES = {
-    cumulative: { label: '7 周累计', detail: '第 1 周入学测 vs 第 7 周末综合测', sessionCount: 17 },
-    weekly:     { label: '第 7 周',   detail: '本周第 1 节课前测 vs 本周第 3 节课后测', sessionCount: 3 },
-    single:     { label: 'SESSION #3417', detail: '本节课课前测 vs 课后测', sessionCount: 1 },
+    cumulative: { label: '7 周累计', detail: '第 1 周模拟基线与第 7 周综合观测', sessionCount: 17 },
+    weekly:     { label: '第 7 周',   detail: '本周第 1 节课前测与第 3 节课后测', sessionCount: 3 },
+    single:     { label: '本节课 #3417', detail: '本节课课前测与课后测', sessionCount: 1 },
   };
 
   // ============ § 8 · 数据来源（每个 dim 的原始信号） ============
@@ -309,23 +309,23 @@
   // 三套评分体系只做证据路由，不做分数直换。来源评分体系必须保留原分、任务版本与评分记录，
   // 再按 mappingType 决定是否进入 T/S 能力评分。
   const RUBRIC_CROSSWALK = {
-    version: 'crosswalk-v0.1',
-    rule: '不同评分体系的原始分不得直接等比例换算；direct 可进入指定维度的证据包，supporting 仅作旁证，task-only 只评价任务产出。',
+    version: '评分体系对照 v0.1',
+    rule: '不同评分体系的原始分不得直接等比例换算；“可重编码”可进入指定维度的证据包，“仅旁证”不独立计分，“仅任务级”只评价任务产出。',
     systems: {
       capability10: { scale: '0–10', label: '教学数据页教师 / 学生能力评分标准', role: '跨任务能力结果' },
       virtualClass5: { scale: '0–5', label: '虚拟课堂行为评分标准', role: '过程与诊断信号' },
       station10Swot5D: { scale: '5 维表现性评分标准', label: 'SWOT / TOWS 任务评分标准', role: '任务级产出质量' },
     },
     mappings: [
-      { source: 'virtualClass5.policy_citation', target: 'S2', mappingType: 'direct', note: '需保留政策原文、引用准确性与任务版本' },
-      { source: 'virtualClass5.evidence_use', target: 'S2', mappingType: 'supporting', note: '只证明使用证据，不等于政策识读准确' },
-      { source: 'virtualClass5.team_contrib', target: 'S6', mappingType: 'supporting', note: '参与量不能替代论证质量编码' },
-      { source: 'virtualClass5.reflection', target: 'S7', mappingType: 'direct', note: '按 S7 行为锚点重新编码，不转换原始 0–5 分' },
-      { source: 'station10Swot5D.TOWS可操作性', target: 'S5', mappingType: 'direct', note: '限同一任务版本，按 S5 行为锚点复核' },
-      { source: 'station10Swot5D.批判意识', target: 'S7', mappingType: 'supporting', note: '批判意识不是完整的自我调节循环' },
-      { source: 'station10Swot5D.条目证据性', target: 'S2', mappingType: 'supporting', note: '须另核政策证据类型与引用准确性' },
-      { source: 'station10Swot5D.内外分类准确性', target: null, mappingType: 'task-only', note: '评价 SWOT 分类表现，不直接代表任一跨任务能力维度' },
-      { source: 'station10Swot5D.条目精炼度', target: null, mappingType: 'task-only', note: '评价表达质量，不直接计入能力总分' },
+      { source: 'virtualClass5.policy_citation', sourceLabel: '虚拟课堂 · 政策引用', target: 'S2', mappingType: 'direct', note: '需保留政策原文、引用准确性与任务版本' },
+      { source: 'virtualClass5.evidence_use', sourceLabel: '虚拟课堂 · 证据使用', target: 'S2', mappingType: 'supporting', note: '只证明使用证据，不等于政策识读准确' },
+      { source: 'virtualClass5.team_contrib', sourceLabel: '虚拟课堂 · 团队贡献', target: 'S6', mappingType: 'supporting', note: '参与量不能替代论证质量编码' },
+      { source: 'virtualClass5.reflection', sourceLabel: '虚拟课堂 · 反思表现', target: 'S7', mappingType: 'direct', note: '按 S7 行为锚点重新编码，不转换原始 0–5 分' },
+      { source: 'station10Swot5D.TOWS可操作性', sourceLabel: 'SWOT / TOWS 任务 · 方案可操作性', target: 'S5', mappingType: 'direct', note: '限同一任务版本，按 S5 行为锚点复核' },
+      { source: 'station10Swot5D.批判意识', sourceLabel: 'SWOT / TOWS 任务 · 批判意识', target: 'S7', mappingType: 'supporting', note: '批判意识不是完整的自我调节循环' },
+      { source: 'station10Swot5D.条目证据性', sourceLabel: 'SWOT / TOWS 任务 · 条目证据性', target: 'S2', mappingType: 'supporting', note: '须另核政策证据类型与引用准确性' },
+      { source: 'station10Swot5D.内外分类准确性', sourceLabel: 'SWOT / TOWS 任务 · 内外分类准确性', target: null, mappingType: 'task-only', note: '评价 SWOT 分类表现，不直接代表任一跨任务能力维度' },
+      { source: 'station10Swot5D.条目精炼度', sourceLabel: 'SWOT / TOWS 任务 · 条目精炼度', target: null, mappingType: 'task-only', note: '评价表达质量，不直接计入能力总分' },
     ],
   };
 

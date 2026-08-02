@@ -1,0 +1,127 @@
+/* ============================================================
+ * PharmacoPilot · 教学导航专属暗色主题
+ * ------------------------------------------------------------
+ * 暗色模式目前只在教学导航工作台提供。其余页面保持纸色主题，
+ * 避免仅有共享顶栏变暗、页面主体缺少覆盖时出现不可读内容。
+ * ============================================================ */
+html[data-theme="dark"] body { background: var(--ink); color: var(--ivory); }
+
+/* 浅底弱化色在暗底上反向提亮，并同步原生控件主题。 */
+html[data-theme="dark"] { --mute: var(--on-dark); --mute-2: var(--on-dark-mute); }
+html[data-theme="dark"] { color-scheme: dark; accent-color: var(--amber); }
+
+html[data-theme="dark"] .issue-strip {
+  background: var(--ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--ivory) 6%, transparent);
+}
+
+html[data-theme="dark"] .masthead {
+  background: var(--ink-2);
+  border-bottom-color: color-mix(in srgb, var(--ivory) 12%, transparent);
+}
+html[data-theme="dark"] .mast-brand .logo { color: var(--ivory); }
+html[data-theme="dark"] .mast-brand .logo .it { color: var(--amber-soft); }
+html[data-theme="dark"] .mast-brand .ed {
+  color: var(--mute-2);
+  border-left-color: color-mix(in srgb, var(--ivory) 16%, transparent);
+}
+
+html[data-theme="dark"] .app-tabs {
+  background: color-mix(in srgb, var(--ivory) 5%, transparent);
+  border-color: var(--on-dark-veil);
+}
+html[data-theme="dark"] .app-tabs a { color: var(--mute-2); }
+html[data-theme="dark"] .app-tabs a:hover { color: var(--ivory); }
+html[data-theme="dark"] .app-tabs a.is-active {
+  background: color-mix(in srgb, var(--ivory) 8%, var(--ink)); color: var(--ivory);
+  box-shadow: var(--shadow-1);
+}
+html[data-theme="dark"] .app-tabs a kbd {
+  background: color-mix(in srgb, var(--ivory) 8%, transparent); color: var(--mute-2);
+}
+
+html[data-theme="dark"] .cmdbar {
+  background: color-mix(in srgb, var(--ivory) 5%, transparent);
+  border-color: color-mix(in srgb, var(--ivory) 12%, transparent);
+  color: var(--mute-2);
+}
+html[data-theme="dark"] .cmdbar:hover {
+  border-color: color-mix(in srgb, var(--amber) 50%, transparent);
+  background: color-mix(in srgb, var(--ivory) 8%, transparent);
+}
+html[data-theme="dark"] .cmdbar:focus-within {
+  border-color: var(--amber);
+  background: color-mix(in srgb, var(--ivory) 8%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 18%, transparent);
+}
+html[data-theme="dark"] .cmdbar kbd {
+  background: color-mix(in srgb, var(--ivory) 8%, transparent); color: var(--on-dark-mute);
+  border-color: color-mix(in srgb, var(--ivory) 14%, transparent);
+}
+html[data-theme="dark"] .cmdbar-input { color: var(--ivory); }
+html[data-theme="dark"] .cmdbar-input::placeholder { color: var(--mute-2); }
+
+html[data-theme="dark"] .pill-cap.ghost {
+  border-color: color-mix(in srgb, var(--ivory) 40%, transparent); color: var(--ivory);
+}
+html[data-theme="dark"] .pill-cap.ghost:hover {
+  background: var(--on-dark-veil); color: var(--ivory);
+}
+html[data-theme="dark"] .btn-s {
+  border-color: color-mix(in srgb, var(--ivory) 16%, transparent); color: var(--ivory);
+}
+html[data-theme="dark"] .btn-s:hover {
+  background: color-mix(in srgb, var(--ivory) 6%, transparent);
+}
+html[data-theme="dark"] .btn-s.fill {
+  background: var(--on-dark-veil); color: var(--ivory);
+  border-color: color-mix(in srgb, var(--ivory) 16%, transparent);
+}
+html[data-theme="dark"] .btn-s.fill:hover {
+  background: var(--amber-deep); border-color: var(--amber-deep);
+}
+
+html[data-theme="dark"] .pill-amber {
+  background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber-soft);
+}
+html[data-theme="dark"] .pill-ink {
+  background: var(--on-dark-veil); color: var(--ivory);
+}
+html[data-theme="dark"] .pill-sage {
+  background: color-mix(in srgb, var(--sage) 22%, transparent); color: var(--sage-soft);
+}
+html[data-theme="dark"] .pill-indigo {
+  background: color-mix(in srgb, var(--indigo) 30%, transparent); color: var(--indigo-soft);
+}
+html[data-theme="dark"] .pill-mute {
+  background: color-mix(in srgb, var(--ivory) 6%, transparent); color: var(--mute-2);
+}
+
+html[data-theme="dark"] .sec-h { border-bottom-color: var(--on-dark-veil); }
+html[data-theme="dark"] .sec-h .num { color: var(--amber-soft); }
+html[data-theme="dark"] .sec-h h3 { color: var(--ivory); }
+html[data-theme="dark"] .sec-h p { color: var(--on-dark-mute); }
+html[data-theme="dark"] .eyebrow { color: var(--amber-soft); }
+html[data-theme="dark"] .eyebrow::before { background: var(--amber-soft); }
+
+html[data-theme="dark"] .colophon { background: var(--ink); }
+
+html[data-theme="dark"] .page-hero-meta {
+  background: var(--ink-2);
+  border-color: color-mix(in srgb, var(--ivory) 16%, transparent);
+}
+html[data-theme="dark"] .page-hero-meta .row {
+  border-bottom-color: color-mix(in srgb, var(--ivory) 8%, transparent);
+}
+html[data-theme="dark"] .page-hero-meta .row dt { color: var(--mute-2); }
+html[data-theme="dark"] .page-hero-meta .row dd { color: var(--ivory); }
+html[data-theme="dark"] .page-hero-meta .row dd b { color: var(--ivory); }
+html[data-theme="dark"] .page-hero-meta .row dd .it { color: var(--amber-soft); }
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] .masthead,
+html[data-theme="dark"] .app-tabs,
+html[data-theme="dark"] .cmdbar,
+html[data-theme="dark"] .page-hero-meta {
+  transition: background-color .25s ease, border-color .25s ease, color .25s ease;
+}

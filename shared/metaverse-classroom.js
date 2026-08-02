@@ -67,11 +67,11 @@
     const head = el("div", "mv-head");
     head.innerHTML = `
       <div class="mv-head-l">
-        <h4>虚拟班级试错 · 元宇宙教室<small>AI 虚拟班 32 人 · P-2024-Q3 v0.3 · 45 min</small></h4>
+        <h4>虚拟班级试错 · 元宇宙教室<small>AI 虚拟班 32 人 · P-2024-Q3 v0.3 · 45 分钟</small></h4>
       </div>
       <div class="mv-head-r">
         ${canRetry3D ? '<span class="mv-fallback-note">兼容模式</span><button type="button" class="mv-btn mv-btn-ghost" id="mv-retry-3d">重试 3D</button>' : ""}
-        <span class="mv-live"><i></i>LIVE · <b class="mv-timer">02:12</b> / 45:00</span>
+        <span class="mv-live"><i></i>实时 · <b class="mv-timer">02:12</b> / 45:00</span>
         <span class="mv-sess">会话 #3417</span>
       </div>`;
     mount.appendChild(head);
@@ -113,10 +113,10 @@
     podium.innerHTML = `
       <div class="mv-podium-fig mv-fig-teacher" title="教师">师</div>
       <div class="mv-podium-txt">
-        <span class="mv-podium-lbl">讲台 · PODIUM</span>
-        <span class="mv-podium-sub">教师 + AI Agent 协同主持</span>
+        <span class="mv-podium-lbl">讲台</span>
+        <span class="mv-podium-sub">教师 + AI 助手协同主持</span>
       </div>
-      <div class="mv-podium-fig mv-fig-agent" title="AI Agent">AI</div>`;
+      <div class="mv-podium-fig mv-fig-agent" title="AI 助手">AI</div>`;
     stage.appendChild(podium);
 
     // 教室顶视图 / 立场光谱（可切换）+ 教师分组
@@ -157,7 +157,7 @@
     SCRIPT.forEach((b) => {
       if (b.kind === "marker") ms.push({ t: b.t, label: b.text, type: "q" });
       else if (b.kind === "silence") ms.push({ t: b.t, label: "集体沉默 · " + (b.group || "") + " 组", type: "silence" });
-      else if (b.kind === "note") ms.push({ t: b.t, label: (b.km ? b.km + " · " : "") + "Agent 提示", type: "km" });
+      else if (b.kind === "note") ms.push({ t: b.t, label: (b.km ? b.km + " · " : "") + "AI 助手提示", type: "km" });
     });
     TEACHER_BEATS.forEach((tb) => {
       if (tb.marker) ms.push({ t: tb.t, label: tb.text, type: "q" });
@@ -295,7 +295,7 @@
         <span class="mv-wall-lbl wl">◀ 内部能力 S / W</span>
         <span class="mv-wall-lbl wr">外部环境 O / T ▶</span>
         <span class="mv-wall-lbl wc">骑墙 / 观望</span>
-        <div class="mv-podium-iso" id="mv-podium-iso"><span class="mv-pf mv-pf-t" title="教师">师</span><span class="mv-pf mv-pf-ai" title="AI Agent">AI</span></div>
+        <div class="mv-podium-iso" id="mv-podium-iso"><span class="mv-pf mv-pf-t" title="教师">师</span><span class="mv-pf mv-pf-ai" title="AI 助手">AI</span></div>
         <div class="mv-centroid" id="mv-centroid"><span class="mv-centroid-lbl">班级立场重心</span></div>
         <div class="mv-datasrc-notice" id="mv-datasrc" hidden>⚠ 未连接虚拟班数据源 · 当前为脚本回放（立场按个体归宿展示，运行模拟不生成新发言）</div>
       </div>`;
@@ -759,8 +759,8 @@
     ts.textContent = fmt(b.t);
     let roleCls = "role-T", roleLbl = "教师", who = "";
     if (b.kind === "marker") { roleCls = "role-M"; roleLbl = "问题链"; }
-    else if (b.kind === "note") { roleCls = "role-A"; roleLbl = "Agent"; }
-    else if (b.role === "A") { roleCls = "role-A"; roleLbl = "Agent"; }
+    else if (b.kind === "note") { roleCls = "role-A"; roleLbl = "AI 助手"; }
+    else if (b.role === "A") { roleCls = "role-A"; roleLbl = "AI 助手"; }
     else if (b.role === "S") {
       roleCls = "role-S";
       roleLbl = "学生 " + (b.who || "");

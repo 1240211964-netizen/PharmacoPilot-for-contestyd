@@ -309,8 +309,8 @@ assert(
 );
 assert(
   !/COUPLING\(env[^<]*=\s*√/.test(dataHtml) &&
-    /COUPLING\(env\) = mean\(X2–X5 适用评价指标\) × 证据系数 × X1 全局系数/.test(dataHtml),
-  'data-detail must publish only the rubric-based COUPLING formula'
+    /关联强度 = X2–X5 适用指标均值 × 证据系数 × X1 全局系数/.test(dataHtml),
+  'data-detail must publish only the rubric-based association formula in teacher-facing Chinese'
 );
 assert(
   /X4=3\.0 × 证据系数 B=0\.80 × 全局系数 X1\(3\.0\)=0\.95 = 2\.3/.test(dataHtml) &&
@@ -319,12 +319,28 @@ assert(
 );
 assert(
   !/<path class="bridge-path/.test(dataHtml) &&
-    /EV0 基线与 EV4 待接入节点不画线/.test(dataHtml),
+    /模拟基线与迁移验证节点不画线/.test(dataHtml),
   'static HTML must fail closed instead of shipping stale/dead coupling paths'
 );
 assert(
   /data-event="EV0"[\s\S]*?node-evidence lv-B/.test(dataHtml),
   'static EV0 badge must match the B-level virtual rehearsal baseline'
+);
+assert(
+  JSON.stringify(EF.STUDENT_EVENTS.map((event) => event.name)) ===
+    JSON.stringify(['模拟基线', '课中证据', '作品评价', '反思证据', '迁移验证']),
+  'student evidence nodes must use teacher-facing Chinese names'
+);
+assert(
+  !/<span class="node-num">E[0-4]<\/span>/.test(dataHtml) &&
+    !/→\s*E[1-3]\s*·/.test(dataHtml) &&
+    /真实前测待接入/.test(dataHtml) &&
+    /模型预测 · 待验证/.test(dataHtml),
+  'main atlas must hide internal E0-E4 codes and disclose baseline/prediction status'
+);
+assert(
+  /内部数据编号/.test(dataRender) && /e\.num/.test(dataRender),
+  'internal E0-E4 codes must remain available inside the methodology disclosure'
 );
 assert(
   /S5 方案设计与可行性评估/.test(dataHtml) &&
@@ -411,11 +427,22 @@ assert(
   'student nodes must expose an in-context legend for evidence levels A, B, and C'
 );
 const atlasHeader = dataHtml.match(/<section class="atlas-section">([\s\S]*?)<div class="bi-atlas">/)?.[1] || '';
+// 免责口径改为**单点治理**：统一写在紧邻其上的「数据源与证据等级」带（evidence-strip），
+// 图注段只留读图规则。原断言钉的是旧文案（图注里也写一遍免责），现改为守护新口径——
+// 仍要求图表前必须有免责，只是要求它出现在证据带而非重复到图注。
 assert(
   (atlasHeader.match(/<p\b/g) || []).length === 1 &&
-    /<p class="atlas-intro">这是教学设计预演，不是真实学习成效测量。/.test(atlasHeader) &&
+    /线越粗表示关联越强/.test(atlasHeader) &&
+    !/不是真实学习成效测量/.test(atlasHeader) &&
     !/先说这是什么|完整评价框架见下方面板/.test(atlasHeader),
   'atlas introduction must stay to one concise paragraph before the chart'
+);
+const evidenceStripPos = dataHtml.indexOf('class="evidence-strip"');
+const atlasPos = dataHtml.indexOf('<section class="atlas-section">');
+assert(
+  evidenceStripPos >= 0 && atlasPos > evidenceStripPos &&
+    /不是真实教学成效/.test(dataHtml.slice(evidenceStripPos, atlasPos)),
+  'the "not real teaching outcomes" caveat must live once in the evidence strip, immediately above the atlas'
 );
 assert(
   /data\.isLive[\s\S]*当前显示已接入的前后测分差/.test(dataRender),

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PharmacoPilot — Opening Story · Cinematic</title>
+<title>PharmacoPilot — 开场故事</title>
 <meta name="description" content="PharmacoPilot 开场故事页:以三幕电影式镜头呈现药事管理教师备课的真实困境——开课倒计时、迷雾独行、副驾上线,引出教学智能体如何成为教师的备课副驾与路书。" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23a8492a'/%3E%3Ctext x='32' y='42' text-anchor='middle' font-size='30' font-family='Georgia' font-style='italic' fill='%23fffdf7'%3EP%3C/text%3E%3C/svg%3E" />
 <!-- 字体:preconnect + 非阻塞加载(media=print onload),消除原 tokens.css @import 的渲染阻塞 -->
@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=6-readability-floor" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=9-neutral-color" />
+<link rel="stylesheet" href="./shared/tokens.css?v=7-native-control-theming" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=10-native-control-theming" />
 <style>
 /* =========================================================
    PharmacoPilot · Opening Story · Cinematic Revision
@@ -1297,16 +1297,16 @@ button { font: inherit; }
 </head>
 <body>
   <div class="issue-strip">
-    <span>DEMO FILM · CHAPTER 01</span>
+    <span>产品短片 · 第一章</span>
     <span class="sep">—</span>
-    <span><span class="pulse"></span>Opening Story</span>
+    <span><span class="pulse"></span>开场故事</span>
   </div>
 
   <header class="masthead">
     <div class="masthead-inner">
       <a class="mast-brand" href="./index.html" aria-label="PharmacoPilot 首页">
         <span class="logo">Pharmaco<span class="it">Pilot</span></span>
-        <span class="ed">for Pharmacy Education</span>
+        <span class="ed">药学教育版</span>
       </a>
       <nav class="app-tabs" aria-label="PharmacoPilot 演示导航">
         <a href="./opening-story.html" class="is-opening">开场</a>
@@ -1327,15 +1327,15 @@ button { font: inherit; }
     <section class="story-stage" data-current="1" aria-label="PharmacoPilot 第一章开场三镜头">
       <article class="story-scene scene-1 is-active" aria-label="镜头一 新教师桌面困境">
         <div class="scene-copy">
-          <div class="scene-label">Shot 01</div>
+          <div class="scene-label">镜头 01</div>
           <h2>备课桌前。</h2>
-          <div class="scene-note"><i></i>14 days before first class</div>
+          <div class="scene-note"><i></i>距第一次上课还有 14 天</div>
         </div>
 
         <div class="scene-visual image-scene prep-image" aria-hidden="true">
           <picture><source type="image/webp" srcset="./assets/opening-story/scene-1-prep-desk.webp"><img class="scene-art" src="./assets/opening-story/scene-1-prep-desk.webp" alt="" fetchpriority="high" decoding="async" /></picture>
           <div class="art-vignette"></div>
-          <div class="countdown-tile"><b>14</b><span>days</span></div>
+          <div class="countdown-tile"><b>14</b><span>天</span></div>
           <span class="prep-chip ppt">几十份 PPT</span>
           <span class="prep-chip lesson">旧教案</span>
           <span class="prep-chip policy">政策原文</span>
@@ -1345,7 +1345,7 @@ button { font: inherit; }
 
       <article class="story-scene scene-2" aria-label="镜头二 迷雾里没有副驾">
         <div class="scene-copy">
-          <div class="scene-label">Shot 02</div>
+          <div class="scene-label">镜头 02</div>
           <h2>没有副驾。</h2>
         </div>
 
@@ -1356,19 +1356,19 @@ button { font: inherit; }
           <span class="fog-chip chip-b">旧教案</span>
           <span class="fog-chip chip-c">PPT 模板</span>
           <span class="fog-chip chip-d">经验判断</span>
-          <span class="empty-copilot-label">empty copilot</span>
-          <span class="roadbook-missing">roadbook missing</span>
+          <span class="empty-copilot-label">暂无教学副驾</span>
+          <span class="roadbook-missing">缺少备课路书</span>
         </div>
       </article>
 
       <article class="story-scene scene-3" aria-label="镜头三 PharmacoPilot 产品回答">
         <div class="scene-copy">
-          <div class="scene-label">Shot 03</div>
+          <div class="scene-label">镜头 03</div>
           <h2>副驾上线。</h2>
-          <div class="beta-badge"><i></i>药事管理 · beta</div>
+          <div class="beta-badge"><i></i>药事管理 · 测试版</div>
           <div class="scene-actions">
             <a class="pill-cap fill" href="./index.html">进入 PharmacoPilot →</a>
-            <span class="hint">handoff</span>
+            <span class="hint">进入工作台</span>
           </div>
         </div>
 
@@ -1378,7 +1378,7 @@ button { font: inherit; }
           <span class="route-pin pin-a">备课路径</span>
           <span class="route-pin pin-b">虚拟试错</span>
           <span class="route-pin pin-c">能力写回</span>
-          <div class="pilot-overlay"><b>Pharmaco<i>Pilot</i></b><span>roadbook</span></div>
+          <div class="pilot-overlay"><b>Pharmaco<i>Pilot</i></b><span>备课路书</span></div>
           <div class="route-sheet-overlay">
             <span>教学导航</span>
             <span>教学实践</span>

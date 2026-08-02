@@ -207,7 +207,7 @@
             { key: "q1", label: "Q1 · W 含义(65% 正确)",      mistakeType: "misread" },
             { key: "q2", label: "Q2 · S/W 边界(32% 正确)",    mistakeType: "misread" },
             { key: "q3", label: "Q3 · 内外来源(41% 正确)",    mistakeType: "misread" },
-            { key: "q4", label: "Q4 · S 与 T 并存(19% 正确)", correct: true },
+            { key: "q4", label: "Q4 · W/T 分类边界(19% 正确)", correct: true },
           ],
           hints: [
             { level: 1, kind: "direction", text: "条形图越短代表正确率越低,看哪一条最短?" },
@@ -219,14 +219,14 @@
         // ━━━ Q2 诊断题(错误选项映射真实归因谬误) ━━━
         {
           step: 2, kind: "diagnosis",
-          stem: "Q4「S 与 T 并存」只有 19% 正确率,说明本班的核心问题是什么?",
+          stem: "Q4「根据分析对象区分 W 与 T」只有 19% 正确率，说明本班的核心问题是什么？",
           options: [
             { key: "review",
               label: "学生没认真背概念,需要再讲一遍 SWOT 定义",
               mistakeType: "knowledge-gap-misread",
               theorySource: "Berliner novice 阶段 · 不区分「不知道」和「错误地知道」" },
             { key: "misconception",
-              label: "学生存在「S 与 T 互斥」的概念误区,需要做边界训练",
+              label: "学生尚未稳定依据分析对象与证据来源区分 W/T，需要做边界训练",
               correct: true },
             { key: "moral",
               label: "学生学习不认真,下节课加强课堂纪律和督促",
@@ -241,7 +241,7 @@
             { level: 1, kind: "direction", text: "看 Q4 数据右侧的注释——「高频误区」那一行写的是什么?" },
             { level: 2, kind: "contrast",  text: "如果是「没背概念」,那 65% 正确的 Q1 学生为什么背得动?" },
             { level: 3, kind: "principle", text: "学情数据不是评估「学生能不能」,而是诊断「他们错在哪一种具体方式上」。低正确率背后通常有具体的认知误区,不是泛泛的「基础差」或「态度差」。" },
-            { level: 4, kind: "answer",    text: "答案是 B。Q4 注释明确写了「38% 学生认为 S 与 T 互斥」——这是一个具体的概念误区,可以通过边界训练直接干预。" },
+            { level: 4, kind: "answer",    text: "答案是 B。Q4 显示 38% 的学生将外部威胁误判为内部劣势——这是一个具体的分类边界误解，可以通过正反例与三步判断路径继续检验和干预。" },
           ],
         },
         // ━━━ Q3 决策题(沿用 decisionBank + 反向提问) ━━━

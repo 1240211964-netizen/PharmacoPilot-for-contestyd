@@ -775,7 +775,7 @@
         roleClass = "role-S";
       }
     }
-    else if (b.role === "A") { roleLabel = "Agent"; roleClass = "role-A"; }
+    else if (b.role === "A") { roleLabel = "AI 助手"; roleClass = "role-A"; }
 
     div.innerHTML = isMarker
       ? `<span></span><span></span><span class="what">${b.text}</span>`
@@ -1166,7 +1166,7 @@
       card.dataset.kmId = km.id;
       card.innerHTML = `
         <div class="km-time">
-          <span>KEY MOMENT ${String(i + 1).padStart(2, "0")}</span>
+          <span>关键时刻 ${String(i + 1).padStart(2, "0")}</span>
           <b>${fmtTime(km.tSec)}</b>
         </div>
         <h4>${km.cn}</h4>
@@ -1177,7 +1177,16 @@
           <span class="pill pill-sage">可关联修订候选</span>
         </div>
         <div class="km-meta">
-          <span>类型 <b>${km.typeId}</b></span>
+          <span>类型 <b>${({
+            "simulation-signal": "仿真信号",
+            "silence-cliff": "集体沉默",
+            "structural-conflict": "结构性分歧",
+            "reflection-signal": "反思信号",
+            "question-chain-marker": "问题链节点",
+            "high-response-density": "高应答密度",
+            "unplanned-dimension": "意外维度",
+            "agent-intervention-adopted": "AI 建议已采纳",
+          })[km.typeId] || km.cn || "关键信号"}</b></span>
           <span>优先级 <b>${km.priority}</b></span>
         </div>
       `;
@@ -1428,43 +1437,30 @@
     const ct = cl.querySelector(".ct");
     if (ct) ct.textContent = candidates.length;
 
-    cl.querySelectorAll(".decision-row, .decision-empty").forEach((row) => row.remove());
+    cl.querySelectorAll(".decision-env-group, .decision-row, .decision-empty").forEach((row) => row.remove());
 
+    // 写回清单与 C 区热点同构：按目标教学环节分组。多目标候选归入首个
+    // 目标环节组（row 内 decision-targets 仍展示全部目标环节）；四段证据链逐条保留。
+    const groups = new Map();
     candidates.forEach((entry) => {
-      const row = document.createElement("article");
-      row.className = `decision-row ${entry.expert.ec}`;
-      const envLabels = entry.targetEnvKeys.map((key) => {
-        const env = PRACTICE_ENV_BY_KEY[key];
-        return env ? `${env.no} ${env.label}` : key;
-      });
-      const originalTexts = entry.targetEnvKeys.map((key) => {
-        const env = PRACTICE_ENV_BY_KEY[key];
-        const text = entry.originalEnvContent?.[key] || "当前环节暂无内容";
-        return `<span><b>${env?.no || "--"}</b>${escapeHtml(text.slice(0, 86))}${text.length > 86 ? "…" : ""}</span>`;
-      }).join("");
-      const linked = state.keyMoments.filter((km) => entry.evidenceLinks.includes(km.id));
-      const evidenceHtml = linked.length
-        ? linked.map((km) => `<span><b>${fmtTime(km.tSec)}</b>${escapeHtml(km.cn)}</span>`).join("")
-        : `<span class="is-muted">尚未关联仿真记录</span>`;
-      const decision = {
-        supported: ["教师确认支持", "is-supported"],
-        unsupported: ["教师确认不支持", "is-unsupported"],
-        insufficient: ["证据不足", "is-insufficient"],
-        pending: ["待教师判断", "is-pending"],
-      }[entry.decision] || ["待教师判断", "is-pending"];
-      row.innerHTML = `
-        <header class="decision-head">
-          <span class="src ${entry.expert.ec}">${escapeHtml(entry.expert.role)}</span>
-          <span class="decision-targets">${escapeHtml(envLabels.join(" / "))}</span>
-        </header>
-        <div class="decision-flow">
-          <section><small>01 · 原内容</small><div class="decision-copy">${originalTexts}</div></section>
-          <section><small>02 · 修订候选</small><p>${escapeHtml(entry.draftText)}</p></section>
-          <section><small>03 · 仿真证据关联</small><div class="decision-copy">${evidenceHtml}</div></section>
-          <section><small>04 · 教师判断</small><span class="decision-state ${decision[1]}">${decision[0]}</span>${entry.decisionNote ? `<p>${escapeHtml(entry.decisionNote)}</p>` : ""}</section>
-        </div>
-      `;
-      cl.appendChild(row);
+      const key = entry.targetEnvKeys[0] || "unassigned";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(entry);
+    });
+    [...groups.keys()].sort().forEach((envKey) => {
+      const entries = groups.get(envKey);
+      const env = PRACTICE_ENV_BY_KEY[envKey];
+      const group = document.createElement("div");
+      group.className = "decision-env-group";
+      group.dataset.envGroup = envKey;
+      const head = document.createElement("header");
+      head.className = "decision-env-head";
+      head.innerHTML = env
+        ? `<b>${escapeHtml(env.no)}</b><span>${escapeHtml(env.label)} · ${entries.length} 条候选</span>`
+        : `<b>--</b><span>未指定环节 · ${entries.length} 条候选</span>`;
+      group.appendChild(head);
+      entries.forEach((entry) => group.appendChild(buildDecisionRow(entry)));
+      cl.appendChild(group);
     });
 
     if (!candidates.length) {
@@ -1473,6 +1469,43 @@
       empty.textContent = "尚无修订候选 · 请在 ii 段从五路学科审校中加入至少一条候选";
       cl.appendChild(empty);
     }
+  }
+
+  function buildDecisionRow(entry) {
+    const row = document.createElement("article");
+    row.className = `decision-row ${entry.expert.ec}`;
+    const envLabels = entry.targetEnvKeys.map((key) => {
+      const env = PRACTICE_ENV_BY_KEY[key];
+      return env ? `${env.no} ${env.label}` : key;
+    });
+    const originalTexts = entry.targetEnvKeys.map((key) => {
+      const env = PRACTICE_ENV_BY_KEY[key];
+      const text = entry.originalEnvContent?.[key] || "当前环节暂无内容";
+      return `<span><b>${env?.no || "--"}</b>${escapeHtml(text.slice(0, 86))}${text.length > 86 ? "…" : ""}</span>`;
+    }).join("");
+    const linked = state.keyMoments.filter((km) => entry.evidenceLinks.includes(km.id));
+    const evidenceHtml = linked.length
+      ? linked.map((km) => `<span><b>${fmtTime(km.tSec)}</b>${escapeHtml(km.cn)}</span>`).join("")
+      : `<span class="is-muted">尚未关联仿真记录</span>`;
+    const decision = {
+      supported: ["教师确认支持", "is-supported"],
+      unsupported: ["教师确认不支持", "is-unsupported"],
+      insufficient: ["证据不足", "is-insufficient"],
+      pending: ["待教师判断", "is-pending"],
+    }[entry.decision] || ["待教师判断", "is-pending"];
+    row.innerHTML = `
+      <header class="decision-head">
+        <span class="src ${entry.expert.ec}">${escapeHtml(entry.expert.role)}</span>
+        <span class="decision-targets">${escapeHtml(envLabels.join(" / "))}</span>
+      </header>
+      <div class="decision-flow">
+        <section><small>01 · 原内容</small><div class="decision-copy">${originalTexts}</div></section>
+        <section><small>02 · 修订候选</small><p>${escapeHtml(entry.draftText)}</p></section>
+        <section><small>03 · 仿真证据关联</small><div class="decision-copy">${evidenceHtml}</div></section>
+        <section><small>04 · 教师判断</small><span class="decision-state ${decision[1]}">${decision[0]}</span>${entry.decisionNote ? `<p>${escapeHtml(entry.decisionNote)}</p>` : ""}</section>
+      </div>
+    `;
+    return row;
   }
 
   function renderPublishBar() {
@@ -1486,8 +1519,8 @@
     const linked = new Set(candidates.flatMap((entry) => entry.evidenceLinks)).size;
     const heading = bar.querySelector(".pb-l h4");
     if (heading) heading.textContent = supported > 0
-      ? (writable > 0 ? "本轮已有教师确认支持的候选" : "本轮教师确认写回已完成")
-      : "教师确认后才可写回";
+      ? (writable > 0 ? `确认写回清单 · ${writable} 条待写回` : "本轮写回已完成 · 修订与判断记录已保留")
+      : "写回清单为空 · 请先在第二步完成判断";
     const p = bar.querySelector("p");
     if (p) p.textContent = `${candidates.length} 条修订候选 · ${linked} 条已关联仿真记录 · ${supported} 条教师确认支持 · ${pending} 条待判断`;
     const publish = bar.querySelector("#inline-publish");
@@ -1552,8 +1585,17 @@
 
     if (allSupportedWritten) {
       if (heading) heading.textContent = "本轮闭环完成 · 教师确认的修订已回写";
-      if (detail) detail.textContent = "实践包已更新，审校来源、仿真记录关联与教师判断均已保留";
-      if (cta) { cta.textContent = "带着修订再来一轮 →"; cta.href = "#stage-i"; }
+      // 写回触发 revision bump，本机审校批注自动转入旧稿（isLiveReviewStale）。
+      // 闭环收尾把教师引导回第二步重新审校，让"写回 → 再审校"的回路显式可见。
+      const hasStaleReviews = (state.expertCards || []).some((entry) => entry.liveReview && isLiveReviewStale(entry));
+      if (hasStaleReviews) {
+        const revision = getPackRevision(getSelected("chapter")?.id);
+        if (detail) detail.textContent = `实践包已更新至第 ${revision} 版 · 原五路审校批注已标记为旧稿，回到第二步重新审校即可开启下一轮`;
+        if (cta) { cta.textContent = "回到第二步重新审校 →"; cta.href = "#stage-ii"; }
+      } else {
+        if (detail) detail.textContent = "实践包已更新，审校来源、仿真记录关联与教师判断均已保留";
+        if (cta) { cta.textContent = "带着修订再来一轮 →"; cta.href = "#stage-i"; }
+      }
       return;
     }
     if (!candidates.length) {
@@ -1594,6 +1636,8 @@
     });
     applySupportedCandidatesToPracticePack(shippedReviewIds);
     renderMigrate();
+    // 写回推高稿件版本：C 区审校卡立即呈现旧稿态，引导教师回第二步重新审校
+    renderReviewSurfaces(getSelected("chapter"), { autoLink: false });
     toast(`教师已确认写回 ${shipped} 个资产 · 修订与判断记录已保留`);
     const envCount = new Set(state.writebackLog.map((item) => item.practiceEnvKey).filter(Boolean)).size;
     setStageStatus("iii", `已写回 ${shipped} 个资产到 ${envCount} 个当前教学环节`, false, true);
@@ -1615,12 +1659,14 @@
         const current = body?.textContent?.trim() || loadGeneratedPack(chapterId)?.[envKey] || "";
         const addition = `修订：${entry.draftText}`;
         const next = current.includes(addition) ? current : [current, addition].filter(Boolean).join(" · ");
-        saveGeneratedSection(chapterId, envKey, next);
+        saveGeneratedSection(chapterId, envKey, next, { bump: false });
         if (body) body.textContent = next;
       });
       entry.writtenBack = true;
       saveExpertReview(chapterId, entry);
     });
+    // 一轮写回只升一版：分环节保存不逐次推高，统一在写回结束时 bump 一次
+    bumpPackRevision(chapterId);
   }
   function writeBackOne(a) {
     try {
@@ -1679,7 +1725,7 @@
         return { label: "学生意外提出维度", dimension: reviewText, howToUse: "由教师确认后作为协作任务可选入口" };
       case "pulseRule.ifThen":
         return {
-          label: "Agent 介入复盘规则",
+          label: "AI 助手介入复盘规则",
           ifCond: a.km?.cn || "出现与修订候选相关的仿真信号",
           thenAct: reviewText,
           microFormat: "仿真记录关联 + 教师判断",
@@ -2024,7 +2070,7 @@
     function refreshDependent() {
       const c = wizSelection.course;
       renderChips("class", c ? (WIZ_DATA.classesByCourse[c] || []) : [], { metaOf: (it) => `${it.n} 人` });
-      renderChips("session", c ? (WIZ_DATA.sessionsByCourse[c] || []) : [], { metaOf: (it) => `${it.min} min` });
+      renderChips("session", c ? (WIZ_DATA.sessionsByCourse[c] || []) : [], { metaOf: (it) => `${it.min} 分钟` });
       if (c) renderChapterChoices(c);
       else renderChips("chapter", [], { emptyLabel: "请先选课时" });
     }
@@ -2712,14 +2758,154 @@
 
   function syncReviewVerdictIndex(entry) {
     const root = document.querySelector('#stage-ii [data-ec-role="verdict-list"]');
-    const button = root?.querySelector(`[data-review-select="${entry.expertId}"]`);
-    if (!button) return;
-    button.classList.toggle("is-resolved", reviewVerdictIsResolved(entry));
-    const status = button.querySelector("[data-review-index-status]");
-    const evidence = button.querySelector(`[data-review-index-evidence="${entry.expertId}"]`);
-    if (status) status.textContent = reviewVerdictStatus(entry);
-    if (evidence) evidence.textContent = `${reviewVerdictEvidenceCount(entry)} 条证据`;
+    if (!root) return;
+    const group = buildVerdictGroups(state.expertCards || []).find((candidate) => candidate.entries.includes(entry));
+    if (!group) return;
+    const button = root.querySelector(`[data-review-select="${group.focusKey}"]`);
+    if (group.kind === "env") {
+      const pendingCount = verdictGroupPendingCount(group);
+      const unionCount = [...verdictGroupEvidenceUnion(group).keys()].filter((id) => state.keyMoments.some((km) => km.id === id)).length;
+      if (button) {
+        button.classList.toggle("is-resolved", pendingCount === 0);
+        const status = button.querySelector("[data-review-index-status]");
+        const evidence = button.querySelector("[data-review-index-evidence]");
+        if (status) status.textContent = pendingCount ? `${pendingCount} 路待处理` : "全部已处理";
+        if (evidence) evidence.textContent = `并集 ${unionCount} 条证据`;
+      }
+      // 组卡并集行随证据/判定变化重算，保持只读投影与真实关联一致
+      const unionLine = root.querySelector(`[data-review-group="${group.focusKey}"] [data-group-evidence]`);
+      if (unionLine) unionLine.innerHTML = verdictGroupEvidenceMarkup(group);
+    } else if (button) {
+      button.classList.toggle("is-resolved", reviewVerdictIsResolved(entry));
+      const status = button.querySelector("[data-review-index-status]");
+      const evidence = button.querySelector("[data-review-index-evidence]");
+      if (status) status.textContent = reviewVerdictStatus(entry);
+      if (evidence) evidence.textContent = `${reviewVerdictEvidenceCount(entry)} 条证据`;
+    }
     syncReviewWorkspaceSummary();
+  }
+
+  // —— C 区分组：聚焦单位从单路线改为环节热点组。组内仍每路各自三选，
+  // 组级只做呈现与聚焦；判定/证据 handler 仍按 entry.verdict 作用域工作。 ——
+  function reviewRoleLabel(entry) {
+    return (entry.expert?.role || "学科").replace("审校", "");
+  }
+
+  // 返回 [{kind:"env", focusKey:"env:env04", entries:[...]} |
+  //        {kind:"route", focusKey:"route:expert-xxx", entries:[entry], observation}]
+  // 口径与右栏热点一致：只有 ready 按 annotation.targetEnv 聚类，≥2 为 env 组；
+  // ready 单路与一切非 ready 都是 route 组，非 ready 带 observation 标记。
+  function buildVerdictGroups(entries) {
+    const projection = buildEnvReviewProjection(entries);
+    const grouped = new Set();
+    const envGroups = [...projection.byEnv.entries()]
+      .map(([key, bucket]) => ({ key, entries: bucket }))
+      .filter(({ entries: bucket }) => bucket.length >= 2)
+      .sort((a, b) => b.entries.length - a.entries.length || a.key.localeCompare(b.key))
+      .map(({ key, entries: bucket }) => {
+        bucket.forEach((entry) => grouped.add(entry.expertId));
+        return { kind: "env", key, focusKey: `env:${key}`, entries: bucket, observation: null };
+      });
+    const routeGroups = entries
+      .map((entry, index) => ({ entry, index }))
+      .filter(({ entry }) => !grouped.has(entry.expertId))
+      .map(({ entry, index }) => {
+        const reviewState = liveReviewState(entry);
+        return {
+          kind: "route", key: entry.expertId, focusKey: `route:${entry.expertId}`, entries: [entry],
+          observation: reviewState === "ready" ? null : reviewState,
+          priority: reviewVerdictPriority(entry, index),
+        };
+      })
+      .sort((a, b) => b.priority - a.priority);
+    return [...envGroups, ...routeGroups];
+  }
+
+  // 组级证据并集：只读投影，标注每条记录来自哪几路；交互 chip 仍留在各路线子区。
+  function verdictGroupEvidenceUnion(group) {
+    const union = new Map();
+    group.entries.forEach((entry) => {
+      const ids = entry.evidenceTouched ? entry.evidenceLinks : suggestedEvidenceIdsForEntry(entry);
+      ids.forEach((id) => {
+        if (!union.has(id)) union.set(id, new Set());
+        union.get(id).add(reviewRoleLabel(entry));
+      });
+    });
+    return union;
+  }
+
+  function verdictGroupEvidenceMarkup(group) {
+    const union = verdictGroupEvidenceUnion(group);
+    const valid = [...union.entries()].filter(([id]) => state.keyMoments.some((km) => km.id === id));
+    if (!valid.length) return `关联记录并集 <b>0</b> 条 · 尚未匹配同环节记录`;
+    const items = valid.map(([id, roles]) => {
+      const index = state.keyMoments.findIndex((km) => km.id === id);
+      return `<span class="review-verdict-group-km">KM-${String(index + 1).padStart(2, "0")}<small>${escapeHtml([...roles].join("·"))}</small></span>`;
+    }).join("");
+    return `关联记录并集 <b>${valid.length}</b> 条 · ${items}`;
+  }
+
+  function verdictGroupPendingCount(group) {
+    return group.entries.filter((entry) => !reviewVerdictIsResolved(entry)).length;
+  }
+
+  function observationCopy(reviewState) {
+    return { loading: "审校进行中", error: "预置观察重点", seed: "预置观察重点", stale: "待按当前版复审" }[reviewState] || "";
+  }
+
+  // 选中切换：索引点击与右栏热点深链共用。幂等，重复选中同组不产生变化。
+  function selectVerdictFocus(focusKey) {
+    const list = document.querySelector('#stage-ii [data-ec-role="verdict-list"]');
+    if (!list || !focusKey) return;
+    state.activeVerdictFocus = focusKey;
+    list.querySelectorAll("[data-review-select]").forEach((candidate) => {
+      const selected = candidate.dataset.reviewSelect === focusKey;
+      candidate.classList.toggle("is-active", selected);
+      candidate.setAttribute("aria-pressed", String(selected));
+    });
+    list.querySelectorAll("[data-review-group]").forEach((detail) => {
+      const selected = detail.dataset.reviewGroup === focusKey;
+      detail.hidden = !selected;
+      detail.classList.toggle("is-active", selected);
+    });
+  }
+
+  // 单路线子区 markup：组内与单卡共用同一份 data-ec-role 元素全集，
+  // 保证 wireReviewCard / renderReviewEvidence / 判定 handler 零改动可用。
+  function verdictRouteArticleMarkup(entry, { inGroup = false, topLevel = null } = {}) {
+    const targets = entry.targetEnvKeys.map((key) => PRACTICE_ENV_BY_KEY[key]?.no).filter(Boolean).join(" / ");
+    const groupAttr = topLevel ? ` data-review-group="${escapeHtml(topLevel.focusKey)}"` : "";
+    const activeAttr = topLevel?.active ? " is-active" : "";
+    const hiddenAttr = topLevel && !topLevel.active ? " hidden" : "";
+    return `<article id="review-verdict-${escapeHtml(entry.expertId)}" class="review-verdict-row is-posttrial${inGroup ? " is-in-group" : ""}${activeAttr}"${groupAttr} data-review-verdict="${escapeHtml(entry.expertId)}"${hiddenAttr}>
+      ${inGroup ? "" : `<div class="review-detail-kicker"><span>当前聚焦</span><small>其余审校保留在左侧索引</small></div>`}
+      <div class="posttrial-head"><div><b>${escapeHtml(entry.expert.role)}</b><small>${escapeHtml(entry.expert.persona)} · 观察环节 ${targets || "未选择"}</small></div><span class="pill pill-sage" data-ec-role="posttrial-status">${escapeHtml(reviewVerdictStatus(entry))}</span></div>
+      <div class="posttrial-source" data-ec-role="posttrial-source">
+        <span class="posttrial-source-label">建议要点</span>
+        <div class="posttrial-source-copy${entry.liveReview ? " is-structured" : ""}" data-ec-role="posttrial-body"></div>
+        <button type="button" class="posttrial-source-toggle" data-source-act="toggle" aria-expanded="false">展开全文</button>
+      </div>
+      <div class="posttrial-flow">
+        <section class="ec-evidence">
+          <div class="ec-evidence-summary"><span class="ec-evidence-label">试教证据</span><span data-ec-role="evidence-summary">正在匹配相关记录</span><button type="button" data-evidence-act="toggle" aria-expanded="false">查看</button></div>
+          <span data-ec-role="evidence-count" hidden>系统正在匹配相关记录</span>
+          <div class="ec-evidence-list" data-ec-role="evidence-list" hidden></div>
+        </section>
+        <section data-ec-role="resolution" class="ec-resolution">
+          <span class="ec-section-lbl"><b>你的处理</b><small>选择一次</small></span>
+          <div class="ec-resolution-picker" data-ec-role="resolution-picker">
+            <button type="button" data-review-choice="original" aria-pressed="false">按建议修改</button>
+            <button type="button" data-review-choice="modified" aria-pressed="false">调整后修改</button>
+            <button type="button" data-review-choice="rejected" aria-pressed="false">暂不修改</button>
+          </div>
+          <span class="ec-inline-error ec-candidate-error" data-ec-role="candidate-error" role="alert" hidden></span>
+          <div class="ec-resolution-summary" data-ec-role="resolution-summary" hidden><span class="ec-resolution-copy"></span><span class="ec-resolution-actions"><button type="button" data-note-act="toggle" aria-expanded="false" hidden>补充说明</button><button type="button" data-review-act="revise">改判</button></span></div>
+          <div class="ec-edit-panel" data-ec-role="edit-panel" hidden><label>修改后意见<textarea rows="4" maxlength="480"></textarea></label><span class="ec-inline-error" data-ec-role="edit-error" role="alert" hidden></span><div><button type="button" data-edit-act="save">保存候选</button><button type="button" data-edit-act="cancel">取消</button></div></div>
+          <div class="ec-reject-panel" data-ec-role="reject-panel" hidden><label>暂不修改的原因<select data-ec-role="defer-kind"><option value="insufficient">本次试教证据不足</option><option value="not-applicable">建议不适用于本课</option><option value="defer">本轮暂缓处理</option></select></label><label>补充说明（可选）<input maxlength="160" placeholder="用于保留教师决策痕迹"/></label><span class="ec-inline-error" data-ec-role="reject-error" role="alert" hidden></span><div><button type="button" data-reject-act="confirm">确认暂不修改</button><button type="button" data-reject-act="cancel">取消</button></div></div>
+          <label class="ec-decision-note-field" data-ec-role="decision-note-field" hidden><span>补充说明（可选）</span><input class="ec-decision-note" data-ec-role="decision-note" maxlength="120" placeholder="例如：下一轮重点观察什么"/></label>
+        </section>
+      </div>
+    </article>`;
   }
 
   function renderReviewVerdictBand() {
@@ -2731,57 +2917,53 @@
       return;
     }
     const entries = state.expertCards || [];
+    const groups = buildVerdictGroups(entries);
     const preferred = entries
       .map((entry, index) => ({ entry, score:reviewVerdictPriority(entry, index) }))
       .sort((a, b) => b.score - a.score)[0]?.entry;
-    if (!entries.some((entry) => entry.expertId === state.activeVerdictExpertId)) {
-      state.activeVerdictExpertId = preferred?.expertId || entries[0]?.expertId || "";
+    if (!groups.some((group) => group.focusKey === state.activeVerdictFocus)) {
+      state.activeVerdictFocus = groups.find((group) => group.entries.includes(preferred))?.focusKey || groups[0]?.focusKey || "";
     }
     const resolvedCount = entries.filter(reviewVerdictIsResolved).length;
     const evidencedCount = entries.filter((entry) => reviewVerdictEvidenceCount(entry) > 0).length;
     list.classList.add("review-verdict-list");
-    const indexMarkup = entries.map((entry, index) => {
-      const active = entry.expertId === state.activeVerdictExpertId;
+    const indexMarkup = groups.map((group) => {
+      const active = group.focusKey === state.activeVerdictFocus;
+      if (group.kind === "env") {
+        const env = PRACTICE_ENV_BY_KEY[group.key];
+        const pendingCount = verdictGroupPendingCount(group);
+        const unionCount = [...verdictGroupEvidenceUnion(group).keys()].filter((id) => state.keyMoments.some((km) => km.id === id)).length;
+        const roles = group.entries.map(reviewRoleLabel).join("｜");
+        return `<button type="button" class="review-verdict-index-item is-group${active ? " is-active" : ""}${pendingCount ? "" : " is-resolved"}" data-review-select="${escapeHtml(group.focusKey)}" aria-pressed="${active}" aria-controls="review-group-${escapeHtml(group.key)}">
+          <span class="review-verdict-index-top"><i>${escapeHtml(env?.no || group.key)}</i><b>${group.entries.length} 路共同关注</b><em data-review-index-status>${pendingCount ? `${pendingCount} 路待处理` : "全部已处理"}</em></span>
+          <span class="review-verdict-index-issue">${escapeHtml(roles)}</span>
+          <span class="review-verdict-index-meta"><small>环节 ${escapeHtml(env?.no || group.key)}</small><small data-review-index-evidence>并集 ${unionCount} 条证据</small></span>
+        </button>`;
+      }
+      const entry = group.entries[0];
+      const position = entries.indexOf(entry) + 1;
       const evidenceCount = reviewVerdictEvidenceCount(entry);
       const targets = entry.targetEnvKeys.map((key) => PRACTICE_ENV_BY_KEY[key]?.no).filter(Boolean).join(" / ");
-      return `<button type="button" class="review-verdict-index-item${active ? " is-active" : ""}${reviewVerdictIsResolved(entry) ? " is-resolved" : ""}" data-review-select="${escapeHtml(entry.expertId)}" aria-pressed="${active}" aria-controls="review-verdict-${escapeHtml(entry.expertId)}">
-        <span class="review-verdict-index-top"><i>${String(index + 1).padStart(2, "0")}</i><b>${escapeHtml(entry.expert.role)}</b><em data-review-index-status>${escapeHtml(reviewVerdictStatus(entry))}</em></span>
+      const observation = group.observation ? observationCopy(group.observation) : "";
+      return `<button type="button" class="review-verdict-index-item${active ? " is-active" : ""}${reviewVerdictIsResolved(entry) ? " is-resolved" : ""}${group.observation ? " is-observation" : ""}" data-review-select="${escapeHtml(group.focusKey)}" aria-pressed="${active}" aria-controls="review-verdict-${escapeHtml(entry.expertId)}">
+        <span class="review-verdict-index-top"><i>${String(position).padStart(2, "0")}</i><b>${escapeHtml(entry.expert.role)}</b><em data-review-index-status>${escapeHtml(reviewVerdictStatus(entry))}</em></span>
         <span class="review-verdict-index-issue">${escapeHtml(reviewVerdictIssue(entry))}</span>
-        <span class="review-verdict-index-meta"><small>环节 ${targets || "未选择"}</small><small data-review-index-evidence="${escapeHtml(entry.expertId)}">${evidenceCount} 条证据</small></span>
+        <span class="review-verdict-index-meta">${observation ? `<small class="review-verdict-index-obs">${escapeHtml(observation)}</small>` : ""}<small>环节 ${targets || "未选择"}</small><small data-review-index-evidence>${evidenceCount} 条证据</small></span>
       </button>`;
     }).join("");
-    const detailMarkup = entries.map((entry) => {
-      const targets = entry.targetEnvKeys.map((key) => PRACTICE_ENV_BY_KEY[key]?.no).filter(Boolean).join(" / ");
-      const active = entry.expertId === state.activeVerdictExpertId;
-      return `<article id="review-verdict-${escapeHtml(entry.expertId)}" class="review-verdict-row is-posttrial${active ? " is-active" : ""}" data-review-verdict="${escapeHtml(entry.expertId)}"${active ? "" : " hidden"}>
-        <div class="review-detail-kicker"><span>当前聚焦</span><small>其余审校保留在左侧索引</small></div>
-        <div class="posttrial-head"><div><b>${escapeHtml(entry.expert.role)}</b><small>${escapeHtml(entry.expert.persona)} · 观察环节 ${targets || "未选择"}</small></div><span class="pill pill-sage" data-ec-role="posttrial-status">${escapeHtml(reviewVerdictStatus(entry))}</span></div>
-        <div class="posttrial-source" data-ec-role="posttrial-source">
-          <span class="posttrial-source-label">建议要点</span>
-          <div class="posttrial-source-copy${entry.liveReview ? " is-structured" : ""}" data-ec-role="posttrial-body"></div>
-          <button type="button" class="posttrial-source-toggle" data-source-act="toggle" aria-expanded="false">展开全文</button>
-        </div>
-        <div class="posttrial-flow">
-          <section class="ec-evidence">
-            <div class="ec-evidence-summary"><span class="ec-evidence-label">试教证据</span><span data-ec-role="evidence-summary">正在匹配相关记录</span><button type="button" data-evidence-act="toggle" aria-expanded="false">查看</button></div>
-            <span data-ec-role="evidence-count" hidden>系统正在匹配相关记录</span>
-            <div class="ec-evidence-list" data-ec-role="evidence-list" hidden></div>
-          </section>
-          <section data-ec-role="resolution" class="ec-resolution">
-            <span class="ec-section-lbl"><b>你的处理</b><small>选择一次</small></span>
-            <div class="ec-resolution-picker" data-ec-role="resolution-picker">
-              <button type="button" data-review-choice="original" aria-pressed="false">按建议修改</button>
-              <button type="button" data-review-choice="modified" aria-pressed="false">调整后修改</button>
-              <button type="button" data-review-choice="rejected" aria-pressed="false">暂不修改</button>
-            </div>
-            <span class="ec-inline-error ec-candidate-error" data-ec-role="candidate-error" role="alert" hidden></span>
-            <div class="ec-resolution-summary" data-ec-role="resolution-summary" hidden><span class="ec-resolution-copy"></span><span class="ec-resolution-actions"><button type="button" data-note-act="toggle" aria-expanded="false" hidden>补充说明</button><button type="button" data-review-act="revise">改判</button></span></div>
-            <div class="ec-edit-panel" data-ec-role="edit-panel" hidden><label>修改后意见<textarea rows="4" maxlength="480"></textarea></label><span class="ec-inline-error" data-ec-role="edit-error" role="alert" hidden></span><div><button type="button" data-edit-act="save">保存候选</button><button type="button" data-edit-act="cancel">取消</button></div></div>
-            <div class="ec-reject-panel" data-ec-role="reject-panel" hidden><label>暂不修改的原因<select data-ec-role="defer-kind"><option value="insufficient">本次试教证据不足</option><option value="not-applicable">建议不适用于本课</option><option value="defer">本轮暂缓处理</option></select></label><label>补充说明（可选）<input maxlength="160" placeholder="用于保留教师决策痕迹"/></label><span class="ec-inline-error" data-ec-role="reject-error" role="alert" hidden></span><div><button type="button" data-reject-act="confirm">确认暂不修改</button><button type="button" data-reject-act="cancel">取消</button></div></div>
-            <label class="ec-decision-note-field" data-ec-role="decision-note-field" hidden><span>补充说明（可选）</span><input class="ec-decision-note" data-ec-role="decision-note" maxlength="120" placeholder="例如：下一轮重点观察什么"/></label>
-          </section>
-        </div>
-      </article>`;
+    const detailMarkup = groups.map((group) => {
+      const active = group.focusKey === state.activeVerdictFocus;
+      if (group.kind === "env") {
+        const env = PRACTICE_ENV_BY_KEY[group.key];
+        const roles = group.entries.map(reviewRoleLabel).join("｜");
+        const routes = group.entries.map((entry) => verdictRouteArticleMarkup(entry, { inGroup: true })).join("");
+        return `<article id="review-group-${escapeHtml(group.key)}" class="review-verdict-group${active ? " is-active" : ""}" data-review-group="${escapeHtml(group.focusKey)}"${active ? "" : " hidden"}>
+          <header class="review-verdict-group-head"><b>${escapeHtml(env?.no || group.key)}</b><div><span>${escapeHtml(env?.short || "")} · ${group.entries.length} 路共同关注</span><small>${escapeHtml(roles)} · 每路意见独立判断</small></div></header>
+          <div class="review-verdict-group-evidence" data-group-evidence>${verdictGroupEvidenceMarkup(group)}</div>
+          <div class="review-verdict-group-routes">${routes}</div>
+        </article>`;
+      }
+      return verdictRouteArticleMarkup(group.entries[0], { topLevel: { focusKey: group.focusKey, active } });
     }).join("");
     list.innerHTML = `<div class="review-verdict-workspace">
       <aside class="review-verdict-index" aria-label="五路审校索引">
@@ -2790,23 +2972,18 @@
         <nav>${indexMarkup}</nav>
       </aside>
       <div class="review-verdict-detail-stack" aria-live="polite">${detailMarkup}</div>
+      <footer class="review-verdict-handoff" data-review-handoff>
+        <span class="review-verdict-handoff-counts">本轮判断 · <b data-handoff="original">0</b> 按建议修改 · <b data-handoff="modified">0</b> 调整后修改 · <b data-handoff="deferred">0</b> 暂不修改 · <b data-handoff="pending">0</b> 待处理</span>
+        <a class="review-verdict-handoff-link" href="#stage-iii" data-handoff-link>前往第三步确认写回 →</a>
+      </footer>
     </div>`;
     entries.forEach((entry) => { entry.verdict = list.querySelector(`[data-review-verdict="${entry.expertId}"]`); });
+    updateExpertAdoptBar();
     list.querySelectorAll("[data-review-select]").forEach((button) => {
       button.addEventListener("click", () => {
-        const nextId = button.dataset.reviewSelect;
-        if (!nextId || nextId === state.activeVerdictExpertId) return;
-        state.activeVerdictExpertId = nextId;
-        list.querySelectorAll("[data-review-select]").forEach((candidate) => {
-          const selected = candidate.dataset.reviewSelect === nextId;
-          candidate.classList.toggle("is-active", selected);
-          candidate.setAttribute("aria-pressed", String(selected));
-        });
-        list.querySelectorAll("[data-review-verdict]").forEach((detail) => {
-          const selected = detail.dataset.reviewVerdict === nextId;
-          detail.hidden = !selected;
-          detail.classList.toggle("is-active", selected);
-        });
+        const nextKey = button.dataset.reviewSelect;
+        if (!nextKey || nextKey === state.activeVerdictFocus) return;
+        selectVerdictFocus(nextKey);
       });
     });
   }
@@ -2908,7 +3085,9 @@
         const annotation = entry.liveReview.annotation;
         return `<li><b>${escapeHtml(roleOf(entry))}</b><p><i>问题</i>${escapeHtml(annotation.issue)}</p><p><i>建议</i>${escapeHtml(annotation.suggestion)}</p><p class="review-focus-excerpt"><i>摘录</i>「${escapeHtml(annotation.sourceExcerpt)}」</p><small>本机 Qwen · 已锚定 · 第 ${entry.liveReview.sourceRevision} 版</small></li>`;
       }).join("");
-      return `<details class="review-focus-env"><summary><b>${escapeHtml(group.env.no)}</b><span>${escapeHtml(heading)}</span><small>${escapeHtml(roles)} · ${escapeHtml(note)}</small></summary><ul>${items}</ul></details>`;
+      const goto = shared
+        ? `<li class="review-focus-goto"><button type="button" data-focus-goto="${escapeHtml(group.key)}">在处理区查看 →</button></li>` : "";
+      return `<details class="review-focus-env" data-env-key="${escapeHtml(group.key)}"><summary><b>${escapeHtml(group.env.no)}</b><span>${escapeHtml(heading)}</span><small>${escapeHtml(roles)} · ${escapeHtml(note)}</small></summary><ul>${items}${goto}</ul></details>`;
     }).join("");
     const pending = [];
     if (seedCount > 0) pending.push(`${seedCount} 路使用固定审校种子`);
@@ -3012,6 +3191,24 @@
       document.documentElement.dataset.reviewDrawerEscape = "1";
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && drawer?.getAttribute("aria-hidden") === "false") closeDrawer();
+      });
+    }
+    // 右栏热点 → C 区组卡深链：有证据直达对应组，无证据落到占位区。
+    const focusList = document.querySelector('#stage-ii [data-review-role="focus-list"]');
+    if (focusList && focusList.dataset.gotoWired !== "1") {
+      focusList.dataset.gotoWired = "1";
+      focusList.addEventListener("click", (event) => {
+        const gotoButton = event.target.closest("[data-focus-goto]");
+        if (!gotoButton) return;
+        const focusKey = `env:${gotoButton.dataset.focusGoto}`;
+        const verdictList = document.querySelector('#stage-ii [data-ec-role="verdict-list"]');
+        if (!hasTrialEvidence()) {
+          verdictList?.scrollIntoView({ behavior: "smooth", block: "start" });
+          toast("证据出现后可在此处理这组意见");
+          return;
+        }
+        selectVerdictFocus(focusKey);
+        verdictList?.querySelector(`[data-review-group="${focusKey}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     }
     document.querySelectorAll('#stage-ii [data-review-view]').forEach((button) => {
@@ -3986,7 +4183,7 @@
       } else {
         row.className = "beat-row" + (b.note ? " note" : "");
         const roleClass = `role-${b.role}`;
-        const roleText = b.role === "T" ? "教师" : b.role === "A" ? "Agent" : (b.who || "学生");
+        const roleText = b.role === "T" ? "教师" : b.role === "A" ? "AI 助手" : (b.who || "学生");
         row.innerHTML = `
           <span class="ts">${b.ts}</span>
           <span class="role ${roleClass}">${roleText}</span>
@@ -4613,7 +4810,7 @@
       };
       if (course && chapter) setField("course", `${course.title} · ${chapter.topic}`);
       if (klass && session)   setField("class",  `${klass.title} · ${klass.n} 人 · ${session.title.split("·")[0].trim()}`);
-      if (session)             setField("plan",   `plan.md · v 0.4 · ${session.min} min`);
+      if (session)             setField("plan",   `plan.md · v 0.4 · ${session.min} 分钟`);
     }
 
     // —— 2. 同步“设计摘要”生成输入（不是完整实践包）
@@ -4878,6 +5075,26 @@
     if (bar) {
       const left = bar.querySelector("span:first-child");
       if (left) left.innerHTML = `建议 <span class="pct">${total}</span> 条 · 已处理 ${decided} · 准备修改 ${preparing} · 暂不修改 ${deferred} · 待处理 ${pending} · 已关联记录 ${linked}`;
+    }
+    // C 区底部“本轮判断小结”条：口径与上方 adopt-bar 一致，按建议/调整后
+    // 两档把准备修改拆到 candidateMode；待写回 = 已确认支持且尚未写回。
+    // 无试教证据时 verdict band early-return，小结条不存在，必须 null-check。
+    const handoff = document.querySelector("#stage-ii [data-review-handoff]");
+    if (handoff) {
+      const supportedCandidates = state.expertCards.filter((entry) => entry.state === "candidate" && entry.decision === "supported");
+      const original = supportedCandidates.filter((entry) => entry.candidateMode !== "modified").length;
+      const modified = supportedCandidates.filter((entry) => entry.candidateMode === "modified").length;
+      const writable = supportedCandidates.filter((entry) => !entry.writtenBack).length;
+      const setHandoffCount = (key, value) => {
+        const node = handoff.querySelector(`[data-handoff="${key}"]`);
+        if (node) node.textContent = value;
+      };
+      setHandoffCount("original", original);
+      setHandoffCount("modified", modified);
+      setHandoffCount("deferred", deferred);
+      setHandoffCount("pending", pending);
+      const link = handoff.querySelector("[data-handoff-link]");
+      if (link) link.textContent = writable > 0 ? `待写回 ${writable} 条 · 前往确认写回 →` : "前往第三步确认写回 →";
     }
     // 同步页眉摘要卡，让候选/判断操作所见即所得
     const summary = document.querySelector('#practiceMeta [data-field="adoption"]')

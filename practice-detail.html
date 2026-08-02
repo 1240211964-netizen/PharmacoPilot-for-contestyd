@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=6-readability-floor" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=9-neutral-color" />
+<link rel="stylesheet" href="./shared/tokens.css?v=7-native-control-theming" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=10-native-control-theming" />
 <!-- 虚拟教室 3D：Three.js 本地自托管（零外部依赖，内网/离线/受限网络均可显示）。
      若本地文件缺失或 WebGL 不可用 → 3D 模块自动回退到 2.5D 渲染器。 -->
 <script type="importmap">
@@ -619,8 +619,9 @@
   opacity: 0.4; cursor: not-allowed; pointer-events: none;
 }
 .wiz-hint {
-  font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
-  letter-spacing: 0.04em;
+  max-width: 34em; margin-inline: auto;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: var(--lh-body);
+  color: var(--mute); text-align: start;
 }
 .wiz-hint b { color: var(--amber-deep); }
 .input-card {
@@ -857,7 +858,7 @@
   color: var(--amber-deep); font-family: var(--mono); font-size: var(--fs-2xs);
   letter-spacing: .06em;
 }
-.brief-tag::before { content: "PROMPT"; margin-right: 7px; color: var(--mute-2); }
+.brief-tag::before { content: "生成要求"; margin-right: 7px; color: var(--mute-2); }
 .pack-item .hd .pack-regenerate { margin-left: auto; text-transform: none; }
 .pack-item .body b { color: var(--ink); font-weight: 500; }
 .pack-item .body[contenteditable="true"] {
@@ -1376,9 +1377,20 @@
 
 .decision-empty {
   padding: 22px 14px; border: 1px dashed var(--rule); border-radius: 8px;
-  background: var(--paper-2); color: var(--mute); text-align: center;
-  font-family: var(--mono); font-size: var(--fs-2xs);
+  max-width: 34em; margin-inline: auto;
+  background: var(--paper-2); color: var(--mute); text-align: start;
+  font-family: var(--serif-cn); font-size: var(--fs-xs); line-height: var(--lh-body);
 }
+/* ---- 决策卷宗按教学环节分组：与 C 区热点组头同构，更轻 ---- */
+.decision-env-group { margin-top: 14px; }
+.decision-env-head {
+  display: flex; align-items: baseline; gap: 9px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--rule);
+}
+.decision-env-head b { color: var(--amber-deep); font-family: var(--mono); font-size: var(--fs-sm); font-weight: 600; }
+.decision-env-head span { color: var(--mute); font-family: var(--mono); font-size: var(--text-caption); letter-spacing: .04em; }
+.decision-env-group .decision-row { border-top: 0; margin-top: 10px; }
+.decision-env-group .decision-row + .decision-row { border-top: 1px dashed var(--rule); }
 .decision-row {
   border-top: 1px solid var(--ink); padding: 14px 0 4px; margin-top: 14px;
 }
@@ -2003,6 +2015,8 @@ html.reveal-on [data-reveal]:not([data-reveal="fade"]).is-revealed{ transform: n
 .review-focus-env li>p.review-focus-excerpt{ color:var(--mute); }
 .review-focus-env li>small{ color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
 .review-focus-pending{ grid-column:1/-1; margin:0; padding:8px 9px; border:1px dashed var(--rule); border-radius:7px; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
+.review-focus-goto button{ padding:2px 0; border:0; border-bottom:1px solid currentColor; background:transparent; color:var(--amber-deep); cursor:pointer; font-family:var(--mono); font-size:var(--text-caption); white-space:nowrap; }
+.review-focus-goto button:hover{ color:var(--ink); }
 .review-focus-open{ width:100%; padding:9px 10px; border:1px solid var(--ink); border-radius:7px; background:var(--ink); color:var(--ivory); cursor:pointer; font-family:var(--mono); font-size:var(--fs-2xs); }
 .review-focus-status{ color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
 .review-observation-only{ margin:8px 0 0 30px; padding:8px 10px; border-left:2px solid var(--sage); background:rgba(77,98,87,.06); color:var(--sage); font-family:var(--mono); font-size:var(--text-caption); line-height:var(--lh-ui); }
@@ -2048,7 +2062,6 @@ html.review-drawer-open,html.review-drawer-open body{ overflow:hidden; }
 .review-drawer-head h4{
   margin:3px 0 3px;
   color:var(--ivory);
-  font-size:clamp(25px,2.3vw,34px);
   line-height:1.12;
 }
 .review-drawer-head p{
@@ -2474,7 +2487,32 @@ html.review-drawer-open,html.review-drawer-open body{ overflow:hidden; }
 .ec-decision-note-field{ display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:8px; max-width:none; margin-top:4px; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); }
 .ec-decision-note-field[hidden]{ display:none!important; }
 .posttrial-flow .ec-decision-note{ width:100%; margin-top:0; padding:7px 8px; border:1px solid var(--rule); border-radius:5px; background:var(--paper); }
-.posttrial-wait{ padding:16px; border:1px dashed var(--rule); border-radius:8px; background:var(--paper-2); color:var(--mute); text-align:center; font-family:var(--mono); font-size:var(--fs-2xs); }
+.posttrial-wait{ max-width:34em; margin-inline:auto; padding:16px; border:1px dashed var(--rule); border-radius:8px; background:var(--paper-2); color:var(--mute); text-align:start; font-family:var(--serif-cn); font-size:var(--fs-xs); line-height:var(--lh-body); }
+
+/* ---- C 区环节热点组卡：组级呈现，组内每路仍独立三选 ---- */
+.review-verdict-group{ display:block; min-height:100%; background:var(--ivory); }
+.review-verdict-group[hidden]{ display:none!important; }
+.review-verdict-group.is-active{ animation:review-detail-in .28s cubic-bezier(.16,1,.3,1) both; }
+.review-verdict-group-head{ display:grid; grid-template-columns:auto minmax(0,1fr); gap:3px 10px; align-items:start; padding:15px 19px 11px; border-bottom:1px solid var(--rule); }
+.review-verdict-group-head>b{ color:var(--amber-deep); font-family:var(--mono); font-size:var(--fs-lg); font-weight:600; line-height:1.1; }
+.review-verdict-group-head span{ display:block; color:var(--ink); font-family:var(--serif-cn); font-size:var(--fs-sm); font-weight:500; }
+.review-verdict-group-head small{ display:block; margin-top:3px; color:var(--mute); font-family:var(--mono); font-size:var(--text-caption); }
+.review-verdict-group-evidence{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:10px 19px 0; padding:7px 10px; border:1px solid color-mix(in srgb, var(--sage) 24%, transparent); border-radius:7px; background:color-mix(in srgb, var(--sage) 5%, transparent); color:var(--sage); font-family:var(--mono); font-size:var(--text-caption); }
+.review-verdict-group-evidence b{ font-size:var(--fs-xs); }
+.review-verdict-group-km{ display:inline-flex; align-items:baseline; gap:5px; padding:2px 7px; border-radius:999px; background:color-mix(in srgb, var(--sage) 12%, transparent); }
+.review-verdict-group-km small{ color:var(--mute); }
+.review-verdict-group-routes{ display:grid; }
+.review-verdict-row.is-posttrial.is-in-group{ min-height:0; border-top:1px dashed var(--rule); }
+.review-verdict-group-routes>.review-verdict-row.is-posttrial.is-in-group:first-child{ border-top:0; }
+.review-verdict-index-item.is-group .review-verdict-index-top b{ color:var(--amber-deep); }
+.review-verdict-index-obs{ color:var(--amber-deep); }
+
+/* ---- C 区底部“本轮判断小结”条：计数与 adopt-bar 同口径，锚点直达第三步 ---- */
+.review-verdict-handoff{ grid-column:1 / -1; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px; padding:11px 19px; border-top:1px dashed var(--rule); background:var(--paper-2); }
+.review-verdict-handoff-counts{ min-width:0; color:var(--ink-2); font-family:var(--serif-cn); font-size:var(--fs-xs); line-height:1.6; }
+.review-verdict-handoff-counts b{ margin:0 2px; color:var(--amber-deep); font-family:var(--mono); font-weight:600; }
+.review-verdict-handoff-link{ flex:none; color:var(--amber-deep); font-family:var(--mono); font-size:var(--text-caption); text-decoration:none; border-bottom:1px solid currentColor; }
+.review-verdict-handoff-link:hover{ color:var(--ink); }
 
 @media(max-width:980px){
   .trial-first-layout{ grid-template-columns:1fr; }
@@ -2512,7 +2550,6 @@ html.review-drawer-open,html.review-drawer-open body{ overflow:hidden; }
 }
 @media(max-width:640px){
   .review-drawer-head{ padding:20px 20px 18px 24px; }
-  .review-drawer-head h4{ font-size:30px; }
   .review-drawer-head>div>span,
   .review-drawer-head p{ display:none; }
   .review-drawer-stats{ gap:5px; margin-top:10px; }
@@ -2559,7 +2596,7 @@ window.__ANIM = window.__ANIM || { reveal: { step: 75 } };
 <script src="./shared/practice-runtime-contract.js?v=trial-first-v6-single-decision" defer></script>
 <script src="./shared/toast.js?v=3-color-token" defer></script>
 <script src="./shared/faq.js?v=2-neutral-color" defer></script>
-<script src="./shared/practice-runtime.js?v=41-env-hotspot" defer></script>
+<script src="./shared/practice-runtime.js?v=43-stage3-handoff" defer></script>
 <script src="./shared/rerun-bridge.js?v=3" defer></script>
 <script src="./shared/backend-client.js?v=7-structured-pack" defer></script>
 <!-- ===== 虚拟教室 ===== 优先 3D；core=仿真大脑；2.5D 为回退 -->
@@ -2582,12 +2619,12 @@ window.addEventListener('load', function () {
 
 <!-- ===== Issue strip ===== -->
 <div class="issue-strip">
-  <span>VOL. 药事管理 · 2026 春季</span>
+  <span>药事管理 · 2026 春季</span>
   <span class="sep">—</span>
   <span>课程设计</span>
   <span class="sep">—</span>
-  <span><span class="pulse"></span><span data-live="teachers" data-baseline="17">17</span> 教师 LIVE</span>
-  <span class="r">SESSION #3417 · 演练 <span data-live="timer" data-start="132" data-cap="2700">02:12</span> / 45:00 · 录制中</span>
+  <span><span class="pulse"></span><span data-live="teachers" data-baseline="17">17</span> 位教师在线</span>
+  <span class="r">教学场次 #3417 · 演练 <span data-live="timer" data-start="132" data-cap="2700">02:12</span> / 45:00 · 录制中</span>
 </div>
 
 <!-- ===== Masthead ===== -->
@@ -2595,7 +2632,7 @@ window.addEventListener('load', function () {
   <div class="masthead-inner">
     <a class="mast-brand" href="./index.html">
       <span class="logo">Pharmaco<span class="it">Pilot</span></span>
-      <span class="ed">for Pharmacy Education</span>
+      <span class="ed">药学教育版</span>
     </a>
     <div class="app-tabs">
       <a href="./index.html">概览</a>
@@ -2621,7 +2658,7 @@ window.addEventListener('load', function () {
          （管理它的 JS 带 if(!meta) return 守卫，删除元素后自动空跑） -->
     <div class="page-hero-grid is-solo" data-reveal>
       <div>
-        <div class="eyebrow">FEATURE 02 · 教学实践</div>
+        <div class="eyebrow">02 · 教学实践</div>
         <h1>从课堂实践包<br/>到<span class="it">可发布</span>的一节课。</h1>
       </div>
     </div>
@@ -2629,20 +2666,20 @@ window.addEventListener('load', function () {
     <!-- ---- 3-step stepper: 生成 → 试错+证据 → 确认写回 ---- -->
     <nav class="loop-stepper" aria-label="教学实践三步运行循环">
       <a class="loop-step is-active" href="#stage-i">
-        <span class="seq">i</span>
-        <span class="cn">生成实践包<small>A · GENERATE</small></span>
+        <span class="seq">01</span>
+        <span class="cn">生成实践包<small>第一步</small></span>
         <span class="out">产出 · <b>任务 · 角色 · 评价 · 资料</b></span>
         <span class="arr">→</span>
       </a>
       <a class="loop-step" href="#stage-ii">
-        <span class="seq">ii</span>
-        <span class="cn">试错+证据<small>B · TRIAL &amp; EVIDENCE</small></span>
+        <span class="seq">02</span>
+        <span class="cn">试错+证据<small>第二步</small></span>
         <span class="out">产出 · <b>五路学科审校 · 仿真关键时刻 · 处理建议</b></span>
         <span class="arr">→</span>
       </a>
       <a class="loop-step" href="#stage-iii">
-        <span class="seq">iii</span>
-        <span class="cn">确认写回<small>C · WRITE-BACK</small></span>
+        <span class="seq">03</span>
+        <span class="cn">确认写回<small>第三步</small></span>
         <span class="out">产出 · <b>按 9 个教学环节回写实践包 / 数据 / 资产库</b></span>
       </a>
       <div class="loop-feedback">
@@ -2673,7 +2710,7 @@ window.addEventListener('load', function () {
   <!-- ===== Stage i — Generate practice pack ===== -->
   <section class="stage" id="stage-i" aria-labelledby="stage-i-title">
     <div class="stage-h" data-reveal>
-      <div class="num">i<small>STAGE · 生成实践包</small></div>
+      <div class="num">01<small>第一步 · 生成实践包</small></div>
       <div>
         <h3 id="stage-i-title">先确认<span class="it"> 9 个教学环节 </span>设计摘要，<br/>再生成一份可以上课堂的完整实践包。</h3>
         <p>课程、班级、课时与章节决定课堂边界；九张摘要卡提供可编辑的生成要求。本地 Qwen 据此展开教师动作、学生任务、资源、评价证据与时间安排，生成后可继续编辑、审校并下载。</p>
@@ -2684,10 +2721,10 @@ window.addEventListener('load', function () {
       <!-- LEFT: 4-step selection wizard (chip groups) -->
       <div class="pack-wizard" id="packWizard">
         <div class="wiz-flow" id="wizFlow">
-          <div class="wiz-step" data-step="course"><span class="seq">i</span><span class="cn">选课程</span></div>
-          <div class="wiz-step" data-step="class"><span class="seq">ii</span><span class="cn">选班级</span></div>
-          <div class="wiz-step" data-step="session"><span class="seq">iii</span><span class="cn">选课时</span></div>
-          <div class="wiz-step" data-step="chapter"><span class="seq">iv</span><span class="cn">选章节</span></div>
+          <div class="wiz-step" data-step="course"><span class="seq">①</span><span class="cn">选课程</span></div>
+          <div class="wiz-step" data-step="class"><span class="seq">②</span><span class="cn">选班级</span></div>
+          <div class="wiz-step" data-step="session"><span class="seq">③</span><span class="cn">选课时</span></div>
+          <div class="wiz-step" data-step="chapter"><span class="seq">④</span><span class="cn">选章节</span></div>
         </div>
         <div class="wiz-group" data-wiz="course">
           <div class="wiz-lbl"><span>① 选 <b>课程</b></span><small>所教课程</small></div>
@@ -2706,7 +2743,7 @@ window.addEventListener('load', function () {
           <div class="wiz-chips"></div>
         </div>
         <div class="wiz-hint" id="wizHint" style="grid-column:1/-1">
-          按 <b>i → ii → iii → iv</b> 依次选择；课时与章节双向保持一致，非本课时章节会锁定 · 结果即时同步到下方设计摘要 · 选择会持久化到浏览器
+          按 <b>① → ② → ③ → ④</b> 依次选择；课时与章节双向保持一致，非本课时章节会锁定 · 结果即时同步到下方设计摘要 · 选择会持久化到浏览器
         </div>
       </div>
     </div>
@@ -2836,7 +2873,7 @@ window.addEventListener('load', function () {
   <!-- ===== Stage ii — 试错+证据 (五路学科审校 + 虚拟班仿真记录关联) ===== -->
   <section class="stage" id="stage-ii" aria-labelledby="stage-ii-title">
     <div class="stage-h" data-reveal>
-      <div class="num">ii<small>STAGE · 试错+证据</small></div>
+      <div class="num">02<small>第二步 · 试错+证据</small></div>
       <div>
         <h3 id="stage-ii-title">先把课<span class="it">跑一遍</span>，<br/>再根据真实发生的关键时刻决定改什么。</h3>
         <p>五路学科审校先压缩为本轮观察重点，帮助教师带着问题看试教；证据出现前不接受任何采纳决定。系统先匹配相关试教记录，具体怎么处理由教师决定。</p>
@@ -2894,11 +2931,11 @@ window.addEventListener('load', function () {
     <div class="km-grid" id="kmStream" style="margin-top:10px;" data-reveal-stagger>
       <div class="km-card" data-reveal>
         <div class="km-time">
-          <span>KEY MOMENT 01</span>
+          <span>关键时刻 01</span>
           <b>02:05</b>
         </div>
         <h4>SWOT 内外部边界出现结构性分歧</h4>
-        <div class="km-quote">"学生 A 将门店排班能力归为内部劣势 W，学生 B 将行业药师供给归为外部威胁 T——Agent 提示应拆成两条并分别举证。"</div>
+        <div class="km-quote">"学生 A 将门店排班能力归为内部劣势 W，学生 B 将行业药师供给归为外部威胁 T——AI 助手提示应拆成两条并分别举证。"</div>
         <p>系统建议关联「教学设计审校 · W/T 边界锚点」；是否补入分类判据，由教师确认。</p>
         <div class="km-tag">
           <span class="pill pill-amber">问题链 #3</span>
@@ -2912,7 +2949,7 @@ window.addEventListener('load', function () {
 
       <div class="km-card" data-reveal>
         <div class="km-time">
-          <span>KEY MOMENT 02</span>
+          <span>关键时刻 02</span>
           <b>02:00</b>
         </div>
         <h4>威胁（T）类证据讨论中出现集体沉默</h4>
@@ -2930,7 +2967,7 @@ window.addEventListener('load', function () {
 
       <div class="km-card" data-reveal>
         <div class="km-time">
-          <span>KEY MOMENT 03</span>
+          <span>关键时刻 03</span>
           <b>01:24</b>
         </div>
         <h4>问题链 · 第 3 题 — 从 W/T 边界转向 TOWS</h4>
@@ -2961,7 +2998,7 @@ window.addEventListener('load', function () {
     <div class="review-drawer-scrim" data-review-act="close-drawer" hidden></div>
     <aside class="review-drawer" data-review-surface="drawer" aria-label="五路学科审校完整卷宗" aria-hidden="true" inert>
       <header class="review-drawer-head">
-        <div><span>PROFESSIONAL REVIEW DOSSIER</span><h4>五路学科审校</h4><p>先看问题与建议；锚点、版本和原稿依据按需展开。这里不形成采纳决定。</p><div class="review-drawer-stats"><b>5 路审校</b><b>问题 → 建议 → 原稿依据</b><b>证据前只读</b></div></div>
+        <div><span>完整审校卷宗</span><h4>五路学科审校</h4><p>先看问题与建议；锚点、版本和原稿依据按需展开。这里不形成采纳决定。</p><div class="review-drawer-stats"><b>5 路审校</b><b>问题 → 建议 → 原稿依据</b><b>证据前只读</b></div></div>
         <button type="button" data-review-act="close-drawer" aria-label="关闭完整审校卷宗">×</button>
       </header>
       <div class="review-drawer-body">
@@ -2974,7 +3011,7 @@ window.addEventListener('load', function () {
             <button type="button" class="is-active" data-review-view="env" role="tab" aria-selected="true">按环节</button>
             <button type="button" data-review-view="discipline" role="tab" aria-selected="false">按学科</button>
           </div>
-          <button type="button" class="review-edit-pack" data-review-act="edit-pack">回 Stage I 编辑实践包</button>
+          <button type="button" class="review-edit-pack" data-review-act="edit-pack">回到第一步编辑实践包</button>
         </div>
         <p class="review-edit-warning" data-ec-role="edit-warning" hidden>修改实践包会提升修订号，并使本轮模型批注变为“针对旧稿”。</p>
         <nav class="review-env-index" data-ec-role="env-index" aria-label="九个教学环节审校索引"></nav>
@@ -2994,17 +3031,17 @@ window.addEventListener('load', function () {
   <!-- ===== Stage iii — 确认写回 · 按 9 个教学环节回写 ===== -->
   <section class="stage" id="stage-iii" aria-labelledby="stage-iii-title">
     <div class="stage-h" data-reveal>
-      <div class="num">iii<small>STAGE · 确认写回</small></div>
+      <div class="num">03<small>第三步 · 确认写回</small></div>
       <div>
         <h3 id="stage-iii-title">把<span class="it">本轮修改</span>，<br/>按<span class="it"> 9 个教学环节 </span>回写到实践包 · 数据 · 资产库。</h3>
-        <p>每条候选按"原内容 → 修订候选 → 仿真证据关联 → 教师判断"展开。只有教师明确判断为"支持"的候选，才按目标教学环节写回<b>本课实践包</b>、<b>教学数据工作台</b>与<b>个人教学资产库</b>；系统不自动宣布验证结论。</p>
+        <p>判断已在第二步完成。这里按教学环节核对写回清单：每条候选保留"原内容 → 修订候选 → 仿真证据关联 → 教师判断"四段证据链，教师确认无误后按目标教学环节一次性写回<b>本课实践包</b>、<b>教学数据工作台</b>与<b>个人教学资产库</b>；系统不自动宣布验证结论。</p>
       </div>
     </div>
 
     <!-- Decision dossier — revision candidates + simulation records + teacher judgment -->
     <div class="change-list">
       <h5><b>教师决策卷宗</b><span>共 <span class="ct">0</span> 条修订候选 · 四段证据链</span></h5>
-      <div class="decision-empty">尚无修订候选 · 请先在 ii 段从五路学科审校中加入至少一条候选</div>
+      <div class="decision-empty">尚无修订候选 · 请先在第二步的五路学科审校中加入至少一条候选</div>
     </div>
 
     <div class="migrate" data-reveal>
@@ -3068,11 +3105,11 @@ window.addEventListener('load', function () {
     <!-- Publish bar -->
     <div class="publish-bar" data-reveal>
       <div class="pb-l">
-        <h4>教师确认后才可写回</h4>
+        <h4>写回清单为空 · 请先在第二步完成判断</h4>
         <p>0 条修订候选 · 0 条已关联仿真记录 · 0 条教师确认支持 · 0 条待判断</p>
       </div>
       <div class="pb-r">
-        <button type="button" class="btn-secondary" id="inline-diff">查看完整 diff</button>
+        <button type="button" class="btn-secondary" id="inline-diff">查看完整差异</button>
         <button type="button" class="btn-publish" id="inline-publish" disabled aria-disabled="true">教师确认写回 →</button>
       </div>
     </div>
@@ -3116,7 +3153,7 @@ window.addEventListener('load', function () {
     <div class="colo-brand">
       <div class="logo">Pharmaco<span class="it">Pilot</span></div>
       <p>全生命周期赋能药学类课程教学智能体。把课程纲要、政策案例与临床场景，编织成可审校、可复用、可追溯的教学材料，与新教师协同走向新教学范式。</p>
-      <p class="brand-demo-note">本 demo 以药事管理本科课程为先发场景。</p>
+      <p class="brand-demo-note">本演示版以药事管理本科课程为先发场景。</p>
     </div>
     <div class="colo">
       <h5>产品</h5>
@@ -3135,13 +3172,13 @@ window.addEventListener('load', function () {
     <div class="colo">
       <h5>合作伙伴</h5>
       <a data-wendao="home" style="cursor:pointer">闻道 · 科学探索</a>
-      <a href="#faq">常见问题 · FAQ</a>
+      <a href="#faq">常见问题</a>
       <a href="mailto:editor@pharmacopilot.cn">联系编辑部</a>
     </div>
   </div>
   <div class="colo-foot">
     <span>© 2026 PharmacoPilot · v2.0.4</span>
-    <span>SESSION #3417 · 演练 #03 · 累计沉淀 17</span>
+    <span>教学场次 #3417 · 演练 #03 · 累计沉淀 17</span>
   </div>
 </footer>
 

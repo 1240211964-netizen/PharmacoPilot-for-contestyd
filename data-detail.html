@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=6-readability-floor" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=9-neutral-color" />
+<link rel="stylesheet" href="./shared/tokens.css?v=7-native-control-theming" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=10-native-control-theming" />
 <style>
 /* ============ 教学数据 详情页 ============ */
 
@@ -429,20 +429,19 @@
   transition: transform .15s, box-shadow .15s;
 }
 .event-node:hover { transform: translateY(-1px); box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 10px 22px -12px color-mix(in srgb, var(--ink) 30%, transparent); }
-.event-node .node-num {
-  font-size: var(--fs-2xs); font-weight: 700; color: var(--sage);
-  letter-spacing: 0.06em;
-}
 .event-node .node-name {
-  font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 500;
-  color: var(--ink); margin-top: 1px;
+  font-family: var(--serif-cn); font-size: var(--fs-2xs); font-weight: 650;
+  color: var(--ink); margin-top: 1px; padding-right: 22px; line-height: 1.25;
+}
+.event-node .node-status {
+  font-size: var(--fs-2xs); color: var(--mute); line-height: 1.35;
 }
 .event-node .node-delta {
   font-size: var(--fs-xs); font-weight: 700; color: var(--sage);
   background: var(--sage-soft); border-radius: 3px;
   padding: 1px 6px; align-self: flex-start;
   letter-spacing: 0.02em;
-  margin-top: 2px;
+  margin-top: 2px; line-height: 1.25;
 }
 .event-node.is-baseline .node-delta {
   background: color-mix(in srgb, var(--ivory) 60%, transparent); color: var(--mute);
@@ -451,11 +450,11 @@
 /* 实测维度标签 — 让读者看到"每个节点测的是不同维度"，破除"伪轨迹"误读 */
 .event-node .node-dims {
   font-size: var(--fs-2xs); color: var(--sage); font-weight: 600;
-  letter-spacing: 0.02em; margin-top: 3px; opacity: 0.85;
+  letter-spacing: 0.02em; margin-top: 3px; opacity: 0.85; line-height: 1.25;
 }
 .event-node .node-when {
   font-size: var(--fs-2xs); color: var(--mute); margin-top: auto;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.04em; line-height: 1.25;
 }
 /* C 级证据（如 E4 迁移，待真课接入）→ 预测/待验证：delta 不再实心高亮，改虚线淡色，
    让"最大数字"不再视觉压过"最弱证据" */
@@ -1623,9 +1622,9 @@
   .bi-atlas-body .station-numbers,
   .bi-atlas-body .lane,
   .bi-atlas-body .coupling-bridge,
-  .bi-atlas-body .student-events { min-width: 760px; }
+  .bi-atlas-body .student-events { min-width: 1100px; }
 
-  /* 窄屏（~760px 时每列约 68px）收紧学生节点，避免维度标签/时机文字挤裁 */
+  /* 窄屏使用桌面比例的内部画布，保留横向滑动并避免中文节点名与状态被压成竖排 */
   .event-node { padding: 6px 5px 5px; min-height: 80px; }
   .event-node .node-name { font-size: var(--fs-2xs); }
   .event-node .node-delta { font-size: var(--fs-2xs); padding: 1px 4px; }
@@ -1912,7 +1911,7 @@
 
 <!-- ===== Issue strip ===== -->
 <div class="issue-strip">
-  <span>VOL. 药事管理 · 2026 春季</span>
+  <span>药事管理 · 2026 春季</span>
   <span class="sep">—</span>
   <span>课程设计</span>
   <span class="sep">—</span>
@@ -1922,7 +1921,7 @@
     <span class="ds-text">样本数据</span>
     <span class="ds-meta" id="dsBadgeMeta"></span>
   </button>
-  <span class="r">SESSION #3417 · 已耗时 <span data-live="timer" data-start="132">02:12</span></span>
+  <span class="r">教学场次 #3417 · 已耗时 <span data-live="timer" data-start="132">02:12</span></span>
 </div>
 
 <!-- ===== Data Source Drawer ===== -->
@@ -1953,7 +1952,7 @@
   <div class="masthead-inner">
     <a class="mast-brand" href="./index.html">
       <span class="logo">Pharmaco<span class="it">Pilot</span></span>
-      <span class="ed">for Pharmacy Education</span>
+      <span class="ed">药学教育版</span>
     </a>
     <div class="app-tabs">
       <a href="./index.html">概览</a>
@@ -1975,14 +1974,14 @@
     <!-- hero 不重复输出测量结果；平均分差与关联覆盖率集中在下方测量快照。 -->
     <div class="page-hero-grid is-solo">
       <div>
-        <div class="eyebrow">FEATURE 03 · 教学数据</div>
+        <div class="eyebrow">03 · 教学数据</div>
         <h1>把课堂信号，<br/>写回 <span class="it">9 个教学环节</span>。</h1>
       </div>
     </div>
 
     <!-- 评价依据：横向铺满 hero 宽度，与上方左右两栏视觉对齐 -->
     <div class="theory-row theory-row-wide" data-store-key="pp.theoryAdds.data">
-      <span class="theory-h">评价依据 · INFORMED BY</span>
+      <span class="theory-h">评价依据</span>
       <span class="theory-chip">教学评一体化 <small>崔允漷</small></span>
       <span class="theory-chip">建设性对齐 <small>Biggs 1996</small></span>
       <span class="theory-chip">OBE 成果导向 <small>Spady 1994</small></span>
@@ -2015,18 +2014,18 @@
     <!-- 指标图例：解释 T# / S# / COUPLING / ↑n 记号（样式见 bc-chrome.css .metric-legend） -->
     <div class="metric-legend" role="note" aria-label="指标读法图例">
       <span class="lead">指标怎么读 ·</span>
-      <span><b>T#</b> 教师 · 教学环节指标</span>
-      <span><b>S#</b> 学生 · 能力维度</span>
-      <span><b>COUPLING</b> 评价指标耦合信号 — 局部 X2–X5 × 证据系数 × X1 全局系数</span>
-      <span class="dim"><b>Δn</b> 前后分差（可正可负；样本为设计预演读数）· <b>非</b>真实成效</span>
+      <span><b>T1–T8</b> 教师 · 教学环节指标</span>
+      <span><b>S1–S7</b> 学生 · 能力维度</span>
+      <span><b>关联强度</b> 师生环节关联信号 — 局部 X2–X5 × 证据系数 × X1 全局系数</span>
+      <span class="dim"><b>Δ分差</b> 前后变化（可正可负；样本为设计预演读数）· <b>非</b>真实成效</span>
     </div>
 
     <div class="summary-row" data-summary-row>
       <div class="s-cell s" data-summary-role="keep">
-        <div class="l">最值得保留 · KEEP</div>
+        <div class="l">最值得保留</div>
         <!-- 静态默认对齐契约单一信源（KEEP = co 池中 COUPLING 最强 = 06 形成性评价与适应性调控）；data-render.js 会按 LIVE 数据重渲 -->
         <div class="v"><span class="it" data-slot="num">06</span><small data-slot="name">形成性评价与适应性调控</small></div>
-        <div class="d" data-slot="desc">同期观测：教师 T6 ↑6.8 · 学生 S3 ↑5.5；评价指标 COUPLING 2.3</div>
+        <div class="d" data-slot="desc">同期观测：教师 T6 ↑6.8 · 学生 S3 ↑5.5；关联强度 2.3</div>
         <svg class="spark" viewBox="0 0 200 36" preserveAspectRatio="none"
              role="img" aria-label="当前关联快照，无连续时间序列" data-slot="spark">
           <title data-slot="spark-title">当前关联快照</title>
@@ -2035,7 +2034,7 @@
           <polyline points="0,16 200,16" fill="none" stroke="#4d6257" stroke-width="1.5" data-slot="spark-line"/>
         </svg>
         <div class="basis">
-          <div class="basis-lab">解释 · INTERPRET</div>
+          <div class="basis-lab">判断依据</div>
           <div class="basis-list" data-slot="chips">
             <span class="basis-chip">互动调控 <small>T6 教师维度</small></span>
             <span class="basis-chip">利益相关者 <small>S3 学生维度</small></span>
@@ -2044,7 +2043,7 @@
         </div>
       </div>
       <div class="s-cell" data-summary-role="fix">
-        <div class="l">最需要修正 · FIX</div>
+        <div class="l">最需要修正</div>
         <div class="v"><span class="it" data-slot="num">07</span><small data-slot="name">表现性评价与学习成效诊断</small></div>
         <div class="d" data-slot="desc">评价标准 R-04 立场迁移度 2 处歧义 · 评分者一致性偏低 · 政策证据引用不足</div>
         <!-- y-range mirrors KEEP (6–30) so the two trend lines are visually comparable -->
@@ -2056,7 +2055,7 @@
           <polyline points="0,16 200,16" fill="none" stroke="#a8492a" stroke-width="1.5" data-slot="spark-line"/>
         </svg>
         <div class="basis">
-          <div class="basis-lab">解释 · INTERPRET</div>
+          <div class="basis-lab">判断依据</div>
           <div class="basis-list" data-slot="chips">
             <span class="basis-chip">证据反馈与评价诊断 <small>T7 教师维度</small></span>
             <span class="basis-chip">政策证据识读 <small>S2 学生维度</small></span>
@@ -2065,7 +2064,7 @@
         </div>
       </div>
       <div class="s-cell x is-emphasized" data-summary-role="next">
-        <div class="l">下一轮优先动作 · NEXT</div>
+        <div class="l">下一轮优先动作</div>
         <div class="v"><span class="it" data-slot="count">4</span><small>条建议待写回</small></div>
         <div class="d" data-slot="desc">写回 07 表现性评价与学习成效诊断 · 08 反思性实践与教学改进 · 06 形成性评价与适应性调控 · 03 教学内容结构化与前概念诊断</div>
         <!-- 4 dots = 4 queued actions. First (filled amber, larger) = 立即；others = 本周 / 暂缓 / 后续（静态默认与 data-render.js renderNextSpark 运行时输出一致） -->
@@ -2083,7 +2082,7 @@
           <text x="160" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" text-anchor="middle" fill="#1b1916" opacity="0.55">后续</text>
         </svg>
         <div class="basis">
-          <div class="basis-lab">操作 · ACTION</div>
+          <div class="basis-lab">直接操作</div>
           <div class="action-row">
             <a href="#writebackQueue" class="q-btn is-primary">进入教学实践重跑 →</a>
             <button type="button" class="q-btn">更新本课实践包</button>
@@ -2097,8 +2096,8 @@
     <!-- 数据源与证据等级 · Hero 下方一行 4 卡 · 由 data-render.js 填充 -->
     <div class="evidence-strip" id="evidenceStrip">
       <div class="evidence-strip-head">
-        <span class="tag">数据源与证据等级 · DATA SOURCE</span>
-        <span class="lvl">本页数字<b>源自 <span class="ev-badge">B</span> 级证据</b>（虚拟演练，非真实课堂）· 这是设计的预演与复盘，<b>不是真实教学成效</b>；真实成效以泛雅接入的真实课堂为准 · COUPLING 按证据等级作置信折扣(×0.8)，能力增量按面值呈现 · 接入真实课堂升级 A · <a href="#evaluationFramework" style="color:var(--amber-deep);text-decoration:underline dashed;text-underline-offset:3px;">查看完整评价框架 →</a></span>
+        <span class="tag">数据源与证据等级</span>
+        <span class="lvl">本页数字<b>源自 <span class="ev-badge">B</span> 级证据</b>（虚拟演练，非真实课堂）· 这是设计的预演与复盘，<b>不是真实教学成效</b>；真实成效以泛雅接入的真实课堂为准 · 关联强度按证据等级作置信折扣(×0.8)，能力增量按面值呈现 · 接入真实课堂升级 A · <a href="#evaluationFramework" style="color:var(--amber-deep);text-decoration:underline dashed;text-underline-offset:3px;">查看完整评价框架 →</a></span>
       </div>
       <div class="evidence-grid" id="evidenceGrid">
         <!-- 4 cards rendered by renderDataSources() -->
@@ -2109,16 +2108,17 @@
   <!-- ============== ATLAS — 9 个教学环节 × bidirectional ============== -->
   <section class="atlas-section">
     <div class="data-section-h">
-      <div class="num">i<small>SECTION · 9 个教学环节 × 双向</small></div>
+      <div class="num">01<small>环节关联 · 9 个教学环节 × 双向</small></div>
       <div>
         <h3>教师 9 环节中，哪些已有评价证据可以连接学生节点？</h3>
-        <p class="atlas-intro">这是教学设计预演，不是真实学习成效测量。线越粗表示关联越强，虚线表示次要关联；数字仅作改进提示。</p>
+        <!-- 免责口径统一在「数据源与证据等级」带，此处不再重复；说明只留读图规则。 -->
+        <p class="atlas-intro">线越粗表示关联越强，虚线表示次要关联；数字仅作改进提示。</p>
       </div>
     </div>
 
     <div class="bi-atlas">
       <div class="bi-atlas-head">
-        <div class="title">双向能力图谱 · 双时间轴<small>9 个教师环节（5 个有局部耦合评价指标）→ 5 个学生节点（当前连到 E1–E3）</small></div>
+        <div class="title">双向能力图谱 · 双时间轴<small>9 个教师环节（5 个有局部耦合评价指标）→ 5 个学生证据节点</small></div>
         <div class="toggle-row">
           <span class="toggle-chip is-active">累计增量</span>
           <span class="toggle-chip">本周增量</span>
@@ -2130,41 +2130,41 @@
       <!-- LEDE: three key findings (was atlas-foot, moved up to read first) -->
       <div class="atlas-lede">
         <div class="lede-h">
-          <span class="tag">7 周累计 · 三条值得关注的 COUPLING 连线</span>
-          <span class="hint">下方图谱：5 个有评价指标的环节 → E1–E3；E0 基线与 E4 待接入节点不画线 ↓</span>
+          <span class="tag">7 周累计 · 三条值得关注的环节关联线</span>
+          <span class="hint">下方图谱：教师环节连接课中证据、作品评价与反思证据；模拟基线和迁移验证不画关联线 ↓</span>
         </div>
         <div class="lede-row">
           <!-- 静态默认与 data-render.js renderLedeCards(cumulative) 运行时输出一致：按 COUPLING 强度排序 06 / 07 / 03 -->
           <div class="lede-card">
             <div class="lc-h">
               <span class="num">06<span class="cn">形成性评价与适应性调控</span></span>
-              <span class="env">→ E1 · 2.3</span>
+              <span class="env">→ 课中证据 · 2.3</span>
             </div>
             <div class="lc-b">
               同期观测（不作为公式输入）：<span class="t-em">教师 形成性评价与适应性调控 +6.1</span>；
-              <span class="s-em">学生 课中表现 +2.2</span>。<br>
+              <span class="s-em">学生 课中证据 +2.2</span>。<br>
               评价指标计算：X4=3.0 × 证据系数 B=0.80 × 全局系数 X1(3.0)=0.95 = 2.3，形成主关联。建议优先验证。
             </div>
           </div>
           <div class="lede-card">
             <div class="lc-h">
               <span class="num">07<span class="cn">表现性评价与学习成效诊断</span></span>
-              <span class="env">→ E2 · 2.3</span>
+              <span class="env">→ 作品评价 · 2.3</span>
             </div>
             <div class="lc-b">
               同期观测（不作为公式输入）：<span class="t-em">教师 表现性评价与学习成效诊断 +3.6</span>；
-              <span class="s-em">学生 评价画像 +1.6</span>。<br>
+              <span class="s-em">学生 作品评价 +1.6</span>。<br>
               评价指标计算：mean(X4=3.0, X5=3.0) × 证据系数 B=0.80 × 全局系数 X1(3.0)=0.95 = 2.3，形成主关联。建议优先验证。
             </div>
           </div>
           <div class="lede-card">
             <div class="lc-h">
               <span class="num">03<span class="cn">教学内容结构化与前概念诊断</span></span>
-              <span class="env">→ E1 · 1.9</span>
+              <span class="env">→ 课中证据 · 1.9</span>
             </div>
             <div class="lc-b">
               同期观测（不作为公式输入）：<span class="t-em">教师 教学内容结构化与前概念诊断 +4.7</span>；
-              <span class="s-em">学生 课中表现 +2.2</span>。<br>
+              <span class="s-em">学生 课中证据 +2.2</span>。<br>
               评价指标计算：X2=2.5 × 证据系数 B=0.80 × 全局系数 X1(3.0)=0.95 = 1.9，形成主关联。建议优先验证。
             </div>
           </div>
@@ -2199,7 +2199,7 @@
 
         <!-- Stage header (课前 5 / 课中 1 / 课后 3) -->
         <div class="station-header">
-          <span class="head-l">phase</span>
+          <span class="head-l">教学阶段</span>
           <span class="stage-pre">01–05 课前 · 设计</span>
           <span class="stage-in">06 课中 · 调控</span>
           <span class="stage-post">07–09 课后 · 沉淀</span>
@@ -2285,7 +2285,7 @@
             <!-- viewBox: 900 (9 cols × 100) × 56 (track height) · 由 JS renderCouplingBridge() 重绘
                  Sankey 式 S 形曲线：首尾竖直切线 C x1,H/2 x2,H/2 x2,H · 同节点入线扇形展开 -->
             <svg viewBox="0 0 900 56" preserveAspectRatio="none" role="img"
-                 aria-label="教学环节与学习证据关联图将在统一评价指标契约加载后绘制；EV0 基线与 EV4 待接入节点不画线。">
+                 aria-label="教学环节与学习证据关联图将在统一评价指标契约加载后绘制；模拟基线与迁移验证节点不画线。">
               <defs>
                 <linearGradient id="bridgeFlow" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stop-color="#d97757"/>
@@ -2317,52 +2317,49 @@
           </div>
 
           <!-- E0 入学基线 · 锚在 env01 列 · 标识为「课前外」 -->
-          <div class="event-node is-baseline" data-event="EV0" title="E0 虚拟演练基线 · 第 1 周课前 · 32 卷；真实入学前测待接入">
-            <span class="node-num">E0</span>
-            <span class="node-name">入学基线</span>
-            <span class="node-delta">基线</span>
-            <span class="node-dims">7 维基线</span>
-            <span class="node-when">第 1 周</span>
+          <div class="event-node is-baseline" data-event="EV0" title="模拟基线 · 第 1 周课前 · 32 卷；真实入学前测待接入">
+            <span class="node-name">模拟基线</span>
+            <span class="node-status">真实前测待接入</span>
+            <span class="node-delta">参照点</span>
+            <span class="node-dims">学生 7 维</span>
+            <span class="node-when">第1周课前</span>
             <span class="node-evidence lv-B" title="证据等级 B · 中强证据" aria-label="证据等级 B：虚拟演练与行为记录">B</span>
           </div>
 
           <!-- E1 课中表现 · 锚在 env06 形成性评价与适应性调控 -->
-          <div class="event-node" data-event="EV1" title="E1 课中表现 · 第 7 周课中 · 任务卡 + 互动热图">
-            <span class="node-num">E1</span>
-            <span class="node-name">课中表现</span>
+          <div class="event-node" data-event="EV1" title="课中证据 · 第 7 周课中 · 任务卡 + 互动热图">
+            <span class="node-name">课中证据</span>
             <span class="node-delta">+2.2</span>
             <span class="node-dims">S3·S6·S2</span>
-            <span class="node-when">第 7 周·课中</span>
+            <span class="node-when">第7周课中</span>
             <span class="node-evidence lv-B" title="证据等级 B · 中强证据" aria-label="证据等级 B：中强证据">B</span>
           </div>
 
           <!-- E2 评价画像 · 锚在 env07 表现性评价与学习成效诊断 -->
-          <div class="event-node" data-event="EV2" title="E2 评价画像 · 课后 1-3 天 · 作品 + 评价标准">
-            <span class="node-num">E2</span>
-            <span class="node-name">评价画像</span>
+          <div class="event-node" data-event="EV2" title="作品评价 · 课后 1-3 天 · 作品 + 评价标准">
+            <span class="node-name">作品评价</span>
             <span class="node-delta">+1.6</span>
             <span class="node-dims">S2·S4·S5</span>
-            <span class="node-when">课后 1-3 天</span>
+            <span class="node-when">课后1–3天</span>
             <span class="node-evidence lv-B" title="证据等级 B · 中强证据" aria-label="证据等级 B：中强证据">B</span>
           </div>
 
           <!-- E3 反思迁移 · 锚在 env08 复盘前后 -->
-          <div class="event-node" data-event="EV3" title="E3 反思迁移 · 课后 7 天 · 反思文本">
-            <span class="node-num">E3</span>
-            <span class="node-name">反思迁移</span>
+          <div class="event-node" data-event="EV3" title="反思证据 · 课后 7 天 · 反思文本">
+            <span class="node-name">反思证据</span>
             <span class="node-delta">+0.9</span>
             <span class="node-dims">S7·S1</span>
-            <span class="node-when">课后 7 天</span>
+            <span class="node-when">课后7天</span>
             <span class="node-evidence lv-B" title="证据等级 B · 中强证据" aria-label="证据等级 B：中强证据">B</span>
           </div>
 
           <!-- E4 迁移测试 · 锚在 env09 列 · +30d 外延 · C 级证据 → 预测/待验证样式 -->
-          <div class="event-node is-post is-predicted" data-event="EV4" title="E4 迁移测试 · 课后 +30d · 新情境任务（待真课接入，当前为预测值）">
-            <span class="node-num">E4</span>
-            <span class="node-name">迁移测试</span>
+          <div class="event-node is-post is-predicted" data-event="EV4" title="迁移验证 · 课后 30 天 · 新情境任务（待真实课堂接入，当前为预测值）">
+            <span class="node-name">迁移验证</span>
+            <span class="node-status">模型预测 · 待验证</span>
             <span class="node-delta">≈+2.7</span>
             <span class="node-dims">综合 7 维</span>
-            <span class="node-when">+30d · 待验证</span>
+            <span class="node-when">课后30天</span>
             <span class="node-evidence lv-C" title="证据等级 C · 弱证据" aria-label="证据等级 C：弱证据，待验证">C</span>
           </div>
 
@@ -2378,9 +2375,9 @@
       <!-- 评价框架公开声明 — 默认收起，点击展开看 5 项决策 + 文献 -->
       <details class="framework-panel" id="evaluationFramework">
         <summary class="fp-summary">
-          <span class="fp-tag">评价框架 · FRAMEWORK</span>
+          <span class="fp-tag">评价框架</span>
           <span class="fp-preview">
-            10 分制 · 教师 8 维 × 9 环节 + 学生 7 维 × 5 节点 · COUPLING(env) = mean(X2–X5 适用评价指标) × 证据系数 × X1 全局系数 · 15 项数据源
+            10 分制 · 教师 8 维 × 9 环节 + 学生 7 维 × 5 节点 · 关联强度 = X2–X5 适用指标均值 × 证据系数 × X1 全局系数 · 15 项数据源
           </span>
           <span class="fp-caret" aria-hidden="true">⌄</span>
         </summary>
@@ -2397,7 +2394,7 @@
   <!-- ============== 下一轮改进队列 · 教学改进工作台核心 ============== -->
   <section class="queue-section" id="writebackQueue">
     <div class="data-section-h">
-      <div class="num">ii<small>SECTION · 下一轮改进队列</small></div>
+      <div class="num">02<small>下一轮改进队列</small></div>
       <div>
         <!-- 标题只回答本节要解决的问题（对齐另两节的写法）。
              原句「不是大屏、也不是成效测量，是…」是页面级定位、且靠否定定义自己；
@@ -2421,23 +2418,23 @@
       <div class="queue-item is-priority">
         <span class="queue-prio is-p1">P1</span>
         <div class="queue-field">
-          <span class="lbl">问题来源 · SOURCE</span>
+          <span class="lbl">问题来源</span>
           <span class="v">教学实践 · 试错关键时刻 KM-01<br/><b>立场结构性冲突 · 一致性评价 vs 替代焦虑</b></span>
         </div>
         <div class="queue-field">
-          <span class="lbl">证据 · EVIDENCE</span>
-          <span class="v">7 周内 17 次模拟，分歧锚点出现时学生协作论证表达 <b>+4.2</b>；同期教师问题链设计能力 <b>+5.7</b>。评价指标 X2=2.5，经 B 级证据系数与 X1 全局系数折算，COUPLING 为 <b>1.9</b>。</span>
+          <span class="lbl">支持证据</span>
+          <span class="v">7 周内 17 次模拟，分歧锚点出现时学生协作论证表达 <b>+4.2</b>；同期教师问题链设计能力 <b>+5.7</b>。评价指标 X2=2.5，经 B 级证据系数与 X1 全局系数折算，关联强度为 <b>1.9</b>。</span>
         </div>
         <div class="queue-field">
-          <span class="lbl">建议动作 · ACTION</span>
+          <span class="lbl">建议动作</span>
           <span class="v">把"第 3 题 A/B 立场切换"固化为<b>问题链模板</b>，在下一轮任务链生成时默认套用。<small class="queue-writeback-sync">当前最优实践 · 因果验证见下方验证设计字段</small></span>
         </div>
         <div class="queue-field">
-          <span class="lbl">写回位置 · WRITE-BACK</span>
+          <span class="lbl">写回位置</span>
           <span class="v"><span class="env">05</span> 学习活动与教学支架设计<small class="queue-writeback-sync">同步至本课实践包 + 资产库 · 问题链模板</small></span>
         </div>
         <div class="queue-field is-verify">
-          <span class="lbl">验证设计 · VERIFY</span>
+          <span class="lbl">验证设计</span>
           <span class="v">A/B 对照：一组保留分歧锚点，一组替换为中性开放题，控制话题类型，单独测定 S6 协作论证表达增幅，分离锚点设计效应与话题显著性效应。</span>
         </div>
         <div class="queue-actions">
@@ -2453,23 +2450,23 @@
       <div class="queue-item is-priority">
         <span class="queue-prio is-p1">P1</span>
         <div class="queue-field">
-          <span class="lbl">问题来源 · SOURCE</span>
+          <span class="lbl">问题来源</span>
           <span class="v">教学实践 · 风险信号<br/><b>立场失衡 — 4 位"药企背景"学生未发声</b></span>
         </div>
         <div class="queue-field">
-          <span class="lbl">证据 · EVIDENCE</span>
+          <span class="lbl">支持证据</span>
           <span class="v">虚拟班级 32 人中沉默学生占比 25%，集中在"药企背景"画像；06 形成性评价与适应性调控环节教师增量 <b>+6.4</b> 但学生立场覆盖偏窄。</span>
         </div>
         <div class="queue-field">
-          <span class="lbl">建议动作 · ACTION</span>
+          <span class="lbl">建议动作</span>
           <span class="v">在分组讨论前加入<b>"画像点名"</b>步骤；下一轮提示词加入"邀请 1 位药企背景学生先发声"。</span>
         </div>
         <div class="queue-field">
-          <span class="lbl">写回位置 · WRITE-BACK</span>
-          <span class="v"><span class="env">06</span> 形成性评价与适应性调控<small class="queue-writeback-sync">同步至本课实践包 · stage iii 分组提示词</small></span>
+          <span class="lbl">写回位置</span>
+          <span class="v"><span class="env">06</span> 形成性评价与适应性调控<small class="queue-writeback-sync">同步至本课实践包 · 第三步分组提示词</small></span>
         </div>
         <div class="queue-field is-verify">
-          <span class="lbl">验证设计 · VERIFY</span>
+          <span class="lbl">验证设计</span>
           <span class="v">话语编码实验：对比前后 5 次课堂录像，按 Mercer 三类话语框架（争论型 / 探究型 / 累积型）分类学生发言；控制话题难度，单一改变追问类型，计算证据型话语占比变化，分离认识论追问效应与沉默干预效应。</span>
         </div>
         <div class="queue-actions">
@@ -2485,23 +2482,23 @@
       <div class="queue-item">
         <span class="queue-prio is-p2">P2</span>
         <div class="queue-field">
-          <span class="lbl">问题来源 · SOURCE</span>
+          <span class="lbl">问题来源</span>
           <span class="v">教学实践 · 评价标准歧义 R-04<br/><b>立场迁移度缺少可观测锚点</b></span>
         </div>
         <div class="queue-field">
-          <span class="lbl">证据 · EVIDENCE</span>
+          <span class="lbl">支持证据</span>
           <span class="v">5 类评审中评价专家提出该维度无 3 级评价标准；07 表现性评价与学习成效诊断环节学生政策证据识读 <b>+3.4</b> 但评分一致性偏低。</span>
         </div>
         <div class="queue-field">
-          <span class="lbl">建议动作 · ACTION</span>
+          <span class="lbl">建议动作</span>
           <span class="v">补充<b>3 级行为锚点评价标准</b>（如"分组前后引用的政策条款是否升级"），并写入下一版评价证据。</span>
         </div>
         <div class="queue-field">
-          <span class="lbl">写回位置 · WRITE-BACK</span>
+          <span class="lbl">写回位置</span>
           <span class="v"><span class="env">07</span> 表现性评价与学习成效诊断<small class="queue-writeback-sync">同步至本课实践包 评价证据 + 资产库 · 评价标准</small></span>
         </div>
         <div class="queue-field is-verify">
-          <span class="lbl">验证设计 · VERIFY</span>
+          <span class="lbl">验证设计</span>
           <span class="v">评价标准修订实验：下轮同时运行 3 级锚点版本 vs 现有评价标准，对比评分者间一致性（κ 系数）和学生政策引用密度，分离评价标准设计效应与任务说明效应。</span>
         </div>
         <div class="queue-actions">
@@ -2517,23 +2514,23 @@
       <div class="queue-item">
         <span class="queue-prio is-p2">P2</span>
         <div class="queue-field">
-          <span class="lbl">问题来源 · SOURCE</span>
+          <span class="lbl">问题来源</span>
           <span class="v">教学实践 · 沉淀建议<br/><b>本包结构可抽象为"集采类"通用模板</b></span>
         </div>
         <div class="queue-field">
-          <span class="lbl">证据 · EVIDENCE</span>
+          <span class="lbl">支持证据</span>
           <span class="v">4 利益方 + 政策证据 + 立场迁移评价维度的结构，已在 17 次模拟中稳定复用；09 教学知识建构与专业共享环节增量 <b>+1.6/+1.0</b>，可作模板候选。</span>
         </div>
         <div class="queue-field">
-          <span class="lbl">建议动作 · ACTION</span>
+          <span class="lbl">建议动作</span>
           <span class="v">把 P-2024-Q3 抽象为<b>模板 T-集采类 v0.1</b>，未来"集采乙类替代""集采耗材"等课题直接套用。</span>
         </div>
         <div class="queue-field">
-          <span class="lbl">写回位置 · WRITE-BACK</span>
+          <span class="lbl">写回位置</span>
           <span class="v"><span class="env">09</span> 教学知识建构与专业共享<small class="queue-writeback-sync">同步至个人教学资产库</small></span>
         </div>
         <div class="queue-field is-verify">
-          <span class="lbl">验证设计 · VERIFY</span>
+          <span class="lbl">验证设计</span>
           <span class="v">版本迭代追踪：将 T-集采类 v0.1 应用于下一课题（集采乙类替代），记录教师设计用时与学生参与指标，验证模板复用效益是否可持续。</span>
         </div>
         <div class="queue-actions">
@@ -2552,17 +2549,18 @@
 <section class="traj-section">
   <div class="wrap">
   <div class="data-section-h is-dark">
-    <div class="num">iii<small>SECTION · 测量快照</small></div>
+      <div class="num">03<small>测量快照</small></div>
     <div>
       <h3>先看<span class="it">前后差异</span>，<br/>再看关联证据的<span class="it">强度与覆盖</span>。</h3>
-      <p><b>这是虚拟演练推演快照，不是真实课堂轨迹。</b>教师与学生均报告已测维度的平均绝对分差；环节关联报告均值与覆盖率，不把 5 个环节机械相加，也不虚构连续时间曲线。</p>
+      <!-- 免责口径统一在「数据源与证据等级」带，此处不再重复；说明只留口径规则（怎么算的）。 -->
+      <p>教师与学生均报告已测维度的平均绝对分差；环节关联报告均值与覆盖率，不把 5 个环节机械相加，也不虚构连续时间曲线。</p>
     </div>
   </div>
 
   <div class="trajectory">
     <div class="traj-head-row">
       <h5>师生测量 <span class="it">快照</span></h5>
-      <div class="meta">环节—证据关联均值 <b>1.9 / 4</b> · 覆盖 <b>5/9</b> 环节 · 第 1 周入学测 vs 第 7 周末综合测</div>
+      <div class="meta">环节—证据关联均值 <b>1.9 / 4</b> · 覆盖 <b>5/9</b> 环节 · 第 1 周模拟基线与第 7 周综合观测</div>
     </div>
     <div class="traj-chart">
       <svg viewBox="0 0 1180 220" preserveAspectRatio="none" role="img" aria-label="虚拟演练推演快照：教师平均分差加3.6分，学生已测六维平均分差加3.0分，环节关联均值1.9分，覆盖5/9环节">
@@ -2588,7 +2586,7 @@
     <div class="colo-brand">
       <div class="logo">Pharmaco<span class="it">Pilot</span></div>
       <p>全生命周期赋能药学类课程教学智能体。把课程纲要、政策案例与临床场景，编织成可审校、可复用、可追溯的教学材料，与新教师协同走向新教学范式。</p>
-      <p class="brand-demo-note">本 demo 以药事管理本科课程为先发场景。</p>
+      <p class="brand-demo-note">本演示版以药事管理本科课程为先发场景。</p>
     </div>
     <div class="colo">
       <h5>产品</h5>
@@ -2608,13 +2606,13 @@
       <h5>合作伙伴</h5>
       <a data-wendao="home" style="cursor:pointer">闻道 · 科学探索</a>
       <a data-fanya style="cursor:pointer">泛雅 · 课程平台</a>
-      <a href="#faq">常见问题 · FAQ</a>
+      <a href="#faq">常见问题</a>
       <a href="mailto:editor@pharmacopilot.cn">联系编辑部</a>
     </div>
   </div>
   <div class="colo-foot">
     <span>© 2026 PharmacoPilot · v2.0.4</span>
-    <span>SESSION #3417 · 7 周 · 17 次模拟课堂</span>
+    <span>教学场次 #3417 · 7 周 · 17 次模拟课堂</span>
   </div>
 </footer>
 
@@ -2639,7 +2637,7 @@
     <div class="ed-head-l">
       <span class="ed-phase" id="envDrawerPhase">课中</span>
       <h3 class="ed-title" id="envDrawerTitle">环节 — · ——</h3>
-      <span class="ed-coupling" id="envDrawerCoupling">COUPLING —</span>
+      <span class="ed-coupling" id="envDrawerCoupling">关联强度 —</span>
     </div>
     <div class="ed-head-nav">
       <button type="button" class="ed-nav-btn" id="envDrawerPrev" aria-label="上一环节" title="上一环节 · ←">‹</button>
@@ -2652,7 +2650,7 @@
     <!-- 4 sections: teacher / student / coupling / writeback — rendered by JS -->
   </div>
   <footer class="ed-foot">
-    <a class="ed-action" id="envDrawerAction" href="./practice-detail.html#stage-iii">→ 进入教学实践重跑此环节</a>
+    <a class="ed-action" id="envDrawerAction" href="./practice-detail.html#stage-iii">→ 进入教学实践第三步重跑此环节</a>
   </footer>
 </aside>
 

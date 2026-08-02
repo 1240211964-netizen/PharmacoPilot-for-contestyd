@@ -11,8 +11,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=6-readability-floor" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=9-neutral-color" />
+<link rel="stylesheet" href="./shared/tokens.css?v=7-native-control-theming" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=10-native-control-theming" />
+<link rel="stylesheet" href="./shared/nav-theme.css?v=1-nav-only" />
 <style>
 /* ============ 教学导航 详情页 ============ */
 
@@ -461,7 +462,7 @@
   border-radius: 10px;
 }
 .agent-banner::before {
-  content: "AGENT";
+  content: "AI 助手";
   position: absolute; top: -8px; left: 14px;
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   background: var(--amber-deep); color: var(--ivory);
@@ -1368,7 +1369,7 @@ html[data-theme="dark"] .figure-drill .drill-misc { color: var(--amber-soft); }
   position: relative;
 }
 .agent-mini::before {
-  content: "AGENT"; position: absolute; top: -7px; left: 14px;
+  content: "AI 助手"; position: absolute; top: -7px; left: 14px;
   font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
   background: var(--amber-deep); color: var(--ivory); padding: 1px 6px; border-radius: 3px;
 }
@@ -1671,17 +1672,17 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
      顺序/清单见项目根 build.mjs 的 BUNDLES["nav-detail"]。含 wendao/fanya/live-stats/
      toast/faq/contract/decision-bank/station1-11.payload/store/sample-collection/
      nav-render/theory-chips/store-bridge/practice-feedback-bridge。 -->
-<script src="./dist/nav-detail.bundle.js?v=21-swot-guide-dedupe" defer></script>
+<script src="./dist/nav-detail.bundle.js?v=23-s1-decision-sheet" defer></script>
 <script src="./shared/backend-client.js?v=6-color-token" defer></script>
 
 <!-- ===== Issue strip ===== -->
 <div class="issue-strip">
-  <span>VOL. 药事管理 · 2026 春季</span>
+  <span>药事管理 · 2026 春季</span>
   <span class="sep">—</span>
   <span>课程设计</span>
   <span class="sep">—</span>
-  <span><span class="pulse"></span><span data-live="teachers" data-baseline="17">17</span> 教师 LIVE</span>
-  <span class="r">SESSION #3417 · <span id="sessionStation">01 / 9 · 课前 · 学习者与教学情境分析</span> · 已耗时 <span data-live="timer" data-start="132">02:12</span></span>
+  <span><span class="pulse"></span><span data-live="teachers" data-baseline="17">17</span> 位教师在线</span>
+  <span class="r">教学场次 #3417 · <span id="sessionStation">01 / 9 · 课前 · 学习者与教学情境分析</span> · 已耗时 <span data-live="timer" data-start="132">02:12</span></span>
 </div>
 
 <!-- ===== Masthead ===== -->
@@ -1689,7 +1690,7 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
   <div class="masthead-inner">
     <a class="mast-brand" href="./index.html">
       <span class="logo">Pharmaco<span class="it">Pilot</span></span>
-      <span class="ed">for Pharmacy Education</span>
+      <span class="ed">药学教育版</span>
     </a>
     <div class="app-tabs">
       <a href="./index.html">概览</a>
@@ -1713,7 +1714,7 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
          hero 面板属重复。收为单栏让 slogan 舒展。nav-render.js 对 #heroMeta 有 if(meta) 守卫，删除后空跑。 -->
     <div class="page-hero-grid is-solo">
       <div>
-        <div class="eyebrow">FEATURE 01 · 教学导航</div>
+        <div class="eyebrow">01 · 教学导航</div>
         <h1>新教师第一节药事课，<br/>沿 <span class="it">9 个教学环节</span>行进。</h1>
       </div>
     </div>
@@ -1761,8 +1762,9 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
 <!-- ===== Stage overview — 课前 / 课中 / 课后进度总览 ===== -->
 <section class="station-deck stage-deck-v4">
   <div class="station-deck-head">
-    <span class="eyebrow-d">STAGE OVERVIEW · 9 个教学环节
-      <a href="./nav-3d.html" style="margin-left:10px;font-weight:600;color:var(--amber-deep);border:1px dashed var(--amber-deep);border-radius:999px;padding:1px 9px;text-decoration:none;">3D 路书 · 实验</a>
+    <span class="eyebrow-d">环节总览 · 9 个教学环节
+      <!-- 深底(--ink)上用浅琥珀 --amber(5.62:1)；--amber-deep 是浅底变体,压在深底只有 3.05:1。同区 .stat-live 同此惯例。 -->
+      <a href="./nav-3d.html" style="margin-left:10px;font-weight:600;color:var(--amber);border:1px dashed var(--amber);border-radius:999px;padding:1px 9px;text-decoration:none;">3D 路书 · 实验</a>
     </span>
     <div class="stat" id="deckProgress">
       <b>00</b> 已完成<span class="sep">·</span>
@@ -1815,7 +1817,7 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
     <div class="colo-brand">
       <div class="logo">Pharmaco<span class="it">Pilot</span></div>
       <p>全生命周期赋能药学类课程教学智能体。把课程纲要、政策案例与临床场景，编织成可审校、可复用、可追溯的教学材料，与新教师协同走向新教学范式。</p>
-      <p class="brand-demo-note">本 demo 以药事管理本科课程为先发场景。</p>
+      <p class="brand-demo-note">本演示版以药事管理本科课程为先发场景。</p>
     </div>
     <div class="colo">
       <h5>产品</h5>
@@ -1836,13 +1838,13 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
       <h5>合作伙伴</h5>
       <a data-wendao="home" style="cursor:pointer">闻道 · 科学探索</a>
       <a data-fanya style="cursor:pointer">泛雅 · 课程平台</a>
-      <a href="#faq">常见问题 · FAQ</a>
+      <a href="#faq">常见问题</a>
       <a href="mailto:editor@pharmacopilot.cn">联系编辑部</a>
     </div>
   </div>
   <div class="colo-foot">
     <span>© 2026 PharmacoPilot · v2.0.4</span>
-    <span>SESSION #3417 · 01 / 9 · 已耗时 02:12</span>
+    <span>教学场次 #3417 · 01 / 9 · 已耗时 02:12</span>
   </div>
 </footer>
 
