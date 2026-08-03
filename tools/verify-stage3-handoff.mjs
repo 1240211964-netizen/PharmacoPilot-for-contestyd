@@ -8,6 +8,7 @@ import { chromium } from "/Users/yandilei/.npm/_npx/e41f203b7505f1fb/node_module
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { waitSettledBox, waitFontsReady } from "./pw-wait-settled.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const BASE = "http://127.0.0.1:4173";
@@ -74,6 +75,17 @@ async function waitHandoff(page, key, value) {
     const node = document.querySelector(`#stage-ii [data-review-handoff] [data-handoff="${key}"]`);
     return node?.textContent.trim() === value;
   }, { key, value }, { timeout: 15000 });
+}
+
+// 组项/发布按钮常距当前滚动位数千 px（seek 把页面带到课尾场景区）。
+// page.click 自带的 scrollIntoView 会把未渲染区域拉进视口、触发持续重排，
+// 其 actionability 稳定性自检遂永远不过（M 场景实测）。故先瞬时滚到视口中央，
+// 等目标位置稳定（pw-wait-settled 轮询）再点 —— 与 resolveRoute 的 clickCentered 同理。
+async function clickAfterScrollSettled(page, selector, { stableMs = 700 } = {}) {
+  await page.waitForSelector(selector, { timeout: 20000 });
+  await page.evaluate((sel) => document.querySelector(sel)?.scrollIntoView({ block: "center", behavior: "instant" }), selector);
+  await waitSettledBox(page, selector, { stableMs });
+  await page.click(selector);
 }
 
 // 在指定组内对第 index 个子区执行：关联首条证据 → 选择处理方式
@@ -154,9 +166,11 @@ async function runScenario(id, { routes, seek = false, viewport } = {}) {
       await page.evaluate(() => window.PharmacoPilotMV.seek(2690));
       step = "wait-workspace";
       await page.waitForFunction(() => !!document.querySelector("#stage-ii .review-verdict-workspace"), undefined, { timeout: 60000 });
-      await page.waitForTimeout(600);
+      // seek 后渲染沉降约 2s（boundingBox 漂移数 px）：轮询位置稳定再操作，不用固定等待
+      await waitSettledBox(page, "#stage-ii [data-ec-role='verdict-list']", { stableMs: 700 });
     } else {
-      await page.waitForTimeout(900);
+      await page.waitForSelector("#stage-ii .posttrial-wait", { timeout: 15000 });
+      await waitSettledBox(page, "#stage-ii [data-ec-role='verdict-list']", { stableMs: 700 });
     }
 
     if (id === "B") {
@@ -185,16 +199,16 @@ async function runScenario(id, { routes, seek = false, viewport } = {}) {
     }
 
     // ── 处理五路：env04 两路（按建议/调整后）＋一路暂不修改；env02 一路按建议、一路不处理 ──
-    await page.click("[data-review-select='env:env04']");
-    await page.waitForTimeout(400);
+    await clickAfterScrollSettled(page, "[data-review-select='env:env04']");
+    await waitSettledBox(page, "[data-review-group='env:env04']", { stableMs: 500 });
     await resolveRoute(page, "env:env04", 0, "original");
     await waitHandoff(page, "original", "1");
     await resolveRoute(page, "env:env04", 1, "modified");
     await waitHandoff(page, "modified", "1");
     await resolveRoute(page, "env:env04", 2, "rejected");
     await waitHandoff(page, "deferred", "1");
-    await page.click("[data-review-select='env:env02']");
-    await page.waitForTimeout(400);
+    await clickAfterScrollSettled(page, "[data-review-select='env:env02']");
+    await waitSettledBox(page, "[data-review-group='env:env02']", { stableMs: 500 });
     await resolveRoute(page, "env:env02", 0, "original");
     await waitHandoff(page, "original", "2");
 
@@ -237,19 +251,21 @@ async function runScenario(id, { routes, seek = false, viewport } = {}) {
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth);
       if (overflow > 391) fail(id, "移动端横向溢出", `scrollWidth=${overflow}`);
       await page.evaluate(() => document.querySelector("[data-review-handoff]")?.scrollIntoView({ block: "center" }));
-      await page.waitForTimeout(400);
-      await page.screenshot({ path: resolve(root, "output/playwright/stage3-handoff-mobile.png") });
+      await waitSettledBox(page, "[data-review-handoff]", { stableMs: 500 });
+      await waitFontsReady(page);
+      await page.screenshot({ path: resolve(root, "output/playwright/stage3-handoff-mobile.png"), timeout: 60000 });
     } else {
       await page.evaluate(() => document.querySelector(".review-verdict-workspace")?.scrollIntoView({ block: "center" }));
-      await page.waitForTimeout(400);
-      await page.screenshot({ path: resolve(root, "output/playwright/stage3-handoff-verdict.png") });
+      await waitSettledBox(page, ".review-verdict-workspace", { stableMs: 500 });
+      await waitFontsReady(page);
+      await page.screenshot({ path: resolve(root, "output/playwright/stage3-handoff-verdict.png"), timeout: 60000 });
       await page.evaluate(() => document.querySelector("#stage-iii .change-list")?.scrollIntoView({ block: "start" }));
-      await page.waitForTimeout(400);
-      await page.screenshot({ path: resolve(root, "output/playwright/stage3-handoff-change-list.png") });
+      await waitSettledBox(page, "#stage-iii .change-list", { stableMs: 500 });
+      await page.screenshot({ path: resolve(root, "output/playwright/stage3-handoff-change-list.png"), timeout: 60000 });
     }
 
     // ── 写回：闭环引导重新审校 + C 区卡片转旧稿 ──
-    await page.click("#inline-publish");
+    await clickAfterScrollSettled(page, "#inline-publish");
     await page.waitForFunction(() => document.querySelector(".publish-bar .pb-l h4")?.textContent.trim() === "本轮写回已完成 · 修订与判断记录已保留", undefined, { timeout: 15000 });
     const closed = await page.evaluate(() => ({
       ctaText: document.querySelector(".loop-close .lc-cta")?.textContent.trim() || "",
@@ -274,8 +290,9 @@ async function runScenario(id, { routes, seek = false, viewport } = {}) {
 
     if (viewport?.width !== 390) {
       await page.evaluate(() => document.querySelector(".loop-close")?.scrollIntoView({ block: "center" }));
-      await page.waitForTimeout(400);
-      await page.screenshot({ path: resolve(root, "output/playwright/stage3-handoff-loop-close.png") });
+      await waitSettledBox(page, ".loop-close", { stableMs: 500 });
+      await waitFontsReady(page);
+      await page.screenshot({ path: resolve(root, "output/playwright/stage3-handoff-loop-close.png"), timeout: 60000 });
     }
     pass(id, `decided=${JSON.stringify(decided && [decided.original, decided.modified, decided.deferred, decided.pending])} groups=${stage3.groupKeys} stale=${closed.stalePanels}`);
   } catch (error) {
