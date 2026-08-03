@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "version": "virtual-class-agents-v0.7",
-    "simVersion": "sim-1.5.0",
+    "version": "virtual-class-agents-v0.5",
+    "simVersion": "sim-1.3.0",
     "description": "32 个药事管理本科生虚拟人智能体。每个 agent 由 8 个层次构成：identity(身份) / persona(人格) / knowledge(知识边界) / state_init(可变状态初值) / rules(决策规则) / graph(关系网) / responses(响应模板库) / drama(内心戏剧)。运行时由 practice-runtime.js 驱动，按 _agent_lifecycle 流程做决策。",
     "_agent_lifecycle": {
       "init": "读取 state_init 作为运行时状态",
@@ -113,9 +113,8 @@
           "disposition": "降级展示，供卡片文案（§4）"
         },
         "rules.interrupt_tolerance": {
-          "consumer": "engine",
-          "disposition": "P5 已接线（§4）：persona-map-v1.R4 由 F4×F1×silenceCauses 派生，teacherCallOn 打断式干预处理器消费（提升幅度与发言后残留惩罚）；P2 曾降级 _meta.design_notes 留档",
-          "use": "teacherCallOn 打断式干预响应/恢复系数（MVCore 干预处理器）"
+          "consumer": "design_notes",
+          "disposition": "P2 已降级 _meta.design_notes；P5 跟随干预面接线（§4）"
         },
         "rules.ally_threshold": {
           "consumer": "engine",
@@ -166,22 +165,6 @@
         "state_init.group_role": {
           "consumer": "display",
           "use": "inspector 展示（practice-runtime:4558 / metaverse-classroom:921）；32 人每人唯一标签，非分组字段——§13 分组门禁不涉及；key 名含 group 为 v0.1 遗留命名，静态扫描据此登记豁免"
-        },
-        "graph.derivedFrom": {
-          "consumer": "derived",
-          "use": "社交图边文档依据（行号）；verify-agent-persona (t) 门禁；P4b 社交图复查落地"
-        },
-        "_meta.corpus_provenance": {
-          "consumer": "derived",
-          "use": "语料冻结溯源（模型/参数/签收/freezeHash）；verify-agent-persona (s) 一致性门禁"
-        },
-        "interventionResponse.publicCall": {
-          "consumer": "engine",
-          "use": "干预响应矩阵·公开点名行（persona-map-v1.R4）：scoreDesire/scoreSpeakDesire 的 callSilent 0.8 / callC 0.9 加成按 directMult（+openQ 铺垫叠加 scaffoldedBonus）逐人缩放；两引擎对称"
-        },
-        "interventionResponse.openQProbe": {
-          "consumer": "engine",
-          "use": "干预响应矩阵·追问行（persona-map-v1.R4）：scoreDesire openQ 窗口 += gain（F7 驱动，高者正低者微负）；MVCore 消费（practice-runtime 无 openQ 钩子）"
         }
       }
     },
@@ -1117,16 +1100,6 @@
           "formula": "0.3 + 0.4(1−F7)(1−F6×0.5)"
         }
       },
-      "R4": {
-        "contract": "persona-v2-contract §4（interrupt_tolerance 接线 P5）/ §14 P5（干预响应矩阵，跟随 UI 干预面不超前）",
-        "formulas": {
-          "rules.interrupt_tolerance": "clamp(0.15 + 0.55×F4 + 0.45×F1 − 0.15×silenceLoad, 0, 1)；silenceLoad=min(1, 沉默因果数/2)。F4 社会安全 + F1 自我效能合成抗压韧性；消费者=teacherCallOn 打断式干预处理器（提升幅度与发言后残留惩罚均按其缩放）。",
-          "interventionResponse.publicCall.directMult": "clamp(0.8×F4 + 0.6×F1 − 0.5×silenceLoad − 0.28, −0.4, 1.2)。消费：scoreDesire 点名窗口加成 0.8(callSilent)/0.9(callC) × (directMult + 铺垫叠加时 scaffoldedBonus)。截距 −0.28 使最低 F4×F1 + 有沉默因果者≈0（直接公开点名近无效）；为负上限 −0.4 允许\"被吓住\"方向。",
-          "interventionResponse.publicCall.scaffoldedBonus": "clamp(0.45×(1−F4), 0, 0.45)。低安全感者从\"先铺垫（openQ 窗口叠加）再点名\"获益最大；高 F4 者增益小。",
-          "interventionResponse.openQProbe.gain": "clamp(0.9×F7 − 0.45, −0.15, 0.25)。消费：scoreDesire openQ 窗口 += gain。高 F7（认知调节）追问响应强（正增益），最低 F7 微负（追问压力下退缩）。"
-        },
-        "_note": "干预响应矩阵（P5）：系数逐人由 F1/F4/F7 × silenceCauses 确定性派生（铁律③：无分组/字母模板）。消费点与字段同批落地（§1.2-①）：scoreDesire/scoreSpeakDesire 点名窗口加成逐人缩放（两引擎对称）、scoreDesire openQ 窗口增益（MVCore；practice-runtime 无 openQ 钩子不消费）、teacherCallOn 打断式干预（仅 MVCore 有该钩子）。与 _meta.design_notes.interrupt_tolerance 3 级原值故意不做单调对齐：原值偏对话风格语义（A1/A3/A4/A5/B2=low 与 F4×F1 复合相左），§0-3 以因子派生为唯一运行来源。"
-      },
       "blueprint": {
         "_note": "班级级硬门禁蓝图区间（persona-v2-contract §13；P2 自定/标定）。依据：32 人小班 7 因子需可区分但禁极端工程化分布——均值限中带防整体漂移，sd 下限保个体可区分、上限防人为拉散，尾部上限防堆边；F4 均值带 [0.3,0.65] 下移因 17/32 人带沉默因果属设计事实（上沿即规则 base 0.65）。近重复/微簇的余弦基于班级均值中心化向量——原始量纲余弦在 sd<0.1 的因子上恒 ≈1，中心化是 §1.3\"结构雷同\"的可操作化。cosineMax 标定：§1.3 初拟 0.92，P2 实测 496 对中仅 3 对同经历类型组合（医保支付实习×2、医院见习+照护家庭×2、家庭照护+志愿服务×2）落 0.924–0.928，属 §0-2 明示允许的同培养方案 2 人自然邻近、非模板复制痕迹；判重目标（防整班模板化）在 0.93 下依然成立且无一对触及，故标定为 0.93，任何新对超阈即失败",
         "mean": {
@@ -1620,39 +1593,6 @@
         "L3_learningTrace": "L3 轨迹 {t, event, concept, effect}：peer_counterexample（冲突 +Δ）、self_revision（说出消解，preConflict>0.2）、teacher_scaffold（点名窗口响应）。仅 enrichmentPlan learningTraceDepth≥2 的 deep 学生追加（light 空数组，深度分层由 verify harness 门禁）。消费者：MVCore.learningTraceMoments() 派生 KM 候选（conflict_resolution=反例后 240s 内自我修正；scaffold_uptake=支架后首次响应）；证明 tools/prove-learning-trace-km.mjs；UI 接线（practice-detail.html）PENDING——页面解禁后任务。"
       },
       "priorAdjustNote": "speak_motivation 有效锚含旧引擎字母先验折算（A/B+0.09、C−0.5、D−0.65，来源 migration/persona-v1-legacy-map.json）；折算仅用于标定目标，不写回运行数据。残差 flag 集中处即 v0.3 手工对称结构（旧 D 组 sm≈0）与事件证据不符的位置，属预期暴露而非拟合失败。"
-    },
-    "corpus_provenance": {
-      "frozenAt": "2026-08-03",
-      "stage": "P4b 冻结入库（三段式：staging → 用户签收 → 冻结）",
-      "userSignoff": "2026-08-03：67 条保留现长 + 7 键打回重生成后入库；社交图 13 删 3 增同批落地",
-      "model": "mlx-community/Qwen3.5-9B-4bit",
-      "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
-      "temperature": 0,
-      "maxTokens": 512,
-      "promptTemplateVersions": "v1 首轮 54 条 / v1.5 禁英文双引号续跑 20 条 / v2 P4b 打回重生成（+文号禁令+长度/问句条款）；模板全文见 staging provenance.promptTemplate",
-      "regeneratedKeys": [
-        "A1.question_other",
-        "A6.situational",
-        "B2.case_data",
-        "D3.if_called",
-        "D3.reflection_sheet",
-        "A1.forced_silent_break",
-        "D5.if_nudged"
-      ],
-      "userKeptLongKeys": [
-        "B1.anchor_argument（偏长·用户裁定保留 2026-08-03）",
-        "B1.case_support（偏长·用户裁定保留 2026-08-03）",
-        "B1.proposal（偏长·用户裁定保留 2026-08-03）",
-        "B1.rhetorical_question（偏长·用户裁定保留 2026-08-03）",
-        "B6.domain_point（偏长·用户裁定保留 2026-08-03）",
-        "B6.technical（偏长·用户裁定保留 2026-08-03）"
-      ],
-      "preservedKeys": [
-        "D2.if_called（刻意沉默「…」原样保留）"
-      ],
-      "stagingFile": "migration/persona-v2-corpus-staging.json",
-      "freezeHash": "09489b2ad23eaa9a958ef91f385aab4b992b775c240db044a060b5b5c248a5c2",
-      "freezeHashAlgorithm": "sha256(JSON.stringify(agents.map(a=>[a.id, keys(responses).sort().map(k=>[k, responses[k]])]))) · tools/freeze-corpus-p4b.mjs 与 verify-agent-persona (s) 同算法"
     }
   },
   "_class_context": {
@@ -1913,20 +1853,20 @@
         "primary_style": "证据反驳+量化",
         "secondary_style": "证据核查提问",
         "ally_threshold": 2,
-        "rebut_threshold": 0.4168,
-        "interrupt_tolerance": 0.841
+        "rebut_threshold": 0.4168
       },
       "graph": {
         "allies": [
           "A2",
-          "A3"
+          "A3",
+          "A5"
         ],
         "ally_basis": "同组+证据互补",
         "rivals": [
           "B1",
-          "B3"
+          "B2"
         ],
-        "rival_basis": "立场对立（医保 vs 慢病家属 · KM-01）",
+        "rival_basis": "立场对立",
         "watches": [
           "C1",
           "C2"
@@ -1934,32 +1874,26 @@
         "ignores": [
           "D1",
           "D2"
-        ],
-        "derivedFrom": {
-          "A1>A2": "L96 互动对象「A2×4（同盟+补充）」；L126 A2 跟进 A1",
-          "A1>A3": "L165 A3 侧互动「A1×2」（单向互证）",
-          "A1>B1": "L88 反驳 B1；L89 提问→B1；L96「B1×3 质疑+追问」；KM-01 L1052",
-          "A1>B3": "L96 互动对象「B3×2（引用反驳）」（2026-08-03 签收新增）"
-        }
+        ]
       },
       "responses": {
         "to_open_question": [
-          "先看到原研药降价 87%，数据上 DRG 能控费，制度上国办发文件明确优先使用集采品种。",
-          "从支付方角度，国办发文件要求优先使用集采药，数据上能保医保基金安全，先看到整体效益。"
+          "先看到价格——原研降到这个价位真的有点意外",
+          "数据上，集采第 11 批的降幅意味着支付方覆盖能力大幅提升"
         ],
         "to_rival": [
-          "先看到国办发集采文件，数据上原研药降价 87%，支付方角度必须算总账。",
-          "制度上 DRG 分组逻辑已定，若因家属叙事动摇，公共财政 ROI 将受损。"
+          "我承认依从性是真问题，但医保支付方角度首先要算的是基金可持续",
+          "情感上理解，但国办发 2 号文已经写得很清楚"
         ],
         "concession": [
-          "先看到原研药降价 87% 符合国办发集采精神，数据上支付方 ROI 仍是首要尺度，我理解家属顾虑但制度上必须优先保障基金安全。"
+          "我承认依从性数据值得纳入评价标准——但这本身就是医保关心的"
         ],
         "question_other": [
-          "先看到对方数据，DRG 分组逻辑下这药真能进池吗？",
-          "数据上量价挂钩了，制度上为何没提仿制药质量差异？"
+          "B 组数据来源是哪份院方记录？",
+          "你说的 INR 失控是临床数据还是个案？"
         ],
         "forced_silent_break": [
-          "同意，数据上确实要控费"
+          "我同意 A2 已经说的"
         ]
       },
       "drama": {
@@ -2152,43 +2086,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.688,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.072
         }
       }
     },
@@ -2293,13 +2190,13 @@
         "primary_style": "量化补强+整合",
         "secondary_style": "代表小组发言",
         "ally_threshold": 2,
-        "rebut_threshold": 0.4279,
-        "interrupt_tolerance": 0.8095
+        "rebut_threshold": 0.4279
       },
       "graph": {
         "allies": [
           "A1",
-          "A5"
+          "A5",
+          "A6"
         ],
         "ally_basis": "数据派同盟",
         "rivals": [
@@ -2313,28 +2210,23 @@
           "D1",
           "D2",
           "D4"
-        ],
-        "derivedFrom": {
-          "A2>A1": "L126 跟进 A1；L131/L133「A1×4」",
-          "A2>A5": "L133「A5×2」；L227 A5 侧「A2×3」（双向互证）",
-          "A2>B2": "L129 提问→B2；L133「B2×2」；L381 B2 侧「A2×2」（双向互证）"
-        }
+        ]
       },
       "responses": {
         "to_open_question": [
-          "也就是说，原研药降价 87% 后，算下来医保基金省下的钱，够给社区老人发半年药，这才是真政绩。"
+          "对——医保已经为这个降价付了对应的预算，再开口子就乱了"
         ],
         "to_rival": [
-          "也就是说，原研药降价 87% 后，算下来医保基金省下的钱，够给社区老人发半年药，这才是真政绩。"
+          "你说的抗凝窗口是临床数据还是个案？"
         ],
         "concession": [
-          "也就是说，原研药降价 87% 后，算下来老人每月能省三千多，这才是实打实的政绩。"
+          "也是，量化要看真实复购率"
         ],
         "question_other": [
-          "也就是说，集采后原研药降价 87%，算下来医保基金省下的钱，够给多少老人发补贴？"
+          "B 组讨论里有没有看医保基金的承受度？"
         ],
         "rallying": [
-          "也就是说，原研药降价 87%，算下来医保基金省下的钱，够给社区老人发半年药，这才是真政绩。"
+          "原研 87% 的降幅，意味着同等医保支出可覆盖几倍患者（注：忽略了筹资端约束 · 经管专家建议教师追问）"
         ]
       },
       "drama": {
@@ -2499,43 +2391,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.646,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.036
         }
       }
     },
@@ -2655,12 +2510,12 @@
         "primary_style": "引文+辨术语",
         "secondary_style": "反驳依从性论点",
         "ally_threshold": 2,
-        "rebut_threshold": 0.389,
-        "interrupt_tolerance": 0.8275
+        "rebut_threshold": 0.389
       },
       "graph": {
         "allies": [
-          "A1"
+          "A1",
+          "A2"
         ],
         "ally_basis": "证据-政策互补",
         "rivals": [
@@ -2673,24 +2528,20 @@
         "ignores": [
           "D1",
           "D2"
-        ],
-        "derivedFrom": {
-          "A3>A1": "L165「A1×2」",
-          "A3>B4": "L165「B4×2」；L438 B4 提问→A3（对抗性）；L442「A3×1」"
-        }
+        ]
       },
       "responses": {
         "to_open_question": [
-          "原文是国办发 2 号文要求‘招采合一、量价挂钩’，按规定必须优先使用中选仿制药，严格说不能随意回原研。"
+          "国办发〔2019〕2 号原文是'招采合一、量价挂钩'——注意是'挂钩'不是'合一'"
         ],
         "to_rival": [
-          "原文是‘招采合一、量价挂钩’，咱们得严格按文件办，不能拿临床终点去硬套医保规则。"
+          "依从性问题本质是医患沟通，不该转嫁给采购环节"
         ],
         "concession": [
-          "原文是「招采合一·量价挂钩」，按规定必须优先用集采中选品，家属诉求得区分对待。"
+          "我承认基层执行确实有'换药通知不到位'的情况"
         ],
         "question_other": [
-          "原文是‘量价挂钩’，那原研药降价 87% 后，按文件办，怎么保证基层执行不走样？"
+          "你说的'量价合一'是哪份文件原文？"
         ]
       },
       "drama": {
@@ -2851,43 +2702,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.67,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.162
         }
       }
     },
@@ -2987,8 +2801,7 @@
         "primary_style": "提出新维度",
         "secondary_style": "向教师追问框架",
         "ally_threshold": 2,
-        "rebut_threshold": 0.4218,
-        "interrupt_tolerance": 0.8095
+        "rebut_threshold": 0.4218
       },
       "graph": {
         "allies": [
@@ -3001,20 +2814,17 @@
           "C3",
           "C8"
         ],
-        "ignores": [],
-        "derivedFrom": {
-          "A4>A6": "L196「A6×2」"
-        }
+        "ignores": []
       },
       "responses": {
         "to_open_question": [
-          "如果换个视角，商保产品更看重原研药的品牌溢价，这其实是两个问题。"
+          "如果引入 DRG/DIP 视角，原研 vs 仿制其实分采购、支付两条线"
         ],
         "to_teacher": [
-          "老师，若换商保视角，「集采」后患者自付药费可能反升，这其实是医保控费与商保盈利两个问题。"
+          "我们讨论的是采购，还是支付？混了"
         ],
         "question_other": [
-          "如果换个视角，这份替代率数据真的能代表患者真实选择吗？"
+          "你说的'同价'是医保支付价还是采购挂网价？"
         ]
       },
       "drama": {
@@ -3170,43 +2980,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.646,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.072
         }
       }
     },
@@ -3306,8 +3079,7 @@
         ],
         "primary_style": "援数据补强",
         "ally_threshold": 2,
-        "rebut_threshold": 0.3986,
-        "interrupt_tolerance": 0.8068
+        "rebut_threshold": 0.3986
       },
       "graph": {
         "allies": [
@@ -3318,21 +3090,17 @@
         "watches": [
           "B2"
         ],
-        "ignores": [],
-        "derivedFrom": {
-          "A5>A2": "L227「A2×3」",
-          "A5>A3": "L227「A3×2」"
-        }
+        "ignores": []
       },
       "responses": {
         "evidence_supply": [
-          "BE 是 90%CI 落在 80-125%，但文献里没提临床怎么用，只敢认数据标准。"
+          "一致性评价 BE 试验 90% 置信区间是 80-125%（窄治疗窗药如华法林、地高辛已收紧至 90-111%）"
         ],
         "to_open_question": [
-          "老师，BE 是 80-125% 几何均值比，标准是 90%CI 窄至 90-111%，文献里说这能保疗效。"
+          "也就是说 A 组立场是有制度依据的"
         ],
         "concession": [
-          "我同意原研药降价 87% 能省医保钱，但 BE 值必须卡在 90% 到 111% 之间，标准是几何均值比要在 80-125%，文献里没达标不能替代。"
+          "我引数据时没看 BE 的临床异质性研究"
         ]
       },
       "drama": {
@@ -3488,43 +3256,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.6424,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.144
         }
       }
     },
@@ -3623,8 +3354,7 @@
         ],
         "primary_style": "情境化补充",
         "ally_threshold": 2,
-        "rebut_threshold": 0.4168,
-        "interrupt_tolerance": 0.8095
+        "rebut_threshold": 0.4168
       },
       "graph": {
         "allies": [
@@ -3634,17 +3364,14 @@
         "watches": [
           "B5"
         ],
-        "ignores": [],
-        "derivedFrom": {
-          "A6>A4": "L196 A4 侧「A6×2」（单向互证）"
-        }
+        "ignores": []
       },
       "responses": {
         "situational": [
-          "我们店里发现，集采药上架后，老人反而更主动指名要买，这很真实。"
+          "我们店里集采药上架后，老人主动指名要的反而多了"
         ],
         "to_open_question": [
-          "我们店里发现，患者指名要原研药时，店员常劝换集采仿制，但实际销售数据证明，只要解释清楚等效性，患者用脚投票，照样愿意买单。"
+          "零售端反馈跟政策预设其实有差距"
         ]
       },
       "drama": {
@@ -3799,43 +3526,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.646,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.072
         }
       }
     },
@@ -3929,8 +3619,7 @@
         ],
         "primary_style": "反思小结",
         "ally_threshold": 2,
-        "rebut_threshold": 0.4344,
-        "interrupt_tolerance": 0.7897
+        "rebut_threshold": 0.4344
       },
       "graph": {
         "allies": [],
@@ -3939,12 +3628,11 @@
           "A1",
           "B1"
         ],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "late_reflection": [
-          "今天我意识到，虽然数据支持集采，但我心里还是有点犹豫，毕竟没实操过。"
+          "今天我意识到，价格不是这场讨论的核心，是'换还是不换'的决策机制"
         ]
       },
       "drama": {
@@ -4107,43 +3795,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.6196,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.072
         }
       }
     },
@@ -4236,8 +3887,7 @@
         ],
         "primary_style": "私下附议",
         "ally_threshold": 2,
-        "rebut_threshold": 0.414,
-        "interrupt_tolerance": 0.5553
+        "rebut_threshold": 0.414
       },
       "graph": {
         "allies": [
@@ -4245,14 +3895,11 @@
         ],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {
-          "A8>A1": "L309 小组内低声「A1 说的有道理」；L314「A1×1（仅小组内）」；L320 课后私下向 A1 提问"
-        }
+        "ignores": []
       },
       "responses": {
         "private_to_ally": [
-          "嗯，其实我也觉得 A 组有道理，就是怕说错被反驳，不敢大声说。"
+          "A1 说的有道理，但我不太敢在全班说"
         ]
       },
       "drama": {
@@ -4407,43 +4054,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.1444,
-          "scaffoldedBonus": 0.2205
-        },
-        "openQProbe": {
-          "gain": 0.108
         }
       }
     },
@@ -4569,8 +4179,7 @@
         "primary_style": "亲历叙事+反诘",
         "secondary_style": "提案",
         "ally_threshold": 2,
-        "rebut_threshold": 0.426,
-        "interrupt_tolerance": 0.828
+        "rebut_threshold": 0.426
       },
       "graph": {
         "allies": [
@@ -4592,30 +4201,23 @@
         "ignores": [
           "D1",
           "D4"
-        ],
-        "derivedFrom": {
-          "B1>B2": "L348「B2×3」；L381 B2 侧「B1×3」（双向互证）",
-          "B1>B4": "L348「B4×2」；L442 B4 侧「B1×2」（双向互证）",
-          "B1>B6": "L500 B6 侧「B1×2」（单向互证）；KM-03 L1054「B1 提出 → B6/B4 强化」",
-          "B1>A1": "L341「A1 反驳后」；KM-01 L1052 立场冲突核心",
-          "B1>A2": "L342 A2「7 倍覆盖」触发情境追问；L348「A2×2」"
-        }
+        ]
       },
       "responses": {
         "anchor_argument": [
-          "但是，我父亲十年糖尿病，进口胰岛素不能随便换，你们怎么算这 87% 的降价，就是病人的救命钱？"
+          "但已用原研 2 年的患者怎么办？替代焦虑是真问题"
         ],
         "case_support": [
-          "但是，我父亲用进口胰岛素十年，仿制药虽便宜，可那 30 次陪诊里，他血糖忽高忽低，你们怎么算这隐性成本？"
+          "我父亲换药后 3 周血糖波动加剧，调到三餐前+睡前 4 点 SMBG 才稳"
         ],
         "rhetorical_question": [
-          "但是，我父亲十年糖尿病，进口胰岛素没断过，你们怎么算这 87% 降价里，他多挨的针头值多少钱？"
+          "如果换药意味着家庭每月多 800 块自掏，你们怎么算这笔账？"
         ],
         "concession": [
-          "我理解医院要控费，但我父亲十年打进口胰岛素，断药真会出事，你们怎么算这风险？"
+          "我承认这不是采购环节能完全解决的，需要医患沟通配合"
         ],
         "proposal": [
-          "但是，我父亲十年糖尿病，SMBG 7 点法记录里，仿制药批次差异让他血糖波动，院方匿名数据也显示，咱们得先解决稳定性，再谈价格。"
+          "建议在集采配套里加'换药观察期 3 个月'的临床路径"
         ]
       },
       "drama": {
@@ -4796,43 +4398,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.674,
-          "scaffoldedBonus": 0.1125
-        },
-        "openQProbe": {
-          "gain": 0.045
         }
       }
     },
@@ -4937,8 +4502,7 @@
         "primary_style": "技术反诘",
         "secondary_style": "病例引证",
         "rebut_threshold": 0.4279,
-        "ally_threshold": 2,
-        "interrupt_tolerance": 0.823
+        "ally_threshold": 2
       },
       "graph": {
         "allies": [
@@ -4953,23 +4517,18 @@
         ],
         "ignores": [
           "D1"
-        ],
-        "derivedFrom": {
-          "B2>B1": "L381「B1×3」（双向互证）",
-          "B2>A2": "L375 反诘 A 组；L381「A2×2」；L129 A2 提问→B2",
-          "B2>A5": "L381「A5×1」；语义闭环：L375 反诘「BE 80-125%」↔ L222 A5 援引「BE 90%CI 80-125%」"
-        }
+        ]
       },
       "responses": {
         "technical_rebuttal": [
-          "华法林治疗窗窄，INR 2.0-3.0 波动大，仿制药溶出曲线差异直接威胁临床安全。",
-          "我见习时见过因辅料不同导致抗凝失败，技术细节不能妥协，必须优先保障疗效。"
+          "华法林是窄治疗窗·不同厂家辅料、晶型与溶出曲线差异可影响生物利用度",
+          "BE 80-125% 对窄治疗窗药是不是该卡更紧？"
         ],
         "case_data": [
-          "浦东抗凝门诊 3 个月 12 例 INR 失控，仿制药溶出差异是主因。"
+          "院方记录显示 6 个月内 7 例 INR 超出 2.0-3.0 治疗窗"
         ],
         "concession": [
-          "你说医保省钱没错，但「治疗窗」窄的华法林，辅料差异导致 INR 波动，安全底线不能妥协。"
+          "我支持加观察期，但不必否定集采"
         ]
       },
       "drama": {
@@ -5139,43 +4698,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.664,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.036
         }
       }
     },
@@ -5291,8 +4813,7 @@
         ],
         "primary_style": "情境陈述",
         "ally_threshold": 2,
-        "rebut_threshold": 0.4334,
-        "interrupt_tolerance": 0.837
+        "rebut_threshold": 0.4334
       },
       "graph": {
         "allies": [
@@ -5303,22 +4824,17 @@
           "A3"
         ],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {
-          "B3>B1": "L413「B1×2」；L411「听 B1/B2 定调」",
-          "B3>B4": "L413「B4×1」",
-          "B3>A3": "L408「反驳 A3：通知到位也无济于事」"
-        }
+        "ignores": []
       },
       "responses": {
         "case": [
-          "其实我妈吃降压药八年，换药后她总担心谷峰时间不对，这焦虑真不是政策能马上解决的。"
+          "降压药的谷峰差异在仿制品中确实存在"
         ],
         "rebuttal": [
-          "其实我妈换药后血压波动，我妈说这药劲儿不对，咱老百姓心里慌，真不是政策的问题。"
+          "通知到位也无济于事，老人换药本身有抗拒"
         ],
         "concession": [
-          "其实我妈换药那会儿特焦虑，虽然集采便宜是制度优势，但咱老百姓心里没底，这情绪得先被看见。"
+          "教师说的'医患沟通配合'我同意"
         ]
       },
       "drama": {
@@ -5473,43 +4989,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.686,
-          "scaffoldedBonus": 0.1125
-        },
-        "openQProbe": {
-          "gain": 0.036
         }
       }
     },
@@ -5627,8 +5106,7 @@
         ],
         "primary_style": "叙事+追问",
         "ally_threshold": 2,
-        "rebut_threshold": 0.4334,
-        "interrupt_tolerance": 0.842
+        "rebut_threshold": 0.4334
       },
       "graph": {
         "allies": [
@@ -5639,19 +5117,14 @@
           "A3"
         ],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {
-          "B4>B1": "L442「B1×2」（双向互证）",
-          "B4>B6": "L442「B6×1」；L500 B6 侧「B4×1」（双向互证）",
-          "B4>A3": "L438 提问→A3「国办文件里有没有规定换药的临床观察义务？」"
-        }
+        "ignores": []
       },
       "responses": {
         "case": [
-          "群里说换药后我爸再入院了，这算不算仿制药替代的代价？"
+          "我加的病友群里有 4 例换药后再入院"
         ],
         "question": [
-          "群里说换药后父亲再入院，这算不算仿制药质量问题的真实数据？"
+          "国办文件里有没有规定换药的临床观察义务？"
         ]
       },
       "drama": {
@@ -5809,43 +5282,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.696,
-          "scaffoldedBonus": 0.09
-        },
-        "openQProbe": {
-          "gain": 0.036
         }
       }
     },
@@ -5940,8 +5376,7 @@
           "话题:[老年,依从性]"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.408,
-        "interrupt_tolerance": 0.7879
+        "rebut_threshold": 0.408
       },
       "graph": {
         "allies": [
@@ -5951,17 +5386,14 @@
         "watches": [
           "A6"
         ],
-        "ignores": [],
-        "derivedFrom": {
-          "B5>B3": "L471「B3×1」"
-        }
+        "ignores": []
       },
       "responses": {
         "situational": [
-          "爷爷帕金森换药，记不住就漏服，这代价真不是光省那点药钱能衡量的。"
+          "老年人换药记不住，配药袋必须重新贴标，工作量很大"
         ],
         "late_reflection": [
-          "爷爷帕金森换药，记不住就漏服，这代价真不是光省那点药钱能衡量的。"
+          "我之前没意识到这其实是基层医院的活"
         ]
       },
       "drama": {
@@ -6118,43 +5550,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.6172,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.126
         }
       }
     },
@@ -6251,8 +5646,7 @@
           "讨论 5 年以上方案时"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.4279,
-        "interrupt_tolerance": 0.8095
+        "rebut_threshold": 0.4279
       },
       "graph": {
         "allies": [
@@ -6261,18 +5655,14 @@
         ],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {
-          "B6>B1": "L500「B1×2」",
-          "B6>B2": "L500「B2×1」"
-        }
+        "ignores": []
       },
       "responses": {
         "domain_point": [
-          "深圳肿瘤科见习时，母亲吃阿那曲唑，集采后仿制药虽便宜，但内分泌治疗差之毫厘谬以千里，5 年依从性才是命悬一线。"
+          "内分泌治疗 5 年起步，期间换药对依从性影响极大"
         ],
         "technical": [
-          "深圳肿瘤科见习时，母亲吃仿制药后内分泌疗效波动，5 年依从性命悬一线，数据再漂亮也抵不过临床真实。"
+          "原研 vs 仿制的差别可能在辅料，对长期使用敏感人群非小事"
         ]
       },
       "drama": {
@@ -6431,43 +5821,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.646,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.036
         }
       }
     },
@@ -6562,25 +5915,19 @@
           "全班相对安静时"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.4218,
-        "interrupt_tolerance": 0.8145
+        "rebut_threshold": 0.4218
       },
       "graph": {
-        "allies": [
-          "A4"
-        ],
+        "allies": [],
         "rivals": [],
         "watches": [
           "A4"
         ],
-        "ignores": [],
-        "derivedFrom": {
-          "B7>A4": "L524 B7 提问→A 组；L528「A4×1（A4 接住了她的问题）」（2026-08-03 签收新增）"
-        }
+        "ignores": []
       },
       "responses": {
         "question": [
-          "监测频次和 SCr 变化才是换药关键，别光盯着价格，外公那会儿就是看指标稳不稳才敢换的。"
+          "换药后 SCr + eGFR + 电解质需不需要相应加密监测？"
         ]
       },
       "drama": {
@@ -6736,43 +6083,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.656,
-          "scaffoldedBonus": 0.1125
-        },
-        "openQProbe": {
-          "gain": 0.072
         }
       }
     },
@@ -6866,8 +6176,7 @@
           "全班"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.414,
-        "interrupt_tolerance": 0.7861
+        "rebut_threshold": 0.414
       },
       "graph": {
         "allies": [
@@ -6875,14 +6184,11 @@
         ],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {
-          "B8>B7": "L556「B7×1（同组）」"
-        }
+        "ignores": []
       },
       "responses": {
         "private": [
-          "我奶奶那鸡飞狗跳的日子，真怕换了便宜药，血糖血压又失控了。"
+          "我奶奶吃 7 种药，换 1 种都鸡飞狗跳"
         ]
       },
       "drama": {
@@ -7036,43 +6342,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.6148,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.108
         }
       }
     },
@@ -7181,33 +6450,31 @@
           "与同桌 D5 低声 30s"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.4566,
-        "interrupt_tolerance": 0.6215
+        "rebut_threshold": 0.4566
       },
       "graph": {
         "allies": [
-          "D5"
+          "C2",
+          "C3",
+          "C4"
         ],
-        "ally_basis": "同桌低声交流互证（文档 L587/L591/L926/L931）",
+        "ally_basis": "都有药企背景",
         "rivals": [],
         "watches": [
           "A1",
           "B1"
         ],
-        "ignores": [],
-        "derivedFrom": {
-          "C1>D5": "L587/L591 与同桌 D5 低声交流；L926/L931 D5 侧互证（2026-08-03 签收新增）"
-        }
+        "ignores": []
       },
       "responses": {
         "if_called_by_teacher": [
-          "老师，我理解医保控费，但 NPV 和专利期是 MNC 研发 Pipeline 的基石，不能因噎废食。"
+          "其实原研降价 87% 也是企业策略的一部分——专利后期守住医院端而非放弃市场"
         ],
         "internal_monologue": [
-          "NPV 模型里原研药利润虽薄，但 Pipeline 还在，这不算背叛吧？"
+          "A 组在简化 R&D 成本；B 组在道德化讨论；其实两边都没看到 NPV 回收周期"
         ],
         "private_to_neighbor": [
-          "其实 MNC 算 NPV 时，专利期后的 Pipeline 投入才是真金白银，集采没伤到根。"
+          "你看，他们都没提 Pipeline 现金流"
         ]
       },
       "drama": {
@@ -7400,43 +6667,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.23,
-          "scaffoldedBonus": 0.2385
-        },
-        "openQProbe": {
-          "gain": -0.036
         }
       }
     },
@@ -7555,25 +6785,25 @@
           "写未说的论点"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.4148,
-        "interrupt_tolerance": 0.6513
+        "rebut_threshold": 0.4148
       },
       "graph": {
-        "allies": [],
+        "allies": [
+          "C1",
+          "C3"
+        ],
         "rivals": [],
         "watches": [
           "A1",
           "B2"
         ],
-        "ignores": [],
-        "derivedFrom": {},
-        "ally_basis": ""
+        "ignores": []
       },
       "responses": {
         "if_called_by_teacher": [
-          "老师，我有点犹豫，但想起母亲在恒瑞做 II 期临床时，她总担心集采后原研药数据被稀释，影响后续创新投入。"
+          "其实我想说，一致性评价对仿制药是公平起跑线，但对原研创新者来说，是否会让长期 R&D 投入预期下降，这才是真正的连带效应"
         ],
-        "post_class_action": "老师，我刚才举手没被点到，有点担心是不是太心急了。"
+        "post_class_action": "在班级群发了一段文字阐述未说出的观点"
       },
       "drama": {
         "tension": "想说 vs 被忽视的挫败",
@@ -7760,43 +6990,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.2764,
-          "scaffoldedBonus": 0.1935
-        },
-        "openQProbe": {
-          "gain": 0.081
         }
       }
     },
@@ -7899,34 +7092,30 @@
           "写小组报告稿（实际贡献 ≈5 但署名 A2）"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.4168,
-        "interrupt_tolerance": 0.6765
+        "rebut_threshold": 0.4168
       },
       "graph": {
         "allies": [
+          "C1",
           "A2"
         ],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {
-          "C3>A2": "L646 小组报告稿「全是 C3 写的但是 A2 念的」；L650「A2×2（小组内）」"
-        },
-        "ally_basis": "小组内协作（报告稿 C3 写、A2 念）"
+        "ignores": []
       },
       "responses": {
         "if_called_uncertain": [
-          "我……先说个数据，集采后原研 NPV 确实跌了，但专利期没到，BD 那边可能还在谈授权金。",
-          "那个……我有点不敢说，毕竟不是行业内部，但按 CRO 流程看，仿制药替代后原研现金流短期会承压。"
+          "我……补一句行吗——从企业角度看，药师供给不足不全是门店自己能控的，行业趋势那半更像 T。可能只说对一半。",
+          "小组里我们聊过，企业侧其实也在算这笔账——我说不好，但门店排班和药师供给好像得拆开归。"
         ],
         "small_group": [
-          "这 NPV 模型里，专利期一缩短，BD 溢价空间直接没了，数据上仿制药替代是必然的。"
+          "原研降价 87% 背后是企业守住医院端的策略——不是'专利悬崖'，悬崖是专利到期触发的"
         ],
         "report_text_written": [
-          "报告里这段数据我写了，但怕大家觉得我太懂行，其实只是算算专利期 NPV 和 BD 条款。"
+          "集采后市场退出/转线是企业经管层的核心议题（写入报告但未念出）"
         ],
         "if_called_by_teacher": [
-          "老师，我查过百济数据，集采后 NPV 确实下降，但专利期才是关键变量。"
+          "我可以从 BD 视角解释一下——MNC 在国内的策略其实有 4 种"
         ]
       },
       "drama": {
@@ -8108,43 +7297,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.31,
-          "scaffoldedBonus": 0.1935
-        },
-        "openQProbe": {
-          "gain": 0.072
         }
       }
     },
@@ -8248,26 +7400,26 @@
           "A5 引 BE 时 → 想接但停"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.4334,
-        "interrupt_tolerance": 0.6512
+        "rebut_threshold": 0.4334
       },
       "graph": {
-        "allies": [],
+        "allies": [
+          "C1",
+          "C3"
+        ],
         "rivals": [],
         "watches": [
           "A5",
           "B2"
         ],
-        "ignores": [],
-        "derivedFrom": {},
-        "ally_basis": ""
+        "ignores": []
       },
       "responses": {
         "if_called_by_teacher": [
-          "老师，我实习见过 GMP 车间，洁净区分级和批记录能保质控，仿制药替代是公共价值。"
+          "其实仿制企业在 GMP 现场和原研差距没那么大，关键看洁净区分级和批记录质量"
         ],
-        "small_group_contrib": "我实习时见过 GMP 洁净区，批记录能证明仿制药质控达标。",
-        "post_class_action": "刚才讨论挺激烈，其实我在豪森实习时，GMP 洁净区批记录里质控数据也很严。"
+        "small_group_contrib": "贡献了 GMP 段落到报告稿但被砍",
+        "post_class_action": "私下问教师'是不是有药企背景就不能在这种课讨论？'"
       },
       "drama": {
         "tension": "实操懂得多 vs 自我审查",
@@ -8436,43 +7588,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.2696,
-          "scaffoldedBonus": 0.2385
-        },
-        "openQProbe": {
-          "gain": 0.018
         }
       }
     },
@@ -8572,23 +7687,22 @@
           "@01:30, @02:20, @14:00, @22:00, @35:00 共 5 次"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.4036,
-        "interrupt_tolerance": 0.6405
+        "rebut_threshold": 0.4036
       },
       "graph": {
-        "allies": [],
+        "allies": [
+          "C1"
+        ],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {},
-        "ally_basis": ""
+        "ignores": []
       },
       "responses": {
         "intended_but_not_said": [
-          "其实我寒假去县医院跑过，但当时没机会插话，只能记着原研药降价后大家的选择。"
+          "其实国内仿制企业内部分化很大，集采前后存活下来的就那么几家"
         ],
         "if_finally_called": [
-          "其实我爸是药企的，但县医院确实只进集采药，这数据挺真实的。"
+          "对，其实国内仿制企业也是集采赢家——头部企业市场更集中了"
         ]
       },
       "drama": {
@@ -8790,43 +7904,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.262,
-          "scaffoldedBonus": 0.1935
-        },
-        "openQProbe": {
-          "gain": 0.117
         }
       }
     },
@@ -8922,26 +7999,24 @@
           "反思单上写完整观点"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.421,
-        "interrupt_tolerance": 0.6495
+        "rebut_threshold": 0.421
       },
       "graph": {
         "allies": [],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "if_called_uncertain": [
-          "我……刚在药代实习，只看到过仿制药怎么进医院，没懂政策细节，可能只说对一半。",
-          "老师，我有个私心：仿制药企为了进集采，其实也拼命降价，这算不算另一种‘受益’？"
+          "我可以……说一句吗？仿制企业其实也是受益方——比如换品后供货稳定性，是不是能写进 S？不确定对不对。",
+          "刚才那个角度我一直没插进去……就是，换品之后门店的进货成本其实是降的。可能片面了。"
         ],
         "intended": [
-          "（低头记笔记，等老师说完才小声补一句）其实我在药代实习时见过，集采后仿制药销量暴涨，企业才是真赢家。"
+          "仿制企业其实也是集采受益方——头部市场份额更集中了"
         ],
         "reflection_sheet": [
-          "听大家吵医保和患者，我实习时见过仿制药数据达标，其实它们也是集采赢家。"
+          "这堂课的议题被框死为医保 vs 患者，我有第三视角但找不到插入点"
         ]
       },
       "drama": {
@@ -9105,43 +8180,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.274,
-          "scaffoldedBonus": 0.1935
-        },
-        "openQProbe": {
-          "gain": 0.072
         }
       }
     },
@@ -9240,22 +8278,20 @@
           "记 6 页笔记"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.445,
-        "interrupt_tolerance": 0.6134
+        "rebut_threshold": 0.445
       },
       "graph": {
         "allies": [],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "intended_but_hidden": [
-          "笔记记满六页，但讨论时只能低头，怕暴露家里小厂的事。"
+          "集采加速 API 议价权下降+环保升级成本+CDE 关联审评后 DMF 议价变化——小厂三重挤压"
         ],
         "if_anonymous_channel": [
-          "匿名区：家里小厂年销八百万，集采后 API 被制剂厂压价，环保 GMP 升级成本全得我们扛。"
+          "（匿名提问通道可能激活）"
         ]
       },
       "drama": {
@@ -9416,43 +8452,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.2192,
-          "scaffoldedBonus": 0.2385
-        },
-        "openQProbe": {
-          "gain": 0
         }
       }
     },
@@ -9547,8 +8546,7 @@
           "所有"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.4223,
-        "interrupt_tolerance": 0.663
+        "rebut_threshold": 0.4223
       },
       "graph": {
         "allies": [],
@@ -9557,15 +8555,14 @@
           "C1",
           "B1"
         ],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "if_regulatory_slot_exists": [
-          "老师，我母亲在药监局值班，但我也在药企实习，这种立场冲突让我很难开口。"
+          "从药监角度看，集采后的不良反应监测和上市后再评价是新的监管重点——GSP/GVP/MAH 制度的衔接才是落地难点"
         ],
         "if_called": [
-          "老师，我实习在药企，我妈是药监局，这立场我有点乱，不敢多说。"
+          "我妈在药监，但我也在药企实习过，所以…我可以代表两边吗？"
         ]
       },
       "drama": {
@@ -9725,43 +8722,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.292,
-          "scaffoldedBonus": 0.1935
-        },
-        "openQProbe": {
-          "gain": 0.054
         }
       }
     },
@@ -9852,19 +8812,17 @@
           "所有"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.402,
-        "interrupt_tolerance": 0.5793
+        "rebut_threshold": 0.402
       },
       "graph": {
         "allies": [],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "if_called": [
-          "老师，我有点紧张，不太懂集采具体怎么影响慢病用药，只能记下来回去查查资料。"
+          "我…我没想好"
         ]
       },
       "drama": {
@@ -10020,43 +8978,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.1804,
-          "scaffoldedBonus": 0.1935
-        },
-        "openQProbe": {
-          "gain": 0.144
         }
       }
     },
@@ -10147,15 +9068,13 @@
           "所有"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.402,
-        "interrupt_tolerance": 0.4542
+        "rebut_threshold": 0.402
       },
       "graph": {
         "allies": [],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "if_called": [
@@ -10315,43 +9234,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.0136,
-          "scaffoldedBonus": 0.1935
-        },
-        "openQProbe": {
-          "gain": 0.144
         }
       }
     },
@@ -10448,8 +9330,7 @@
           "想举手但等不到机会"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.402,
-        "interrupt_tolerance": 0.6545
+        "rebut_threshold": 0.402
       },
       "graph": {
         "allies": [],
@@ -10457,15 +9338,14 @@
         "watches": [
           "B5"
         ],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "if_called": [
-          "被点名了，其实基层换药最耗人，贴袋、通知、重建档全是白忙活。"
+          "其实基层换药的行政成本是教师没提到的——通知患者、贴药袋、重新建档案，社区医生做这些是没工分的"
         ],
         "reflection_sheet": [
-          "反思单上记着：集采省了钱，但基层换药通知的行政成本谁算？"
+          "这堂课其实漏了'基层执行成本'这一维度，我想说但没机会"
         ]
       },
       "drama": {
@@ -10630,43 +9510,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.284,
-          "scaffoldedBonus": 0.171
-        },
-        "openQProbe": {
-          "gain": 0.144
         }
       }
     },
@@ -10755,19 +9598,17 @@
           "所有"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.402,
-        "interrupt_tolerance": 0.6976
+        "rebut_threshold": 0.402
       },
       "graph": {
         "allies": [],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "if_called": [
-          "老师，我有点感冒发烧，脑子不太清醒，这药的事我可能说不好。"
+          "……老师，我今天有点不舒服"
         ]
       },
       "drama": {
@@ -10917,43 +9758,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.3468,
-          "scaffoldedBonus": 0.135
-        },
-        "openQProbe": {
-          "gain": 0.144
         }
       }
     },
@@ -11049,8 +9853,7 @@
           "主动"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.414,
-        "interrupt_tolerance": 0.6495
+        "rebut_threshold": 0.414
       },
       "graph": {
         "allies": [
@@ -11058,17 +9861,14 @@
         ],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {
-          "D5>C1": "L926 接 C1 低声交流；L931「C1×1（小组内）」；L587/L591 C1 侧互证"
-        }
+        "ignores": []
       },
       "responses": {
         "to_C1_private": [
-          "我同意 C1 观点，但我爸在药店时，患者总担心仿制药‘分量’不够，这顾虑挺真实的。"
+          "我家店里也有老人换药不适应"
         ],
         "if_nudged": [
-          "我同意，但担心疗效不够。"
+          "我同意 B 组"
         ]
       },
       "drama": {
@@ -11233,43 +10033,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.274,
-          "scaffoldedBonus": 0.1935
-        },
-        "openQProbe": {
-          "gain": 0.108
         }
       }
     },
@@ -11377,19 +10140,17 @@
           "主动"
         ],
         "ally_threshold": 1,
-        "rebut_threshold": 0.4277,
-        "interrupt_tolerance": 0.6518
+        "rebut_threshold": 0.4277
       },
       "graph": {
         "allies": [],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "report_read": [
-          "老师，我们组认为集采后仿制药替代能省医保钱，但具体怎么换药还得看医生，我们不太懂细节。"
+          "我们组认为应保留集采…（念稿）"
         ]
       },
       "drama": {
@@ -11546,43 +10307,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.2804,
-          "scaffoldedBonus": 0.171
-        },
-        "openQProbe": {
-          "gain": 0.108
         }
       }
     },
@@ -11691,8 +10415,7 @@
           "表态"
         ],
         "ally_threshold": 2,
-        "rebut_threshold": 0.396,
-        "interrupt_tolerance": 0.6554
+        "rebut_threshold": 0.396
       },
       "graph": {
         "allies": [],
@@ -11700,12 +10423,11 @@
         "watches": [
           "A5"
         ],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "clarifying_question": [
-          "老师，我没完全听懂，什么叫‘一致性评价’？"
+          "什么叫'一致性评价'？我没完全听懂"
         ]
       },
       "drama": {
@@ -11861,43 +10583,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.2852,
-          "scaffoldedBonus": 0.171
-        },
-        "openQProbe": {
-          "gain": 0.162
         }
       }
     },
@@ -11988,19 +10673,17 @@
           "主动"
         ],
         "ally_threshold": 1,
-        "rebut_threshold": 0.4277,
-        "interrupt_tolerance": 0.6243
+        "rebut_threshold": 0.4277
       },
       "graph": {
         "allies": [],
         "rivals": [],
         "watches": [],
-        "ignores": [],
-        "derivedFrom": {}
+        "ignores": []
       },
       "responses": {
         "if_called": [
-          "老师我同意，原研药降价确实能省医保钱，就是担心家里老人突然换药不适应。"
+          "我同意 A2 说的"
         ]
       },
       "drama": {
@@ -12155,43 +10838,6 @@
             "F6"
           ],
           "rule": "persona-map-v1.R2"
-        },
-        "rules.interrupt_tolerance": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.directMult": {
-          "from": [
-            "F4",
-            "F1",
-            "silenceCauses"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.publicCall.scaffoldedBonus": {
-          "from": [
-            "F4"
-          ],
-          "rule": "persona-map-v1.R4"
-        },
-        "interventionResponse.openQProbe.gain": {
-          "from": [
-            "F7"
-          ],
-          "rule": "persona-map-v1.R4"
-        }
-      },
-      "interventionResponse": {
-        "publicCall": {
-          "directMult": 0.2404,
-          "scaffoldedBonus": 0.1935
-        },
-        "openQProbe": {
-          "gain": 0.108
         }
       }
     }

@@ -1,0 +1,434 @@
+{
+  "_meta": {
+    "purpose": "P2 persona-map-v1 标定前的 v0.3 运行参数备份（persona-v2-contract §14 P2）：替换 state_init 五字段与 ally/rebut_threshold 之前的旧值存档，供前后对照报告与逐阶段回退使用。",
+    "source": "shared/virtual-class-agents.json @ virtual-class-agents-v0.3 / sim-1.1.0",
+    "createdPhase": "P2",
+    "fields": [
+      "state_init.attention",
+      "state_init.speak_motivation",
+      "state_init.fatigue",
+      "state_init.social_safety",
+      "state_init.stance_position",
+      "rules.ally_threshold",
+      "rules.rebut_threshold"
+    ]
+  },
+  "backup": {
+    "A1": {
+      "state_init": {
+        "attention": 0.92,
+        "speak_motivation": 0.88,
+        "fatigue": 0.0,
+        "social_safety": 0.82,
+        "stance_position": 0.92
+      },
+      "rules": {
+        "ally_threshold": 0.7,
+        "rebut_threshold": 0.4
+      }
+    },
+    "A2": {
+      "state_init": {
+        "attention": 0.85,
+        "speak_motivation": 0.82,
+        "fatigue": 0.0,
+        "social_safety": 0.78,
+        "stance_position": 0.78
+      },
+      "rules": {
+        "ally_threshold": 0.6,
+        "rebut_threshold": 0.5
+      }
+    },
+    "A3": {
+      "state_init": {
+        "attention": 0.85,
+        "speak_motivation": 0.7,
+        "fatigue": 0.0,
+        "social_safety": 0.78,
+        "stance_position": 0.75
+      },
+      "rules": {
+        "ally_threshold": 0.7,
+        "rebut_threshold": 0.5
+      }
+    },
+    "A4": {
+      "state_init": {
+        "attention": 0.8,
+        "speak_motivation": 0.6,
+        "fatigue": 0.0,
+        "social_safety": 0.6,
+        "stance_position": 0.5
+      },
+      "rules": {
+        "ally_threshold": 0.5,
+        "rebut_threshold": 0.6
+      }
+    },
+    "A5": {
+      "state_init": {
+        "attention": 0.85,
+        "speak_motivation": 0.55,
+        "fatigue": 0.0,
+        "social_safety": 0.7,
+        "stance_position": 0.7
+      },
+      "rules": {
+        "ally_threshold": 0.6,
+        "rebut_threshold": 0.5
+      }
+    },
+    "A6": {
+      "state_init": {
+        "attention": 0.75,
+        "speak_motivation": 0.45,
+        "fatigue": 0.0,
+        "social_safety": 0.6,
+        "stance_position": 0.6
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "A7": {
+      "state_init": {
+        "attention": 0.7,
+        "speak_motivation": 0.35,
+        "fatigue": 0.0,
+        "social_safety": 0.65,
+        "stance_position": 0.4
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "A8": {
+      "state_init": {
+        "attention": 0.55,
+        "speak_motivation": 0.15,
+        "fatigue": 0.05,
+        "social_safety": 0.4,
+        "stance_position": 0.3
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "B1": {
+      "state_init": {
+        "attention": 0.95,
+        "speak_motivation": 0.9,
+        "fatigue": 0.0,
+        "social_safety": 0.75,
+        "stance_position": -0.92
+      },
+      "rules": {
+        "ally_threshold": 0.7,
+        "rebut_threshold": 0.3
+      }
+    },
+    "B2": {
+      "state_init": {
+        "attention": 0.9,
+        "speak_motivation": 0.75,
+        "fatigue": 0.0,
+        "social_safety": 0.78,
+        "stance_position": -0.78
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": 0.4
+      }
+    },
+    "B3": {
+      "state_init": {
+        "attention": 0.78,
+        "speak_motivation": 0.65,
+        "fatigue": 0.0,
+        "social_safety": 0.72,
+        "stance_position": -0.7
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "B4": {
+      "state_init": {
+        "attention": 0.8,
+        "speak_motivation": 0.5,
+        "fatigue": 0.0,
+        "social_safety": 0.7,
+        "stance_position": -0.7
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "B5": {
+      "state_init": {
+        "attention": 0.75,
+        "speak_motivation": 0.4,
+        "fatigue": 0.0,
+        "social_safety": 0.65,
+        "stance_position": -0.5
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "B6": {
+      "state_init": {
+        "attention": 0.85,
+        "speak_motivation": 0.6,
+        "fatigue": 0.0,
+        "social_safety": 0.75,
+        "stance_position": -0.78
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "B7": {
+      "state_init": {
+        "attention": 0.75,
+        "speak_motivation": 0.35,
+        "fatigue": 0.0,
+        "social_safety": 0.6,
+        "stance_position": -0.5
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "B8": {
+      "state_init": {
+        "attention": 0.55,
+        "speak_motivation": 0.2,
+        "fatigue": 0.05,
+        "social_safety": 0.45,
+        "stance_position": -0.4
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "C1": {
+      "state_init": {
+        "attention": 0.92,
+        "speak_motivation": 0.7,
+        "fatigue": 0.0,
+        "social_safety": 0.35,
+        "stance_position": 0.55
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "C2": {
+      "state_init": {
+        "attention": 0.85,
+        "speak_motivation": 0.6,
+        "fatigue": 0.0,
+        "social_safety": 0.4,
+        "stance_position": 0.5
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "C3": {
+      "state_init": {
+        "attention": 0.82,
+        "speak_motivation": 0.55,
+        "fatigue": 0.0,
+        "social_safety": 0.5,
+        "stance_position": 0.4
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "C4": {
+      "state_init": {
+        "attention": 0.78,
+        "speak_motivation": 0.45,
+        "fatigue": 0.0,
+        "social_safety": 0.4,
+        "stance_position": 0.6
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "C5": {
+      "state_init": {
+        "attention": 0.7,
+        "speak_motivation": 0.5,
+        "fatigue": 0.1,
+        "social_safety": 0.4,
+        "stance_position": 0.3
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "C6": {
+      "state_init": {
+        "attention": 0.65,
+        "speak_motivation": 0.3,
+        "fatigue": 0.05,
+        "social_safety": 0.5,
+        "stance_position": 0.25
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "C7": {
+      "state_init": {
+        "attention": 0.8,
+        "speak_motivation": 0.2,
+        "fatigue": 0.0,
+        "social_safety": 0.3,
+        "stance_position": 0.15
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "C8": {
+      "state_init": {
+        "attention": 0.75,
+        "speak_motivation": 0.3,
+        "fatigue": 0.0,
+        "social_safety": 0.45,
+        "stance_position": 0.1
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "D1": {
+      "state_init": {
+        "attention": 0.5,
+        "speak_motivation": 0.06,
+        "fatigue": 0.05,
+        "social_safety": 0.3,
+        "stance_position": 0.0
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "D2": {
+      "state_init": {
+        "attention": 0.3,
+        "speak_motivation": 0.01,
+        "fatigue": 0.3,
+        "social_safety": 0.25,
+        "stance_position": 0.0
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "D3": {
+      "state_init": {
+        "attention": 0.8,
+        "speak_motivation": 0.32,
+        "fatigue": 0.0,
+        "social_safety": 0.5,
+        "stance_position": -0.2
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "D4": {
+      "state_init": {
+        "attention": 0.15,
+        "speak_motivation": 0.02,
+        "fatigue": 0.7,
+        "social_safety": 0.4,
+        "stance_position": 0.0
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "D5": {
+      "state_init": {
+        "attention": 0.6,
+        "speak_motivation": 0.22,
+        "fatigue": 0.0,
+        "social_safety": 0.5,
+        "stance_position": -0.2
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "D6": {
+      "state_init": {
+        "attention": 0.55,
+        "speak_motivation": 0.18,
+        "fatigue": 0.0,
+        "social_safety": 0.5,
+        "stance_position": 0.2
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "D7": {
+      "state_init": {
+        "attention": 0.7,
+        "speak_motivation": 0.26,
+        "fatigue": 0.0,
+        "social_safety": 0.55,
+        "stance_position": 0.0
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    },
+    "D8": {
+      "state_init": {
+        "attention": 0.55,
+        "speak_motivation": 0.14,
+        "fatigue": 0.05,
+        "social_safety": 0.45,
+        "stance_position": 0.2
+      },
+      "rules": {
+        "ally_threshold": null,
+        "rebut_threshold": null
+      }
+    }
+  }
+}

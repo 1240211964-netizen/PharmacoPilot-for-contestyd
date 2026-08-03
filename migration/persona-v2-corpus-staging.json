@@ -1,0 +1,1045 @@
+{
+  "provenance": {
+    "stage": "P4a-staging（未签收 · 未入库）",
+    "model": "mlx-community/Qwen3.5-9B-4bit",
+    "endpoint": "http://127.0.0.1:8080/v1/chat/completions",
+    "temperature": 0,
+    "maxTokens": 512,
+    "timeoutMs": 120000,
+    "retry": 3,
+    "gapMs": 250,
+    "lessonContext": "mp-ch3-environment（激活方向来源课）",
+    "promptTemplate": "你是药学本科课堂模拟的语料撰写器。根据学生画像，为指定发言情境撰写 {N} 条候选语料。\n\n【学生画像】\n{PERSONA}\n\n【发言情境】{KEY_SEM}\n【课程背景】《药事管理》课堂讨论：集采后仿制药替代（原研药降价 87%，医保视角 vs 慢病家属视角交锋中）。\n\n要求：\n1. 每条都是这名学生会说的话，第一人称、口语化，符合其风格与顾虑；\n2. {LEN_RULE}\n3. 事实不得超出其知识储备与经历锚点；药学/医保术语要准确；\n4. {N} 条之间措辞与角度要有差异；\n5. 文本内部如需引用或强调，一律用「」，严禁使用英文双引号 \" ；\n6. 禁止引用任何法规/文件文号（如「国办发〔2019〕2 号」这类），除非该文号逐字出现在上方知识储备里；\n7. 严格输出 JSON：{\"lines\": [\"...\", \"...\"]}，恰好 {N} 条，不要输出任何其他文字。",
+    "generatedAt": "2026-08-03T09:40:08.581Z",
+    "resumedFrom": "2026-08-03T09:38:20.923Z",
+    "script": "tools/gen-corpus-qwen.mjs",
+    "stats": {
+      "pairs": 74,
+      "generated": 3,
+      "reusedFromPreviousRun": 70,
+      "repairedJson": 0,
+      "preserved": 1,
+      "failed": 0,
+      "retries": 0,
+      "elapsedSec": 12
+    }
+  },
+  "students": {
+    "A1": {
+      "keys": {
+        "to_open_question": {
+          "shape": "array[2]",
+          "old": [
+            "先看到价格——原研降到这个价位真的有点意外",
+            "数据上，集采第 11 批的降幅意味着支付方覆盖能力大幅提升"
+          ],
+          "new": [
+            "先看到原研药降价 87%，数据上 DRG 能控费，制度上国办发文件明确优先使用集采品种。",
+            "从支付方角度，国办发文件要求优先使用集采药，数据上能保医保基金安全，先看到整体效益。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/回应教师开放性提问的发言（主动接话、亮出视角）；F3=证据型；激活=中性"
+        },
+        "to_rival": {
+          "shape": "array[2]",
+          "old": [
+            "我承认依从性是真问题，但医保支付方角度首先要算的是基金可持续",
+            "情感上理解，但国办发 2 号文已经写得很清楚"
+          ],
+          "new": [
+            "先看到国办发集采文件，数据上原研药降价 87%，支付方角度必须算总账。",
+            "制度上 DRG 分组逻辑已定，若因家属叙事动摇，公共财政 ROI 将受损。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/直接对立场对手说的话（先礼后兵、有交锋感）；F3=证据型；激活=中性"
+        },
+        "concession": {
+          "shape": "array[1]",
+          "old": [
+            "我承认依从性数据值得纳入评价标准——但这本身就是医保关心的"
+          ],
+          "new": [
+            "先看到原研药降价 87% 符合国办发集采精神，数据上支付方 ROI 仍是首要尺度，我理解家属顾虑但制度上必须优先保障基金安全。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/承认对方部分有理的让步发言（但保留自己的核心立场）；F3=证据型；激活=中性"
+        },
+        "question_other": {
+          "shape": "array[2]",
+          "old": [
+            "B 组数据来源是哪份院方记录？",
+            "你说的 INR 失控是临床数据还是个案？"
+          ],
+          "new": [
+            "先看到对方数据，DRG 分组逻辑下这药真能进池吗？",
+            "数据上量价挂钩了，制度上为何没提仿制药质量差异？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/针对他人发言的证据核查式提问（全班发言）；F3=证据型；激活=中性"
+        },
+        "forced_silent_break": {
+          "shape": "array[1]",
+          "old": [
+            "我同意 A2 已经说的"
+          ],
+          "new": [
+            "同意，数据上确实要控费"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被打断/冷场后被迫简短表态（一句话、附议式）；F3=证据型；激活=中性"
+        }
+      }
+    },
+    "A2": {
+      "keys": {
+        "to_open_question": {
+          "shape": "array[1]",
+          "old": [
+            "对——医保已经为这个降价付了对应的预算，再开口子就乱了"
+          ],
+          "new": [
+            "也就是说，原研药降价 87% 后，算下来医保基金省下的钱，够给社区老人发半年药，这才是真政绩。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/回应教师开放性提问的发言（主动接话、亮出视角）；F3=证据型；激活=正向(证据倾向)"
+        },
+        "to_rival": {
+          "shape": "array[1]",
+          "old": [
+            "你说的抗凝窗口是临床数据还是个案？"
+          ],
+          "new": [
+            "也就是说，原研药降价 87% 后，算下来医保基金省下的钱，够给社区老人发半年药，这才是真政绩。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/直接对立场对手说的话（先礼后兵、有交锋感）；F3=证据型；激活=正向(证据倾向)"
+        },
+        "concession": {
+          "shape": "array[1]",
+          "old": [
+            "也是，量化要看真实复购率"
+          ],
+          "new": [
+            "也就是说，原研药降价 87% 后，算下来老人每月能省三千多，这才是实打实的政绩。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/承认对方部分有理的让步发言（但保留自己的核心立场）；F3=证据型；激活=正向(证据倾向)"
+        },
+        "question_other": {
+          "shape": "array[1]",
+          "old": [
+            "B 组讨论里有没有看医保基金的承受度？"
+          ],
+          "new": [
+            "也就是说，集采后原研药降价 87%，算下来医保基金省下的钱，够给多少老人发补贴？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/针对他人发言的证据核查式提问（全班发言）；F3=证据型；激活=正向(证据倾向)"
+        },
+        "rallying": {
+          "shape": "array[1]",
+          "old": [
+            "原研 87% 的降幅，意味着同等医保支出可覆盖几倍患者（注：忽略了筹资端约束 · 经管专家建议教师追问）"
+          ],
+          "new": [
+            "也就是说，原研药降价 87%，算下来医保基金省下的钱，够给社区老人发半年药，这才是真政绩。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/整合己方论据、给同盟定调的发言（量化、有煽动性但克制）；F3=证据型；激活=正向(证据倾向)"
+        }
+      }
+    },
+    "A3": {
+      "keys": {
+        "to_open_question": {
+          "shape": "array[1]",
+          "old": [
+            "国办发〔2019〕2 号原文是'招采合一、量价挂钩'——注意是'挂钩'不是'合一'"
+          ],
+          "new": [
+            "原文是国办发 2 号文要求‘招采合一、量价挂钩’，按规定必须优先使用中选仿制药，严格说不能随意回原研。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/回应教师开放性提问的发言（主动接话、亮出视角）；F3=证据型；激活=中性"
+        },
+        "to_rival": {
+          "shape": "array[1]",
+          "old": [
+            "依从性问题本质是医患沟通，不该转嫁给采购环节"
+          ],
+          "new": [
+            "原文是‘招采合一、量价挂钩’，咱们得严格按文件办，不能拿临床终点去硬套医保规则。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/直接对立场对手说的话（先礼后兵、有交锋感）；F3=证据型；激活=中性"
+        },
+        "concession": {
+          "shape": "array[1]",
+          "old": [
+            "我承认基层执行确实有'换药通知不到位'的情况"
+          ],
+          "new": [
+            "原文是「招采合一·量价挂钩」，按规定必须优先用集采中选品，家属诉求得区分对待。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/承认对方部分有理的让步发言（但保留自己的核心立场）；F3=证据型；激活=中性"
+        },
+        "question_other": {
+          "shape": "array[1]",
+          "old": [
+            "你说的'量价合一'是哪份文件原文？"
+          ],
+          "new": [
+            "原文是‘量价挂钩’，那原研药降价 87% 后，按文件办，怎么保证基层执行不走样？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/针对他人发言的证据核查式提问（全班发言）；F3=证据型；激活=中性"
+        }
+      }
+    },
+    "A4": {
+      "keys": {
+        "to_open_question": {
+          "shape": "array[1]",
+          "old": [
+            "如果引入 DRG/DIP 视角，原研 vs 仿制其实分采购、支付两条线"
+          ],
+          "new": [
+            "如果换个视角，商保产品更看重原研药的品牌溢价，这其实是两个问题。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/回应教师开放性提问的发言（主动接话、亮出视角）；F3=证据型；激活=中性"
+        },
+        "to_teacher": {
+          "shape": "array[1]",
+          "old": [
+            "我们讨论的是采购，还是支付？混了"
+          ],
+          "new": [
+            "老师，若换商保视角，「集采」后患者自付药费可能反升，这其实是医保控费与商保盈利两个问题。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/直接向教师提的问题或纠偏（礼貌但敢问）；F3=证据型；激活=中性"
+        },
+        "question_other": {
+          "shape": "array[1]",
+          "old": [
+            "你说的'同价'是医保支付价还是采购挂网价？"
+          ],
+          "new": [
+            "如果换个视角，这份替代率数据真的能代表患者真实选择吗？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/针对他人发言的证据核查式提问（全班发言）；F3=证据型；激活=中性"
+        }
+      }
+    },
+    "A5": {
+      "keys": {
+        "evidence_supply": {
+          "shape": "array[1]",
+          "old": [
+            "一致性评价 BE 试验 90% 置信区间是 80-125%（窄治疗窗药如华法林、地高辛已收紧至 90-111%）"
+          ],
+          "new": [
+            "BE 是 90%CI 落在 80-125%，但文献里没提临床怎么用，只敢认数据标准。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/补充一条具体证据（数据/文件/事实）支持当前讨论（全班发言）；F3=证据型；激活=中性"
+        },
+        "to_open_question": {
+          "shape": "array[1]",
+          "old": [
+            "也就是说 A 组立场是有制度依据的"
+          ],
+          "new": [
+            "老师，BE 是 80-125% 几何均值比，标准是 90%CI 窄至 90-111%，文献里说这能保疗效。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/回应教师开放性提问的发言（主动接话、亮出视角）；F3=证据型；激活=中性"
+        },
+        "concession": {
+          "shape": "array[1]",
+          "old": [
+            "我引数据时没看 BE 的临床异质性研究"
+          ],
+          "new": [
+            "我同意原研药降价 87% 能省医保钱，但 BE 值必须卡在 90% 到 111% 之间，标准是几何均值比要在 80-125%，文献里没达标不能替代。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/承认对方部分有理的让步发言（但保留自己的核心立场）；F3=证据型；激活=中性"
+        }
+      }
+    },
+    "A6": {
+      "keys": {
+        "situational": {
+          "shape": "array[1]",
+          "old": [
+            "我们店里集采药上架后，老人主动指名要的反而多了"
+          ],
+          "new": [
+            "我们店里发现，集采药上架后，老人反而更主动指名要买，这很真实。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/从自己的日常经验/工作场景出发的情境化补充（全班发言）；F3=证据与；激活=正向(证据倾向)"
+        },
+        "to_open_question": {
+          "shape": "array[1]",
+          "old": [
+            "零售端反馈跟政策预设其实有差距"
+          ],
+          "new": [
+            "我们店里发现，患者指名要原研药时，店员常劝换集采仿制，但实际销售数据证明，只要解释清楚等效性，患者用脚投票，照样愿意买单。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/回应教师开放性提问的发言（主动接话、亮出视角）；F3=证据与；激活=正向(证据倾向)"
+        }
+      }
+    },
+    "A7": {
+      "keys": {
+        "late_reflection": {
+          "shape": "array[1]",
+          "old": [
+            "今天我意识到，价格不是这场讨论的核心，是'换还是不换'的决策机制"
+          ],
+          "new": [
+            "今天我意识到，虽然数据支持集采，但我心里还是有点犹豫，毕竟没实操过。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/课程尾声的反思性发言（语气沉淀下来，总结自己学到的）；F3=证据与；激活=中性"
+        }
+      }
+    },
+    "A8": {
+      "keys": {
+        "private_to_ally": {
+          "shape": "array[1]",
+          "old": [
+            "A1 说的有道理，但我不太敢在全班说"
+          ],
+          "new": [
+            "嗯，其实我也觉得 A 组有道理，就是怕说错被反驳，不敢大声说。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "repaired": true,
+          "personaBasis": "键语义=private/私下只对信任的同盟说的悄悄话；F3=证据与；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "B1": {
+      "keys": {
+        "anchor_argument": {
+          "shape": "array[1]",
+          "old": [
+            "但已用原研 2 年的患者怎么办？替代焦虑是真问题"
+          ],
+          "new": [
+            "但是，我父亲十年糖尿病，进口胰岛素不能随便换，你们怎么算这 87% 的降价，就是病人的救命钱？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/全班面前抛出引爆讨论的核心论点（一针见血、带锋芒）；F3=证据与；激活=负向(更短更保留)"
+        },
+        "case_support": {
+          "shape": "array[1]",
+          "old": [
+            "我父亲换药后 3 周血糖波动加剧，调到三餐前+睡前 4 点 SMBG 才稳"
+          ],
+          "new": [
+            "但是，我父亲用进口胰岛素十年，仿制药虽便宜，可那 30 次陪诊里，他血糖忽高忽低，你们怎么算这隐性成本？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/用亲历案例补强同盟的论点（全班发言）；F3=证据与；激活=负向(更短更保留)"
+        },
+        "rhetorical_question": {
+          "shape": "array[1]",
+          "old": [
+            "如果换药意味着家庭每月多 800 块自掏，你们怎么算这笔账？"
+          ],
+          "new": [
+            "但是，我父亲十年糖尿病，进口胰岛素没断过，你们怎么算这 87% 降价里，他多挨的针头值多少钱？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/反问句（带情绪张力、把问题抛回给对方，全班发言）；F3=证据与；激活=负向(更短更保留)"
+        },
+        "concession": {
+          "shape": "array[1]",
+          "old": [
+            "我承认这不是采购环节能完全解决的，需要医患沟通配合"
+          ],
+          "new": [
+            "我理解医院要控费，但我父亲十年打进口胰岛素，断药真会出事，你们怎么算这风险？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/承认对方部分有理的让步发言（但保留自己的核心立场）；F3=证据与；激活=负向(更短更保留)"
+        },
+        "proposal": {
+          "shape": "array[1]",
+          "old": [
+            "建议在集采配套里加'换药观察期 3 个月'的临床路径"
+          ],
+          "new": [
+            "但是，我父亲十年糖尿病，SMBG 7 点法记录里，仿制药批次差异让他血糖波动，院方匿名数据也显示，咱们得先解决稳定性，再谈价格。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/提出具体可操作的建议/方案（全班发言，建设性）；F3=证据与；激活=负向(更短更保留)"
+        }
+      }
+    },
+    "B2": {
+      "keys": {
+        "technical_rebuttal": {
+          "shape": "array[2]",
+          "old": [
+            "华法林是窄治疗窗·不同厂家辅料、晶型与溶出曲线差异可影响生物利用度",
+            "BE 80-125% 对窄治疗窗药是不是该卡更紧？"
+          ],
+          "new": [
+            "华法林治疗窗窄，INR 2.0-3.0 波动大，仿制药溶出曲线差异直接威胁临床安全。",
+            "我见习时见过因辅料不同导致抗凝失败，技术细节不能妥协，必须优先保障疗效。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/用技术细节反驳对方（药理/数据层面，全班发言）；F3=证据型；激活=中性"
+        },
+        "case_data": {
+          "shape": "array[1]",
+          "old": [
+            "院方记录显示 6 个月内 7 例 INR 超出 2.0-3.0 治疗窗"
+          ],
+          "new": [
+            "浦东抗凝门诊 3 个月 12 例 INR 失控，仿制药溶出差异是主因。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/引用具体数据化案例证据（全班发言）；F3=证据型；激活=中性"
+        },
+        "concession": {
+          "shape": "array[1]",
+          "old": [
+            "我支持加观察期，但不必否定集采"
+          ],
+          "new": [
+            "你说医保省钱没错，但「治疗窗」窄的华法林，辅料差异导致 INR 波动，安全底线不能妥协。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/承认对方部分有理的让步发言（但保留自己的核心立场）；F3=证据型；激活=中性"
+        }
+      }
+    },
+    "B3": {
+      "keys": {
+        "case": {
+          "shape": "array[1]",
+          "old": [
+            "降压药的谷峰差异在仿制品中确实存在"
+          ],
+          "new": [
+            "其实我妈吃降压药八年，换药后她总担心谷峰时间不对，这焦虑真不是政策能马上解决的。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/用亲历/家庭案例支撑自己观点（全班发言）；F3=经验型；激活=正向(证据倾向)"
+        },
+        "rebuttal": {
+          "shape": "array[1]",
+          "old": [
+            "通知到位也无济于事，老人换药本身有抗拒"
+          ],
+          "new": [
+            "其实我妈换药后血压波动，我妈说这药劲儿不对，咱老百姓心里慌，真不是政策的问题。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/直接反驳对方论点（全班发言）；F3=经验型；激活=正向(证据倾向)"
+        },
+        "concession": {
+          "shape": "array[1]",
+          "old": [
+            "教师说的'医患沟通配合'我同意"
+          ],
+          "new": [
+            "其实我妈换药那会儿特焦虑，虽然集采便宜是制度优势，但咱老百姓心里没底，这情绪得先被看见。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/承认对方部分有理的让步发言（但保留自己的核心立场）；F3=经验型；激活=正向(证据倾向)"
+        }
+      }
+    },
+    "B4": {
+      "keys": {
+        "case": {
+          "shape": "array[1]",
+          "old": [
+            "我加的病友群里有 4 例换药后再入院"
+          ],
+          "new": [
+            "群里说换药后我爸再入院了，这算不算仿制药替代的代价？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/用亲历/家庭案例支撑自己观点（全班发言）；F3=经验型；激活=负向(更短更保留)"
+        },
+        "question": {
+          "shape": "array[1]",
+          "old": [
+            "国办文件里有没有规定换药的临床观察义务？"
+          ],
+          "new": [
+            "群里说换药后父亲再入院，这算不算仿制药质量问题的真实数据？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/向对方阵营或全班提出的追问（全班发言）；F3=经验型；激活=负向(更短更保留)"
+        }
+      }
+    },
+    "B5": {
+      "keys": {
+        "situational": {
+          "shape": "array[1]",
+          "old": [
+            "老年人换药记不住，配药袋必须重新贴标，工作量很大"
+          ],
+          "new": [
+            "爷爷帕金森换药，记不住就漏服，这代价真不是光省那点药钱能衡量的。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/从自己的日常经验/工作场景出发的情境化补充（全班发言）；F3=经验型；激活=负向(更短更保留)"
+        },
+        "late_reflection": {
+          "shape": "array[1]",
+          "old": [
+            "我之前没意识到这其实是基层医院的活"
+          ],
+          "new": [
+            "爷爷帕金森换药，记不住就漏服，这代价真不是光省那点药钱能衡量的。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/课程尾声的反思性发言（语气沉淀下来，总结自己学到的）；F3=经验型；激活=负向(更短更保留)"
+        }
+      }
+    },
+    "B6": {
+      "keys": {
+        "domain_point": {
+          "shape": "array[1]",
+          "old": [
+            "内分泌治疗 5 年起步，期间换药对依从性影响极大"
+          ],
+          "new": [
+            "深圳肿瘤科见习时，母亲吃阿那曲唑，集采后仿制药虽便宜，但内分泌治疗差之毫厘谬以千里，5 年依从性才是命悬一线。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/陈述一个自己熟悉领域的专业知识点（全班发言）；F3=证据型；激活=负向(更短更保留)"
+        },
+        "technical": {
+          "shape": "array[1]",
+          "old": [
+            "原研 vs 仿制的差别可能在辅料，对长期使用敏感人群非小事"
+          ],
+          "new": [
+            "深圳肿瘤科见习时，母亲吃仿制药后内分泌疗效波动，5 年依从性命悬一线，数据再漂亮也抵不过临床真实。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/技术性陈述（药理/制剂/临床术语准确，全班发言）；F3=证据型；激活=负向(更短更保留)"
+        }
+      }
+    },
+    "B7": {
+      "keys": {
+        "question": {
+          "shape": "array[1]",
+          "old": [
+            "换药后 SCr + eGFR + 电解质需不需要相应加密监测？"
+          ],
+          "new": [
+            "监测频次和 SCr 变化才是换药关键，别光盯着价格，外公那会儿就是看指标稳不稳才敢换的。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/向对方阵营或全班提出的追问（全班发言）；F3=证据与；激活=负向(更短更保留)"
+        }
+      }
+    },
+    "B8": {
+      "keys": {
+        "private": {
+          "shape": "array[1]",
+          "old": [
+            "我奶奶吃 7 种药，换 1 种都鸡飞狗跳"
+          ],
+          "new": [
+            "我奶奶那鸡飞狗跳的日子，真怕换了便宜药，血糖血压又失控了。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/只在小组/私下嘀咕的话（口语、碎碎念）；F3=经验型；激活=负向(更短更保留)"
+        }
+      }
+    },
+    "C1": {
+      "keys": {
+        "if_called_by_teacher": {
+          "shape": "array[1]",
+          "old": [
+            "其实原研降价 87% 也是企业策略的一部分——专利后期守住医院端而非放弃市场"
+          ],
+          "new": [
+            "老师，我理解医保控费，但 NPV 和专利期是 MNC 研发 Pipeline 的基石，不能因噎废食。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被教师点名后终于说出的观点（平时沉默，被点才敢讲，语气略拘谨）；F3=证据与；激活=中性；沉默因果=1条"
+        },
+        "internal_monologue": {
+          "shape": "array[1]",
+          "old": [
+            "A 组在简化 R&D 成本；B 组在道德化讨论；其实两边都没看到 NPV 回收周期"
+          ],
+          "new": [
+            "NPV 模型里原研药利润虽薄，但 Pipeline 还在，这不算背叛吧？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/边听边在心里的吐槽/分析（内心独白，最诚实）；F3=证据与；激活=中性；沉默因果=1条"
+        },
+        "private_to_neighbor": {
+          "shape": "array[1]",
+          "old": [
+            "你看，他们都没提 Pipeline 现金流"
+          ],
+          "new": [
+            "其实 MNC 算 NPV 时，专利期后的 Pipeline 投入才是真金白银，集采没伤到根。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/低声对同桌说的话（30 秒低声交流的体量）；F3=证据与；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "C2": {
+      "keys": {
+        "if_called_by_teacher": {
+          "shape": "array[1]",
+          "old": [
+            "其实我想说，一致性评价对仿制药是公平起跑线，但对原研创新者来说，是否会让长期 R&D 投入预期下降，这才是真正的连带效应"
+          ],
+          "new": [
+            "老师，我有点犹豫，但想起母亲在恒瑞做 II 期临床时，她总担心集采后原研药数据被稀释，影响后续创新投入。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被教师点名后终于说出的观点（平时沉默，被点才敢讲，语气略拘谨）；F3=证据型；激活=中性；沉默因果=1条"
+        },
+        "post_class_action": {
+          "shape": "string",
+          "old": "在班级群发了一段文字阐述未说出的观点",
+          "new": "老师，我刚才举手没被点到，有点担心是不是太心急了。",
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/课后的实际行动（一句话描述行为，如'在班级群发了一段文字'）；F3=证据型；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "C3": {
+      "keys": {
+        "if_called_uncertain": {
+          "shape": "array[2]",
+          "old": [
+            "我……补一句行吗——从企业角度看，药师供给不足不全是门店自己能控的，行业趋势那半更像 T。可能只说对一半。",
+            "小组里我们聊过，企业侧其实也在算这笔账——我说不好，但门店排班和药师供给好像得拆开归。"
+          ],
+          "new": [
+            "我……先说个数据，集采后原研 NPV 确实跌了，但专利期没到，BD 那边可能还在谈授权金。",
+            "那个……我有点不敢说，毕竟不是行业内部，但按 CRO 流程看，仿制药替代后原研现金流短期会承压。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被点名后低确定性的短回应（磕巴、自我怀疑、说一半让步，如'我……补一句行吗''可能只说对一半'）；F3=证据型；激活=中性；沉默因果=1条"
+        },
+        "small_group": {
+          "shape": "array[1]",
+          "old": [
+            "原研降价 87% 背后是企业守住医院端的策略——不是'专利悬崖'，悬崖是专利到期触发的"
+          ],
+          "new": [
+            "这 NPV 模型里，专利期一缩短，BD 溢价空间直接没了，数据上仿制药替代是必然的。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/小组讨论内说的话（比全班发言放松、可以说得深）；F3=证据型；激活=中性；沉默因果=1条"
+        },
+        "report_text_written": {
+          "shape": "array[1]",
+          "old": [
+            "集采后市场退出/转线是企业经管层的核心议题（写入报告但未念出）"
+          ],
+          "new": [
+            "报告里这段数据我写了，但怕大家觉得我太懂行，其实只是算算专利期 NPV 和 BD 条款。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/写进小组报告稿但没念出来的段落（书面）；F3=证据型；激活=中性；沉默因果=1条"
+        },
+        "if_called_by_teacher": {
+          "shape": "array[1]",
+          "old": [
+            "我可以从 BD 视角解释一下——MNC 在国内的策略其实有 4 种"
+          ],
+          "new": [
+            "老师，我查过百济数据，集采后 NPV 确实下降，但专利期才是关键变量。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被教师点名后终于说出的观点（平时沉默，被点才敢讲，语气略拘谨）；F3=证据型；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "C4": {
+      "keys": {
+        "if_called_by_teacher": {
+          "shape": "array[1]",
+          "old": [
+            "其实仿制企业在 GMP 现场和原研差距没那么大，关键看洁净区分级和批记录质量"
+          ],
+          "new": [
+            "老师，我实习见过 GMP 车间，洁净区分级和批记录能保质控，仿制药替代是公共价值。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被教师点名后终于说出的观点（平时沉默，被点才敢讲，语气略拘谨）；F3=证据型；激活=中性；沉默因果=1条"
+        },
+        "small_group_contrib": {
+          "shape": "string",
+          "old": "贡献了 GMP 段落到报告稿但被砍",
+          "new": "我实习时见过 GMP 洁净区，批记录能证明仿制药质控达标。",
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/对小组报告的实际贡献（一句话描述，可带'没被采用'的委屈）；F3=证据型；激活=中性；沉默因果=1条"
+        },
+        "post_class_action": {
+          "shape": "string",
+          "old": "私下问教师'是不是有药企背景就不能在这种课讨论？'",
+          "new": "刚才讨论挺激烈，其实我在豪森实习时，GMP 洁净区批记录里质控数据也很严。",
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/课后的实际行动（一句话描述行为，如'在班级群发了一段文字'）；F3=证据型；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "C5": {
+      "keys": {
+        "intended_but_not_said": {
+          "shape": "array[1]",
+          "old": [
+            "其实国内仿制企业内部分化很大，集采前后存活下来的就那么几家"
+          ],
+          "new": [
+            "其实我寒假去县医院跑过，但当时没机会插话，只能记着原研药降价后大家的选择。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/几次想说最终没说出口的话（内心独白）；F3=证据与；激活=中性；沉默因果=1条"
+        },
+        "if_finally_called": {
+          "shape": "array[1]",
+          "old": [
+            "对，其实国内仿制企业也是集采赢家——头部企业市场更集中了"
+          ],
+          "new": [
+            "其实我爸是药企的，但县医院确实只进集采药，这数据挺真实的。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/憋了整节课终于被点到时的回应（终于有机会、一口气说出但克制）；F3=证据与；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "C6": {
+      "keys": {
+        "if_called_uncertain": {
+          "shape": "array[2]",
+          "old": [
+            "我可以……说一句吗？仿制企业其实也是受益方——比如换品后供货稳定性，是不是能写进 S？不确定对不对。",
+            "刚才那个角度我一直没插进去……就是，换品之后门店的进货成本其实是降的。可能片面了。"
+          ],
+          "new": [
+            "我……刚在药代实习，只看到过仿制药怎么进医院，没懂政策细节，可能只说对一半。",
+            "老师，我有个私心：仿制药企为了进集采，其实也拼命降价，这算不算另一种‘受益’？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被点名后低确定性的短回应（磕巴、自我怀疑、说一半让步，如'我……补一句行吗''可能只说对一半'）；F3=证据与；激活=中性；沉默因果=1条"
+        },
+        "intended": {
+          "shape": "array[1]",
+          "old": [
+            "仿制企业其实也是集采受益方——头部市场份额更集中了"
+          ],
+          "new": [
+            "（低头记笔记，等老师说完才小声补一句）其实我在药代实习时见过，集采后仿制药销量暴涨，企业才是真赢家。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/心里想好但没说出口的观点（内心独白）；F3=证据与；激活=中性；沉默因果=1条"
+        },
+        "reflection_sheet": {
+          "shape": "array[1]",
+          "old": [
+            "这堂课的议题被框死为医保 vs 患者，我有第三视角但找不到插入点"
+          ],
+          "new": [
+            "听大家吵医保和患者，我实习时见过仿制药数据达标，其实它们也是集采赢家。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/写在反思单上的话（书面、诚实、比口头敢说）；F3=证据与；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "C7": {
+      "keys": {
+        "intended_but_hidden": {
+          "shape": "array[1]",
+          "old": [
+            "集采加速 API 议价权下降+环保升级成本+CDE 关联审评后 DMF 议价变化——小厂三重挤压"
+          ],
+          "new": [
+            "笔记记满六页，但讨论时只能低头，怕暴露家里小厂的事。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/刻意隐藏不说的真实想法（怕暴露利益/身份，内心独白）；F3=经验型；激活=中性；沉默因果=1条"
+        },
+        "if_anonymous_channel": {
+          "shape": "array[1]",
+          "old": [
+            "（匿名提问通道可能激活）"
+          ],
+          "new": [
+            "匿名区：家里小厂年销八百万，集采后 API 被制剂厂压价，环保 GMP 升级成本全得我们扛。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/只敢在匿名提问通道里说的话（私下书面，不是全班发言）；F3=经验型；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "C8": {
+      "keys": {
+        "if_regulatory_slot_exists": {
+          "shape": "array[1]",
+          "old": [
+            "从药监角度看，集采后的不良反应监测和上市后再评价是新的监管重点——GSP/GVP/MAH 制度的衔接才是落地难点"
+          ],
+          "new": [
+            "老师，我母亲在药监局值班，但我也在药企实习，这种立场冲突让我很难开口。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/如果课堂有'监管视角'发言槽位才会说的话（私下书面陈述）；F3=证据型；激活=中性；沉默因果=1条"
+        },
+        "if_called": {
+          "shape": "array[1]",
+          "old": [
+            "我妈在药监，但我也在药企实习过，所以…我可以代表两边吗？"
+          ],
+          "new": [
+            "老师，我实习在药企，我妈是药监局，这立场我有点乱，不敢多说。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被教师点名后的回应（被动、简短、有点措手不及）；F3=证据型；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "D1": {
+      "keys": {
+        "if_called": {
+          "shape": "array[1]",
+          "old": [
+            "我…我没想好"
+          ],
+          "new": [
+            "老师，我有点紧张，不太懂集采具体怎么影响慢病用药，只能记下来回去查查资料。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被教师点名后的回应（被动、简短、有点措手不及）；F3=证据与；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "D2": {
+      "keys": {
+        "if_called": {
+          "shape": "array[1]",
+          "old": [
+            "…"
+          ],
+          "new": [
+            "…"
+          ],
+          "status": "preserved",
+          "personaBasis": "刻意沉默回应'…'，画像一致，原样保留"
+        }
+      }
+    },
+    "D3": {
+      "keys": {
+        "if_called": {
+          "shape": "array[1]",
+          "old": [
+            "其实基层换药的行政成本是教师没提到的——通知患者、贴药袋、重新建档案，社区医生做这些是没工分的"
+          ],
+          "new": [
+            "被点名了，其实基层换药最耗人，贴袋、通知、重建档全是白忙活。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被教师点名后的回应（被动、简短、有点措手不及）；F3=经验型；激活=负向(更短更保留)；沉默因果=1条"
+        },
+        "reflection_sheet": {
+          "shape": "array[1]",
+          "old": [
+            "这堂课其实漏了'基层执行成本'这一维度，我想说但没机会"
+          ],
+          "new": [
+            "反思单上记着：集采省了钱，但基层换药通知的行政成本谁算？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/写在反思单上的话（书面、诚实、比口头敢说）；F3=经验型；激活=负向(更短更保留)；沉默因果=1条"
+        }
+      }
+    },
+    "D4": {
+      "keys": {
+        "if_called": {
+          "shape": "array[1]",
+          "old": [
+            "……老师，我今天有点不舒服"
+          ],
+          "new": [
+            "老师，我有点感冒发烧，脑子不太清醒，这药的事我可能说不好。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被教师点名后的回应（被动、简短、有点措手不及）；F3=证据与；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "D5": {
+      "keys": {
+        "to_C1_private": {
+          "shape": "array[1]",
+          "old": [
+            "我家店里也有老人换药不适应"
+          ],
+          "new": [
+            "我同意 C1 观点，但我爸在药店时，患者总担心仿制药‘分量’不够，这顾虑挺真实的。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=private/低声回应 C1 的私下搭话（小组内、口语）；F3=证据与；激活=正向(证据倾向)；沉默因果=1条"
+        },
+        "if_nudged": {
+          "shape": "array[1]",
+          "old": [
+            "我同意 B 组"
+          ],
+          "new": [
+            "我同意，但担心疗效不够。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被同桌/教师轻推后才说的极短一句（附议式、几个字到一句话）；F3=证据与；激活=正向(证据倾向)；沉默因果=1条"
+        }
+      }
+    },
+    "D6": {
+      "keys": {
+        "report_read": {
+          "shape": "array[1]",
+          "old": [
+            "我们组认为应保留集采…（念稿）"
+          ],
+          "new": [
+            "老师，我们组认为集采后仿制药替代能省医保钱，但具体怎么换药还得看医生，我们不太懂细节。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/代表小组念报告稿（念稿口吻、不是自己的观点）；F3=证据与；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "D7": {
+      "keys": {
+        "clarifying_question": {
+          "shape": "array[1]",
+          "old": [
+            "什么叫'一致性评价'？我没完全听懂"
+          ],
+          "new": [
+            "老师，我没完全听懂，什么叫‘一致性评价’？"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/没听懂时向全班/教师提出的澄清概念提问（坦诚、不装懂）；F3=证据与；激活=中性；沉默因果=1条"
+        }
+      }
+    },
+    "D8": {
+      "keys": {
+        "if_called": {
+          "shape": "array[1]",
+          "old": [
+            "我同意 A2 说的"
+          ],
+          "new": [
+            "老师我同意，原研药降价确实能省医保钱，就是担心家里老人突然换药不适应。"
+          ],
+          "status": "generated",
+          "attempts": 1,
+          "personaBasis": "键语义=public/被教师点名后的回应（被动、简短、有点措手不及）；F3=证据与；激活=中性；沉默因果=1条"
+        }
+      }
+    }
+  }
+}

@@ -27,6 +27,62 @@
   }
 
   // ──────────────────────────────────────────────────────────────
+  // 0.5 确定性随机（persona-v2-contract §9 · P0）
+  //     与 MVCore 同一套 seeded RNG，独立流：seed 串追加 ":prt" 派生。
+  //     P0 内嵌副本，与 shared/sim-rng.js 标记区逐字节一致（verify 校验）。
+  // ──────────────────────────────────────────────────────────────
+  /* ==== SIM-RNG-BEGIN · 引擎内嵌副本须与本区逐字节一致 ==== */
+  // FNV-1a 32bit：seed 字符串 → 32 位无符号整数
+  function fnv1a32(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h >>> 0;
+  }
+  // mulberry32：32 位种子 PRNG，输出 [0,1)，无依赖、可复现
+  function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function next() {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  // seed 串 = simVersion | personaSetVersion | lessonId | scenarioId | runSeed
+  function seedStringOf(cfg) {
+    return [cfg.simVersion, cfg.personaSetVersion, cfg.lessonId, cfg.scenarioId, cfg.runSeed].join("|");
+  }
+  function createSeededRng(cfg) {
+    return mulberry32(fnv1a32(seedStringOf(cfg)));
+  }
+  /* ==== SIM-RNG-END ==== */
+
+  // 默认值与 MVCore 相同；画像 _meta 加载后 simVersion / personaSetVersion 自动跟随。
+  const DEFAULT_SEED_CONFIG = {
+    simVersion: "sim-1.0.0",
+    personaSetVersion: "virtual-class-agents-v0.2",
+    lessonId: "mp-ch3-environment",
+    scenarioId: "swot-huakang-chronic",
+    runSeed: "run-0",
+  };
+  let __seedCfg = { ...DEFAULT_SEED_CONFIG };
+  let __rng = createSeededRng(__seedCfg);
+  function reseedAgentRng(seedConfig) {
+    const meta = (__agents && __agents._meta) || {};
+    __seedCfg = {
+      ...DEFAULT_SEED_CONFIG,
+      simVersion: meta.simVersion || DEFAULT_SEED_CONFIG.simVersion,
+      personaSetVersion: meta.version || DEFAULT_SEED_CONFIG.personaSetVersion,
+      ...(seedConfig || {}),
+    };
+    __rng = mulberry32(fnv1a32(seedStringOf(__seedCfg) + ":prt")); // 独立流，与 MVCore 互不消耗
+  }
+
+  // ──────────────────────────────────────────────────────────────
   // 1. 运行时状态
   // ──────────────────────────────────────────────────────────────
   const state = {
@@ -83,17 +139,41 @@
   const __agentRuntime = new Map();
   let __scheduledEvents = [];
   let __lastAgentTickSec = 0;
+  let __activationById = {};   // P3 · L1 激活结果（§7.2，课程加载时计算）
+  let __enrichPlan = null;     // P3 · 本课 enrichmentPlan（§2.1，课结束丢弃）
 
-  function initAgentRuntimes() {
+  function initAgentRuntimes(seedConfig) {
     if (!__agents) return;
+    reseedAgentRng(seedConfig); // §9：每次初始化重播种，同一 seedConfig 全程可复放
     __agentRuntime.clear();
+    // P3：课程加载 → L1 激活 + enrichmentPlan（§2.1 生命周期：课加载生成、课结束丢弃，绝不回写 persona）
+    const meta = __agents._meta || {};
+    const lessonId = (seedConfig && seedConfig.lessonId) || __seedCfg.lessonId;
+    const lesson = (meta.lessons || []).find((l) => l.lessonId === lessonId) || null;
+    const tables = {
+      proximity: (meta.role_proximity_table && meta.role_proximity_table.proximity) || {},
+      transferability: (meta.transferability_table && meta.transferability_table.by_type) || {},
+    };
+    __activationById = {};
+    __enrichPlan = computeEnrichmentPlan(__agents, lesson, tables);
     __agents.agents.forEach((a) => {
+      // §7.2 激活 → L1 生效 speak_motivation（base 不变，仅运行时层调制）
+      const act = activationOf(a, lesson, tables);
+      const l1 = applyActivationToL1(a.state_init?.speak_motivation ?? 0.3, act);
+      __activationById[a.id] = act;
       __agentRuntime.set(a.id, {
         attention: a.state_init?.attention ?? 0.5,
-        speak_motivation: a.state_init?.speak_motivation ?? 0.3,
+        speak_motivation: l1.speak_motivation,
         fatigue: a.state_init?.fatigue ?? 0.0,
         social_safety: a.state_init?.social_safety ?? 0.5,
         stance_position: a.state_init?.stance_position ?? 0,
+        fatigue_rate: a.state_init?.fatigue_rate ?? 0.00005, // P2 persona-map-v1 R2 派生；缺数据回退基础档
+        // P3 · L2 课堂运行状态（更新/消费规则见 tickAgents/generateAgentBeats/scoreSpeakDesire；依据见 _meta.persona_map_notes.runtime_layer）
+        cognitiveConflict: 0,
+        perceivedUnderstanding: Math.min(1, Math.max(0, 0.35 + 0.4 * (personaFactorValue(a, "F1") != null ? personaFactorValue(a, "F1") : 0.5))),
+        participationDebt: 0,
+        learningTrace: [], // L3：仅 enrichmentPlan learningTraceDepth≥2 的 deep 学生追加
+        _baseSpeakMotivation: a.state_init?.speak_motivation ?? null, // L1 调制前基线（对照/审查用）
         spoke_count: 0,
         last_event_t: null,
         _events: []
@@ -107,67 +187,155 @@
     return __agentRuntime.get(id) || null;
   }
 
-  // Build scripted events from agent.drama signals. Each event fires once at t_sec
-  // and applies effects to one agent. Reasons are surfaced in the inspector changelog.
+  /* ==== SCHED-DERIVE-BEGIN · 引擎内嵌副本须与本区逐字节一致 ==== */
+  // drama.events → SCHED：agent 由所属学生隐含，产物按 t 升序。
+  function deriveSchedFromDrama(agentsData) {
+    const out = [];
+    ((agentsData && agentsData.agents) || []).forEach((a) => {
+      const evs = (a && a.drama && a.drama.events) || [];
+      evs.forEach((e) => {
+        out.push({ t: e.t, agent: a.id, fx: e.fx, why: e.why });
+      });
+    });
+    out.sort((x, y) => x.t - y.t);
+    return out;
+  }
+  /* ==== SCHED-DERIVE-END ==== */
+
+  /* ==== ENRICH-ACTIVATION-BEGIN · 引擎内嵌副本须与本区逐字节一致 ==== */
+  // 本区为纯函数：不读引擎状态、不调 rng、无 DOM——同输入同输出。
+  // tables = { proximity: _meta.role_proximity_table.proximity, transferability: _meta.transferability_table.by_type }
+
+  // FNV-1a 32bit（§2.1 explorationBonus 用；与 SIM-RNG 同算法但独立命名，防标记区耦合）
+  function __enrichFnv1a32(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h >>> 0;
+  }
+  function __jaccardTags(a, b) {
+    const sa = {}, sb = {};
+    (a || []).forEach((t) => { sa[t] = 1; });
+    (b || []).forEach((t) => { sb[t] = 1; });
+    let inter = 0, union = 0;
+    Object.keys(sa).forEach((t) => { union += 1; if (sb[t]) inter += 1; });
+    Object.keys(sb).forEach((t) => { if (!sa[t]) union += 1; });
+    return union === 0 ? 0 : inter / union;
+  }
+
+  // §7.1 情境熟悉度：max over historyEvents of Jaccard(tags) × depth × recency × roleProximity × transferability
+  // 返回 {value, event}：event 为取得最大值的事件（§7.2 sensitive 方向判定用）；无命中 value=0/event=null
+  function scenarioFamiliarity(student, lesson, tables) {
+    const best = { value: 0, event: null };
+    if (!student || !lesson || !tables) return best;
+    const proximity = tables.proximity || {};
+    const transfer = tables.transferability || {};
+    (student.historyEvents || []).forEach((e) => {
+      const row = proximity[e.role] || {};
+      let prox = 0; // 缺列兜底弱相关档 0.1（§7.1 锚定无关≈0.1–0.15）
+      (lesson.requiredRole || []).forEach((r) => {
+        const v = row[r] != null ? row[r] : 0.1;
+        if (v > prox) prox = v;
+      });
+      const tr = transfer[e.type] != null ? transfer[e.type] : 0;
+      const v = __jaccardTags(e.tags, lesson.tags) * (e.depth || 0) * (e.recency || 0) * prox * tr;
+      if (v > best.value) { best.value = v; best.event = e; }
+    });
+    return best;
+  }
+
+  // 画像因子有效值：approved:true 的 §6.2 校准 delta 生效（限幅由 persona-map-v1 管线把守），未批准不动
+  function personaFactorValue(agent, k) {
+    const f = agent && agent.latentFactors && agent.latentFactors[k];
+    if (!f || typeof f.value !== "number") return null;
+    const adj = f.adjustment;
+    const d = adj && adj.approved === true && typeof adj.delta === "number" ? adj.delta : 0;
+    return Math.min(1, Math.max(0, f.value + d));
+  }
+
+  // §7.2 激活（方向判定，可正可负）：
+  //   熟悉度 ─▶ 身份相关性（F5 调制 identity ∈ [0.5,1]）─▶ 情绪显著性（sensitive:true → 负向）─▶ 行为方向
+  //   判例（契约 §7.2）：家庭成员慢病经历学生在患者负担议题 familiarity 高，但 sensitive 使方向为负——更沉默而非更积极。
+  function activationOf(student, lesson, tables) {
+    const fam = scenarioFamiliarity(student, lesson, tables);
+    const f5 = personaFactorValue(student, "F5");
+    const identity = 0.5 + 0.5 * (f5 == null ? 0.5 : f5);
+    const sensitive = !!(fam.event && fam.event.sensitive);
+    const magnitude = fam.value * identity;
+    const direction = magnitude > 0 ? (sensitive ? -1 : 1) : 0;
+    return { familiarity: fam.value, eventId: fam.event ? fam.event.id : null, identity: identity, sensitive: sensitive, magnitude: magnitude, direction: direction };
+  }
+
+  // L1 生效值调制（只调运行时初始化层，不写回 state_init）：
+  //   正向 speak_motivation↑ + evidence 语料键优先（evidenceBias=true 供 pickRespKey 消费）；
+  //   负向 silent 倾向↑（sm 减分；"仅小组内"语义由 silent_on 规则侧承载，不在本函数内分支）。
+  var ACTIVATION_SM_GAIN = 0.2;
+  function applyActivationToL1(baseSpeakMotivation, act) {
+    let sm = baseSpeakMotivation;
+    if (act && act.direction !== 0) sm = baseSpeakMotivation + act.direction * ACTIVATION_SM_GAIN * act.magnitude;
+    return { speak_motivation: Math.min(1, Math.max(0, sm)), evidenceBias: !!(act && act.direction > 0) };
+  }
+
+  // §2.1 课程级临时资源计划（enrichmentPlan）：
+  //   课程加载时生成 → 本课使用 → 课结束丢弃；不得写回 persona 永久记录（verify 硬门禁）。
+  //   优先级公式六项（speakProbability 不得为主要权重——公式不含 sm 主项，sm 仅以"不确定性"形式反向进入）：
+  //     scenarioActivation      §7 情境激活程度（熟悉度）
+  //     personaUncertainty      参数不确定性：sm 越居中行为越难预判，越值得深建模
+  //     coverageGap             班级覆盖缺口：该生最佳匹配背景类型在已激活班级中的稀缺度
+  //     interventionSensitivity 干预敏感性（教学诊断价值）：有沉默因果 / 敏感经历者优先
+  //     counterfactualValue     反事实价值：立场易动者在不同干预下分叉潜力更大
+  //     explorationBonus        探索奖励：确定性哈希，防稳定偏向高动机学生
+  //   系数依据见画像 _meta.persona_map_notes.enrichment。
+  var ENRICH_WEIGHTS = { scenarioActivation: 0.3, personaUncertainty: 0.15, coverageGap: 0.15, interventionSensitivity: 0.2, counterfactualValue: 0.1, explorationBonus: 0.1 };
+  var ENRICH_TOP_N = 8;
+  var ENRICH_DEEP = { conceptModel: "deep", responseInventory: 6, misconceptionModel: true, learningTraceDepth: 2, interventionBranches: 3, counterfactualResponses: true };
+  var ENRICH_LIGHT = { conceptModel: "light", responseInventory: 3, misconceptionModel: false, learningTraceDepth: 0, interventionBranches: 1, counterfactualResponses: false };
+  function computeEnrichmentPlan(agentsData, lesson, tables) {
+    const agents = (agentsData && agentsData.agents) || [];
+    if (!lesson || !agents.length) return null;
+    const best = agents.map((a) => ({ a: a, fam: scenarioFamiliarity(a, lesson, tables) }));
+    const activated = best.filter((x) => x.fam.value > 0);
+    const typeCount = {};
+    activated.forEach((x) => {
+      const t = x.fam.event && x.fam.event.type;
+      typeCount[t] = (typeCount[t] || 0) + 1;
+    });
+    const rows = best.map((x) => {
+      const a = x.a, fam = x.fam;
+      const sm = (a.state_init && a.state_init.speak_motivation != null) ? a.state_init.speak_motivation : 0.3;
+      const str = (a.persona && typeof a.persona.stance_strength === "number") ? a.persona.stance_strength : 3;
+      const parts = {
+        scenarioActivation: fam.value,
+        personaUncertainty: 1 - Math.abs(2 * sm - 1),
+        coverageGap: fam.value > 0 ? 1 - (typeCount[(fam.event && fam.event.type)] || 1) / Math.max(1, activated.length) : 0,
+        interventionSensitivity: 0.5 * (((a.silenceCauses || []).length > 0) ? 1 : 0) + 0.5 * ((fam.event && fam.event.sensitive) ? 1 : 0),
+        counterfactualValue: (5 - Math.min(5, Math.max(1, str))) / 4,
+        explorationBonus: __enrichFnv1a32(String(lesson.lessonId) + "|" + a.id) / 4294967296,
+      };
+      let total = 0;
+      Object.keys(ENRICH_WEIGHTS).forEach((k) => { total += ENRICH_WEIGHTS[k] * parts[k]; });
+      return { id: a.id, total: Math.round(total * 10000) / 10000, parts: parts };
+    });
+    rows.sort((x, y) => (y.total - x.total) || (x.id < y.id ? -1 : 1));
+    const top8 = rows.slice(0, ENRICH_TOP_N).map((r) => r.id);
+    const students = {};
+    rows.forEach((r) => {
+      const deep = top8.indexOf(r.id) >= 0;
+      students[r.id] = Object.assign({}, deep ? ENRICH_DEEP : ENRICH_LIGHT, { priority: r.total, priorityParts: r.parts });
+    });
+    return { lessonId: lesson.lessonId, lifecycle: "lesson-load（课程加载时生成 · 课结束丢弃 · 不回写 persona）", top8: top8, students: students };
+  }
+  /* ==== ENRICH-ACTIVATION-END ==== */
+
+  // Build scripted events from agent.drama.events — §8.2 单源派生。
+  // 原手工 26 条列表已迁入画像 drama.events（唯一事实源），本函数只做派生调用；
+  // 事件在 t_sec 各触发一次并作用于单个 agent，why 供 inspector changelog 展示。
   function buildScheduledEvents() {
     __scheduledEvents = [];
     if (!__agents) return;
-
-    // C2 白雨桐：举手 2 次未被点 → 注意力 0.85→0.45 (其 drama 明确)
-    __scheduledEvents.push(
-      { t: 150,  agent: "C2", fx: { speak_motivation: -0.18, attention: -0.12, social_safety: -0.08 }, why: "举手 5s 未被点·第 1 次" },
-      { t: 1000, agent: "C2", fx: { speak_motivation: -0.22, attention: -0.18, social_safety: -0.12 }, why: "举手 5s 未被点·第 2 次" },
-      { t: 1500, agent: "C2", fx: { speak_motivation: -0.10, attention: -0.10 }, why: "放弃·开始默写未说论点" }
-    );
-
-    // C5 邱钰泽：5 次插话被抢 (@01:30, @02:20, @14:00, @22:00, @35:00)
-    [90, 140, 840, 1320, 2100].forEach((t, idx) => {
-      __scheduledEvents.push({
-        t, agent: "C5",
-        fx: { speak_motivation: -0.07, attention: -0.06, social_safety: -0.04 },
-        why: `想插话被抢 · 第 ${idx + 1}/5 次`
-      });
-    });
-
-    // C1 蒋亦舟：内嵌行为时间戳 (摇头/笔记/手抬桌面/与 D5 低声)
-    __scheduledEvents.push(
-      { t: 120,  agent: "C1", fx: { social_safety: -0.04 }, why: "摇头·不同意二元对立框架" },
-      { t: 720,  agent: "C1", fx: { social_safety: -0.03, attention: +0.02 }, why: "笔记累积·想说的反驳" },
-      { t: 1180, agent: "C1", fx: { social_safety: -0.05 }, why: "手抬到桌面但放弃举起" },
-      { t: 1560, agent: "C1", fx: { social_safety: +0.06, attention: -0.03 }, why: "与同桌 D5 低声 30s" },
-      { t: 1560, agent: "D5", fx: { attention: +0.08, social_safety: +0.08, speak_motivation: +0.05 }, why: "C1 低声向她解释" }
-    );
-
-    // C3 夏梓晗：小组讨论中说了 4 分钟但全班退场
-    __scheduledEvents.push(
-      { t: 480, agent: "C3", fx: { social_safety: +0.05, speak_motivation: +0.05 }, why: "小组内讲述 BD 视角" },
-      { t: 930, agent: "C3", fx: { social_safety: -0.08, speak_motivation: -0.10 }, why: "代表小组发言机会让给 A2·退缩" }
-    );
-
-    // C4 罗予安：报告稿 GMP 段被砍
-    __scheduledEvents.push(
-      { t: 1800, agent: "C4", fx: { social_safety: -0.10, speak_motivation: -0.05 }, why: "GMP 段被砍·自我审查强化" }
-    );
-
-    // A1, A2, B1, B2 主动发言事件 → 微小正反馈
-    __scheduledEvents.push(
-      { t: 48,  agent: "A1", fx: { speak_motivation: +0.04, attention: +0.04, social_safety: +0.04 }, why: "首发被教师认可" },
-      { t: 98,  agent: "A1", fx: { speak_motivation: +0.03 }, why: "核心论证" },
-      { t: 108, agent: "B1", fx: { speak_motivation: +0.05, social_safety: +0.04 }, why: "引爆论点" },
-      { t: 125, agent: "A1", fx: { social_safety: -0.05 }, why: "B 组立场冲击" },
-      { t: 125, agent: "B1", fx: { social_safety: +0.05 }, why: "冲击成功" },
-      { t: 480, agent: "A2", fx: { speak_motivation: +0.05, social_safety: +0.05 }, why: "分组内主导整合" },
-      { t: 600, agent: "B2", fx: { speak_motivation: +0.05, social_safety: +0.05 }, why: "技术反诘 BE" }
-    );
-
-    // 教师在 1920s 追问'被低估视角' → A1 立场微调 + A7 反思激活 + D3 反思触发
-    __scheduledEvents.push(
-      { t: 1920, agent: "A1", fx: { stance_position: -0.05 }, why: "立场松动·吸收依从性维度" },
-      { t: 1920, agent: "A7", fx: { speak_motivation: +0.20, attention: +0.10 }, why: "反思阶段·被激活" },
-      { t: 1920, agent: "D3", fx: { speak_motivation: +0.05 }, why: "想发言但仍等点名" }
-    );
-
-    __scheduledEvents.sort((a, b) => a.t - b.t);
+    __scheduledEvents = deriveSchedFromDrama(__agents);
   }
 
   // 应用单个 event 到 runtime
@@ -203,22 +371,26 @@
       const baseDecay = 0.0002 * (1 + rt.fatigue * 1.5) * dt;
       rt.attention = Math.max(0, rt.attention - baseDecay);
 
-      // 疲劳累积
-      rt.fatigue = Math.min(1, rt.fatigue + 0.00008 * dt);
+      // 疲劳累积：P2 起全员按画像派生 fatigue_rate（persona-map-v1 R2），替代 v0.3 的字母分支加速
+      rt.fatigue = Math.min(1, rt.fatigue + (rt.fatigue_rate != null ? rt.fatigue_rate : 0.00008) * dt);
 
-      // D 组疲劳加速
-      if (id.startsWith("D") && id !== "D4") {
-        rt.fatigue = Math.min(1, rt.fatigue + 0.00015 * dt);
-      }
-      // D4 因身体不适，疲劳特别快
-      if (id === "D4") {
-        rt.fatigue = Math.min(1, rt.fatigue + 0.0008 * dt);
-        rt.attention = Math.max(0.05, rt.attention - 0.0006 * dt);
-      }
+      // P3 · L2 更新规则（取值依据 _meta.persona_map_notes.runtime_layer）：
+      // 认知冲突随时间自然消解；理解度随听课缓慢衰减
+      rt.cognitiveConflict = Math.max(0, (rt.cognitiveConflict || 0) - 0.00005 * dt);
+      rt.perceivedUnderstanding = Math.max(0, (rt.perceivedUnderstanding || 0) - 0.00003 * dt);
     });
 
     __lastAgentTickSec = t_sec;
     return fired;
+  }
+
+  // P3 · L3：learningTrace 仅对 enrichmentPlan learningTraceDepth≥2 的 deep 学生追加（light 保持空数组）
+  function traceDepthOf(id) { return (__enrichPlan && __enrichPlan.students && __enrichPlan.students[id] && __enrichPlan.students[id].learningTraceDepth) || 0; }
+  function pushAgentTrace(id, entry) {
+    if (traceDepthOf(id) < 2) return;
+    const rt = getAgentRuntime(id); if (!rt) return;
+    rt.learningTrace.push(entry);
+    if (rt.learningTrace.length > 50) rt.learningTrace.shift();
   }
 
   // 把 runtime 投影到视觉：注意力 → opacity，事件触发 → 闪烁
@@ -478,6 +650,8 @@
       if (rule.includes("家庭隐私")) return context.topic.some((t) => t.includes("家庭"));
       if (rule.includes("临床细节")) return context.topic.some((t) => t.includes("临床") || t.includes("BE") || t.includes("INR"));
       // 几乎从不
+      // §15-1：仅 C6 使用——除教师点名窗口外全程沉默（沉默因果结构不变，被点名可短回应）
+      if (rule === "所有（除教师点名）") return !(context.teacherCalled || context.teacherCallC || context.teacherCallSilent);
       if (rule.includes("几乎从不") || rule === "所有公开发言" || rule === "所有" || rule.includes("从未成功")) return true;
       // 仅小组内
       if (rule.includes("仅小组内") || rule.includes("仅在小组内")) return context.phaseIsSmallGroup === false;
@@ -486,6 +660,26 @@
       return false;
     });
   }
+
+  // P2：行业视角点名（callC）目标判定——有沉默因果且具行业/职业接触（或家族产业参与）的学生（历史驱动，替代 v0.3 字母口径）
+  function isCallCTarget(agent) {
+    if (!agent || !(agent.silenceCauses || []).length) return false;
+    return (agent.historyEvents || []).some((e) => e.type === "industry_experience" || e.type === "career_contact" || e.role === "family_business_participant");
+  }
+  // P5 · 干预响应矩阵（persona-map-v1.R4 逐人派生，与 mv-classroom-core 对称读取）：
+  // practice-runtime 干预面仅 callC/callSilent 窗口（drama 节拍驱动）——openQ/teacherCallOn 钩子
+  // 在 MVCore 侧，本侧不超前新建（§14 P5 跟随 UI 干预面）；缺省降级 = 旧行为
+  function interventionOf(agent) {
+    const ir = (agent && agent.interventionResponse) || {};
+    const pc = ir.publicCall || {};
+    return {
+      directMult: typeof pc.directMult === "number" ? pc.directMult : 1,
+      scaffoldedBonus: typeof pc.scaffoldedBonus === "number" ? pc.scaffoldedBonus : 0,
+    };
+  }
+  // P2 §4：认识论习惯（latentFactors.F3）驱动的语料键类别——只在已匹配的公开候选池内调概率，键集合不变
+  const EVIDENCE_KEYS = ["evidence_supply", "case_data", "case_support", "anchor_argument", "technical", "technical_rebuttal", "rebuttal", "domain_point", "clarifying_question"];
+  const EXPERIENCE_KEYS = ["case", "situational", "rallying", "proposal", "question", "question_other", "rhetorical_question", "to_open_question"];
 
   // 计算 agent 当前的"想说话"分数
   function scoreSpeakDesire(agent, rt, context) {
@@ -501,11 +695,25 @@
     // 话题/规则命中加分
     if (rulesMatch(agent.rules?.speak_on, context)) score += 0.35;
 
-    // 盟友/对手刚发言
+    // 盟友/对手刚发言（P2 §4 接线：均带阈值，persona-map-v1 R2 派生）
     const recent = context.recentSpeakers || [];
     const recentIds = recent.map((w) => (w || "").split("·")[0]);
-    if (agent.graph?.allies?.some((id) => recentIds.includes(id))) score += 0.15;
-    if (agent.graph?.rivals?.some((id) => recentIds.includes(id))) score += 0.25;
+    // allies 加成需近期发言盟友数 ≥ ally_threshold（F6 派生；缺省 1 = 原无条件语义）
+    const allySpokeCount = agent.graph?.allies ? agent.graph.allies.filter((id) => recentIds.includes(id)).length : 0;
+    const allyTh = typeof agent.rules?.ally_threshold === "number" ? agent.rules.ally_threshold : 1;
+    if (allySpokeCount >= allyTh) score += 0.15;
+    // rivals 加成需 立场差 × 在场强度 ≥ rebut_threshold（F7×F6 派生；缺省 0.3）
+    const rivalSpokeIds = agent.graph?.rivals ? agent.graph.rivals.filter((id) => recentIds.includes(id)) : [];
+    if (rivalSpokeIds.length) {
+      const gap = Math.max(...rivalSpokeIds.map((id) => Math.abs((rt.stance_position || 0) - (getAgentRuntime(id)?.stance_position || 0))));
+      const rebutTh = typeof agent.rules?.rebut_threshold === "number" ? agent.rules.rebut_threshold : 0.3;
+      if (gap * Math.min(1, rivalSpokeIds.length / 2) >= rebutTh) score += 0.25;
+    }
+
+    // P3 · L2 消费点（更新规则见 generateAgentBeats/tickAgents，依据 _meta.persona_map_notes.runtime_layer）：
+    // 高认知冲突 × 高认知调节(F7≥0.55) → 反驳/立场迁移倾向；理解度过低 → 不敢开口
+    if ((rt.cognitiveConflict || 0) > 0.5 && (personaFactorValue(agent, "F7") || 0) >= 0.55) score += 0.2;
+    if ((rt.perceivedUnderstanding || 0) < 0.25) score -= 0.15;
 
     // 冷却（刚说过不久再说）
     if (rt.last_spoke_t != null && context.t_sec - rt.last_spoke_t < 90) {
@@ -515,26 +723,29 @@
     // 立场强度
     score += (agent.persona?.stance_strength || 0) * 0.05;
 
-    // 轮换激励：说得越多越降权；从未发言的 A/B 组加分，避免两人垄断
+    // 轮换激励：说得越多越降权（P2 §14：v0.3 的 A/B 首发字母加成已移除，个体倾向由派生 state_init 承载）
     const spokeCount = rt.spoke_count || 0;
     score -= spokeCount * 0.11;
-    if (spokeCount === 0 && (agent.id.startsWith("A") || agent.id.startsWith("B"))) score += 0.18;
 
-    // 组别先验（C/D 默认低发言概率）
-    if (agent.id.startsWith("C")) score -= 0.5;
-    if (agent.id.startsWith("D")) score -= 0.65;
+    // P2（§14）：v0.3 组别先验（C/D 固定减分）已移除
 
-    // 教师点名时 D/C 组分数大幅提升（已响应本轮点名的不再加分，让位给别的沉默同学）
+    // 教师点名窗口（历史驱动，非字母）：已响应本轮点名的不再加分，让位给别的沉默同学
+    // P5 · 干预响应矩阵消费点：窗口加成按 directMult 逐人缩放（低安全感/低效能+沉默因果者近零甚至微负）
+    const irm = interventionOf(agent);
     const alreadyResponded = state._callResponders && state._callResponders.has(agent.id);
     if (!alreadyResponded) {
-      if (context.teacherCallSilent && (agent.id.startsWith("C") || agent.id.startsWith("D"))) score += 0.8;
-      if (context.teacherCallC && agent.id.startsWith("C")) score += 0.9;
+      // 点名沉默窗口：有沉默因果记录的学生被激活
+      if (context.teacherCallSilent && (agent.silenceCauses || []).length > 0) score += 0.8 * irm.directMult;
+      // 行业视角点名窗口：有沉默因果且具行业/职业接触（或家族产业参与）的学生被激活
+      if (context.teacherCallC && isCallCTarget(agent)) score += 0.9 * irm.directMult;
+      // P3 · L2 消费点：参与欠账累积 → 点名窗口内目标权重上调（沉默风险对冲）
+      if (context.teacherCallC || context.teacherCallSilent) score += Math.min(0.3, (rt.participationDebt || 0) * 0.05);
     } else if (context.teacherCallC || context.teacherCallSilent) {
       score -= 0.5;
     }
 
-    // 噪声（让相近分数随机）
-    score += (Math.random() - 0.5) * 0.18;
+    // 噪声（让相近分数随机 · §9 seeded）
+    score += (__rng() - 0.5) * 0.18;
 
     return score;
   }
@@ -545,8 +756,9 @@
     const keys = Object.keys(r);
     if (!keys.length) return null;
 
-    // 教师点名/被叫起
+    // 教师点名/被叫起（if_called_uncertain 优先：§15-1 低确定性短回应，仅 C3/C6 持有该键）
     if (context.teacherCalled || context.teacherCallSilent || context.teacherCallC) {
+      if (r.if_called_uncertain) return "if_called_uncertain";
       if (r.if_called_by_teacher) return "if_called_by_teacher";
       if (r.if_called) return "if_called";
       if (r.if_nudged) return "if_nudged";
@@ -563,7 +775,7 @@
       if (r.technical_rebuttal) return "technical_rebuttal";
       if (r.to_rival) return "to_rival";
       if (r.rebuttal) return "rebuttal";
-      if (Math.random() < 0.3 && r.concession) return "concession";
+      if (__rng() < 0.3 && r.concession) return "concession";
     }
     // 盟友刚发言 → 支援/补强
     if (context.lastWasAlly) {
@@ -578,14 +790,31 @@
       if (r.concession) return "concession";
       if (r.proposal) return "proposal";
     }
+    // P3 · L2 消费点：理解不足（perceivedUnderstanding<0.3）优先澄清请求（若有该语料键）
+    const rtU = getAgentRuntime(agent.id);
+    if (rtU && (rtU.perceivedUnderstanding || 0) < 0.3 && r.clarifying_question) return "clarifying_question";
     // 兜底：选一个非私密、非内心独白的公开响应
-    const publicKeys = keys.filter((k) =>
+    let publicKeys = keys.filter((k) =>
       !k.includes("private") && !k.includes("internal") && !k.includes("intended") &&
       !k.includes("post_class") && !k.includes("small_group") && !k.includes("report_text") &&
       !k.includes("if_anonymous") && !k.includes("if_regulatory") && !k.includes("reflection_sheet")
     );
     if (publicKeys.length === 0) return null;
-    return publicKeys[Math.floor(Math.random() * publicKeys.length)];
+    // P3 · §7.2 正向激活：evidence 语料键优先（80% 落入证据子池；覆盖 F3 调序，键集合不变）
+    const act = __activationById[agent.id];
+    if (act && act.evidenceBias && publicKeys.length > 1) {
+      const evPool = publicKeys.filter((k) => EVIDENCE_KEYS.includes(k));
+      if (evPool.length && __rng() < 0.8) publicKeys = evPool;
+    } else {
+      // P2 §4：认识论习惯调序——F3≥0.55 证据型 / ≤0.45 经验型，65% 概率落入偏好子池（只在已匹配键集合内，集合不变）
+      const f3 = agent.latentFactors?.F3?.value;
+      if (typeof f3 === "number" && publicKeys.length > 1) {
+        const pref = f3 >= 0.55 ? EVIDENCE_KEYS : f3 <= 0.45 ? EXPERIENCE_KEYS : null;
+        const prefPool = pref ? publicKeys.filter((k) => pref.includes(k)) : [];
+        if (prefPool.length && __rng() < 0.65) publicKeys = prefPool;
+      }
+    }
+    return publicKeys[Math.floor(__rng() * publicKeys.length)];
   }
 
   // 在 [fromSec, toSec] 内由 agents 决定生成的 beat 行
@@ -637,7 +866,11 @@
       if (scored.length === 0) continue;
       const top = scored[0];
       // 兜底阈值（避免在没人想说时强行发言）
-      if (top.score < 0.55) continue;
+      if (top.score < 0.55) {
+        // P3 · L2 participationDebt：本轮无人发言，全员欠账 +1
+        __agentRuntime.forEach((r2) => { r2.participationDebt = (r2.participationDebt || 0) + 1; });
+        continue;
+      }
 
       const respKey = pickResponseKey(top.a, top.ctx);
       const respArr = respKey && top.a.responses?.[respKey];
@@ -650,7 +883,7 @@
       const recentRaw = (rtTop && rtTop._recentRaw) || [];
       const fresh = respTexts.filter((tx) => !recentRaw.includes(tx));
       const pool = fresh.length ? fresh : respTexts;
-      const rawText = pool[Math.floor(Math.random() * pool.length)];
+      const rawText = pool[Math.floor(__rng() * pool.length)];
       if (rtTop) rtTop._recentRaw = [...recentRaw, rawText].slice(-6);
       // 剥离面向审阅者的元注释（（注：…）/（…专家…）），不进课堂台词
       const text = cleanBeatText(rawText);
@@ -675,7 +908,29 @@
         applyAgentEvent({ t, agent: top.a.id, fx, why: `发言「${respKey}」` });
         rt.last_spoke_t = t;
         rt.spoke_count = (rt.spoke_count || 0) + 1;
+        // P3 · L2/L3 发言事件更新（规则依据 _meta.persona_map_notes.runtime_layer）
+        const concept = (context.topic && context.topic[0]) || "SWOT";
+        const preConflict = rt.cognitiveConflict || 0;
+        rt.cognitiveConflict = Math.max(0, preConflict - 0.15);                       // 说出即部分消解
+        rt.perceivedUnderstanding = Math.min(1, (rt.perceivedUnderstanding || 0) + 0.02);
+        if (preConflict > 0.2) pushAgentTrace(top.a.id, { t, event: "self_revision", concept, effect: -0.15 });
+        // 认知冲突：任何与听者立场差 >0.5 的发言都是"反例"（全班轻量运行；deep 学生记概念级轨迹）
+        __agentRuntime.forEach((r2, id) => {
+          if (id === top.a.id) return;
+          const gap = Math.abs((rt.stance_position || 0) - (r2.stance_position || 0));
+          if (gap > 0.5) {
+            const d = Math.round(0.1 * gap * 10000) / 10000;
+            r2.cognitiveConflict = Math.min(1, (r2.cognitiveConflict || 0) + d);
+            pushAgentTrace(id, { t, event: "peer_counterexample", concept, effect: d });
+          }
+        });
+        if (top.ctx.teacherCallC || top.ctx.teacherCallSilent) pushAgentTrace(top.a.id, { t, event: "teacher_scaffold", concept, effect: 0.05 });
       }
+      // P3 · L2 participationDebt：连续未发言轮次计数，发言即清零（本轮结算一次）
+      __agentRuntime.forEach((r2, id) => {
+        if (id === top.a.id) r2.participationDebt = 0;
+        else r2.participationDebt = (r2.participationDebt || 0) + 1;
+      });
       // 记录本轮点名响应者，避免同一人重复占用点名窗口
       if (top.ctx.teacherCallC || top.ctx.teacherCallSilent) {
         if (!state._callResponders) state._callResponders = new Set();
@@ -684,6 +939,8 @@
       // 盟友受益 / 对手被激
       (top.a.graph?.allies || []).forEach((aid) => {
         applyAgentEvent({ t, agent: aid, fx: { social_safety: 0.03 }, why: `盟友 ${top.a.id} 发言支持` });
+        const r3 = getAgentRuntime(aid);
+        if (r3) r3.perceivedUnderstanding = Math.min(1, (r3.perceivedUnderstanding || 0) + 0.05); // P3 · L2：盟友阐发提升理解
       });
       (top.a.graph?.rivals || []).forEach((rid) => {
         applyAgentEvent({ t, agent: rid, fx: { speak_motivation: 0.06 }, why: `对手 ${top.a.id} 发言·激起反驳` });
@@ -878,7 +1135,6 @@
     const prev = state.tSec;
     state.tSec = Math.min(state.capSec, state.tSec + state.realtimeScale);
     generateNextBeats(prev, state.tSec);
-    syncHeaderTimers();
     updatePersonaLive();
     // Agent runtime tick → drives state evolution + visual feedback
     const fired = tickAgents(state.tSec);
@@ -895,7 +1151,6 @@
     const prev = state.tSec;
     state.tSec = Math.min(state.capSec, state.tSec + seconds);
     generateNextBeats(prev, state.tSec);
-    syncHeaderTimers();
     updatePersonaLive();
     const fired = tickAgents(state.tSec);
     reflectAgentStateInGrid(fired);
@@ -933,15 +1188,10 @@
     });
     refreshAllReviewEvidence();
     composeAssets();
-    syncHeaderTimers();
     updatePersonaLive();
     reflectAgentStateInGrid([]);
     setStageStatus("ii", `已重置 · ${fmtTime(state.tSec)} / 45:00`, false, false);
   }
-  function syncHeaderTimers() {
-    $$('[data-live="timer"]').forEach((el) => (el.textContent = fmtTime(state.tSec)));
-  }
-
   // ──────────────────────────────────────────────────────────────
   // 5. Stage ii —— 派生关键时刻
   // ──────────────────────────────────────────────────────────────
@@ -5144,5 +5394,7 @@
   global.PharmacoPilotPracticeRuntime = {
     state, startSim, pauseSim, stepSim, resetSim,
     deriveKeyMoments, syncKeyMomentsFromPlayback, composeAssets, writeBackAllAssets,
+    // §9 确定性：当前 seed 配置（独立流 ":prt"）
+    getSeedInfo: () => ({ config: { ...__seedCfg }, seedString: seedStringOf(__seedCfg) + ":prt", seed: fnv1a32(seedStringOf(__seedCfg) + ":prt") }),
   };
 })(window);

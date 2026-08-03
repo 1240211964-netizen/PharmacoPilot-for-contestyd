@@ -65,7 +65,8 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const fmt = (sec) => { const m = String(Math.floor(sec / 60)).padStart(2, "0"); const s = String(Math.floor(sec % 60)).padStart(2, "0"); return `${m}:${s}`; };
-  const groupOf = (id) => id[0]; // A/B/C/D
+  // P3：展示分组由画像驱动（MVCore.visualArchetypeOf：沉默观察/低参与/立场取向），替代学号首字母着色
+  const archetypeOf = (id) => (window.MVCore && window.MVCore.visualArchetypeOf) ? window.MVCore.visualArchetypeOf(id) : "D";
 
   // 品牌色（与 tokens.css 对齐）
   const COL = {
@@ -667,7 +668,7 @@
       const MV = this.MV;
       MV.STUDENTS.forEach((s) => {
         const rnd = mulberry32(hashStr(s.id));
-        const grp = groupOf(s.id);
+        const grp = archetypeOf(s.id);
         const female = rnd() < 0.5;
         const opt = {
           skin: SKIN[Math.floor(rnd() * SKIN.length)],
@@ -713,7 +714,7 @@
 
     /* ---------- 立场 → 世界坐标 ---------- */
     targetFor(id, rt) {
-      const grp = groupOf(id);
+      const grp = archetypeOf(id);
       if (this.huddle) {
         // 8 个小组围圈讨论
         const i = this.MV.STUDENTS.findIndex((s) => s.id === id);
@@ -1070,7 +1071,7 @@
         const open = speaking ? (0.35 + 0.65 * Math.abs(Math.sin(time * 9 + c.bob))) : 0;
         ud.mouth.scale.y = lerp(ud.mouth.scale.y || 1, 1 + open * 3.2, 0.35);
       }
-      const anxious = (groupOf(c.id) === "C" && fs.ss < 0.45 && fs.at > 0.4) || fs.fa > 0.62;
+      const anxious = (archetypeOf(c.id) === "C" && fs.ss < 0.45 && fs.at > 0.4) || fs.fa > 0.62;
       const wants = fs.sm > 0.84 && !anxious && !speaking;
       if (ud.browL) {
         const inner = anxious ? 0.42 : (wants ? -0.22 : 0);   // 内端上扬=担忧 / 下压=跃跃欲试
@@ -1121,12 +1122,12 @@
 
     exprFor(id, fs, speaking) {
       if (speaking) return "💬";
-      const grp = groupOf(id);
+      const grp = archetypeOf(id);
       if (id === "D4") return "🤒";
       if (fs.at < 0.34) return "💤";
       if (fs.fa > 0.66) return "😮‍💨";
       if (grp === "C" && fs.ss < 0.45 && fs.at > 0.42) return "😟";
-      if (fs.sm > 0.84 && /[AB]/.test(grp)) return "✋";
+      if (fs.sm > 0.84 && (grp === "A" || grp === "B")) return "✋";
       return "";
     }
     updateExpr(c, fs, speaking, time) {
@@ -1517,7 +1518,7 @@
       const rt = this.live ? this.MV.rtOf(id) : null; const fs = this.frameState(id);
       const st = rt ? rt.stance_position : fs.st;
       const stance = st > 0.25 ? "偏外部环境" : st < -0.25 ? "偏内部能力" : "边界核对/观望";
-      const grpName = { A: "政策/市场", B: "门店/顾客", C: "产业/竞争", D: "观望/被动" }[groupOf(id)];
+      const grpName = { A: "政策/市场", B: "门店/顾客", C: "产业/竞争", D: "观望/被动" }[archetypeOf(id)];
       const insp = this.mount.querySelector("#mv3-inspector");
       insp.hidden = false;
       insp.innerHTML = `

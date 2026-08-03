@@ -1,0 +1,43 @@
+{
+  "_meta": {
+    "purpose": "v0.2 运行数据的 A/B/C/D 归属唯一合法存放处（persona-v2-contract §0-11）：仅用于迁移对照与 32 人完整性检查，迁移结束后可归档。A/B/C/D 禁止写入 V2 学生记录、_meta、runtime、prompt、UI、语料生成请求、_decision_weights 或场景加载逻辑。",
+    "source": "虚拟班32人数据.md（L10-18 整体分布、L23-58 总览表、L62/L324/L566/L805 四个组小节）",
+    "personaSetVersion": "virtual-class-agents-v0.2",
+    "createdPhase": "P1",
+    "studentCount": 32
+  },
+  "map": {
+    "A1": { "v0_2_group": "A", "source": "总览表 L27；Group A 小节 L64-108（医保视角 8 人）" },
+    "A2": { "v0_2_group": "A", "source": "总览表 L28；Group A 小节 L112-141" },
+    "A3": { "v0_2_group": "A", "source": "总览表 L29；Group A 小节 L145-173" },
+    "A4": { "v0_2_group": "A", "source": "总览表 L30；Group A 小节 L177-204" },
+    "A5": { "v0_2_group": "A", "source": "总览表 L31；Group A 小节 L208-235" },
+    "A6": { "v0_2_group": "A", "source": "总览表 L32；Group A 小节 L239-263" },
+    "A7": { "v0_2_group": "A", "source": "总览表 L33；Group A 小节 L267-291" },
+    "A8": { "v0_2_group": "A", "source": "总览表 L34；Group A 小节 L295-320" },
+    "B1": { "v0_2_group": "B", "source": "总览表 L35；Group B 小节 L326-356（慢病家属 8 人）" },
+    "B2": { "v0_2_group": "B", "source": "总览表 L36；Group B 小节 L360-389" },
+    "B3": { "v0_2_group": "B", "source": "总览表 L37；Group B 小节 L393-419" },
+    "B4": { "v0_2_group": "B", "source": "总览表 L38；Group B 小节 L423-448" },
+    "B5": { "v0_2_group": "B", "source": "总览表 L39；Group B 小节 L452-477" },
+    "B6": { "v0_2_group": "B", "source": "总览表 L40；Group B 小节 L481-506" },
+    "B7": { "v0_2_group": "B", "source": "总览表 L41；Group B 小节 L510-534" },
+    "B8": { "v0_2_group": "B", "source": "总览表 L42；Group B 小节 L538-562" },
+    "C1": { "v0_2_group": "C", "source": "总览表 L43；Group C 小节 L570-597（药企背景 8 人 · 集体沉默）" },
+    "C2": { "v0_2_group": "C", "source": "总览表 L44；Group C 小节 L601-627" },
+    "C3": { "v0_2_group": "C", "source": "总览表 L45；Group C 小节 L631-656" },
+    "C4": { "v0_2_group": "C", "source": "总览表 L46；Group C 小节 L660-685" },
+    "C5": { "v0_2_group": "C", "source": "总览表 L47；Group C 小节 L689-717" },
+    "C6": { "v0_2_group": "C", "source": "总览表 L48；Group C 小节 L721-745" },
+    "C7": { "v0_2_group": "C", "source": "总览表 L49；Group C 小节 L749-773" },
+    "C8": { "v0_2_group": "C", "source": "总览表 L50；Group C 小节 L777-801" },
+    "D1": { "v0_2_group": "D", "source": "总览表 L51；Group D 小节 L807-831（沉默观望 8 人）" },
+    "D2": { "v0_2_group": "D", "source": "总览表 L52；Group D 小节 L835-855" },
+    "D3": { "v0_2_group": "D", "source": "总览表 L53；Group D 小节 L859-884" },
+    "D4": { "v0_2_group": "D", "source": "总览表 L54；Group D 小节 L888-908" },
+    "D5": { "v0_2_group": "D", "source": "总览表 L55；Group D 小节 L912-937" },
+    "D6": { "v0_2_group": "D", "source": "总览表 L56；Group D 小节 L941-965" },
+    "D7": { "v0_2_group": "D", "source": "总览表 L57；Group D 小节 L969-993" },
+    "D8": { "v0_2_group": "D", "source": "总览表 L58；Group D 小节 L997-1021" }
+  }
+}

@@ -657,8 +657,8 @@
           lastLine = b;
         }
       });
-      // C 组一旦有人发声(教师点名后),集体沉默幕掀开
-      if ([...spoke].some((id) => id[0] === "C")) cSilenced = false;
+      // 沉默幕掀开条件：任一"沉默观察"学生已发声（画像驱动：有沉默因果且具行业/职业接触，MVCore.isSilentObserver）
+      if ([...spoke].some((id) => MV.isSilentObserver && MV.isSilentObserver(MV.agentOf(id)))) cSilenced = false;
     } else {
       // 静态:展示 45 min 端态投影(已表态 14)+ C 集体沉默
       PROJECTION_SPOKEN.forEach((id) => spoke.add(id));
