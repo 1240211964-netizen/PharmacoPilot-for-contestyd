@@ -10,6 +10,7 @@ import { chromium } from "/Users/yandilei/.npm/_npx/e41f203b7505f1fb/node_module
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { waitSettledBox, clickWhenSettled, waitFontsReady } from "./pw-wait-settled.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const BASE = "http://127.0.0.1:4173";
@@ -126,9 +127,11 @@ async function runScenario(id, { routes, seek = false, viewport } = {}) {
       await page.waitForFunction(() => typeof window.PharmacoPilotMV?.seek === "function", undefined, { timeout: 30000 });
       await page.evaluate(() => window.PharmacoPilotMV.seek(2690));
       await page.waitForFunction(() => !!document.querySelector("#stage-ii .review-verdict-workspace"), undefined, { timeout: 30000 });
-      await page.waitForTimeout(600);
+      // seek 后渲染沉降约 2s（boundingBox 漂移数 px）：轮询位置稳定再操作，不用固定等待
+      await waitSettledBox(page, "#stage-ii [data-ec-role='verdict-list']", { stableMs: 700 });
     } else {
-      await page.waitForTimeout(900);
+      await page.waitForSelector("#stage-ii .posttrial-wait", { timeout: 15000 });
+      await waitSettledBox(page, "#stage-ii [data-ec-role='verdict-list']", { stableMs: 700 });
     }
 
     const snap = await page.evaluate(() => {
@@ -158,8 +161,8 @@ async function runScenario(id, { routes, seek = false, viewport } = {}) {
       if (!snap.activeKey || snap.activeKey !== snap.activeIndexKey) fail(id, "默认聚焦一致", `detail=${snap.activeKey} index=${snap.activeIndexKey}`);
 
       // 聚焦 env04 组卡：组头 + 并集行 + 三个子区
-      await page.click("[data-review-select='env:env04']");
-      await page.waitForTimeout(400);
+      await clickWhenSettled(page, "[data-review-select='env:env04']");
+      await waitSettledBox(page, "[data-review-group='env:env04']", { stableMs: 500 });
       const group = await page.evaluate(() => {
         const card = document.querySelector("[data-review-group='env:env04']");
         const sub = Array.from(card?.querySelectorAll(".review-verdict-row.is-in-group") || []);
@@ -190,28 +193,29 @@ async function runScenario(id, { routes, seek = false, viewport } = {}) {
       }, undefined, { timeout: 15000 });
       const resolved = await page.evaluate(() => document.querySelector("[data-review-summary='resolved']")?.textContent.trim());
       if (resolved !== "1") fail(id, "工作区已处理计数", `resolved=${resolved}`);
-      await page.screenshot({ path: resolve(root, "output/playwright/stage2-group-desktop.png") });
-      await page.locator("[data-group-evidence]").first().screenshot({ path: resolve(root, "output/playwright/stage2-group-evidence.png") });
+      await waitFontsReady(page);
+      await page.screenshot({ path: resolve(root, "output/playwright/stage2-group-desktop.png"), timeout: 60000 });
+      await page.locator("[data-group-evidence]").first().screenshot({ path: resolve(root, "output/playwright/stage2-group-evidence.png"), timeout: 60000 });
     }
 
     if (id === "B") {
       if (!snap.wait) fail(id, "无证据占位", "未显示 posttrial-wait");
       if (snap.groupCards !== 0 || snap.itemCount !== 0) fail(id, "无证据不渲染组卡", `groups=${snap.groupCards} items=${snap.itemCount}`);
       // 无证据时深链落到占位区且不出组卡（先展开热点 details，按钮才可见）
-      await page.click("details.review-focus-env[data-env-key='env04'] > summary");
-      await page.click("[data-focus-goto='env04']");
-      await page.waitForTimeout(500);
+      await clickWhenSettled(page, "details.review-focus-env[data-env-key='env04'] > summary");
+      await clickWhenSettled(page, "[data-focus-goto='env04']");
+      await waitSettledBox(page, "#stage-ii .posttrial-wait", { stableMs: 500 });
       const stillWait = await page.evaluate(() => !!document.querySelector("#stage-ii .posttrial-wait"));
       if (!stillWait) fail(id, "无证据深链", "深链后占位区消失");
     }
 
     if (id === "C") {
       // 先切到 env02，再从右栏热点深链回 env04
-      await page.click("[data-review-select='env:env02']");
-      await page.waitForTimeout(300);
-      await page.click("details.review-focus-env[data-env-key='env04'] > summary");
-      await page.click("[data-focus-goto='env04']");
-      await page.waitForTimeout(600);
+      await clickWhenSettled(page, "[data-review-select='env:env02']");
+      await waitSettledBox(page, "[data-review-group='env:env02']", { stableMs: 500 });
+      await clickWhenSettled(page, "details.review-focus-env[data-env-key='env04'] > summary");
+      await clickWhenSettled(page, "[data-focus-goto='env04']");
+      await waitSettledBox(page, "[data-review-group='env:env04']", { stableMs: 700 });
       const focus = await page.evaluate(() => ({
         card: document.querySelector("[data-review-group='env:env04']")?.classList.contains("is-active") || false,
         index: document.querySelector("[data-review-select='env:env04']")?.classList.contains("is-active") || false,
@@ -230,9 +234,11 @@ async function runScenario(id, { routes, seek = false, viewport } = {}) {
     }
 
     if (viewport?.width === 390) {
-      await page.click("[data-review-select='env:env04']").catch(() => {});
-      await page.waitForTimeout(400);
-      await page.screenshot({ path: resolve(root, "output/playwright/stage2-group-mobile.png"), fullPage: false });
+      await clickWhenSettled(page, "[data-review-select='env:env04']")
+        .then(() => waitSettledBox(page, "[data-review-group='env:env04']", { stableMs: 500 }))
+        .catch(() => {});
+      await waitFontsReady(page);
+      await page.screenshot({ path: resolve(root, "output/playwright/stage2-group-mobile.png"), fullPage: false, timeout: 60000 });
     }
     pass(id, `groups=${snap.groupItems.length} routes=${snap.routeItems.length} active=${snap.activeKey}`);
   } catch (error) {
