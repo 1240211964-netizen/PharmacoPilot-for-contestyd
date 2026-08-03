@@ -1,0 +1,3292 @@
+{
+  "experiment": "chinese-search-fts5-probe",
+  "params": {
+    "rrfK": 60,
+    "rrfWeights": {
+      "B": 1,
+      "C": 1
+    },
+    "candidateDepth": 50,
+    "recallCutoffs": [
+      5,
+      10
+    ],
+    "segmenter": "Intl.Segmenter('zh', { granularity: 'word' })",
+    "date": "2026-08-03T10:51:17.330Z"
+  },
+  "corpusStats": {
+    "documents": 31,
+    "bySourceType": {
+      "teaching": 6,
+      "textbook": 10,
+      "policy": 8,
+      "rubric": 3,
+      "case": 4
+    },
+    "sourceTextBytes": 10444,
+    "queries": 35,
+    "answerable": 29,
+    "unanswerable": 6
+  },
+  "indexSizes": {
+    "docsTableBytes": 16384,
+    "channelA": 45056,
+    "channelB": 69632,
+    "channelC": 53248
+  },
+  "channelMetrics": {
+    "A": {
+      "recall@5": 0.31,
+      "recall@10": 0.31,
+      "mrr": 0.31,
+      "unanswerableFalseRecallRate": 0,
+      "latencyMs": {
+        "avg": 0.027,
+        "p50": 0.022,
+        "p95": 0.056
+      },
+      "indexBytes": 45056
+    },
+    "B": {
+      "recall@5": 0.448,
+      "recall@10": 0.448,
+      "mrr": 0.448,
+      "unanswerableFalseRecallRate": 0,
+      "latencyMs": {
+        "avg": 0.051,
+        "p50": 0.026,
+        "p95": 0.055
+      },
+      "indexBytes": 69632
+    },
+    "C": {
+      "recall@5": 0.966,
+      "recall@10": 0.966,
+      "mrr": 0.966,
+      "unanswerableFalseRecallRate": 0.667,
+      "latencyMs": {
+        "avg": 0.068,
+        "p50": 0.055,
+        "p95": 0.142
+      },
+      "indexBytes": 53248
+    },
+    "D": {
+      "recall@5": 0.966,
+      "recall@10": 0.966,
+      "mrr": 0.966,
+      "unanswerableFalseRecallRate": 0.667,
+      "latencyMs": {
+        "avg": 0.136,
+        "p50": 0.085,
+        "p95": 0.544
+      },
+      "indexBytes": 122880
+    }
+  },
+  "perQuery": [
+    {
+      "queryId": "q01",
+      "query": "学情",
+      "type": "two-char",
+      "answerable": true,
+      "gold": [
+        "TCH-01",
+        "TCH-02",
+        "TCH-05"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.115
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.031
+        },
+        "C": {
+          "top5": [
+            "TCH-05",
+            "TCH-01",
+            "TCH-02",
+            "TXT-09",
+            "TXT-03"
+          ],
+          "top10": [
+            "TCH-05",
+            "TCH-01",
+            "TCH-02",
+            "TXT-09",
+            "TXT-03",
+            "TXT-05",
+            "POL-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.1
+        },
+        "D": {
+          "top5": [
+            "TCH-05",
+            "TCH-01",
+            "TCH-02",
+            "TXT-09",
+            "TXT-03"
+          ],
+          "top10": [
+            "TCH-05",
+            "TCH-01",
+            "TCH-02",
+            "TXT-09",
+            "TXT-03",
+            "TXT-05",
+            "POL-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.196
+        }
+      }
+    },
+    {
+      "queryId": "q02",
+      "query": "评价",
+      "type": "two-char",
+      "answerable": true,
+      "gold": [
+        "TCH-02",
+        "RUB-01",
+        "RUB-03",
+        "TXT-01"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.025
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.016
+        },
+        "C": {
+          "top5": [
+            "TCH-02",
+            "RUB-01",
+            "TXT-01",
+            "TXT-09",
+            "RUB-03"
+          ],
+          "top10": [
+            "TCH-02",
+            "RUB-01",
+            "TXT-01",
+            "TXT-09",
+            "RUB-03",
+            "TXT-02",
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.04
+        },
+        "D": {
+          "top5": [
+            "TCH-02",
+            "RUB-01",
+            "TXT-01",
+            "TXT-09",
+            "RUB-03"
+          ],
+          "top10": [
+            "TCH-02",
+            "RUB-01",
+            "TXT-01",
+            "TXT-09",
+            "RUB-03",
+            "TXT-02",
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.065
+        }
+      }
+    },
+    {
+      "queryId": "q03",
+      "query": "首剂",
+      "type": "two-char",
+      "answerable": true,
+      "gold": [
+        "TXT-08"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.018
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.017
+        },
+        "C": {
+          "top5": [
+            "TXT-08",
+            "POL-03",
+            "TXT-07",
+            "POL-05"
+          ],
+          "top10": [
+            "TXT-08",
+            "POL-03",
+            "TXT-07",
+            "POL-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.04
+        },
+        "D": {
+          "top5": [
+            "TXT-08",
+            "POL-03",
+            "TXT-07",
+            "POL-05"
+          ],
+          "top10": [
+            "TXT-08",
+            "POL-03",
+            "TXT-07",
+            "POL-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.059
+        }
+      }
+    },
+    {
+      "queryId": "q04",
+      "query": "形成性评价",
+      "type": "multi-char",
+      "answerable": true,
+      "gold": [
+        "RUB-01"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.022
+        },
+        "B": {
+          "top5": [
+            "RUB-01"
+          ],
+          "top10": [
+            "RUB-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.041
+        },
+        "C": {
+          "top5": [
+            "RUB-01",
+            "TCH-02",
+            "TXT-03",
+            "TXT-01",
+            "TXT-09"
+          ],
+          "top10": [
+            "RUB-01",
+            "TCH-02",
+            "TXT-03",
+            "TXT-01",
+            "TXT-09",
+            "RUB-03",
+            "TXT-08",
+            "TXT-02",
+            "TXT-07",
+            "TXT-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.055
+        },
+        "D": {
+          "top5": [
+            "RUB-01",
+            "TCH-02",
+            "TXT-03",
+            "TXT-01",
+            "TXT-09"
+          ],
+          "top10": [
+            "RUB-01",
+            "TCH-02",
+            "TXT-03",
+            "TXT-01",
+            "TXT-09",
+            "RUB-03",
+            "TXT-08",
+            "TXT-02",
+            "TXT-07",
+            "TXT-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.101
+        }
+      }
+    },
+    {
+      "queryId": "q05",
+      "query": "治疗药物监测",
+      "type": "multi-char",
+      "answerable": true,
+      "gold": [
+        "TXT-05"
+      ],
+      "channels": {
+        "A": {
+          "top5": [
+            "TXT-05"
+          ],
+          "top10": [
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.027
+        },
+        "B": {
+          "top5": [
+            "TXT-05"
+          ],
+          "top10": [
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.035
+        },
+        "C": {
+          "top5": [
+            "TXT-05",
+            "POL-04",
+            "TXT-09",
+            "TXT-06",
+            "POL-01"
+          ],
+          "top10": [
+            "TXT-05",
+            "POL-04",
+            "TXT-09",
+            "TXT-06",
+            "POL-01",
+            "POL-06",
+            "TXT-08",
+            "CAS-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.117
+        },
+        "D": {
+          "top5": [
+            "TXT-05",
+            "POL-04",
+            "TXT-09",
+            "TXT-06",
+            "POL-01"
+          ],
+          "top10": [
+            "TXT-05",
+            "POL-04",
+            "TXT-09",
+            "TXT-06",
+            "POL-01",
+            "POL-06",
+            "TXT-08",
+            "CAS-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.157
+        }
+      }
+    },
+    {
+      "queryId": "q06",
+      "query": "处方点评",
+      "type": "multi-char",
+      "answerable": true,
+      "gold": [
+        "CAS-03"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.022
+        },
+        "B": {
+          "top5": [
+            "CAS-03"
+          ],
+          "top10": [
+            "CAS-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.027
+        },
+        "C": {
+          "top5": [
+            "CAS-03",
+            "RUB-03",
+            "RUB-02",
+            "POL-02",
+            "TCH-05"
+          ],
+          "top10": [
+            "CAS-03",
+            "RUB-03",
+            "RUB-02",
+            "POL-02",
+            "TCH-05",
+            "TXT-07",
+            "TXT-06",
+            "POL-05",
+            "POL-04",
+            "TCH-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.056
+        },
+        "D": {
+          "top5": [
+            "CAS-03",
+            "RUB-03",
+            "RUB-02",
+            "POL-02",
+            "TCH-05"
+          ],
+          "top10": [
+            "CAS-03",
+            "RUB-03",
+            "RUB-02",
+            "POL-02",
+            "TCH-05",
+            "TXT-07",
+            "TXT-06",
+            "POL-05",
+            "POL-04",
+            "TCH-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.086
+        }
+      }
+    },
+    {
+      "queryId": "q07",
+      "query": "基本药物",
+      "type": "multi-char",
+      "answerable": true,
+      "gold": [
+        "POL-06"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.02
+        },
+        "B": {
+          "top5": [
+            "POL-06"
+          ],
+          "top10": [
+            "POL-06"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.03
+        },
+        "C": {
+          "top5": [
+            "POL-06",
+            "POL-04",
+            "TXT-05",
+            "TXT-09",
+            "TXT-08"
+          ],
+          "top10": [
+            "POL-06",
+            "POL-04",
+            "TXT-05",
+            "TXT-09",
+            "TXT-08",
+            "CAS-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.039
+        },
+        "D": {
+          "top5": [
+            "POL-06",
+            "POL-04",
+            "TXT-05",
+            "TXT-09",
+            "TXT-08"
+          ],
+          "top10": [
+            "POL-06",
+            "POL-04",
+            "TXT-05",
+            "TXT-09",
+            "TXT-08",
+            "CAS-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.071
+        }
+      }
+    },
+    {
+      "queryId": "q34",
+      "query": "五专管理",
+      "type": "multi-char",
+      "answerable": true,
+      "gold": [
+        "POL-05"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.021
+        },
+        "B": {
+          "top5": [
+            "POL-05"
+          ],
+          "top10": [
+            "POL-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.029
+        },
+        "C": {
+          "top5": [
+            "POL-05",
+            "TXT-03",
+            "TXT-10",
+            "POL-04",
+            "CAS-02"
+          ],
+          "top10": [
+            "POL-05",
+            "TXT-03",
+            "TXT-10",
+            "POL-04",
+            "CAS-02",
+            "POL-02",
+            "POL-03",
+            "POL-07",
+            "TCH-04",
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.053
+        },
+        "D": {
+          "top5": [
+            "POL-05",
+            "TXT-03",
+            "TXT-10",
+            "POL-04",
+            "CAS-02"
+          ],
+          "top10": [
+            "POL-05",
+            "TXT-03",
+            "TXT-10",
+            "POL-04",
+            "CAS-02",
+            "POL-02",
+            "POL-03",
+            "POL-07",
+            "TCH-04",
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.085
+        }
+      }
+    },
+    {
+      "queryId": "q35",
+      "query": "阴凉库",
+      "type": "multi-char",
+      "answerable": true,
+      "gold": [
+        "TXT-10"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.021
+        },
+        "B": {
+          "top5": [
+            "TXT-10"
+          ],
+          "top10": [
+            "TXT-10"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.028
+        },
+        "C": {
+          "top5": [
+            "TXT-10"
+          ],
+          "top10": [
+            "TXT-10"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.038
+        },
+        "D": {
+          "top5": [
+            "TXT-10"
+          ],
+          "top10": [
+            "TXT-10"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.067
+        }
+      }
+    },
+    {
+      "queryId": "q08",
+      "query": "S1",
+      "type": "abbr",
+      "answerable": true,
+      "gold": [
+        "TCH-01",
+        "TCH-03"
+      ],
+      "channels": {
+        "A": {
+          "top5": [
+            "TCH-03",
+            "TCH-01"
+          ],
+          "top10": [
+            "TCH-03",
+            "TCH-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.031
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.02
+        },
+        "C": {
+          "top5": [
+            "TCH-03",
+            "TCH-01"
+          ],
+          "top10": [
+            "TCH-03",
+            "TCH-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.029
+        },
+        "D": {
+          "top5": [
+            "TCH-03",
+            "TCH-01"
+          ],
+          "top10": [
+            "TCH-03",
+            "TCH-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.053
+        }
+      }
+    },
+    {
+      "queryId": "q09",
+      "query": "OBE",
+      "type": "abbr",
+      "answerable": true,
+      "gold": [
+        "TXT-01"
+      ],
+      "channels": {
+        "A": {
+          "top5": [
+            "TXT-01"
+          ],
+          "top10": [
+            "TXT-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.026
+        },
+        "B": {
+          "top5": [
+            "TXT-01"
+          ],
+          "top10": [
+            "TXT-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.026
+        },
+        "C": {
+          "top5": [
+            "TXT-01"
+          ],
+          "top10": [
+            "TXT-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.028
+        },
+        "D": {
+          "top5": [
+            "TXT-01"
+          ],
+          "top10": [
+            "TXT-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.054
+        }
+      }
+    },
+    {
+      "queryId": "q10",
+      "query": "UBD",
+      "type": "abbr",
+      "answerable": true,
+      "gold": [
+        "TXT-02"
+      ],
+      "channels": {
+        "A": {
+          "top5": [
+            "TXT-02"
+          ],
+          "top10": [
+            "TXT-02"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.024
+        },
+        "B": {
+          "top5": [
+            "TXT-02"
+          ],
+          "top10": [
+            "TXT-02"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.025
+        },
+        "C": {
+          "top5": [
+            "TXT-02"
+          ],
+          "top10": [
+            "TXT-02"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.027
+        },
+        "D": {
+          "top5": [
+            "TXT-02"
+          ],
+          "top10": [
+            "TXT-02"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.053
+        }
+      }
+    },
+    {
+      "queryId": "q11",
+      "query": "TDM",
+      "type": "abbr",
+      "answerable": true,
+      "gold": [
+        "TXT-05"
+      ],
+      "channels": {
+        "A": {
+          "top5": [
+            "TXT-05"
+          ],
+          "top10": [
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.024
+        },
+        "B": {
+          "top5": [
+            "TXT-05"
+          ],
+          "top10": [
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.029
+        },
+        "C": {
+          "top5": [
+            "TXT-05"
+          ],
+          "top10": [
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.026
+        },
+        "D": {
+          "top5": [
+            "TXT-05"
+          ],
+          "top10": [
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.055
+        }
+      }
+    },
+    {
+      "queryId": "q12",
+      "query": "第十二条",
+      "type": "clause-no",
+      "answerable": true,
+      "gold": [
+        "POL-01"
+      ],
+      "channels": {
+        "A": {
+          "top5": [
+            "POL-01"
+          ],
+          "top10": [
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.032
+        },
+        "B": {
+          "top5": [
+            "POL-01"
+          ],
+          "top10": [
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.03
+        },
+        "C": {
+          "top5": [
+            "POL-01",
+            "POL-02"
+          ],
+          "top10": [
+            "POL-01",
+            "POL-02"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.037
+        },
+        "D": {
+          "top5": [
+            "POL-01",
+            "POL-02"
+          ],
+          "top10": [
+            "POL-01",
+            "POL-02"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.07
+        }
+      }
+    },
+    {
+      "queryId": "q13",
+      "query": "第二十一条",
+      "type": "clause-no",
+      "answerable": true,
+      "gold": [
+        "POL-08"
+      ],
+      "channels": {
+        "A": {
+          "top5": [
+            "POL-08"
+          ],
+          "top10": [
+            "POL-08"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.025
+        },
+        "B": {
+          "top5": [
+            "POL-08"
+          ],
+          "top10": [
+            "POL-08"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.034
+        },
+        "C": {
+          "top5": [
+            "POL-08"
+          ],
+          "top10": [
+            "POL-08"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.036
+        },
+        "D": {
+          "top5": [
+            "POL-08"
+          ],
+          "top10": [
+            "POL-08"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.07
+        }
+      }
+    },
+    {
+      "queryId": "q14",
+      "query": "药监发〔2023〕15号",
+      "type": "doc-no",
+      "answerable": true,
+      "gold": [
+        "POL-01"
+      ],
+      "channels": {
+        "A": {
+          "top5": [
+            "POL-01"
+          ],
+          "top10": [
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.03
+        },
+        "B": {
+          "top5": [
+            "POL-01"
+          ],
+          "top10": [
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.055
+        },
+        "C": {
+          "top5": [
+            "POL-01",
+            "POL-07",
+            "RUB-03",
+            "POL-02",
+            "POL-06"
+          ],
+          "top10": [
+            "POL-01",
+            "POL-07",
+            "RUB-03",
+            "POL-02",
+            "POL-06",
+            "POL-03",
+            "POL-04",
+            "POL-05",
+            "POL-08",
+            "TXT-06"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.086
+        },
+        "D": {
+          "top5": [
+            "POL-01",
+            "POL-07",
+            "RUB-03",
+            "POL-02",
+            "POL-06"
+          ],
+          "top10": [
+            "POL-01",
+            "POL-07",
+            "RUB-03",
+            "POL-02",
+            "POL-06",
+            "POL-03",
+            "POL-04",
+            "POL-05",
+            "POL-08",
+            "TXT-06"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.146
+        }
+      }
+    },
+    {
+      "queryId": "q15",
+      "query": "医保采〔2024〕21号",
+      "type": "doc-no",
+      "answerable": true,
+      "gold": [
+        "POL-08"
+      ],
+      "channels": {
+        "A": {
+          "top5": [
+            "POL-08"
+          ],
+          "top10": [
+            "POL-08"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.03
+        },
+        "B": {
+          "top5": [
+            "POL-08"
+          ],
+          "top10": [
+            "POL-08"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.052
+        },
+        "C": {
+          "top5": [
+            "POL-08",
+            "CAS-01",
+            "POL-02",
+            "POL-06",
+            "POL-04"
+          ],
+          "top10": [
+            "POL-08",
+            "CAS-01",
+            "POL-02",
+            "POL-06",
+            "POL-04",
+            "POL-05",
+            "POL-03",
+            "POL-07",
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.066
+        },
+        "D": {
+          "top5": [
+            "POL-08",
+            "CAS-01",
+            "POL-02",
+            "POL-06",
+            "POL-04"
+          ],
+          "top10": [
+            "POL-08",
+            "CAS-01",
+            "POL-02",
+            "POL-06",
+            "POL-04",
+            "POL-05",
+            "POL-03",
+            "POL-07",
+            "POL-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.12
+        }
+      }
+    },
+    {
+      "queryId": "q16",
+      "query": "形成性评介",
+      "type": "typo",
+      "answerable": true,
+      "gold": [
+        "RUB-01"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.022
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.024
+        },
+        "C": {
+          "top5": [
+            "RUB-01",
+            "RUB-03",
+            "CAS-03",
+            "RUB-02",
+            "TXT-03"
+          ],
+          "top10": [
+            "RUB-01",
+            "RUB-03",
+            "CAS-03",
+            "RUB-02",
+            "TXT-03",
+            "TCH-02",
+            "TXT-08",
+            "TXT-07",
+            "TXT-04",
+            "TCH-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.053
+        },
+        "D": {
+          "top5": [
+            "RUB-01",
+            "RUB-03",
+            "CAS-03",
+            "RUB-02",
+            "TXT-03"
+          ],
+          "top10": [
+            "RUB-01",
+            "RUB-03",
+            "CAS-03",
+            "RUB-02",
+            "TXT-03",
+            "TCH-02",
+            "TXT-08",
+            "TXT-07",
+            "TXT-04",
+            "TCH-01"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.084
+        }
+      }
+    },
+    {
+      "queryId": "q17",
+      "query": "剂最",
+      "type": "typo",
+      "answerable": true,
+      "gold": [
+        "CAS-04"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.02
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.018
+        },
+        "C": {
+          "top5": [
+            "TXT-08",
+            "TCH-06",
+            "TXT-07",
+            "POL-05",
+            "TCH-01"
+          ],
+          "top10": [
+            "TXT-08",
+            "TCH-06",
+            "TXT-07",
+            "POL-05",
+            "TCH-01"
+          ],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.038
+        },
+        "D": {
+          "top5": [
+            "TXT-08",
+            "TCH-06",
+            "TXT-07",
+            "POL-05",
+            "TCH-01"
+          ],
+          "top10": [
+            "TXT-08",
+            "TCH-06",
+            "TXT-07",
+            "POL-05",
+            "TCH-01"
+          ],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.058
+        }
+      }
+    },
+    {
+      "queryId": "q18",
+      "query": "药物不良反应",
+      "type": "synonym",
+      "answerable": true,
+      "gold": [
+        "POL-01",
+        "TXT-04"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.022
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.02
+        },
+        "C": {
+          "top5": [
+            "POL-01",
+            "TXT-04",
+            "TXT-08",
+            "TXT-05",
+            "POL-06"
+          ],
+          "top10": [
+            "POL-01",
+            "TXT-04",
+            "TXT-08",
+            "TXT-05",
+            "POL-06",
+            "TXT-09",
+            "POL-04",
+            "CAS-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.05
+        },
+        "D": {
+          "top5": [
+            "POL-01",
+            "TXT-04",
+            "TXT-08",
+            "TXT-05",
+            "POL-06"
+          ],
+          "top10": [
+            "POL-01",
+            "TXT-04",
+            "TXT-08",
+            "TXT-05",
+            "POL-06",
+            "TXT-09",
+            "POL-04",
+            "CAS-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.073
+        }
+      }
+    },
+    {
+      "queryId": "q19",
+      "query": "血浆浓度",
+      "type": "synonym",
+      "answerable": true,
+      "gold": [
+        "TXT-06",
+        "TXT-05"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.02
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.021
+        },
+        "C": {
+          "top5": [
+            "TXT-06",
+            "TXT-05"
+          ],
+          "top10": [
+            "TXT-06",
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.034
+        },
+        "D": {
+          "top5": [
+            "TXT-06",
+            "TXT-05"
+          ],
+          "top10": [
+            "TXT-06",
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.056
+        }
+      }
+    },
+    {
+      "queryId": "q20",
+      "query": "逆向教学设计",
+      "type": "cross-expression",
+      "answerable": true,
+      "gold": [
+        "TXT-02"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.021
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.02
+        },
+        "C": {
+          "top5": [
+            "TXT-02",
+            "TXT-01",
+            "TCH-05",
+            "TCH-06",
+            "POL-02"
+          ],
+          "top10": [
+            "TXT-02",
+            "TXT-01",
+            "TCH-05",
+            "TCH-06",
+            "POL-02",
+            "POL-04",
+            "CAS-03",
+            "POL-05",
+            "POL-03",
+            "POL-06"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.058
+        },
+        "D": {
+          "top5": [
+            "TXT-02",
+            "TXT-01",
+            "TCH-05",
+            "TCH-06",
+            "POL-02"
+          ],
+          "top10": [
+            "TXT-02",
+            "TXT-01",
+            "TCH-05",
+            "TCH-06",
+            "POL-02",
+            "POL-04",
+            "CAS-03",
+            "POL-05",
+            "POL-03",
+            "POL-06"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.083
+        }
+      }
+    },
+    {
+      "queryId": "q21",
+      "query": "集采中选药品断供怎么处理",
+      "type": "cross-expression",
+      "answerable": true,
+      "gold": [
+        "POL-08"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.021
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.027
+        },
+        "C": {
+          "top5": [
+            "POL-08",
+            "CAS-01",
+            "POL-04",
+            "POL-05",
+            "POL-01"
+          ],
+          "top10": [
+            "POL-08",
+            "CAS-01",
+            "POL-04",
+            "POL-05",
+            "POL-01",
+            "TXT-10",
+            "TXT-04",
+            "POL-07",
+            "TXT-07",
+            "POL-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.08
+        },
+        "D": {
+          "top5": [
+            "POL-08",
+            "CAS-01",
+            "POL-04",
+            "POL-05",
+            "POL-01"
+          ],
+          "top10": [
+            "POL-08",
+            "CAS-01",
+            "POL-04",
+            "POL-05",
+            "POL-01",
+            "TXT-10",
+            "TXT-04",
+            "POL-07",
+            "TXT-07",
+            "POL-03"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.109
+        }
+      }
+    },
+    {
+      "queryId": "q24",
+      "query": "如何避免首剂引起的低血压",
+      "type": "cross-expression",
+      "answerable": true,
+      "gold": [
+        "TXT-08"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.023
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.021
+        },
+        "C": {
+          "top5": [
+            "TXT-08",
+            "POL-03",
+            "POL-07",
+            "TXT-07",
+            "POL-05"
+          ],
+          "top10": [
+            "TXT-08",
+            "POL-03",
+            "POL-07",
+            "TXT-07",
+            "POL-05",
+            "TXT-02",
+            "TCH-06",
+            "TCH-03",
+            "TXT-03",
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.09
+        },
+        "D": {
+          "top5": [
+            "TXT-08",
+            "POL-03",
+            "POL-07",
+            "TXT-07",
+            "POL-05"
+          ],
+          "top10": [
+            "TXT-08",
+            "POL-03",
+            "POL-07",
+            "TXT-07",
+            "POL-05",
+            "TXT-02",
+            "TCH-06",
+            "TCH-03",
+            "TXT-03",
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.115
+        }
+      }
+    },
+    {
+      "queryId": "q33",
+      "query": "处方限量",
+      "type": "cross-expression",
+      "answerable": true,
+      "gold": [
+        "POL-02"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.022
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.02
+        },
+        "C": {
+          "top5": [
+            "POL-02",
+            "CAS-03",
+            "TXT-07",
+            "POL-05",
+            "POL-04"
+          ],
+          "top10": [
+            "POL-02",
+            "CAS-03",
+            "TXT-07",
+            "POL-05",
+            "POL-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.039
+        },
+        "D": {
+          "top5": [
+            "POL-02",
+            "CAS-03",
+            "TXT-07",
+            "POL-05",
+            "POL-04"
+          ],
+          "top10": [
+            "POL-02",
+            "CAS-03",
+            "TXT-07",
+            "POL-05",
+            "POL-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.06
+        }
+      }
+    },
+    {
+      "queryId": "q22",
+      "query": "学生把外部威胁误判成内部劣势,教师该怎么设计教学",
+      "type": "long-question",
+      "answerable": true,
+      "gold": [
+        "TCH-01",
+        "RUB-02"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.021
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.022
+        },
+        "C": {
+          "top5": [
+            "TCH-01",
+            "RUB-02",
+            "TCH-06",
+            "TXT-01",
+            "CAS-01"
+          ],
+          "top10": [
+            "TCH-01",
+            "RUB-02",
+            "TCH-06",
+            "TXT-01",
+            "CAS-01",
+            "TXT-02",
+            "TCH-05",
+            "TCH-04",
+            "TCH-02",
+            "CAS-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.136
+        },
+        "D": {
+          "top5": [
+            "TCH-01",
+            "RUB-02",
+            "TCH-06",
+            "TXT-01",
+            "CAS-01"
+          ],
+          "top10": [
+            "TCH-01",
+            "RUB-02",
+            "TCH-06",
+            "TXT-01",
+            "CAS-01",
+            "TXT-02",
+            "TCH-05",
+            "TCH-04",
+            "TCH-02",
+            "CAS-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.164
+        }
+      }
+    },
+    {
+      "queryId": "q23",
+      "query": "个例药品不良反应应当在多长时间内上报",
+      "type": "long-question",
+      "answerable": true,
+      "gold": [
+        "POL-01"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.021
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.035
+        },
+        "C": {
+          "top5": [
+            "POL-01",
+            "TCH-05",
+            "TXT-04",
+            "POL-07",
+            "TXT-08"
+          ],
+          "top10": [
+            "POL-01",
+            "TCH-05",
+            "TXT-04",
+            "POL-07",
+            "TXT-08",
+            "CAS-03",
+            "CAS-04",
+            "TXT-06",
+            "TXT-02",
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.157
+        },
+        "D": {
+          "top5": [
+            "POL-01",
+            "TCH-05",
+            "TXT-04",
+            "POL-07",
+            "TXT-08"
+          ],
+          "top10": [
+            "POL-01",
+            "TCH-05",
+            "TXT-04",
+            "POL-07",
+            "TXT-08",
+            "CAS-03",
+            "CAS-04",
+            "TXT-06",
+            "TXT-02",
+            "TXT-05"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.201
+        }
+      }
+    },
+    {
+      "queryId": "q31",
+      "query": "哪些教学环节需要显性回应学生的议程关切",
+      "type": "long-question",
+      "answerable": true,
+      "gold": [
+        "TCH-04",
+        "TCH-06"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.033
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.028
+        },
+        "C": {
+          "top5": [
+            "TCH-04",
+            "TCH-02",
+            "TCH-06",
+            "TCH-01",
+            "RUB-01"
+          ],
+          "top10": [
+            "TCH-04",
+            "TCH-02",
+            "TCH-06",
+            "TCH-01",
+            "RUB-01",
+            "TXT-03",
+            "TXT-01",
+            "TXT-08",
+            "TXT-07",
+            "TXT-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.142
+        },
+        "D": {
+          "top5": [
+            "TCH-04",
+            "TCH-02",
+            "TCH-06",
+            "TCH-01",
+            "RUB-01"
+          ],
+          "top10": [
+            "TCH-04",
+            "TCH-02",
+            "TCH-06",
+            "TCH-01",
+            "RUB-01",
+            "TXT-03",
+            "TXT-01",
+            "TXT-08",
+            "TXT-07",
+            "TXT-04"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.176
+        }
+      }
+    },
+    {
+      "queryId": "q32",
+      "query": "药品召回分为几级,一级召回时限是多久",
+      "type": "long-question",
+      "answerable": true,
+      "gold": [
+        "POL-07"
+      ],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.056
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": 0,
+          "recall@10": 0,
+          "hitsTop5": null,
+          "latencyMs": 0.043
+        },
+        "C": {
+          "top5": [
+            "POL-07",
+            "TXT-04",
+            "TXT-03",
+            "TCH-02",
+            "TCH-01"
+          ],
+          "top10": [
+            "POL-07",
+            "TXT-04",
+            "TXT-03",
+            "TCH-02",
+            "TCH-01",
+            "TXT-02",
+            "TXT-06",
+            "POL-05",
+            "POL-01",
+            "TXT-10"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.114
+        },
+        "D": {
+          "top5": [
+            "POL-07",
+            "TXT-04",
+            "TXT-03",
+            "TCH-02",
+            "TCH-01"
+          ],
+          "top10": [
+            "POL-07",
+            "TXT-04",
+            "TXT-03",
+            "TCH-02",
+            "TCH-01",
+            "TXT-02",
+            "TXT-06",
+            "POL-05",
+            "POL-01",
+            "TXT-10"
+          ],
+          "recall@5": 1,
+          "recall@10": 1,
+          "hitsTop5": null,
+          "latencyMs": 0.163
+        }
+      }
+    },
+    {
+      "queryId": "q25",
+      "query": "药",
+      "type": "ultra-short",
+      "answerable": false,
+      "gold": [],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.026
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.021
+        },
+        "C": {
+          "top5": [
+            "POL-04",
+            "TXT-06",
+            "TXT-05",
+            "TXT-07",
+            "CAS-02"
+          ],
+          "top10": [
+            "POL-04",
+            "TXT-06",
+            "TXT-05",
+            "TXT-07",
+            "CAS-02",
+            "CAS-01",
+            "TXT-03",
+            "CAS-03",
+            "POL-06",
+            "TCH-01"
+          ],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 5,
+          "latencyMs": 0.053
+        },
+        "D": {
+          "top5": [
+            "POL-04",
+            "TXT-06",
+            "TXT-05",
+            "TXT-07",
+            "CAS-02"
+          ],
+          "top10": [
+            "POL-04",
+            "TXT-06",
+            "TXT-05",
+            "TXT-07",
+            "CAS-02",
+            "CAS-01",
+            "TXT-03",
+            "CAS-03",
+            "POL-06",
+            "TCH-01"
+          ],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 5,
+          "latencyMs": 0.08
+        }
+      }
+    },
+    {
+      "queryId": "q26",
+      "query": "量子计算辅助药物设计的最新进展",
+      "type": "unanswerable",
+      "answerable": false,
+      "gold": [],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.024
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.023
+        },
+        "C": {
+          "top5": [
+            "TXT-02",
+            "TXT-05",
+            "POL-06",
+            "TXT-01",
+            "TXT-09"
+          ],
+          "top10": [
+            "TXT-02",
+            "TXT-05",
+            "POL-06",
+            "TXT-01",
+            "TXT-09",
+            "TCH-05",
+            "TXT-08",
+            "POL-04",
+            "CAS-03",
+            "TXT-03"
+          ],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 5,
+          "latencyMs": 0.098
+        },
+        "D": {
+          "top5": [
+            "TXT-02",
+            "TXT-05",
+            "POL-06",
+            "TXT-01",
+            "TXT-09"
+          ],
+          "top10": [
+            "TXT-02",
+            "TXT-05",
+            "POL-06",
+            "TXT-01",
+            "TXT-09",
+            "TCH-05",
+            "TXT-08",
+            "POL-04",
+            "CAS-03",
+            "TXT-03"
+          ],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 5,
+          "latencyMs": 0.544
+        }
+      }
+    },
+    {
+      "queryId": "q27",
+      "query": "执业兽医资格考试的报名条件",
+      "type": "unanswerable",
+      "answerable": false,
+      "gold": [],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.022
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.018
+        },
+        "C": {
+          "top5": [
+            "CAS-02",
+            "TXT-03",
+            "TXT-02",
+            "TXT-05",
+            "TCH-01"
+          ],
+          "top10": [
+            "CAS-02",
+            "TXT-03",
+            "TXT-02",
+            "TXT-05",
+            "TCH-01",
+            "TXT-01",
+            "TXT-04",
+            "TCH-06",
+            "TCH-05",
+            "TXT-06"
+          ],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 5,
+          "latencyMs": 0.078
+        },
+        "D": {
+          "top5": [
+            "CAS-02",
+            "TXT-03",
+            "TXT-02",
+            "TXT-05",
+            "TCH-01"
+          ],
+          "top10": [
+            "CAS-02",
+            "TXT-03",
+            "TXT-02",
+            "TXT-05",
+            "TCH-01",
+            "TXT-01",
+            "TXT-04",
+            "TCH-06",
+            "TCH-05",
+            "TXT-06"
+          ],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 5,
+          "latencyMs": 0.1
+        }
+      }
+    },
+    {
+      "queryId": "q28",
+      "query": "新冠疫苗加强针接种间隔",
+      "type": "unanswerable",
+      "answerable": false,
+      "gold": [],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.017
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.862
+        },
+        "C": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.121
+        },
+        "D": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.984
+        }
+      }
+    },
+    {
+      "queryId": "q29",
+      "query": "手术室器械清点流程",
+      "type": "unanswerable",
+      "answerable": false,
+      "gold": [],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.02
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.017
+        },
+        "C": {
+          "top5": [
+            "TCH-03",
+            "TCH-05",
+            "TXT-02",
+            "CAS-03",
+            "TXT-06"
+          ],
+          "top10": [
+            "TCH-03",
+            "TCH-05",
+            "TXT-02",
+            "CAS-03",
+            "TXT-06",
+            "TCH-01"
+          ],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 5,
+          "latencyMs": 0.066
+        },
+        "D": {
+          "top5": [
+            "TCH-03",
+            "TCH-05",
+            "TXT-02",
+            "CAS-03",
+            "TXT-06"
+          ],
+          "top10": [
+            "TCH-03",
+            "TCH-05",
+            "TXT-02",
+            "CAS-03",
+            "TXT-06",
+            "TCH-01"
+          ],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 5,
+          "latencyMs": 0.087
+        }
+      }
+    },
+    {
+      "queryId": "q30",
+      "query": "中药炮制九蒸九晒工艺",
+      "type": "unanswerable",
+      "answerable": false,
+      "gold": [],
+      "channels": {
+        "A": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.017
+        },
+        "B": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.016
+        },
+        "C": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.112
+        },
+        "D": {
+          "top5": [],
+          "top10": [],
+          "recall@5": null,
+          "recall@10": null,
+          "hitsTop5": 0,
+          "latencyMs": 0.129
+        }
+      }
+    }
+  ],
+  "shortWordReport": [
+    {
+      "queryId": "q01",
+      "query": "学情",
+      "answerable": true,
+      "channels": {
+        "A": "fail(recall@10=0)",
+        "B": "fail(recall@10=0)",
+        "C": "pass",
+        "D": "pass"
+      }
+    },
+    {
+      "queryId": "q02",
+      "query": "评价",
+      "answerable": true,
+      "channels": {
+        "A": "fail(recall@10=0)",
+        "B": "fail(recall@10=0)",
+        "C": "pass",
+        "D": "pass"
+      }
+    },
+    {
+      "queryId": "q03",
+      "query": "首剂",
+      "answerable": true,
+      "channels": {
+        "A": "fail(recall@10=0)",
+        "B": "fail(recall@10=0)",
+        "C": "pass",
+        "D": "pass"
+      }
+    },
+    {
+      "queryId": "q08",
+      "query": "S1",
+      "answerable": true,
+      "channels": {
+        "A": "pass",
+        "B": "fail(recall@10=0)",
+        "C": "pass",
+        "D": "pass"
+      }
+    },
+    {
+      "queryId": "q17",
+      "query": "剂最",
+      "answerable": true,
+      "channels": {
+        "A": "fail(recall@10=0)",
+        "B": "fail(recall@10=0)",
+        "C": "fail(recall@10=0)",
+        "D": "fail(recall@10=0)"
+      }
+    },
+    {
+      "queryId": "q25",
+      "query": "药",
+      "answerable": false,
+      "channels": {
+        "A": "empty(正确)",
+        "B": "empty(正确)",
+        "C": "误召回10条",
+        "D": "误召回10条"
+      }
+    }
+  ],
+  "uniqueRecall": {
+    "A": {
+      "count": 0,
+      "items": []
+    },
+    "B": {
+      "count": 0,
+      "items": []
+    },
+    "C": {
+      "count": 0,
+      "items": []
+    },
+    "D": {
+      "count": 0,
+      "items": []
+    }
+  },
+  "dNewRecallVsBC": {
+    "count": 25,
+    "items": [
+      {
+        "queryId": "q01",
+        "query": "学情",
+        "docId": "TCH-05",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q01",
+        "query": "学情",
+        "docId": "TCH-01",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q01",
+        "query": "学情",
+        "docId": "TCH-02",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q02",
+        "query": "评价",
+        "docId": "TCH-02",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q02",
+        "query": "评价",
+        "docId": "RUB-01",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q02",
+        "query": "评价",
+        "docId": "TXT-01",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q02",
+        "query": "评价",
+        "docId": "RUB-03",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q03",
+        "query": "首剂",
+        "docId": "TXT-08",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q08",
+        "query": "S1",
+        "docId": "TCH-03",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q08",
+        "query": "S1",
+        "docId": "TCH-01",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q16",
+        "query": "形成性评介",
+        "docId": "RUB-01",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q18",
+        "query": "药物不良反应",
+        "docId": "POL-01",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q18",
+        "query": "药物不良反应",
+        "docId": "TXT-04",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q19",
+        "query": "血浆浓度",
+        "docId": "TXT-06",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q19",
+        "query": "血浆浓度",
+        "docId": "TXT-05",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q20",
+        "query": "逆向教学设计",
+        "docId": "TXT-02",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q21",
+        "query": "集采中选药品断供怎么处理",
+        "docId": "POL-08",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q24",
+        "query": "如何避免首剂引起的低血压",
+        "docId": "TXT-08",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q33",
+        "query": "处方限量",
+        "docId": "POL-02",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q22",
+        "query": "学生把外部威胁误判成内部劣势,教师该怎么设计教学",
+        "docId": "TCH-01",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q22",
+        "query": "学生把外部威胁误判成内部劣势,教师该怎么设计教学",
+        "docId": "RUB-02",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q23",
+        "query": "个例药品不良反应应当在多长时间内上报",
+        "docId": "POL-01",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q31",
+        "query": "哪些教学环节需要显性回应学生的议程关切",
+        "docId": "TCH-04",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q31",
+        "query": "哪些教学环节需要显性回应学生的议程关切",
+        "docId": "TCH-06",
+        "missedBy": [
+          "B"
+        ]
+      },
+      {
+        "queryId": "q32",
+        "query": "药品召回分为几级,一级召回时限是多久",
+        "docId": "POL-07",
+        "missedBy": [
+          "B"
+        ]
+      }
+    ]
+  },
+  "structuralFilter": [
+    {
+      "queryId": "q08",
+      "query": "S1",
+      "kind": "stageId",
+      "value": "S1",
+      "gold": [
+        "TCH-01",
+        "TCH-03"
+      ],
+      "metaPathHits": [
+        "TCH-01",
+        "TCH-03"
+      ],
+      "likePathHits": [
+        "TCH-01",
+        "TCH-03"
+      ],
+      "metaPathGoldCover": [
+        "TCH-01",
+        "TCH-03"
+      ],
+      "likePathGoldCover": [
+        "TCH-01",
+        "TCH-03"
+      ],
+      "fulltext": {
+        "A": {
+          "goldCover": [
+            "TCH-01",
+            "TCH-03"
+          ],
+          "goldMissed": []
+        },
+        "B": {
+          "goldCover": [],
+          "goldMissed": [
+            "TCH-01",
+            "TCH-03"
+          ]
+        },
+        "C": {
+          "goldCover": [
+            "TCH-01",
+            "TCH-03"
+          ],
+          "goldMissed": []
+        },
+        "D": {
+          "goldCover": [
+            "TCH-01",
+            "TCH-03"
+          ],
+          "goldMissed": []
+        }
+      }
+    },
+    {
+      "queryId": "q09",
+      "query": "OBE",
+      "kind": "tag",
+      "value": "OBE",
+      "gold": [
+        "TXT-01"
+      ],
+      "metaPathHits": [
+        "TXT-01"
+      ],
+      "likePathHits": [
+        "TXT-01"
+      ],
+      "metaPathGoldCover": [
+        "TXT-01"
+      ],
+      "likePathGoldCover": [
+        "TXT-01"
+      ],
+      "fulltext": {
+        "A": {
+          "goldCover": [
+            "TXT-01"
+          ],
+          "goldMissed": []
+        },
+        "B": {
+          "goldCover": [
+            "TXT-01"
+          ],
+          "goldMissed": []
+        },
+        "C": {
+          "goldCover": [
+            "TXT-01"
+          ],
+          "goldMissed": []
+        },
+        "D": {
+          "goldCover": [
+            "TXT-01"
+          ],
+          "goldMissed": []
+        }
+      }
+    },
+    {
+      "queryId": "q10",
+      "query": "UBD",
+      "kind": "tag",
+      "value": "UBD",
+      "gold": [
+        "TXT-02"
+      ],
+      "metaPathHits": [
+        "TXT-02"
+      ],
+      "likePathHits": [
+        "TXT-02"
+      ],
+      "metaPathGoldCover": [
+        "TXT-02"
+      ],
+      "likePathGoldCover": [
+        "TXT-02"
+      ],
+      "fulltext": {
+        "A": {
+          "goldCover": [
+            "TXT-02"
+          ],
+          "goldMissed": []
+        },
+        "B": {
+          "goldCover": [
+            "TXT-02"
+          ],
+          "goldMissed": []
+        },
+        "C": {
+          "goldCover": [
+            "TXT-02"
+          ],
+          "goldMissed": []
+        },
+        "D": {
+          "goldCover": [
+            "TXT-02"
+          ],
+          "goldMissed": []
+        }
+      }
+    },
+    {
+      "queryId": "q12",
+      "query": "第十二条",
+      "kind": "clauseNo",
+      "value": "第十二条",
+      "gold": [
+        "POL-01"
+      ],
+      "metaPathHits": [
+        "POL-01"
+      ],
+      "likePathHits": [
+        "POL-01"
+      ],
+      "metaPathGoldCover": [
+        "POL-01"
+      ],
+      "likePathGoldCover": [
+        "POL-01"
+      ],
+      "fulltext": {
+        "A": {
+          "goldCover": [
+            "POL-01"
+          ],
+          "goldMissed": []
+        },
+        "B": {
+          "goldCover": [
+            "POL-01"
+          ],
+          "goldMissed": []
+        },
+        "C": {
+          "goldCover": [
+            "POL-01"
+          ],
+          "goldMissed": []
+        },
+        "D": {
+          "goldCover": [
+            "POL-01"
+          ],
+          "goldMissed": []
+        }
+      }
+    },
+    {
+      "queryId": "q13",
+      "query": "第二十一条",
+      "kind": "clauseNo",
+      "value": "第二十一条",
+      "gold": [
+        "POL-08"
+      ],
+      "metaPathHits": [
+        "POL-08"
+      ],
+      "likePathHits": [
+        "POL-08"
+      ],
+      "metaPathGoldCover": [
+        "POL-08"
+      ],
+      "likePathGoldCover": [
+        "POL-08"
+      ],
+      "fulltext": {
+        "A": {
+          "goldCover": [
+            "POL-08"
+          ],
+          "goldMissed": []
+        },
+        "B": {
+          "goldCover": [
+            "POL-08"
+          ],
+          "goldMissed": []
+        },
+        "C": {
+          "goldCover": [
+            "POL-08"
+          ],
+          "goldMissed": []
+        },
+        "D": {
+          "goldCover": [
+            "POL-08"
+          ],
+          "goldMissed": []
+        }
+      }
+    },
+    {
+      "queryId": "q14",
+      "query": "药监发〔2023〕15号",
+      "kind": "docNo",
+      "value": "药监发〔2023〕15号",
+      "gold": [
+        "POL-01"
+      ],
+      "metaPathHits": [
+        "POL-01"
+      ],
+      "likePathHits": [
+        "POL-01"
+      ],
+      "metaPathGoldCover": [
+        "POL-01"
+      ],
+      "likePathGoldCover": [
+        "POL-01"
+      ],
+      "fulltext": {
+        "A": {
+          "goldCover": [
+            "POL-01"
+          ],
+          "goldMissed": []
+        },
+        "B": {
+          "goldCover": [
+            "POL-01"
+          ],
+          "goldMissed": []
+        },
+        "C": {
+          "goldCover": [
+            "POL-01"
+          ],
+          "goldMissed": []
+        },
+        "D": {
+          "goldCover": [
+            "POL-01"
+          ],
+          "goldMissed": []
+        }
+      }
+    },
+    {
+      "queryId": "q15",
+      "query": "医保采〔2024〕21号",
+      "kind": "docNo",
+      "value": "医保采〔2024〕21号",
+      "gold": [
+        "POL-08"
+      ],
+      "metaPathHits": [
+        "POL-08"
+      ],
+      "likePathHits": [
+        "POL-08"
+      ],
+      "metaPathGoldCover": [
+        "POL-08"
+      ],
+      "likePathGoldCover": [
+        "POL-08"
+      ],
+      "fulltext": {
+        "A": {
+          "goldCover": [
+            "POL-08"
+          ],
+          "goldMissed": []
+        },
+        "B": {
+          "goldCover": [
+            "POL-08"
+          ],
+          "goldMissed": []
+        },
+        "C": {
+          "goldCover": [
+            "POL-08"
+          ],
+          "goldMissed": []
+        },
+        "D": {
+          "goldCover": [
+            "POL-08"
+          ],
+          "goldMissed": []
+        }
+      }
+    }
+  ],
+  "typicalErrorCases": [
+    {
+      "queryId": "q01",
+      "query": "学情",
+      "type": "two-char",
+      "channel": "A",
+      "gold": [
+        "TCH-01",
+        "TCH-02",
+        "TCH-05"
+      ],
+      "top5": [],
+      "reason": "短词区分度不足"
+    },
+    {
+      "queryId": "q01",
+      "query": "学情",
+      "type": "two-char",
+      "channel": "B",
+      "gold": [
+        "TCH-01",
+        "TCH-02",
+        "TCH-05"
+      ],
+      "top5": [],
+      "reason": "短词区分度不足"
+    },
+    {
+      "queryId": "q02",
+      "query": "评价",
+      "type": "two-char",
+      "channel": "A",
+      "gold": [
+        "TCH-02",
+        "RUB-01",
+        "RUB-03",
+        "TXT-01"
+      ],
+      "top5": [],
+      "reason": "短词区分度不足"
+    },
+    {
+      "queryId": "q02",
+      "query": "评价",
+      "type": "two-char",
+      "channel": "B",
+      "gold": [
+        "TCH-02",
+        "RUB-01",
+        "RUB-03",
+        "TXT-01"
+      ],
+      "top5": [],
+      "reason": "短词区分度不足"
+    },
+    {
+      "queryId": "q03",
+      "query": "首剂",
+      "type": "two-char",
+      "channel": "A",
+      "gold": [
+        "TXT-08"
+      ],
+      "top5": [],
+      "reason": "短词区分度不足"
+    },
+    {
+      "queryId": "q04",
+      "query": "形成性评价",
+      "type": "multi-char",
+      "channel": "A",
+      "gold": [
+        "RUB-01"
+      ],
+      "top5": [],
+      "reason": "分词切分与索引词元不一致"
+    },
+    {
+      "queryId": "q08",
+      "query": "S1",
+      "type": "abbr",
+      "channel": "B",
+      "gold": [
+        "TCH-01",
+        "TCH-03"
+      ],
+      "top5": [],
+      "reason": "缩写歧义/结构未过滤"
+    },
+    {
+      "queryId": "q16",
+      "query": "形成性评介",
+      "type": "typo",
+      "channel": "A",
+      "gold": [
+        "RUB-01"
+      ],
+      "top5": [],
+      "reason": "词形错误(无模糊匹配能力)"
+    },
+    {
+      "queryId": "q18",
+      "query": "药物不良反应",
+      "type": "synonym",
+      "channel": "A",
+      "gold": [
+        "POL-01",
+        "TXT-04"
+      ],
+      "top5": [],
+      "reason": "同义但字符不同(无同义词映射,词法通道固有边界)"
+    },
+    {
+      "queryId": "q20",
+      "query": "逆向教学设计",
+      "type": "cross-expression",
+      "channel": "A",
+      "gold": [
+        "TXT-02"
+      ],
+      "top5": [],
+      "reason": "表达差异(查询与语料措辞不一致)"
+    }
+  ],
+  "allErrorCaseCount": 46
+}
