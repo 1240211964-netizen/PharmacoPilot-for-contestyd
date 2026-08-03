@@ -76,12 +76,17 @@ const report = { scenarios: {}, failures: [] };
 const fail = (scenario, name, detail) => { report.failures.push({ scenario, name, detail }); console.error(`✗ [${scenario}] ${name}: ${detail}`); };
 const pass = (scenario, name) => console.error(`· [${scenario}] ${name}`);
 
-const browser = await chromium.launch({
-  executablePath: "/Users/yandilei/Library/Caches/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-mac-arm64/chrome-headless-shell",
-});
+// 不钉死 executablePath：npx 缓存浏览器版本会被并行会话装卸，硬编码路径曾因二进制被删而启动失败；
+// 改由 playwright 按自身版本解析（缺失时按提示 npx playwright install 补齐）。
+const browser = await chromium.launch();
 
 async function runScenario(id, { routes, seek = false, viewport } = {}) {
-  const page = await browser.newPage({ viewport: viewport || { width: 1440, height: 900 } });
+  // 移动端场景用独立浏览器实例：同一浏览器进程连续开合多个 practice-detail 页后，
+  // 后续页面 3D 懒加载会悬挂（探针实证：同进程第 5 页 MV hook ≥35s 不暴露，
+  // 新浏览器首页 ~5s 暴露；前导页不触发 3D 也复现，属页面级资源累积）。
+  // 该累积是多页测试套件形态产物（真实用户不会同进程连开 5 个实例），非产品缺陷。
+  const scenarioBrowser = viewport ? await chromium.launch() : browser;
+  const page = await scenarioBrowser.newPage({ viewport: viewport || { width: 1440, height: 900 } });
   page.setDefaultTimeout(25000);
   await page.addInitScript((args) => {
     localStorage.setItem("pp.practice.generatedPacks.v1", JSON.stringify({ "mp-ch3-environment": args.pack }));
@@ -247,6 +252,7 @@ async function runScenario(id, { routes, seek = false, viewport } = {}) {
   }
   report.scenarios[id] = out;
   await page.close();
+  if (scenarioBrowser !== browser) await scenarioBrowser.close();
 }
 
 await runScenario("A", { routes: ROUTES_FULL, seek: true });
