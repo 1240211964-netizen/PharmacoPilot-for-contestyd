@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pharmacopilot.local/schemas/v1/runtime-observation.schema.json",
+  "title": "RuntimeObservation",
+  "description": "运行时观测:由课堂前测/分组等原始记录计算出的量化事实。空值策略:可选字段默认省略而非 null;本 schema 无 nullable 字段(unit 可省略)。自包含,不使用 $ref。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "observationId",
+    "schemaVersion",
+    "observationType",
+    "courseId",
+    "classId",
+    "lessonId",
+    "stageId",
+    "metric",
+    "value",
+    "numerator",
+    "denominator",
+    "calculationRule",
+    "sourceRecordIds",
+    "aggregationLevel",
+    "calculatedAt",
+    "calculationVersion"
+  ],
+  "properties": {
+    "observationId": {
+      "type": "string",
+      "pattern": "^obs_[A-Za-z0-9]{8,64}$"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "observationType": {
+      "enum": [
+        "pretest_score",
+        "pretest_option_distribution",
+        "pretest_participation",
+        "knowledge_level",
+        "experience_profile",
+        "group_aggregate"
+      ]
+    },
+    "courseId": {
+      "type": "string",
+      "pattern": "^crs_[A-Za-z0-9]{8,64}$"
+    },
+    "classId": {
+      "type": "string",
+      "pattern": "^coh_[A-Za-z0-9]{8,64}$"
+    },
+    "lessonId": {
+      "type": "string",
+      "pattern": "^les_[A-Za-z0-9]{8,64}$"
+    },
+    "stageId": {
+      "type": "string",
+      "pattern": "^S[1-9]$"
+    },
+    "metric": {
+      "type": "string",
+      "minLength": 1
+    },
+    "value": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string",
+      "description": "计量单位,可选;省略而非 null。"
+    },
+    "numerator": {
+      "type": "number"
+    },
+    "denominator": {
+      "type": "number"
+    },
+    "calculationRule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceRecordIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "aggregationLevel": {
+      "enum": ["individual", "group", "course"]
+    },
+    "calculatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "calculationVersion": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

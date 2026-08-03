@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pharmacopilot.local/schemas/v1/teaching-decision-record.schema.json",
+  "title": "TeachingDecisionRecord",
+  "description": "教学决策记录:围绕一个决策问题聚合观测/推断/建议主张与证据,承载机检与教师语义复核状态。空值策略:可选字段默认省略而非 null;仅 type 标注 [\"...\",\"null\"] 的字段允许 null。自包含,不使用 $ref。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decisionRecordId",
+    "schemaVersion",
+    "courseId",
+    "classId",
+    "lessonId",
+    "stageId",
+    "decisionQuestion",
+    "observationClaimIds",
+    "inferenceClaimIds",
+    "recommendationClaimIds",
+    "evidenceIds",
+    "mechanicalValidationStatus",
+    "semanticReviewStatus",
+    "teacherDecisionId",
+    "workflowInstanceId",
+    "sourceLessonVersionId",
+    "targetLessonVersionId",
+    "status",
+    "createdAt",
+    "publishedAt"
+  ],
+  "properties": {
+    "decisionRecordId": {
+      "type": "string",
+      "pattern": "^tdr_[A-Za-z0-9]{8,64}$"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "courseId": {
+      "type": "string",
+      "pattern": "^crs_[A-Za-z0-9]{8,64}$"
+    },
+    "classId": {
+      "type": "string",
+      "pattern": "^coh_[A-Za-z0-9]{8,64}$"
+    },
+    "lessonId": {
+      "type": "string",
+      "pattern": "^les_[A-Za-z0-9]{8,64}$"
+    },
+    "stageId": {
+      "type": "string",
+      "pattern": "^S[1-9]$"
+    },
+    "decisionQuestion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observationClaimIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^clm_[A-Za-z0-9]{8,64}$"
+      }
+    },
+    "inferenceClaimIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^clm_[A-Za-z0-9]{8,64}$"
+      }
+    },
+    "recommendationClaimIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^clm_[A-Za-z0-9]{8,64}$"
+      }
+    },
+    "evidenceIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^ev_[A-Za-z0-9]{8,64}$"
+      }
+    },
+    "mechanicalValidationStatus": {
+      "enum": ["PENDING", "PASSED", "FAILED", "WARNING", "NOT_APPLICABLE"]
+    },
+    "semanticReviewStatus": {
+      "enum": [
+        "not_reviewed",
+        "supported",
+        "partially_supported",
+        "unsupported",
+        "uncertain"
+      ]
+    },
+    "teacherDecisionId": {
+      "type": ["string", "null"],
+      "pattern": "^tdec_[A-Za-z0-9]{8,64}$",
+      "description": "nullable:教师尚未作出决定时为 null。"
+    },
+    "workflowInstanceId": {
+      "type": "string",
+      "pattern": "^wf_[A-Za-z0-9]{8,64}$"
+    },
+    "sourceLessonVersionId": {
+      "type": ["string", "null"],
+      "pattern": "^kav_[A-Za-z0-9]{8,64}$",
+      "description": "nullable:决策基于的教案版本,无则为 null。"
+    },
+    "targetLessonVersionId": {
+      "type": ["string", "null"],
+      "pattern": "^kav_[A-Za-z0-9]{8,64}$",
+      "description": "nullable:决策产出的目标教案版本,未产出时为 null。"
+    },
+    "status": {
+      "enum": ["OPEN", "UNDER_REVIEW", "DECIDED", "PUBLISHED", "CANCELLED"]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "publishedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "nullable:status=PUBLISHED 时由服务层强制非空。"
+    }
+  }
+}

@@ -13,6 +13,29 @@ import {
 import { RevisionConflictError } from "./db.mjs";
 import { ModelUnavailableError, ModelUpstreamError } from "./model-client.mjs";
 import { anchorAnnotation, anchorCrossReferences } from "../tools/anchor-gate.mjs";
+import { listEvidenceLinks, listS1Claims } from "./product-core/claims.mjs";
+import {
+  getEffectiveDecision,
+  listDecisionRecords,
+  recordClaimId,
+  submitTeacherDecision,
+} from "./product-core/decisions.mjs";
+import { ProductCoreError } from "./product-core/errors.mjs";
+import {
+  computeFactsAndAdvance,
+  enterTeacherReview,
+  generateClaimsAndAdvance,
+  importPretestAndAdvance,
+  insertCohort,
+  insertCourse,
+  insertLesson,
+  publish,
+  reviewAndAdvance,
+  startS1Workflow,
+  validateAndAdvance,
+} from "./product-core/s1-service.mjs";
+import { SchemaValidationError } from "./product-core/schemas.mjs";
+import { getWorkflow, TERMINAL_STATES, TRANSITIONS } from "./product-core/workflow.mjs";
 
 const MIME = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -50,6 +73,31 @@ function sendJson(res, status, payload, headers = {}) {
 
 function fail(status, code, message, details) {
   throw new HttpError(status, code, message, details);
+}
+
+// 产品内核错误 → HTTP 状态码(docs/product-core/s1-state-machine.md §5);
+// code 原样进入 {error:{code,message,details}},找不到类错误归 404,其余 400。
+const PRODUCT_CORE_HTTP_STATUS = new Map([
+  ["WF_ILLEGAL_TRANSITION", 409],
+  ["WF_VERSION_CONFLICT", 409],
+  ["IMMUTABLE_RECORD", 409],
+  ["SCHEMA_VALIDATION_FAILED", 422],
+  ["GATE_VALIDATION_FAILED", 422],
+  ["PUBLISH_NO_TEACHER_DECISION", 422],
+  ["PUBLISH_REJECTED_CONTENT", 422],
+  ["EVIDENCE_ANCHOR_INVALID", 422],
+  ["OBSERVATION_RECALC_MISMATCH", 422],
+  ["CROSS_SCOPE_REFERENCE", 422],
+  ["PRETEST_FIXTURE_INVALID", 422],
+  ["TEACHER_DECISION_INVALID", 422],
+  ["PROVIDER_NOT_ENABLED", 422],
+  ["PROVIDER_CONTRACT_VIOLATION", 422],
+  ["WF_INSTANCE_NOT_FOUND", 404],
+  ["DECISION_RECORD_NOT_FOUND", 404],
+]);
+function productCoreHttpStatus(code) {
+  if (PRODUCT_CORE_HTTP_STATUS.has(code)) return PRODUCT_CORE_HTTP_STATUS.get(code);
+  return typeof code === "string" && code.endsWith("_NOT_FOUND") ? 404 : 400;
 }
 
 async function readJson(req, limitBytes) {
@@ -452,6 +500,7 @@ function authorized(req, expectedToken) {
 const PUBLIC_ROOT_FILES = new Set([
   "index.html", "login.html", "nav-detail.html", "data-detail.html",
   "practice-detail.html", "opening-story.html", "nav-3d.html",
+  "s1-workspace.html",
 ]);
 const PUBLIC_DIR_EXTENSIONS = new Map([
   ["assets", new Set([".svg", ".png", ".jpg", ".jpeg", ".webp", ".woff2"])],
@@ -540,6 +589,12 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
     }
     if (req.method === "GET" && url.pathname === "/api/agents") {
       sendJson(res, 200, { agents: publicAgentList() });
+      return;
+    }
+
+    // 产品内核 S1:路由层只做参数校验与编排调用,状态字段一律经服务层转移。
+    if (url.pathname.startsWith("/api/product-core/")) {
+      await handleProductCoreApi(req, res, url);
       return;
     }
 
@@ -797,6 +852,419 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
     fail(404, "API_NOT_FOUND", "API 路径不存在");
   }
 
+  // ---------- 产品内核 S1 API(/api/product-core/) ----------
+  // 只做:参数校验 -> 服务层编排调用 -> 视图组装。绝不直接 UPDATE 任何状态字段(B8)。
+  const pcdb = database.db;
+
+  function pcText(value, name, { max = 200 } = {}) {
+    if (typeof value !== "string" || !value.trim()) {
+      fail(400, "INVALID_PRODUCT_CORE_BODY", `${name} 必填且必须是非空文本`);
+    }
+    const text = value.trim();
+    if (text.length > max) fail(400, "INVALID_PRODUCT_CORE_BODY", `${name} 不能超过 ${max} 字符`);
+    return text;
+  }
+
+  function pcActor(body, field = "actorId") {
+    return { actorType: "teacher", actorId: pcText(body?.[field], field, { max: 80 }) };
+  }
+
+  function pcGetWorkflowOr404(workflowId) {
+    const workflow = getWorkflow(pcdb, workflowId);
+    if (!workflow) {
+      fail(404, "WF_INSTANCE_NOT_FOUND", `工作流实例不存在: ${workflowId}`, { workflowInstanceId: workflowId });
+    }
+    return workflow;
+  }
+
+  function pcWorkflowSummary(workflow) {
+    return {
+      id: workflow.id,
+      currentState: workflow.current_state,
+      stateVersion: workflow.state_version,
+      courseId: workflow.course_id,
+      classId: workflow.class_id,
+      lessonId: workflow.lesson_id,
+      createdBy: workflow.created_by,
+      createdAt: workflow.created_at,
+      updatedAt: workflow.updated_at,
+    };
+  }
+
+  function pcAvailableActions(state) {
+    const actions = Object.keys(TRANSITIONS).filter((action) => TRANSITIONS[action].from.includes(state));
+    if (!TERMINAL_STATES.has(state)) actions.push("cancel");
+    return actions;
+  }
+
+  // fixture 两种来源:请求体内嵌 fixture 对象,或 fixturePath(仅限 server/product-core/fixtures 内)。
+  async function pcLoadFixture(body) {
+    if (body?.fixture !== undefined) {
+      if (!body.fixture || typeof body.fixture !== "object" || Array.isArray(body.fixture)) {
+        fail(400, "INVALID_FIXTURE", "fixture 必须是 JSON 对象");
+      }
+      return body.fixture;
+    }
+    if (typeof body?.fixturePath === "string" && body.fixturePath.trim()) {
+      const relative = body.fixturePath.trim();
+      if (relative.includes("\0") || !relative.endsWith(".json")) {
+        fail(400, "INVALID_FIXTURE_PATH", "fixturePath 必须是 .json 文件路径");
+      }
+      const fixturesDir = resolve(config.rootDir, "server/product-core/fixtures");
+      const filePath = resolve(config.rootDir, relative);
+      if (filePath !== fixturesDir && !filePath.startsWith(fixturesDir + sep)) {
+        fail(403, "FIXTURE_PATH_FORBIDDEN", "fixturePath 仅允许 server/product-core/fixtures 内的文件");
+      }
+      try {
+        return JSON.parse(await readFile(filePath, "utf8"));
+      } catch {
+        fail(400, "INVALID_FIXTURE", `fixture 文件无法读取或不是有效 JSON: ${relative}`);
+      }
+    }
+    fail(400, "INVALID_FIXTURE", "必须提供 fixture 对象或 fixturePath");
+  }
+
+  function pcClaimView(claim) {
+    return {
+      id: claim.id,
+      claimType: claim.claim_type,
+      statement: claim.statement,
+      targetStageId: claim.target_stage_id,
+      confidenceStatus: claim.confidence_status,
+      validationStatus: claim.validation_status,
+      semanticReviewStatus: claim.semantic_review_status,
+      createdBy: claim.created_by,
+      supersedesClaimId: claim.supersedes_claim_id,
+      evidenceLinks: listEvidenceLinks(pcdb, claim.id).map((link) => ({
+        id: link.id,
+        evidenceType: link.evidence_type,
+        sourceId: link.source_id,
+        sourceVersionId: link.source_version_id,
+        contentBlockId: link.content_block_id,
+        runtimeObservationId: link.runtime_observation_id,
+        pageIndex: link.page_index,
+        pageLabel: link.page_label,
+        verbatimQuote: link.verbatim_quote,
+        sourceStatus: link.source_status,
+      })),
+      mechanicalReport: claim.mechanical_report_json ? JSON.parse(claim.mechanical_report_json) : null,
+      semanticReport: claim.semantic_report_json ? JSON.parse(claim.semantic_report_json) : null,
+    };
+  }
+
+  // 教师工作区聚合视图:当前状态、observations、按类型分组的 claim、TDR 与生效裁决、可用动作。
+  function pcWorkspaceView(workflowId) {
+    const workflow = pcGetWorkflowOr404(workflowId);
+    const observations = pcdb
+      .prepare(
+        `SELECT id, metric, value, unit, numerator, denominator, calculation_rule,
+                calculation_version, aggregation_level, calculated_at
+         FROM runtime_observations WHERE lesson_id = ? ORDER BY metric`,
+      )
+      .all(workflow.lesson_id)
+      .map((row) => ({
+        id: row.id,
+        metric: row.metric,
+        value: row.value,
+        unit: row.unit,
+        numerator: row.numerator,
+        denominator: row.denominator,
+        calculationRule: row.calculation_rule,
+        calculationVersion: row.calculation_version,
+        aggregationLevel: row.aggregation_level,
+        calculatedAt: row.calculated_at,
+      }));
+    const claimsByType = { factual: [], inference: [], recommendation: [] };
+    for (const claim of listS1Claims(pcdb, workflow.lesson_id, { workflowInstanceId: workflowId })) {
+      const view = pcClaimView(claim);
+      if (claim.claim_type === "factual_claim") claimsByType.factual.push(view);
+      else if (claim.claim_type === "diagnostic_inference") claimsByType.inference.push(view);
+      else if (claim.claim_type === "teaching_recommendation") claimsByType.recommendation.push(view);
+    }
+    const decisionRecords = listDecisionRecords(pcdb, workflowId).map((record) => {
+      const claimId = recordClaimId(record);
+      const claim = claimId
+        ? pcdb.prepare("SELECT id, claim_type, statement FROM teaching_claims WHERE id = ?").get(claimId)
+        : null;
+      const effective = getEffectiveDecision(pcdb, record.id);
+      return {
+        id: record.id,
+        claimId,
+        claimType: claim?.claim_type ?? null,
+        statement: claim?.statement ?? null,
+        decisionQuestion: record.decision_question,
+        status: record.status,
+        mechanicalValidationStatus: record.mechanical_validation_status,
+        semanticReviewStatus: record.semantic_review_status,
+        targetLessonVersionId: record.target_lesson_version_id,
+        publishedAt: record.published_at,
+        effectiveDecision: effective
+          ? {
+              id: effective.id,
+              decision: effective.decision,
+              reviewerId: effective.reviewer_id,
+              originalStatement: effective.original_statement,
+              editedStatement: effective.edited_statement,
+              comment: effective.comment,
+              decidedAt: effective.decided_at,
+            }
+          : null,
+      };
+    });
+    return {
+      workflow: pcWorkflowSummary(workflow),
+      availableActions: pcAvailableActions(workflow.current_state),
+      observations,
+      claims: claimsByType,
+      decisionRecords,
+    };
+  }
+
+  // 审计时间线(只读):优先按 workflow_instance_id 过滤——migration 005 起新事件全部带
+  // workflow 维度;实体归集(lesson/claim/TDR/版本)仅兜底无 workflow 维度的旧事件,
+  // 避免把同一 lesson 下其他轮次的事件混入本轮时间线。
+  function pcAuditTimeline(workflowId) {
+    const workflow = pcGetWorkflowOr404(workflowId);
+    const entityIds = new Set([workflowId, workflow.lesson_id]);
+    for (const row of pcdb.prepare("SELECT id FROM teaching_claims WHERE lesson_id = ?").all(workflow.lesson_id)) {
+      entityIds.add(row.id);
+    }
+    for (const row of pcdb.prepare("SELECT id FROM teaching_decisions WHERE workflow_instance_id = ?").all(workflowId)) {
+      entityIds.add(row.id);
+    }
+    for (const row of pcdb.prepare("SELECT id FROM lesson_versions WHERE lesson_id = ?").all(workflow.lesson_id)) {
+      entityIds.add(row.id);
+    }
+    const placeholders = [...entityIds].map(() => "?").join(", ");
+    return pcdb
+      .prepare(
+        `SELECT * FROM audit_events
+         WHERE workflow_instance_id = ? OR (workflow_instance_id IS NULL AND entity_id IN (${placeholders}))
+         ORDER BY created_at, rowid`,
+      )
+      .all(workflowId, ...entityIds)
+      .map((row) => ({
+        id: row.id,
+        eventType: row.event_type,
+        actorType: row.actor_type,
+        actorId: row.actor_id,
+        entityType: row.entity_type,
+        entityId: row.entity_id,
+        workflowInstanceId: row.workflow_instance_id,
+        previousState: row.previous_state,
+        nextState: row.next_state,
+        payload: row.payload_json ? JSON.parse(row.payload_json) : null,
+        eventHash: row.event_hash,
+        createdAt: row.created_at,
+      }));
+  }
+
+  function pcVersionView(row) {
+    return {
+      id: row.id,
+      lessonId: row.lesson_id,
+      versionNumber: row.version_number,
+      parentVersionId: row.parent_version_id,
+      status: row.status,
+      createdBy: row.created_by,
+      createdAt: row.created_at,
+      publishedAt: row.published_at,
+      ...(row.status === "PUBLISHED" ? { content: JSON.parse(row.content_json) } : {}),
+    };
+  }
+
+  async function handleProductCoreApi(req, res, url) {
+    if (req.method === "POST" && url.pathname === "/api/product-core/courses") {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const course = insertCourse(pcdb, {
+        name: pcText(body.name, "name"),
+        code: pcText(body.code, "code", { max: 60 }),
+        actorContext: pcActor(body),
+      });
+      sendJson(res, 201, { course });
+      return;
+    }
+
+    const cohortMatch = url.pathname.match(/^\/api\/product-core\/courses\/([^/]+)\/cohorts$/);
+    if (req.method === "POST" && cohortMatch) {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const courseId = cohortMatch[1];
+      if (!pcdb.prepare("SELECT id FROM courses WHERE id = ?").get(courseId)) {
+        fail(404, "COURSE_NOT_FOUND", `课程不存在: ${courseId}`, { courseId });
+      }
+      const cohort = insertCohort(pcdb, {
+        courseId,
+        name: pcText(body.name, "name"),
+        academicTerm: typeof body.academicTerm === "string" ? body.academicTerm.trim() : "",
+        actorContext: pcActor(body),
+      });
+      sendJson(res, 201, { cohort });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/product-core/lessons") {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const courseId = pcText(body.courseId, "courseId", { max: 80 });
+      if (!pcdb.prepare("SELECT id FROM courses WHERE id = ?").get(courseId)) {
+        fail(404, "COURSE_NOT_FOUND", `课程不存在: ${courseId}`, { courseId });
+      }
+      let classId = null;
+      if (body.classId != null && body.classId !== "") {
+        classId = pcText(body.classId, "classId", { max: 80 });
+        if (!pcdb.prepare("SELECT id FROM class_cohorts WHERE id = ?").get(classId)) {
+          fail(404, "COHORT_NOT_FOUND", `班级不存在: ${classId}`, { classId });
+        }
+      }
+      const lesson = insertLesson(pcdb, {
+        courseId,
+        classId,
+        title: pcText(body.title, "title"),
+        actorContext: pcActor(body),
+      });
+      sendJson(res, 201, { lesson });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/product-core/s1/workflows") {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const courseId = pcText(body.courseId, "courseId", { max: 80 });
+      const classId = pcText(body.classId, "classId", { max: 80 });
+      const lessonId = pcText(body.lessonId, "lessonId", { max: 80 });
+      if (!pcdb.prepare("SELECT id FROM courses WHERE id = ?").get(courseId)) {
+        fail(404, "COURSE_NOT_FOUND", `课程不存在: ${courseId}`, { courseId });
+      }
+      if (!pcdb.prepare("SELECT id FROM class_cohorts WHERE id = ?").get(classId)) {
+        fail(404, "COHORT_NOT_FOUND", `班级不存在: ${classId}`, { classId });
+      }
+      if (!pcdb.prepare("SELECT id FROM lessons WHERE id = ?").get(lessonId)) {
+        fail(404, "LESSON_NOT_FOUND", `课时不存在: ${lessonId}`, { lessonId });
+      }
+      const actorContext = pcActor(body);
+      const workflow = startS1Workflow(pcdb, { courseId, classId, lessonId, createdBy: actorContext.actorId, actorContext });
+      sendJson(res, 201, { workflow: pcWorkflowSummary(workflow) });
+      return;
+    }
+
+    const decisionMatch = url.pathname.match(/^\/api\/product-core\/s1\/decision-records\/([^/]+)\/decisions$/);
+    if (req.method === "POST" && decisionMatch) {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const reviewerId = pcText(body.reviewerId, "reviewerId", { max: 80 });
+      const result = await submitTeacherDecision(pcdb, {
+        decisionRecordId: decisionMatch[1],
+        decision: pcText(body.decision, "decision", { max: 20 }),
+        reviewerId,
+        editedStatement: typeof body.editedStatement === "string" ? body.editedStatement : null,
+        comment: typeof body.comment === "string" ? body.comment : null,
+        actorContext: { actorType: "teacher", actorId: reviewerId },
+      });
+      sendJson(res, 201, {
+        teacherDecisionId: result.teacherDecisionId,
+        decisionRecordId: result.decisionRecordId,
+        decision: result.decision,
+        revisedClaimId: result.revisedClaimId,
+        effective: result.effective && {
+          id: result.effective.id,
+          decision: result.effective.decision,
+          reviewerId: result.effective.reviewer_id,
+          originalStatement: result.effective.original_statement,
+          editedStatement: result.effective.edited_statement,
+          comment: result.effective.comment,
+          decidedAt: result.effective.decided_at,
+        },
+      });
+      return;
+    }
+
+    const versionsMatch = url.pathname.match(/^\/api\/product-core\/lessons\/([^/]+)\/versions(?:\/([^/]+))?$/);
+    if (req.method === "GET" && versionsMatch) {
+      const lessonId = versionsMatch[1];
+      if (!pcdb.prepare("SELECT id FROM lessons WHERE id = ?").get(lessonId)) {
+        fail(404, "LESSON_NOT_FOUND", `课时不存在: ${lessonId}`, { lessonId });
+      }
+      const rows = pcdb
+        .prepare("SELECT * FROM lesson_versions WHERE lesson_id = ? ORDER BY version_number")
+        .all(lessonId);
+      if (versionsMatch[2]) {
+        const row = rows.find((item) => item.id === versionsMatch[2]);
+        if (!row) fail(404, "LESSON_VERSION_NOT_FOUND", `课时版本不存在: ${versionsMatch[2]}`);
+        sendJson(res, 200, { version: pcVersionView(row) });
+        return;
+      }
+      sendJson(res, 200, { lessonId, versions: rows.map(pcVersionView) });
+      return;
+    }
+
+    const workflowMatch = url.pathname.match(
+      /^\/api\/product-core\/s1\/workflows\/([^/]+?)(?:\/(input|compute-facts|generate-claims|validate|publish|audit))?$/,
+    );
+    if (workflowMatch) {
+      const workflowId = workflowMatch[1];
+      const action = workflowMatch[2] ?? null;
+      if (req.method === "GET" && action === null) {
+        sendJson(res, 200, pcWorkspaceView(workflowId));
+        return;
+      }
+      if (req.method === "GET" && action === "audit") {
+        sendJson(res, 200, { workflowId, events: pcAuditTimeline(workflowId) });
+        return;
+      }
+      if (req.method === "POST" && action === "input") {
+        const body = await readJson(req, config.bodyLimitBytes);
+        const actorContext = pcActor(body);
+        pcGetWorkflowOr404(workflowId);
+        const fixture = await pcLoadFixture(body);
+        const workflow = importPretestAndAdvance(pcdb, { workflowId, fixture, actorContext });
+        sendJson(res, 200, { workflow: pcWorkflowSummary(workflow) });
+        return;
+      }
+      if (req.method === "POST" && action === "compute-facts") {
+        const body = await readJson(req, config.bodyLimitBytes);
+        pcGetWorkflowOr404(workflowId);
+        const { workflow, facts } = computeFactsAndAdvance(pcdb, { workflowId, actorContext: pcActor(body) });
+        sendJson(res, 200, { workflow: pcWorkflowSummary(workflow), facts });
+        return;
+      }
+      if (req.method === "POST" && action === "generate-claims") {
+        const body = await readJson(req, config.bodyLimitBytes);
+        pcGetWorkflowOr404(workflowId);
+        const result = await generateClaimsAndAdvance(pcdb, { workflowId, actorContext: pcActor(body) });
+        sendJson(res, 200, {
+          workflow: pcWorkflowSummary(result.workflow),
+          modelRunId: result.modelRunId,
+          calculationVersion: result.calculationVersion,
+          claims: result.claims,
+          decisionRecords: result.records,
+        });
+        return;
+      }
+      if (req.method === "POST" && action === "validate") {
+        const body = await readJson(req, config.bodyLimitBytes);
+        const actorContext = pcActor(body);
+        pcGetWorkflowOr404(workflowId);
+        const { gate } = validateAndAdvance(pcdb, { workflowId, actorContext });
+        const { review } = reviewAndAdvance(pcdb, { workflowId, actorContext });
+        const workflow = enterTeacherReview(pcdb, { workflowId, actorContext });
+        sendJson(res, 200, { workflow: pcWorkflowSummary(workflow), gate, semanticReview: review });
+        return;
+      }
+      if (req.method === "POST" && action === "publish") {
+        const body = await readJson(req, config.bodyLimitBytes);
+        pcGetWorkflowOr404(workflowId);
+        const result = publish(pcdb, { workflowId, actorContext: pcActor(body) });
+        sendJson(res, 200, {
+          workflow: pcWorkflowSummary(pcGetWorkflowOr404(workflowId)),
+          lessonVersionId: result.lessonVersionId,
+          versionNumber: result.versionNumber,
+          artifact: result.artifact,
+        });
+        return;
+      }
+      fail(405, "METHOD_NOT_ALLOWED", "该工作流接口不支持此动作或方法");
+    }
+
+    fail(404, "API_NOT_FOUND", "API 路径不存在");
+  }
+
   const server = createServer(async (req, res) => {
     res.setHeader("x-content-type-options", "nosniff");
     res.setHeader("referrer-policy", "same-origin");
@@ -819,6 +1287,12 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
           error: { code: "REVISION_CONFLICT", message: error.message },
           current: error.current,
         }, { etag: `"${error.current.revision}"` });
+        return;
+      }
+      if (error instanceof ProductCoreError || error instanceof SchemaValidationError) {
+        sendJson(res, productCoreHttpStatus(error.code), {
+          error: { code: error.code, message: error.message, details: error.details },
+        });
         return;
       }
       if (error instanceof ModelUnavailableError) {

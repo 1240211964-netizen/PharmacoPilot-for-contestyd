@@ -1,0 +1,449 @@
+{
+  "datasetId": "retrieval-dev.v1",
+  "schemaVersion": "1.0.0",
+  "kind": "retrieval",
+  "split": "dev",
+  "createdAt": "2026-08-03",
+  "cases": [
+    {
+      "caseId": "retrieval-001",
+      "schemaVersion": "1.0.0",
+      "question": "《药事管理教学质量监督办法》第十二条对学情诊断提出了什么要求?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_001",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第十二条 学情诊断应当以匿名化前测数据为基础,结合课堂观察记录,形成可核验的教学决策依据。",
+          "quoteHash": "sha256:255b071484983f264dafc372e6fbe4001381653f7cc166c3cb02d3429263e636"
+        }
+      ],
+      "forbiddenClaims": [
+        "学情诊断可以不经任何数据直接凭经验作出"
+      ],
+      "tags": [
+        "policy",
+        "exact",
+        "article",
+        "S1"
+      ]
+    },
+    {
+      "caseId": "retrieval-002",
+      "schemaVersion": "1.0.0",
+      "question": "药教质〔2024〕17号文件的适用范围是什么?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_001",
+          "sourceVersion": "v1",
+          "pageIndex": 0,
+          "pageLabel": "1",
+          "verbatimQuote": "第二条 本办法适用于本校药事管理及相关课程的教学质量监督与改进活动。",
+          "quoteHash": "sha256:b56cb3944afda4436660ab3f57ff791b659e44d3daa39235b207392374bb3e07"
+        }
+      ],
+      "forbiddenClaims": [
+        "本办法适用于全校所有课程的教学质量监督"
+      ],
+      "tags": [
+        "policy",
+        "file-number",
+        "exact"
+      ]
+    },
+    {
+      "caseId": "retrieval-003",
+      "schemaVersion": "1.0.0",
+      "question": "药品不良反应的定义是什么?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_002",
+          "sourceVersion": "v1",
+          "pageIndex": 0,
+          "pageLabel": "12",
+          "verbatimQuote": "药品不良反应是指合格药品在正常用法用量下出现的与用药目的无关的有害反应。",
+          "quoteHash": "sha256:746f0f36881d3e799a256718742a5b84d1cd919d6d77bfa03d174380115d7b87"
+        }
+      ],
+      "forbiddenClaims": [
+        "药品不良反应是指不合格药品在超剂量使用下出现的有害反应"
+      ],
+      "tags": [
+        "textbook",
+        "definition",
+        "exact"
+      ]
+    },
+    {
+      "caseId": "retrieval-004",
+      "schemaVersion": "1.0.0",
+      "question": "什么是药物不良反应?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_003",
+          "sourceVersion": "v1",
+          "pageIndex": 0,
+          "pageLabel": "45",
+          "verbatimQuote": "药物不良反应泛指药物在预防、诊断、治疗疾病或调节生理功能的过程中,出现的有害的和非预期的反应。",
+          "quoteHash": "sha256:01cb4f62e5d0a0f6492b2801aed9a1a41ad2755a41d2910b06ecaeb073cbc48f"
+        }
+      ],
+      "forbiddenClaims": [
+        "药物不良反应仅指超剂量用药产生的反应"
+      ],
+      "tags": [
+        "textbook",
+        "definition",
+        "synonym"
+      ]
+    },
+    {
+      "caseId": "retrieval-005",
+      "schemaVersion": "1.0.0",
+      "question": "学情指的是什么?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_011",
+          "sourceVersion": "v1",
+          "pageIndex": 0,
+          "pageLabel": "88",
+          "verbatimQuote": "学情是指学习者在特定学习阶段的知识基础、能力水平与学习特征的总和。",
+          "quoteHash": "sha256:3e7cfacd9d6e738f7840a17515b01339bf0fc4c58aab43ee3348b6639161d896"
+        }
+      ],
+      "forbiddenClaims": [
+        "学情仅指学生的考试成绩"
+      ],
+      "tags": [
+        "textbook",
+        "short-word",
+        "definition"
+      ]
+    },
+    {
+      "caseId": "retrieval-006",
+      "schemaVersion": "1.0.0",
+      "question": "教学评价的定义是什么?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_011",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "89",
+          "verbatimQuote": "教学评价是依据教学目标,对教学过程与学习结果进行价值判断的活动。",
+          "quoteHash": "sha256:69e88bcd1b1eb930e238ac96eac1158fb8e3a0ab0acb64b6735b0f8a0eb546ff"
+        }
+      ],
+      "forbiddenClaims": [
+        "教学评价只针对学生的期末成绩"
+      ],
+      "tags": [
+        "textbook",
+        "short-word",
+        "definition"
+      ]
+    },
+    {
+      "caseId": "retrieval-007",
+      "schemaVersion": "1.0.0",
+      "question": "S1 阶段的主要任务是什么?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_006",
+          "sourceVersion": "v1",
+          "pageIndex": 0,
+          "pageLabel": "1",
+          "verbatimQuote": "S1 阶段是教学流程的起点,其主要任务是基于前测数据完成学情诊断,为后续教学决策提供事实依据。",
+          "quoteHash": "sha256:d439b8030dde704f469b918802c10178c99fa637df05102eb1b14d5eeb0eb574"
+        }
+      ],
+      "forbiddenClaims": [
+        "S1 阶段的主要任务是期末考试命题"
+      ],
+      "tags": [
+        "teaching-artifact",
+        "abbreviation",
+        "S1"
+      ]
+    },
+    {
+      "caseId": "retrieval-008",
+      "schemaVersion": "1.0.0",
+      "question": "OBE 的核心理念是什么?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_007",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "OBE 的核心理念是反向设计、正向实施,即先明确预期学习成果,再据此组织教学活动与评价方式。",
+          "quoteHash": "sha256:a2520be0eb3fe715a19fbf2e55dd6d35b4d98ca21d941c3920f05a5a1817e6f6"
+        }
+      ],
+      "forbiddenClaims": [
+        "OBE 的核心理念是先组织教学活动再确定学习成果"
+      ],
+      "tags": [
+        "theory",
+        "abbreviation",
+        "OBE"
+      ]
+    },
+    {
+      "caseId": "retrieval-009",
+      "schemaVersion": "1.0.0",
+      "question": "UBD 逆向设计包括哪三个阶段?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_008",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "UBD 逆向设计包括三个阶段:确定预期结果、确定合适的评估证据、设计学习体验与教学。",
+          "quoteHash": "sha256:f1fc444764bb882b17756a2b132e636c9e302be8548150b497830b4ac557084a"
+        }
+      ],
+      "forbiddenClaims": [
+        "UBD 逆向设计包括备课、上课、批改作业三个阶段"
+      ],
+      "tags": [
+        "theory",
+        "abbreviation",
+        "UBD"
+      ]
+    },
+    {
+      "caseId": "retrieval-010",
+      "schemaVersion": "1.0.0",
+      "question": "哪些药物应当开展治疗药物监测?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_002",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "13",
+          "verbatimQuote": "对于治疗窗窄、个体差异大的药物,应当开展治疗药物监测,以保障用药安全。",
+          "quoteHash": "sha256:c3b4e981fdcb307ff03a5f2c572792b055bc995fc7619c0445c4fc9188f57644"
+        }
+      ],
+      "forbiddenClaims": [
+        "所有药物都必须常规开展治疗药物监测"
+      ],
+      "tags": [
+        "textbook",
+        "semantic",
+        "cross-paragraph"
+      ]
+    },
+    {
+      "caseId": "retrieval-011",
+      "schemaVersion": "1.0.0",
+      "question": "现行集中采购规范对中选药品使用监测有何要求?学情诊断又应当以什么为基础?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_009",
+          "sourceVersion": "v2",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第九条 医疗机构应当建立中选药品使用情况监测机制,定期评估供应保障能力。",
+          "quoteHash": "sha256:3a263ecdc1ec044de36750e18ec014438e844fd8b651085f81ba499c2e426c19"
+        },
+        {
+          "documentId": "doc_001",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第十二条 学情诊断应当以匿名化前测数据为基础,结合课堂观察记录,形成可核验的教学决策依据。",
+          "quoteHash": "sha256:255b071484983f264dafc372e6fbe4001381653f7cc166c3cb02d3429263e636"
+        }
+      ],
+      "forbiddenClaims": [
+        "医疗机构无需建立中选药品使用情况监测机制"
+      ],
+      "tags": [
+        "policy",
+        "multi-evidence",
+        "S1"
+      ]
+    },
+    {
+      "caseId": "retrieval-012",
+      "schemaVersion": "1.0.0",
+      "question": "S1 学情诊断量表中,前测正确率低于60% 应如何判定?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_004",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "| 前测正确率 | 低于60% | 判定为基础薄弱 |",
+          "quoteHash": "sha256:3561d83ea20982de08c9ae26b60c9d3953754a860f73fd25f22d4988608a28cc"
+        }
+      ],
+      "forbiddenClaims": [
+        "前测正确率低于60% 判定为熟练掌握"
+      ],
+      "tags": [
+        "rubric",
+        "table",
+        "S1"
+      ]
+    },
+    {
+      "caseId": "retrieval-013",
+      "schemaVersion": "1.0.0",
+      "question": "2020年版《处方点评实施细则》第五条规定的处方点评覆盖率下限是多少?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_010",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第五条 处方点评覆盖率不得低于百分之三十。",
+          "quoteHash": "sha256:8f44c25b26114c84cca7a0c2bb83c2b132a0771af8708d05d75832b3a16126f6"
+        }
+      ],
+      "forbiddenClaims": [
+        "现行处方点评覆盖率不得低于百分之三十"
+      ],
+      "tags": [
+        "policy",
+        "superseded",
+        "exact"
+      ]
+    },
+    {
+      "caseId": "retrieval-014",
+      "schemaVersion": "1.0.0",
+      "question": "现行《处方点评实施细则》要求处方点评覆盖率不得低于多少?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_010",
+          "sourceVersion": "v2",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第五条 处方点评覆盖率不得低于百分之五十。",
+          "quoteHash": "sha256:bece5386f3386509feff5974407009d205020e1f480d921437fedc94b2ab34b8"
+        }
+      ],
+      "forbiddenClaims": [
+        "处方点评覆盖率不得低于百分之三十"
+      ],
+      "tags": [
+        "policy",
+        "conflict-version",
+        "exact"
+      ]
+    },
+    {
+      "caseId": "retrieval-015",
+      "schemaVersion": "1.0.0",
+      "question": "2024年修订的《药品集中采购与供应管理规范》对中选药品使用监测提出了什么新要求?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_009",
+          "sourceVersion": "v2",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第九条 医疗机构应当建立中选药品使用情况监测机制,定期评估供应保障能力。",
+          "quoteHash": "sha256:3a263ecdc1ec044de36750e18ec014438e844fd8b651085f81ba499c2e426c19"
+        }
+      ],
+      "forbiddenClaims": [
+        "2024年修订版删除了中选药品监测要求"
+      ],
+      "tags": [
+        "policy",
+        "current-version",
+        "exact"
+      ]
+    },
+    {
+      "caseId": "retrieval-016",
+      "schemaVersion": "1.0.0",
+      "question": "社区药房用药咨询案例中,学生的小组任务是什么?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_005",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "请学生以小组为单位,梳理该患者用药清单,识别潜在的用药风险,并提出用药教育要点。",
+          "quoteHash": "sha256:d7eeb957a75cea698c494bf9552aed3743eac17a78bc76a941f6710d64f8793d"
+        }
+      ],
+      "forbiddenClaims": [
+        "案例要求学生独立完成患者用药清单梳理"
+      ],
+      "tags": [
+        "case",
+        "semantic"
+      ]
+    },
+    {
+      "caseId": "retrieval-017",
+      "schemaVersion": "1.0.0",
+      "question": "S1 学情诊断量表的结果可以用于评价学生吗?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_004",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "量表结果仅供任课教师进行教学决策参考,不得用于对学生的评价。",
+          "quoteHash": "sha256:14062ce67b7bc2f2ce96cd9aa3ede120b8ae69b0fbb4b6f1cc9c0e7ab8ddc329"
+        }
+      ],
+      "forbiddenClaims": [
+        "量表结果可以直接用于对学生的评价"
+      ],
+      "tags": [
+        "rubric",
+        "boundary",
+        "S1"
+      ]
+    },
+    {
+      "caseId": "retrieval-018",
+      "schemaVersion": "1.0.0",
+      "question": "在药学服务实践中,药师为患者提供个体化用药指导时需要综合运用哪些能力,并持续关注什么?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_011",
+          "sourceVersion": "v1",
+          "pageIndex": 2,
+          "pageLabel": "90",
+          "verbatimQuote": "在药学服务实践中,药师应当综合运用专业知识与沟通技巧,为患者提供个体化的用药指导,并持续关注用药后的疗效与安全性。",
+          "quoteHash": "sha256:51e5ed066920a6d8442e2c11960f6c7fb0b87ce664f470f74f1941929001e2b4"
+        }
+      ],
+      "forbiddenClaims": [
+        "药师提供用药指导后无需持续关注疗效与安全性"
+      ],
+      "tags": [
+        "textbook",
+        "long-question",
+        "semantic"
+      ]
+    }
+  ]
+}

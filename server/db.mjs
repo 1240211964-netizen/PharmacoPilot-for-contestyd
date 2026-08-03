@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { runMigrations } from "./migrations.mjs";
 
 export class RevisionConflictError extends Error {
   constructor(current) {
@@ -20,42 +21,8 @@ export class PharmacoDatabase {
       PRAGMA journal_mode = WAL;
       PRAGMA foreign_keys = ON;
       PRAGMA busy_timeout = 5000;
-
-      CREATE TABLE IF NOT EXISTS workspace_states (
-        workspace_id TEXT PRIMARY KEY,
-        revision INTEGER NOT NULL,
-        state_json TEXT NOT NULL,
-        state_hash TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      ) STRICT;
-
-      CREATE TABLE IF NOT EXISTS audit_events (
-        id TEXT PRIMARY KEY,
-        event_type TEXT NOT NULL,
-        workspace_id TEXT,
-        metadata_json TEXT NOT NULL,
-        created_at TEXT NOT NULL
-      ) STRICT;
-
-      CREATE INDEX IF NOT EXISTS audit_events_workspace_time
-        ON audit_events(workspace_id, created_at DESC);
-
-      CREATE TABLE IF NOT EXISTS inference_events (
-        id TEXT PRIMARY KEY,
-        agent_id TEXT NOT NULL,
-        model_name TEXT NOT NULL,
-        status TEXT NOT NULL,
-        latency_ms INTEGER NOT NULL,
-        input_chars INTEGER NOT NULL,
-        created_at TEXT NOT NULL
-      ) STRICT;
-
-      CREATE TABLE IF NOT EXISTS practice_review_cache (
-        cache_key TEXT PRIMARY KEY,
-        payload_json TEXT NOT NULL,
-        created_at TEXT NOT NULL
-      ) STRICT;
     `);
+    runMigrations(this.db);
 
     this.selectState = this.db.prepare(
       "SELECT workspace_id, revision, state_json, state_hash, updated_at FROM workspace_states WHERE workspace_id = ?",

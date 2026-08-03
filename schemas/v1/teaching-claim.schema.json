@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pharmacopilot.local/schemas/v1/teaching-claim.schema.json",
+  "title": "TeachingClaim",
+  "description": "教学主张:事实陈述/诊断推断/教学建议,必须可追溯到证据。空值策略:可选字段默认省略而非 null;仅 type 标注 [\"...\",\"null\"] 的字段允许 null。claimType=factual_claim 时 evidenceIds 至少 1 条由服务层强制,schema 层 minItems 为 0。自包含,不使用 $ref。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claimId",
+    "schemaVersion",
+    "claimType",
+    "statement",
+    "stageId",
+    "targetStageId",
+    "scope",
+    "evidenceIds",
+    "confidenceStatus",
+    "validationStatus",
+    "createdBy",
+    "createdFromModelRunId",
+    "supersedesClaimId",
+    "createdAt"
+  ],
+  "properties": {
+    "claimId": {
+      "type": "string",
+      "pattern": "^clm_[A-Za-z0-9]{8,64}$"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "claimType": {
+      "enum": [
+        "factual_claim",
+        "diagnostic_inference",
+        "teaching_recommendation"
+      ]
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stageId": {
+      "type": "string",
+      "pattern": "^S[1-9]$"
+    },
+    "targetStageId": {
+      "type": ["string", "null"],
+      "pattern": "^S[1-9]$",
+      "description": "nullable:主张不针对后续阶段时为 null。"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["courseId", "classId", "lessonId"],
+      "properties": {
+        "courseId": {
+          "type": "string",
+          "pattern": "^crs_[A-Za-z0-9]{8,64}$"
+        },
+        "classId": {
+          "type": "string",
+          "pattern": "^coh_[A-Za-z0-9]{8,64}$"
+        },
+        "lessonId": {
+          "type": "string",
+          "pattern": "^les_[A-Za-z0-9]{8,64}$"
+        }
+      }
+    },
+    "evidenceIds": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "pattern": "^ev_[A-Za-z0-9]{8,64}$"
+      }
+    },
+    "confidenceStatus": {
+      "enum": ["confirmed", "provisional", "uncertain", "unsupported"]
+    },
+    "validationStatus": {
+      "enum": ["PENDING", "PASSED", "FAILED", "WARNING", "NOT_APPLICABLE"]
+    },
+    "createdBy": {
+      "enum": ["system", "rule", "mock", "model", "teacher"]
+    },
+    "createdFromModelRunId": {
+      "type": ["string", "null"],
+      "pattern": "^mrn_[A-Za-z0-9]{8,64}$",
+      "description": "nullable:createdBy=model 时由服务层强制非空。"
+    },
+    "supersedesClaimId": {
+      "type": ["string", "null"],
+      "pattern": "^clm_[A-Za-z0-9]{8,64}$",
+      "description": "nullable:本主张取代先前主张时指向被取代者,否则为 null。"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

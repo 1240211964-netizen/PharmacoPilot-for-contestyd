@@ -1,0 +1,1176 @@
+{
+  "schemaVersion": "1.0.0",
+  "fixtureId": "pretest-s1-fixture-v1",
+  "description": "S1 课前前测:32 名匿名学生 × 4 道单选题。Q4 正确率 6/32=0.1875,错误选项 B 集中 13/32=0.40625,用于触发混淆推断规则。所有学生均参与作答。",
+  "items": [
+    {
+      "itemNo": 1,
+      "stem": "关于口服制剂生物利用度的影响因素,下列哪项描述正确?",
+      "options": [
+        {
+          "key": "A",
+          "text": "食物对所有药物的生物利用度均无影响"
+        },
+        {
+          "key": "B",
+          "text": "首过效应可降低口服药物的生物利用度"
+        },
+        {
+          "key": "C",
+          "text": "生物利用度与给药途径无关"
+        },
+        {
+          "key": "D",
+          "text": "溶出度不影响生物利用度"
+        }
+      ],
+      "correctOption": "B",
+      "knowledgeTags": [
+        "药代动力学",
+        "生物利用度"
+      ]
+    },
+    {
+      "itemNo": 2,
+      "stem": "按《处方管理办法》,急诊处方一般不得超过几日用量?",
+      "options": [
+        {
+          "key": "A",
+          "text": "1 日"
+        },
+        {
+          "key": "B",
+          "text": "2 日"
+        },
+        {
+          "key": "C",
+          "text": "3 日"
+        },
+        {
+          "key": "D",
+          "text": "7 日"
+        }
+      ],
+      "correctOption": "C",
+      "knowledgeTags": [
+        "药事管理",
+        "处方管理"
+      ]
+    },
+    {
+      "itemNo": 3,
+      "stem": "下列哪种情形属于不合理联合用药?",
+      "options": [
+        {
+          "key": "A",
+          "text": "无指征联用两种作用机制相同的抗菌药物"
+        },
+        {
+          "key": "B",
+          "text": "高血压联用利尿剂与 ACEI"
+        },
+        {
+          "key": "C",
+          "text": "结核病的标准四联方案"
+        },
+        {
+          "key": "D",
+          "text": "哮喘急性发作联用支气管扩张剂"
+        }
+      ],
+      "correctOption": "A",
+      "knowledgeTags": [
+        "合理用药",
+        "联合用药"
+      ]
+    },
+    {
+      "itemNo": 4,
+      "stem": "关于 CYP3A4 强抑制剂与大剂量辛伐他汀联用,下列说法正确的是?",
+      "options": [
+        {
+          "key": "A",
+          "text": "联用后辛伐他汀血药浓度必然下降"
+        },
+        {
+          "key": "B",
+          "text": "抑制剂与辛伐他汀代谢无关,所有学生熟悉的他汀都可安全联用"
+        },
+        {
+          "key": "C",
+          "text": "只需减少辛伐他汀剂量即可完全消除风险"
+        },
+        {
+          "key": "D",
+          "text": "可显著升高辛伐他汀血药浓度,增加肌病风险,应避免联用"
+        }
+      ],
+      "correctOption": "D",
+      "knowledgeTags": [
+        "药物相互作用",
+        "CYP450 酶抑制",
+        "他汀类药物"
+      ]
+    }
+  ],
+  "students": [
+    {
+      "anonId": "stu_01",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_02",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_03",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_04",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_05",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_06",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_07",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_08",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_09",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_10",
+      "knowledgeLevel": "基础",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_11",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_12",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_13",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_14",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_15",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_16",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_17",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_18",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_19",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_20",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_21",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_22",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_23",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_24",
+      "knowledgeLevel": "中等",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_25",
+      "knowledgeLevel": "良好",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_26",
+      "knowledgeLevel": "良好",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_27",
+      "knowledgeLevel": "良好",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_28",
+      "knowledgeLevel": "良好",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_29",
+      "knowledgeLevel": "良好",
+      "experienceProfile": "药房实习"
+    },
+    {
+      "anonId": "stu_30",
+      "knowledgeLevel": "良好",
+      "experienceProfile": "医院实习"
+    },
+    {
+      "anonId": "stu_31",
+      "knowledgeLevel": "良好",
+      "experienceProfile": "无实习经验"
+    },
+    {
+      "anonId": "stu_32",
+      "knowledgeLevel": "良好",
+      "experienceProfile": "药房实习"
+    }
+  ],
+  "responses": [
+    {
+      "studentAnonId": "stu_01",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:01.000Z"
+    },
+    {
+      "studentAnonId": "stu_01",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:02.000Z"
+    },
+    {
+      "studentAnonId": "stu_01",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:03.000Z"
+    },
+    {
+      "studentAnonId": "stu_01",
+      "itemNo": 4,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:04.000Z"
+    },
+    {
+      "studentAnonId": "stu_02",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:02.000Z"
+    },
+    {
+      "studentAnonId": "stu_02",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:04.000Z"
+    },
+    {
+      "studentAnonId": "stu_02",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:06.000Z"
+    },
+    {
+      "studentAnonId": "stu_02",
+      "itemNo": 4,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:08.000Z"
+    },
+    {
+      "studentAnonId": "stu_03",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:03.000Z"
+    },
+    {
+      "studentAnonId": "stu_03",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:06.000Z"
+    },
+    {
+      "studentAnonId": "stu_03",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:09.000Z"
+    },
+    {
+      "studentAnonId": "stu_03",
+      "itemNo": 4,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:12.000Z"
+    },
+    {
+      "studentAnonId": "stu_04",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:04.000Z"
+    },
+    {
+      "studentAnonId": "stu_04",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:08.000Z"
+    },
+    {
+      "studentAnonId": "stu_04",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:12.000Z"
+    },
+    {
+      "studentAnonId": "stu_04",
+      "itemNo": 4,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:16.000Z"
+    },
+    {
+      "studentAnonId": "stu_05",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:05.000Z"
+    },
+    {
+      "studentAnonId": "stu_05",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:10.000Z"
+    },
+    {
+      "studentAnonId": "stu_05",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:15.000Z"
+    },
+    {
+      "studentAnonId": "stu_05",
+      "itemNo": 4,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:20.000Z"
+    },
+    {
+      "studentAnonId": "stu_06",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:06.000Z"
+    },
+    {
+      "studentAnonId": "stu_06",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:12.000Z"
+    },
+    {
+      "studentAnonId": "stu_06",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:18.000Z"
+    },
+    {
+      "studentAnonId": "stu_06",
+      "itemNo": 4,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:24.000Z"
+    },
+    {
+      "studentAnonId": "stu_07",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:07.000Z"
+    },
+    {
+      "studentAnonId": "stu_07",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:14.000Z"
+    },
+    {
+      "studentAnonId": "stu_07",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:21.000Z"
+    },
+    {
+      "studentAnonId": "stu_07",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:28.000Z"
+    },
+    {
+      "studentAnonId": "stu_08",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:08.000Z"
+    },
+    {
+      "studentAnonId": "stu_08",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:16.000Z"
+    },
+    {
+      "studentAnonId": "stu_08",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:24.000Z"
+    },
+    {
+      "studentAnonId": "stu_08",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:32.000Z"
+    },
+    {
+      "studentAnonId": "stu_09",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:09.000Z"
+    },
+    {
+      "studentAnonId": "stu_09",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:18.000Z"
+    },
+    {
+      "studentAnonId": "stu_09",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:27.000Z"
+    },
+    {
+      "studentAnonId": "stu_09",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:36.000Z"
+    },
+    {
+      "studentAnonId": "stu_10",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:10.000Z"
+    },
+    {
+      "studentAnonId": "stu_10",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:20.000Z"
+    },
+    {
+      "studentAnonId": "stu_10",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:30.000Z"
+    },
+    {
+      "studentAnonId": "stu_10",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:40.000Z"
+    },
+    {
+      "studentAnonId": "stu_11",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:11.000Z"
+    },
+    {
+      "studentAnonId": "stu_11",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:22.000Z"
+    },
+    {
+      "studentAnonId": "stu_11",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:33.000Z"
+    },
+    {
+      "studentAnonId": "stu_11",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:44.000Z"
+    },
+    {
+      "studentAnonId": "stu_12",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:12.000Z"
+    },
+    {
+      "studentAnonId": "stu_12",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:24.000Z"
+    },
+    {
+      "studentAnonId": "stu_12",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:36.000Z"
+    },
+    {
+      "studentAnonId": "stu_12",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:48.000Z"
+    },
+    {
+      "studentAnonId": "stu_13",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:13.000Z"
+    },
+    {
+      "studentAnonId": "stu_13",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:26.000Z"
+    },
+    {
+      "studentAnonId": "stu_13",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:39.000Z"
+    },
+    {
+      "studentAnonId": "stu_13",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:52.000Z"
+    },
+    {
+      "studentAnonId": "stu_14",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:14.000Z"
+    },
+    {
+      "studentAnonId": "stu_14",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:28.000Z"
+    },
+    {
+      "studentAnonId": "stu_14",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:42.000Z"
+    },
+    {
+      "studentAnonId": "stu_14",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:56.000Z"
+    },
+    {
+      "studentAnonId": "stu_15",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:15.000Z"
+    },
+    {
+      "studentAnonId": "stu_15",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:30.000Z"
+    },
+    {
+      "studentAnonId": "stu_15",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:45.000Z"
+    },
+    {
+      "studentAnonId": "stu_15",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:00.000Z"
+    },
+    {
+      "studentAnonId": "stu_16",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:16.000Z"
+    },
+    {
+      "studentAnonId": "stu_16",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:32.000Z"
+    },
+    {
+      "studentAnonId": "stu_16",
+      "itemNo": 3,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:48.000Z"
+    },
+    {
+      "studentAnonId": "stu_16",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:04.000Z"
+    },
+    {
+      "studentAnonId": "stu_17",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:17.000Z"
+    },
+    {
+      "studentAnonId": "stu_17",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:34.000Z"
+    },
+    {
+      "studentAnonId": "stu_17",
+      "itemNo": 3,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:51.000Z"
+    },
+    {
+      "studentAnonId": "stu_17",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:08.000Z"
+    },
+    {
+      "studentAnonId": "stu_18",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:18.000Z"
+    },
+    {
+      "studentAnonId": "stu_18",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:36.000Z"
+    },
+    {
+      "studentAnonId": "stu_18",
+      "itemNo": 3,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:54.000Z"
+    },
+    {
+      "studentAnonId": "stu_18",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:12.000Z"
+    },
+    {
+      "studentAnonId": "stu_19",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:19.000Z"
+    },
+    {
+      "studentAnonId": "stu_19",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:38.000Z"
+    },
+    {
+      "studentAnonId": "stu_19",
+      "itemNo": 3,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:57.000Z"
+    },
+    {
+      "studentAnonId": "stu_19",
+      "itemNo": 4,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:16.000Z"
+    },
+    {
+      "studentAnonId": "stu_20",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:20.000Z"
+    },
+    {
+      "studentAnonId": "stu_20",
+      "itemNo": 2,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:40.000Z"
+    },
+    {
+      "studentAnonId": "stu_20",
+      "itemNo": 3,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:00.000Z"
+    },
+    {
+      "studentAnonId": "stu_20",
+      "itemNo": 4,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:20.000Z"
+    },
+    {
+      "studentAnonId": "stu_21",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:21.000Z"
+    },
+    {
+      "studentAnonId": "stu_21",
+      "itemNo": 2,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:42.000Z"
+    },
+    {
+      "studentAnonId": "stu_21",
+      "itemNo": 3,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:03.000Z"
+    },
+    {
+      "studentAnonId": "stu_21",
+      "itemNo": 4,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:24.000Z"
+    },
+    {
+      "studentAnonId": "stu_22",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:22.000Z"
+    },
+    {
+      "studentAnonId": "stu_22",
+      "itemNo": 2,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:44.000Z"
+    },
+    {
+      "studentAnonId": "stu_22",
+      "itemNo": 3,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:06.000Z"
+    },
+    {
+      "studentAnonId": "stu_22",
+      "itemNo": 4,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:28.000Z"
+    },
+    {
+      "studentAnonId": "stu_23",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:23.000Z"
+    },
+    {
+      "studentAnonId": "stu_23",
+      "itemNo": 2,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:46.000Z"
+    },
+    {
+      "studentAnonId": "stu_23",
+      "itemNo": 3,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:09.000Z"
+    },
+    {
+      "studentAnonId": "stu_23",
+      "itemNo": 4,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:32.000Z"
+    },
+    {
+      "studentAnonId": "stu_24",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:24.000Z"
+    },
+    {
+      "studentAnonId": "stu_24",
+      "itemNo": 2,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:48.000Z"
+    },
+    {
+      "studentAnonId": "stu_24",
+      "itemNo": 3,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:12.000Z"
+    },
+    {
+      "studentAnonId": "stu_24",
+      "itemNo": 4,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:36.000Z"
+    },
+    {
+      "studentAnonId": "stu_25",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:25.000Z"
+    },
+    {
+      "studentAnonId": "stu_25",
+      "itemNo": 2,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:50.000Z"
+    },
+    {
+      "studentAnonId": "stu_25",
+      "itemNo": 3,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:15.000Z"
+    },
+    {
+      "studentAnonId": "stu_25",
+      "itemNo": 4,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:40.000Z"
+    },
+    {
+      "studentAnonId": "stu_26",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:26.000Z"
+    },
+    {
+      "studentAnonId": "stu_26",
+      "itemNo": 2,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:52.000Z"
+    },
+    {
+      "studentAnonId": "stu_26",
+      "itemNo": 3,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:18.000Z"
+    },
+    {
+      "studentAnonId": "stu_26",
+      "itemNo": 4,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:44.000Z"
+    },
+    {
+      "studentAnonId": "stu_27",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:27.000Z"
+    },
+    {
+      "studentAnonId": "stu_27",
+      "itemNo": 2,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:54.000Z"
+    },
+    {
+      "studentAnonId": "stu_27",
+      "itemNo": 3,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:21.000Z"
+    },
+    {
+      "studentAnonId": "stu_27",
+      "itemNo": 4,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:48.000Z"
+    },
+    {
+      "studentAnonId": "stu_28",
+      "itemNo": 1,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:28.000Z"
+    },
+    {
+      "studentAnonId": "stu_28",
+      "itemNo": 2,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:56.000Z"
+    },
+    {
+      "studentAnonId": "stu_28",
+      "itemNo": 3,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:24.000Z"
+    },
+    {
+      "studentAnonId": "stu_28",
+      "itemNo": 4,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:52.000Z"
+    },
+    {
+      "studentAnonId": "stu_29",
+      "itemNo": 1,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:29.000Z"
+    },
+    {
+      "studentAnonId": "stu_29",
+      "itemNo": 2,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:58.000Z"
+    },
+    {
+      "studentAnonId": "stu_29",
+      "itemNo": 3,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:27.000Z"
+    },
+    {
+      "studentAnonId": "stu_29",
+      "itemNo": 4,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:56.000Z"
+    },
+    {
+      "studentAnonId": "stu_30",
+      "itemNo": 1,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:30.000Z"
+    },
+    {
+      "studentAnonId": "stu_30",
+      "itemNo": 2,
+      "selectedOption": "A",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:00.000Z"
+    },
+    {
+      "studentAnonId": "stu_30",
+      "itemNo": 3,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:30.000Z"
+    },
+    {
+      "studentAnonId": "stu_30",
+      "itemNo": 4,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:02:00.000Z"
+    },
+    {
+      "studentAnonId": "stu_31",
+      "itemNo": 1,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:31.000Z"
+    },
+    {
+      "studentAnonId": "stu_31",
+      "itemNo": 2,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:02.000Z"
+    },
+    {
+      "studentAnonId": "stu_31",
+      "itemNo": 3,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:33.000Z"
+    },
+    {
+      "studentAnonId": "stu_31",
+      "itemNo": 4,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:02:04.000Z"
+    },
+    {
+      "studentAnonId": "stu_32",
+      "itemNo": 1,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:00:32.000Z"
+    },
+    {
+      "studentAnonId": "stu_32",
+      "itemNo": 2,
+      "selectedOption": "D",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:04.000Z"
+    },
+    {
+      "studentAnonId": "stu_32",
+      "itemNo": 3,
+      "selectedOption": "B",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:01:36.000Z"
+    },
+    {
+      "studentAnonId": "stu_32",
+      "itemNo": 4,
+      "selectedOption": "C",
+      "participated": 1,
+      "submittedAt": "2026-07-20T08:02:08.000Z"
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pharmacopilot.local/schemas/v1.0.1/evidence-reference.schema.json",
+  "title": "EvidenceReference",
+  "description": "证据引用:指向知识块/运行时观测等来源的可核验锚点。空值策略:可选字段默认省略而非 null;仅 type 标注 [\"...\",\"null\"] 的字段允许 null。bbox 为 null 时 bboxCoordinateSystem 必须为 \"none\"。自包含,不使用 $ref。1.0.1 修正:sourceId 由仅 ka_ 放宽为 (ka|kav|obs|blk|tdec|ev|wf)_ 联合,使 runtime_observation 等类型证据可表达。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidenceId",
+    "schemaVersion",
+    "evidenceType",
+    "sourceId",
+    "sourceVersionId",
+    "contentBlockId",
+    "runtimeObservationId",
+    "pageIndex",
+    "pageLabel",
+    "bbox",
+    "bboxCoordinateSystem",
+    "verbatimQuote",
+    "normalizedQuote",
+    "sourceStatus",
+    "effectiveDate",
+    "supersededBy",
+    "contentHash",
+    "retrievedAt"
+  ],
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^ev_[A-Za-z0-9]{8,64}$"
+    },
+    "schemaVersion": {
+      "const": "1.0.1"
+    },
+    "evidenceType": {
+      "enum": [
+        "knowledge_block",
+        "runtime_observation",
+        "teacher_annotation",
+        "simulation_event",
+        "manual_reference"
+      ]
+    },
+    "sourceId": {
+      "type": "string",
+      "pattern": "^(ka|kav|obs|blk|tdec|ev|wf)_[A-Za-z0-9]{8,64}$",
+      "description": "来源对象 ID。1.0.1 起按 evidenceType 使用对应前缀:知识资产/版本用 ka_/kav_,运行时观测用 obs_,内容块用 blk_,教师裁决用 tdec_,证据自引用用 ev_,工作流实例用 wf_;1.0.0 的 ka_ 数据仍然合法。"
+    },
+    "sourceVersionId": {
+      "type": ["string", "null"],
+      "pattern": "^kav_[A-Za-z0-9]{8,64}$",
+      "description": "nullable:来源无版本概念时为 null。"
+    },
+    "contentBlockId": {
+      "type": ["string", "null"],
+      "pattern": "^blk_[A-Za-z0-9]{8,64}$",
+      "description": "nullable:证据不指向具体知识块时为 null。"
+    },
+    "runtimeObservationId": {
+      "type": ["string", "null"],
+      "pattern": "^obs_[A-Za-z0-9]{8,64}$",
+      "description": "nullable:evidenceType=runtime_observation 时由服务层强制非空。"
+    },
+    "pageIndex": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "nullable:来源无分页时为 null。"
+    },
+    "pageLabel": {
+      "type": ["string", "null"],
+      "description": "nullable:来源无页码标签时为 null。"
+    },
+    "bbox": {
+      "type": ["object", "null"],
+      "description": "nullable:无版面坐标时为 null,此时 bboxCoordinateSystem 必须为 \"none\"。",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "bboxCoordinateSystem": {
+      "enum": [
+        "pdf-points-bottom-left",
+        "pdf-points-top-left",
+        "pixel-top-left",
+        "none"
+      ]
+    },
+    "verbatimQuote": {
+      "type": "string"
+    },
+    "normalizedQuote": {
+      "type": "string"
+    },
+    "sourceStatus": {
+      "enum": ["active", "superseded", "withdrawn", "expired"]
+    },
+    "effectiveDate": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "nullable:来源无生效日期时为 null。"
+    },
+    "supersededBy": {
+      "type": ["string", "null"],
+      "pattern": "^ev_[A-Za-z0-9]{8,64}$",
+      "description": "nullable:sourceStatus=superseded 时由服务层强制非空。"
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "retrievedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "bbox": { "type": "null" } }
+      },
+      "then": {
+        "properties": { "bboxCoordinateSystem": { "const": "none" } }
+      }
+    }
+  ]
+}

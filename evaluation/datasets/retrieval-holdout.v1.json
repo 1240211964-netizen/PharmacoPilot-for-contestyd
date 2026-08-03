@@ -1,0 +1,256 @@
+{
+  "datasetId": "retrieval-holdout.v1",
+  "schemaVersion": "1.0.0",
+  "kind": "retrieval",
+  "split": "holdout",
+  "createdAt": "2026-08-03",
+  "cases": [
+    {
+      "caseId": "retrieval-holdout-001",
+      "schemaVersion": "1.0.0",
+      "question": "《药事管理教学质量监督办法》第十条对前测设计提出了什么要求?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_001",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第十条 任课教师应当在课程开始前完成前测设计,前测题目应当覆盖课程核心知识点。",
+          "quoteHash": "sha256:7e7d83a58c4c1ed58f459662a7d434edd957fa8a864c5ad8f1594aae3151018c"
+        }
+      ],
+      "forbiddenClaims": [
+        "前测设计可以在课程开始后再完成"
+      ],
+      "tags": [
+        "policy",
+        "exact",
+        "article",
+        "S1"
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-002",
+      "schemaVersion": "1.0.0",
+      "question": "前测结果应当在多长时间内完成统计分析?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_001",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第十一条 前测结果应当在开课后一周内完成统计分析,并形成学情分析报告。",
+          "quoteHash": "sha256:0ec1795531b5a0bbd2dd43e72a8bb3bbfe48fba58f74d78ff1e6bf994cbffbc6"
+        }
+      ],
+      "forbiddenClaims": [
+        "前测结果应当在开课后一个月内完成统计分析"
+      ],
+      "tags": [
+        "policy",
+        "exact",
+        "S1"
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-003",
+      "schemaVersion": "1.0.0",
+      "question": "什么是药事管理?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_002",
+          "sourceVersion": "v1",
+          "pageIndex": 2,
+          "pageLabel": "14",
+          "verbatimQuote": "药事管理是指对药学事业的综合管理,涵盖药品研制、生产、经营、使用等环节的监督与管理。",
+          "quoteHash": "sha256:64f0eefc488e34597ea2d8886ccb2eda1013791df1de0418dbac87e28e3bedac"
+        }
+      ],
+      "forbiddenClaims": [
+        "药事管理仅指药品经营环节的管理"
+      ],
+      "tags": [
+        "textbook",
+        "definition"
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-004",
+      "schemaVersion": "1.0.0",
+      "question": "什么是药学监护?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_003",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "46",
+          "verbatimQuote": "药学监护是指药师对患者用药全过程进行的监护与干预,旨在提高药物治疗的安全性与有效性。",
+          "quoteHash": "sha256:bf571de35636700f5d33e5a4872f6d33844fea3e50ca9e1d5cd47ac55e0b14b3"
+        }
+      ],
+      "forbiddenClaims": [
+        "药学监护只发生在患者住院期间"
+      ],
+      "tags": [
+        "textbook",
+        "definition",
+        "semantic"
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-005",
+      "schemaVersion": "1.0.0",
+      "question": "S1 学情诊断量表中,前测正确率高于85% 应如何判定?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_004",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "| 前测正确率 | 高于85% | 判定为熟练掌握 |",
+          "quoteHash": "sha256:7fe5eacaefcead454d41ff96e22e192cd5aca66c671dbe68b7413cb854662cd0"
+        }
+      ],
+      "forbiddenClaims": [
+        "前测正确率高于85% 判定为基础薄弱"
+      ],
+      "tags": [
+        "rubric",
+        "table",
+        "S1"
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-006",
+      "schemaVersion": "1.0.0",
+      "question": "2021年版《药品集中采购与供应管理规范》要求采购数据按什么周期报送?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_009",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第八条 中标药品的采购数据应当按月报送省级集中采购平台。",
+          "quoteHash": "sha256:825572c5b0ad601c089389fcc491e3f8ef84bca3f324ca7e7b8604d8f23ded6b"
+        }
+      ],
+      "forbiddenClaims": [
+        "现行规范要求中选药品采购数据按月报送"
+      ],
+      "tags": [
+        "policy",
+        "superseded",
+        "exact"
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-007",
+      "schemaVersion": "1.0.0",
+      "question": "S1 阶段学生的前测作答数据应当如何存储?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_006",
+          "sourceVersion": "v1",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "前测题目应当在开课前发布,学生作答数据仅以匿名内部标识存储,不得记录任何可识别身份的信息。",
+          "quoteHash": "sha256:b960d8a45ade50d47cd58925ee1295c952eb65a297158fea87072498e503b670"
+        }
+      ],
+      "forbiddenClaims": [
+        "前测作答数据可以连同学生姓名一起存储"
+      ],
+      "tags": [
+        "teaching-artifact",
+        "S1",
+        "privacy"
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-008",
+      "schemaVersion": "1.0.0",
+      "question": "OBE 的英文全称和中文含义分别是什么?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_007",
+          "sourceVersion": "v1",
+          "pageIndex": 0,
+          "pageLabel": "1",
+          "verbatimQuote": "OBE(Outcome-Based Education,成果导向教育)是一种以学习者最终取得的学习成果为导向的教育理念。",
+          "quoteHash": "sha256:a2ac9efcb5e82e50835d12211ac5ea56a14d9f41a9ea3383bacbbde8851819d8"
+        }
+      ],
+      "forbiddenClaims": [
+        "OBE 是 Objective-Based Evaluation 的缩写"
+      ],
+      "tags": [
+        "theory",
+        "abbreviation",
+        "OBE"
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-009",
+      "schemaVersion": "1.0.0",
+      "question": "现行集中采购规范对医疗机构采购中选药品和报送采购数据分别有什么要求?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_009",
+          "sourceVersion": "v2",
+          "pageIndex": 0,
+          "pageLabel": "1",
+          "verbatimQuote": "第五条 医疗机构应当优先采购和使用中选药品,并按约定完成采购量。",
+          "quoteHash": "sha256:67c308f59a9bf0095ecf6be518b2c8a7ee891307dc2f7c2795674a25a0b9d01f"
+        },
+        {
+          "documentId": "doc_009",
+          "sourceVersion": "v2",
+          "pageIndex": 1,
+          "pageLabel": "2",
+          "verbatimQuote": "第八条 中选药品的采购数据应当按季度汇总后报送省级集中采购平台。",
+          "quoteHash": "sha256:56ba32f90eb15afe0246558a4b4d5c62881d277648e4f9a40267675aa822f3f2"
+        }
+      ],
+      "forbiddenClaims": [
+        "中选药品的采购数据应当按月报送省级集中采购平台"
+      ],
+      "tags": [
+        "policy",
+        "multi-evidence"
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-010",
+      "schemaVersion": "1.0.0",
+      "question": "《药事管理教学质量监督办法》自何时起施行,由哪个部门负责解释?",
+      "answerable": true,
+      "goldSources": [
+        {
+          "documentId": "doc_001",
+          "sourceVersion": "v1",
+          "pageIndex": 3,
+          "pageLabel": "4",
+          "verbatimQuote": "第二十条 本办法自2024年3月1日起施行,由教务处负责解释。",
+          "quoteHash": "sha256:476b64d1aa47ac57077d425ee738ca3e03a74519e1a30d9c6ffb321a128caedf"
+        }
+      ],
+      "forbiddenClaims": [
+        "本办法自2025年1月1日起施行"
+      ],
+      "tags": [
+        "policy",
+        "long-question",
+        "exact"
+      ]
+    }
+  ]
+}

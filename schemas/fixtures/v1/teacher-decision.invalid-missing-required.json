@@ -1,0 +1,10 @@
+{
+  "teacherDecisionId": "tdec_5a7b9c1d3e5f7a",
+  "schemaVersion": "1.0.0",
+  "decision": "revise",
+  "reviewerId": "teacher_mao_ny",
+  "originalStatement": "S2 插入 5 分钟袢利尿剂作用部位补充讲解。",
+  "editedStatement": "S2 插入 3 分钟袢利尿剂作用部位动态示意图讲解,并在 S4 复测同知识点。",
+  "comment": "时间有限,压缩讲解时长,用复测闭环替代。",
+  "decidedAt": "2026-08-03T10:05:00Z"
+}

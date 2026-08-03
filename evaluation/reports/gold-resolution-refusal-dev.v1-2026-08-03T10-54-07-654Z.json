@@ -1,0 +1,28 @@
+{
+  "reportType": "gold-resolution",
+  "dataset": "refusal-dev.v1",
+  "generatedAt": "2026-08-03T10:54:07.654Z",
+  "corpus": {
+    "assets": 11,
+    "versions": 13,
+    "blocks": 72
+  },
+  "totals": {
+    "cases": 8,
+    "refusalCases": 8,
+    "goldSources": 0,
+    "resolved": 0,
+    "multiMatch": 0,
+    "unmatched": 0,
+    "pageDrift": 0,
+    "quoteDrift": 0,
+    "needsManualReview": 0,
+    "resolutionRate": null
+  },
+  "resolved": [],
+  "multiMatch": [],
+  "unmatched": [],
+  "pageDrift": [],
+  "quoteDrift": [],
+  "needsManualReview": []
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pharmacopilot.local/schemas/v1/teacher-decision.schema.json",
+  "title": "TeacherDecision",
+  "description": "教师决定:教师对教学决策记录的接受/修改/拒绝/暂缓。空值策略:可选字段默认省略而非 null;仅 type 标注 [\"...\",\"null\"] 的字段允许 null。decision=revise 时 editedStatement 非空由服务层强制。自包含,不使用 $ref。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "teacherDecisionId",
+    "schemaVersion",
+    "decisionRecordId",
+    "decision",
+    "reviewerId",
+    "originalStatement",
+    "editedStatement",
+    "comment",
+    "decidedAt"
+  ],
+  "properties": {
+    "teacherDecisionId": {
+      "type": "string",
+      "pattern": "^tdec_[A-Za-z0-9]{8,64}$"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "decisionRecordId": {
+      "type": "string",
+      "pattern": "^tdr_[A-Za-z0-9]{8,64}$"
+    },
+    "decision": {
+      "enum": ["accept", "revise", "reject", "defer"]
+    },
+    "reviewerId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "originalStatement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "editedStatement": {
+      "type": ["string", "null"],
+      "description": "nullable:decision=revise 时服务层强制非空,其余决定类型通常为 null。"
+    },
+    "comment": {
+      "type": ["string", "null"],
+      "description": "nullable:教师无附加说明时为 null。"
+    },
+    "decidedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

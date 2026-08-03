@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S1 教师审核工作区 · PharmacoPilot</title>
+<!-- 字体与 token 引入方式同其他根级页面(见 data-detail.html) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
+<link rel="stylesheet" href="shared/tokens.css" />
+<style>
+  body { font-size: var(--fs-sm); line-height: var(--lh-body); }
+  header { background: var(--indigo); color: var(--ivory); padding: 10px 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  header h1 { font-size: var(--fs-md); margin: 0; font-weight: 600; }
+  .hdr-label { color: var(--on-dark); }
+  main { max-width: 1280px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+  section { background: var(--ivory); border: 1px solid var(--rule-2); border-radius: 8px; padding: 14px 16px; }
+  section h2 { font-size: var(--fs-md); margin: 0 0 10px; }
+  label { display: inline-flex; flex-direction: column; font-size: var(--fs-2xs); color: var(--mute); margin: 0 8px 8px 0; }
+  input, textarea { font: inherit; padding: 5px 8px; border: 1px solid var(--rule-3); border-radius: 5px; min-width: 160px; }
+  textarea { width: 100%; min-height: 64px; }
+  button { font: inherit; padding: 5px 12px; border: 1px solid var(--indigo); background: var(--indigo); color: var(--ivory); border-radius: 5px; cursor: pointer; margin: 2px 4px 2px 0; }
+  button.ghost { background: var(--ivory); color: var(--indigo); }
+  button.warn { border-color: var(--maroon); background: var(--maroon); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #status { min-height: 20px; font-size: var(--fs-xs); white-space: pre-wrap; }
+  #status.err { color: var(--maroon); }
+  #status.ok { color: var(--ok); }
+  .row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; }
+  .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .col h3 { font-size: var(--fs-sm); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 2px solid var(--rule-2); }
+  .card { border: 1px solid var(--rule-2); border-radius: 6px; padding: 10px; margin-bottom: 10px; background: var(--ivory); }
+  .card .stmt { margin: 0 0 6px; }
+  .meta { font-size: var(--fs-2xs); color: var(--mute); display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .tag { display: inline-block; padding: 0 6px; border-radius: 4px; background: var(--paper-2); border: 1px solid var(--rule-2); font-size: var(--fs-2xs); }
+  .tag.PASSED, .tag.supported, .tag.accept { background: var(--sage-soft); border-color: var(--sage); color: var(--ok); }
+  .tag.FAILED, .tag.unsupported, .tag.reject { background: var(--amber-wash); border-color: var(--amber-deep); color: var(--maroon); }
+  .tag.WARNING, .tag.partially_supported, .tag.revise, .tag.defer, .tag.uncertain { background: var(--paper-2); border-color: var(--gold); color: var(--gold-deep); }
+  .ev { font-size: var(--fs-2xs); color: var(--mute); border-left: 3px solid var(--rule-2); padding-left: 8px; margin: 4px 0; word-break: break-all; }
+  .diff { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0; font-size: var(--fs-2xs); }
+  .diff > div { border: 1px solid var(--rule-2); border-radius: 5px; padding: 6px 8px; background: var(--ivory); }
+  .diff b { display: block; color: var(--mute); margin-bottom: 2px; }
+  .revise-box { display: none; margin-top: 6px; }
+  .revise-box.open { display: block; }
+  #audit-list { max-height: 320px; overflow: auto; font-size: var(--fs-2xs); }
+  #audit-list .ev-row { padding: 4px 0; border-bottom: 1px dashed var(--rule-2); display: flex; gap: 8px; flex-wrap: wrap; }
+  #audit-list code { color: var(--indigo); }
+  pre { background: var(--ink); color: var(--on-dark); padding: 10px; border-radius: 6px; overflow: auto; font-size: var(--fs-2xs); max-height: 360px; }
+  .ids { font-size: var(--fs-2xs); color: var(--mute); word-break: break-all; }
+</style>
+</head>
+<body>
+<header>
+  <h1>S1 教师审核工作区(最小管理页)</h1>
+  <label class="hdr-label">API Token
+    <input id="token" type="password" placeholder="未设置可留空" autocomplete="off">
+  </label>
+  <button class="ghost" id="save-token">保存 Token</button>
+</header>
+<main>
+  <div id="status"></div>
+
+  <section>
+    <h2>1. 建课向导(或直接填已有 ID)</h2>
+    <div class="row">
+      <label>课程名 <input id="course-name" value="药事管理学"></label>
+      <label>课程代码 <input id="course-code" value="PHA-MGMT-301"></label>
+      <label>操作者 actorId <input id="actor" value="teacher-01"></label>
+      <button id="mk-course">创建课程</button>
+    </div>
+    <div class="row">
+      <label>courseId <input id="course-id"></label>
+      <label>班级名 <input id="cohort-name" value="2026 级药管 1 班"></label>
+      <label>学期 <input id="cohort-term" value="2026-2027-1"></label>
+      <button id="mk-cohort">创建班级</button>
+    </div>
+    <div class="row">
+      <label>classId <input id="class-id"></label>
+      <label>课时标题 <input id="lesson-title" value="第 5 章 · 集采制度(课前)"></label>
+      <button id="mk-lesson">创建课时</button>
+      <label>lessonId <input id="lesson-id"></label>
+    </div>
+    <div class="row">
+      <button id="mk-workflow">创建 S1 工作流</button>
+      <label>workflowId <input id="workflow-id"></label>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. 流程推进</h2>
+    <div class="row">
+      <label>fixturePath <input id="fixture-path" value="server/product-core/fixtures/pretest-s1.fixture.json" style="min-width:340px"></label>
+    </div>
+    <div class="row">
+      <button class="ghost" id="step-input">① 导入前测</button>
+      <button class="ghost" id="step-facts">② 计算事实</button>
+      <button class="ghost" id="step-claims">③ 生成诊断</button>
+      <button class="ghost" id="step-validate">④ 校验并进入审核</button>
+      <button id="step-all">一键 ①→④</button>
+      <button class="ghost" id="refresh">刷新工作区</button>
+    </div>
+    <div class="ids" id="wf-state"></div>
+  </section>
+
+  <section>
+    <h2>3. 诊断内容审核(事实 / 推断 / 建议)</h2>
+    <div class="row" style="margin-bottom:8px">
+      <label>审核人 reviewerId <input id="reviewer" value="teacher-01"></label>
+    </div>
+    <div class="cols">
+      <div class="col"><h3>观察事实(factual)</h3><div id="col-factual"></div></div>
+      <div class="col"><h3>诊断推断(inference)</h3><div id="col-inference"></div></div>
+      <div class="col"><h3>教学建议(recommendation)</h3><div id="col-recommendation"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. 发布</h2>
+    <div class="row">
+      <button class="warn" id="do-publish">发布新版本</button>
+      <span class="ids" id="publish-result"></span>
+    </div>
+    <pre id="publish-json" hidden></pre>
+  </section>
+
+  <section>
+    <h2>5. 审计时间线</h2>
+    <button class="ghost" id="load-audit">加载审计事件</button>
+    <div id="audit-list"></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var statusEl = $("status");
+  var tokenEl = $("token");
+  tokenEl.value = sessionStorage.getItem("s1ws.token") || "";
+  ["course-id", "class-id", "lesson-id", "workflow-id"].forEach(function (id) {
+    $(id).value = sessionStorage.getItem("s1ws." + id) || "";
+    $(id).addEventListener("change", function () { sessionStorage.setItem("s1ws." + id, $(id).value.trim()); });
+  });
+
+  function say(text, kind) {
+    statusEl.textContent = text;
+    statusEl.className = kind || "";
+  }
+  function showError(error) {
+    var e = error && error.error ? error.error : error;
+    say("错误 " + (e.code || "") + ": " + (e.message || String(error)), "err");
+  }
+
+  function api(method, path, body) {
+    var headers = {};
+    if (body !== undefined) headers["content-type"] = "application/json";
+    var token = tokenEl.value.trim();
+    if (token) headers["authorization"] = "Bearer " + token;
+    return fetch(path, {
+      method: method,
+      headers: headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    }).then(function (res) {
+      return res.json().then(function (json) {
+        if (!res.ok) { var err = new Error(json.error ? json.error.message : res.statusText); err.error = json.error; err.status = res.status; throw err; }
+        return json;
+      });
+    });
+  }
+  function post(path, body) { return api("POST", path, body || {}); }
+  function actorBody() { return { actorId: $("actor").value.trim() || "teacher-01" }; }
+  function wfId() {
+    var id = $("workflow-id").value.trim();
+    if (!id) throw new Error("请先填写或创建 workflowId");
+    return id;
+  }
+  function setId(id, value) {
+    $(id).value = value;
+    sessionStorage.setItem("s1ws." + id, value);
+  }
+  function esc(text) {
+    return String(text == null ? "" : text).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  $("save-token").addEventListener("click", function () {
+    sessionStorage.setItem("s1ws.token", tokenEl.value.trim());
+    say("Token 已保存(仅 sessionStorage)。", "ok");
+  });
+
+  $("mk-course").addEventListener("click", function () {
+    post("/api/product-core/courses", {
+      name: $("course-name").value, code: $("course-code").value, actorId: actorBody().actorId,
+    }).then(function (r) {
+      setId("course-id", r.course.id);
+      say("课程已创建: " + r.course.id, "ok");
+    }).catch(showError);
+  });
+  $("mk-cohort").addEventListener("click", function () {
+    post("/api/product-core/courses/" + encodeURIComponent($("course-id").value.trim()) + "/cohorts", {
+      name: $("cohort-name").value, academicTerm: $("cohort-term").value, actorId: actorBody().actorId,
+    }).then(function (r) {
+      setId("class-id", r.cohort.id);
+      say("班级已创建: " + r.cohort.id, "ok");
+    }).catch(showError);
+  });
+  $("mk-lesson").addEventListener("click", function () {
+    post("/api/product-core/lessons", {
+      courseId: $("course-id").value.trim(), classId: $("class-id").value.trim(),
+      title: $("lesson-title").value, actorId: actorBody().actorId,
+    }).then(function (r) {
+      setId("lesson-id", r.lesson.id);
+      say("课时已创建: " + r.lesson.id, "ok");
+    }).catch(showError);
+  });
+  $("mk-workflow").addEventListener("click", function () {
+    post("/api/product-core/s1/workflows", {
+      courseId: $("course-id").value.trim(), classId: $("class-id").value.trim(),
+      lessonId: $("lesson-id").value.trim(), actorId: actorBody().actorId,
+    }).then(function (r) {
+      setId("workflow-id", r.workflow.id);
+      say("工作流已创建: " + r.workflow.id + "(" + r.workflow.currentState + ")", "ok");
+      refresh();
+    }).catch(showError);
+  });
+
+  function step(path, body, label) {
+    return post("/api/product-core/s1/workflows/" + encodeURIComponent(wfId()) + "/" + path, body)
+      .then(function (r) { say(label + " 完成 → " + (r.workflow ? r.workflow.currentState : ""), "ok"); return r; });
+  }
+  function doInput() { return step("input", Object.assign({ fixturePath: $("fixture-path").value.trim() }, actorBody()), "导入前测"); }
+  function doFacts() { return step("compute-facts", actorBody(), "计算事实"); }
+  function doClaims() { return step("generate-claims", actorBody(), "生成诊断"); }
+  function doValidate() { return step("validate", actorBody(), "校验"); }
+  $("step-input").addEventListener("click", function () { doInput().then(refresh).catch(showError); });
+  $("step-facts").addEventListener("click", function () { doFacts().then(refresh).catch(showError); });
+  $("step-claims").addEventListener("click", function () { doClaims().then(refresh).catch(showError); });
+  $("step-validate").addEventListener("click", function () { doValidate().then(refresh).catch(showError); });
+  $("step-all").addEventListener("click", function () {
+    doInput().then(doFacts).then(doClaims).then(doValidate).then(function () {
+      say("已进入 TEACHER_REVIEW,请逐条裁决。", "ok");
+      refresh();
+    }).catch(showError);
+  });
+  $("refresh").addEventListener("click", function () { refresh(); });
+
+  var DECISION_LABEL = { accept: "已采纳", revise: "修改后采纳", reject: "已驳回", defer: "暂缓" };
+  function tdrFor(view, claimId) {
+    return (view.decisionRecords || []).find(function (r) { return r.claimId === claimId; }) || null;
+  }
+  function renderClaim(container, view, claim) {
+    var tdr = tdrFor(view, claim.id);
+    var card = document.createElement("div");
+    card.className = "card";
+    var evidence = (claim.evidenceLinks || []).map(function (ev) {
+      return '<div class="ev">[' + esc(ev.evidenceType) + "] " + esc(ev.verbatimQuote || ev.sourceId) + "</div>";
+    }).join("");
+    var eff = tdr && tdr.effectiveDecision;
+    var diff = "";
+    if (eff && eff.decision === "revise") {
+      diff = '<div class="diff"><div><b>系统原文</b>' + esc(eff.originalStatement) +
+        "</div><div><b>教师修改</b>" + esc(eff.editedStatement) + "</div></div>";
+    }
+    card.innerHTML =
+      '<p class="stmt">' + esc(claim.statement) + "</p>" +
+      '<div class="meta">' +
+      '<span class="tag ' + esc(claim.validationStatus) + '">机械: ' + esc(claim.validationStatus) + "</span>" +
+      '<span class="tag ' + esc(claim.semanticReviewStatus) + '">语义: ' + esc(claim.semanticReviewStatus) + "</span>" +
+      (eff ? '<span class="tag ' + esc(eff.decision) + '">裁决: ' + esc(DECISION_LABEL[eff.decision] || eff.decision) + "</span>" : '<span class="tag">未裁决</span>') +
+      "</div>" + evidence + diff +
+      (tdr ?
+        '<div class="row">' +
+        '<button data-d="accept">采纳</button>' +
+        '<button data-d="revise" class="ghost">修改后采纳</button>' +
+        '<button data-d="reject" class="warn">驳回</button>' +
+        '<button data-d="defer" class="ghost">暂缓</button>' +
+        "</div>" +
+        '<div class="revise-box"><textarea placeholder="填写修改后的陈述(保留证据边界)"></textarea>' +
+        '<button data-d="confirm-revise">确认修改并采纳</button></div>'
+        : '<div class="ids">TDR 未生成(先执行流程 ①→④)</div>');
+    if (tdr) {
+      var box = card.querySelector(".revise-box");
+      card.querySelectorAll("button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var d = btn.getAttribute("data-d");
+          if (d === "revise") { box.classList.toggle("open"); return; }
+          var body = { decision: d === "confirm-revise" ? "revise" : d, reviewerId: $("reviewer").value.trim() || "teacher-01" };
+          if (d === "confirm-revise") {
+            body.editedStatement = box.querySelector("textarea").value;
+            if (!body.editedStatement.trim()) { say("修改后采纳必须填写修改文本。", "err"); return; }
+          }
+          if (d === "defer") { var c = prompt("暂缓原因(可留空)", ""); if (c === null) return; body.comment = c; }
+          post("/api/product-core/s1/decision-records/" + encodeURIComponent(tdr.id) + "/decisions", body)
+            .then(function () { say("裁决已记录: " + DECISION_LABEL[body.decision], "ok"); refresh(); })
+            .catch(showError);
+        });
+      });
+    }
+    container.appendChild(card);
+  }
+
+  function refresh() {
+    var id;
+    try { id = wfId(); } catch (e) { return; }
+    api("GET", "/api/product-core/s1/workflows/" + encodeURIComponent(id)).then(function (view) {
+      $("wf-state").textContent =
+        "状态: " + view.workflow.currentState + " (v" + view.workflow.stateVersion + ") · 可用动作: " +
+        view.availableActions.join(", ") + " · observations: " + view.observations.length +
+        " · TDR: " + view.decisionRecords.length;
+      [["col-factual", view.claims.factual], ["col-inference", view.claims.inference], ["col-recommendation", view.claims.recommendation]]
+        .forEach(function (pair) {
+          var el = $(pair[0]);
+          el.innerHTML = "";
+          if (!pair[1].length) { el.innerHTML = '<div class="ids">(空)</div>'; return; }
+          pair[1].forEach(function (claim) { renderClaim(el, view, claim); });
+        });
+    }).catch(showError);
+  }
+
+  $("do-publish").addEventListener("click", function () {
+    step("publish", actorBody(), "发布").then(function (r) {
+      var a = r.artifact;
+      $("publish-result").textContent =
+        "新版本 v" + r.versionNumber + " (" + r.lessonVersionId + ") · 事实 " + a.observedFacts.length +
+        " · 诊断 " + a.confirmedDiagnoses.length + " · 行动 " + a.confirmedTeachingActions.length +
+        " · 未解决 " + a.unresolvedQuestions.length;
+      var pre = $("publish-json");
+      pre.hidden = false;
+      pre.textContent = JSON.stringify(a, null, 2);
+      say("已发布 v" + r.versionNumber + "。", "ok");
+      refresh();
+    }).catch(showError);
+  });
+
+  $("load-audit").addEventListener("click", function () {
+    api("GET", "/api/product-core/s1/workflows/" + encodeURIComponent(wfId()) + "/audit").then(function (r) {
+      $("audit-list").innerHTML = r.events.map(function (ev) {
+        return '<div class="ev-row"><code>' + esc(ev.eventType) + "</code><span>" + esc(ev.createdAt) + "</span>" +
+          (ev.previousState || ev.nextState ? "<span>" + esc(ev.previousState || "") + " → " + esc(ev.nextState || "") + "</span>" : "") +
+          "<span>" + esc(ev.actorId || "") + "</span></div>";
+      }).join("");
+      say("审计事件 " + r.events.length + " 条。", "ok");
+    }).catch(showError);
+  });
+
+  if ($("workflow-id").value.trim()) refresh();
+})();
+</script>
+</body>
+</html>

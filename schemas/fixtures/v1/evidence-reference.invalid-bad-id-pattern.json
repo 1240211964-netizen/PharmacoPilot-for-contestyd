@@ -1,0 +1,25 @@
+{
+  "evidenceId": "BAD-ID!!",
+  "schemaVersion": "1.0.0",
+  "evidenceType": "knowledge_block",
+  "sourceId": "ka_pharmtext9e01",
+  "sourceVersionId": "kav_2025print01a",
+  "contentBlockId": "blk_ch12p301par2",
+  "runtimeObservationId": null,
+  "pageIndex": 300,
+  "pageLabel": "p. 301",
+  "bbox": {
+    "x": 72,
+    "y": 540,
+    "width": 468,
+    "height": 120
+  },
+  "bboxCoordinateSystem": "pdf-points-bottom-left",
+  "verbatimQuote": "袢利尿剂通过抑制髓袢升支粗段 Na+-K+-2Cl- 同向转运体发挥利尿作用。",
+  "normalizedQuote": "袢利尿剂抑制髓袢升支粗段Na-K-2Cl同向转运体",
+  "sourceStatus": "active",
+  "effectiveDate": "2025-09-01T00:00:00Z",
+  "supersededBy": null,
+  "contentHash": "sha256:3a7bd3e2360a5c9b8f1d2e4a6b8c0d2e4f6a8b0c2d4e6f8a0b1c3d5e7f9a1b3c",
+  "retrievedAt": "2026-08-03T09:35:00Z"
+}

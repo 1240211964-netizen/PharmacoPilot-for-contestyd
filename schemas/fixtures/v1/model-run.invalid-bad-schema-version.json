@@ -1,0 +1,34 @@
+{
+  "modelRunId": "mrn_1b3d5f7a9c1e2f",
+  "schemaVersion": "2.0.0",
+  "workflowId": "wf_s1analysis0001",
+  "agentId": "agt_s1-diagnostician",
+  "provider": "mock",
+  "model": "mock-llm-2026.08",
+  "thinkingMode": "on",
+  "reasoningEffort": "medium",
+  "promptVersion": "s1-diag-v3",
+  "inputRecordIds": [
+    "obs_8f3k2m9xq1ab"
+  ],
+  "evidenceIds": [
+    "ev_kb9f2m4x8q1zab"
+  ],
+  "inputHash": "sha256:9b8f7d6c5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d",
+  "outputHash": "sha256:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+  "rawOutputLocation": ".pharmaco-data/model-runs/mrn_1b3d5f7a9c1e2f.raw.txt",
+  "structuredOutput": {
+    "diagnosis": "多数学生将袢利尿剂作用部位误记为远曲小管",
+    "recommendedAction": "S2 插入作用部位示意图讲解"
+  },
+  "latencyMs": 845,
+  "tokenUsage": {
+    "promptTokens": 1230,
+    "completionTokens": 210,
+    "totalTokens": 1440
+  },
+  "validationStatus": "PASSED",
+  "fallbackUsed": false,
+  "startedAt": "2026-08-03T09:42:10Z",
+  "completedAt": "2026-08-03T09:42:11Z"
+}

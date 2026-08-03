@@ -1,0 +1,29 @@
+{
+  "decisionRecordId": "tdr_9f2m4x8q1zab3c",
+  "schemaVersion": "1.0.0",
+  "courseId": "crs_pharm101a2026",
+  "classId": "coh_2026fall01a",
+  "lessonId": "les_diuretics01a",
+  "stageId": "S1",
+  "observationClaimIds": [
+    "clm_3f8k2m9xq1ab2c"
+  ],
+  "inferenceClaimIds": [
+    "clm_7d1e5f9a2b4c6d"
+  ],
+  "recommendationClaimIds": [
+    "clm_2a4b6c8d0e1f3a"
+  ],
+  "evidenceIds": [
+    "ev_kb9f2m4x8q1zab"
+  ],
+  "mechanicalValidationStatus": "PASSED",
+  "semanticReviewStatus": "not_reviewed",
+  "teacherDecisionId": null,
+  "workflowInstanceId": "wf_s1analysis0803",
+  "sourceLessonVersionId": "kav_lesdiur2026v1",
+  "targetLessonVersionId": null,
+  "status": "OPEN",
+  "createdAt": "2026-08-03T09:45:00Z",
+  "publishedAt": null
+}

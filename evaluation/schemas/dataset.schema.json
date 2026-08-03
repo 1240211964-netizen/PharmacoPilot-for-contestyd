@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pharmacopilot.local/evaluation/schemas/dataset.schema.json",
+  "title": "PharmacoPilot 金标准评测数据集",
+  "description": "evaluation/datasets/ 下数据集文件的结构。金标准锚定五元组:documentId + sourceVersion + pageIndex/pageLabel + verbatimQuote + quoteHash;不锚 contentBlockId。quoteHash = 对 verbatimQuote 原文(UTF-8,逐字、不做归一化)计算的 sha256,前缀 sha256:。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["datasetId", "schemaVersion", "kind", "split", "createdAt", "cases"],
+  "properties": {
+    "datasetId": {
+      "type": "string",
+      "pattern": "^(retrieval|refusal)-(dev|holdout)\\.v[0-9]+$",
+      "description": "与文件名一致,如 retrieval-dev.v1"
+    },
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "kind": { "type": "string", "enum": ["retrieval", "refusal"] },
+    "split": { "type": "string", "enum": ["dev", "holdout"] },
+    "createdAt": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseId", "schemaVersion", "question", "answerable", "goldSources", "forbiddenClaims", "tags"],
+        "properties": {
+          "caseId": {
+            "type": "string",
+            "pattern": "^(retrieval|refusal)(-holdout)?-[0-9]{3}$"
+          },
+          "schemaVersion": { "type": "string", "const": "1.0.0" },
+          "question": { "type": "string", "minLength": 1 },
+          "answerable": {
+            "type": "boolean",
+            "description": "false 表示期望系统拒答(进 refusal 集);false 时 goldSources 必须为空数组"
+          },
+          "goldSources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["documentId", "sourceVersion", "pageIndex", "pageLabel", "verbatimQuote", "quoteHash"],
+              "properties": {
+                "documentId": {
+                  "type": "string",
+                  "pattern": "^doc_[0-9]{3}$",
+                  "description": "对应 knowledge_assets.id = ka_<documentId>"
+                },
+                "sourceVersion": {
+                  "type": "string",
+                  "pattern": "^v[0-9]+$",
+                  "description": "对应 asset_versions.version;允许指向 superseded 版本"
+                },
+                "pageIndex": { "type": "integer", "minimum": 0 },
+                "pageLabel": { "type": "string", "minLength": 1 },
+                "verbatimQuote": {
+                  "type": "string",
+                  "minLength": 4,
+                  "description": "必须在对应 fixture 文档正文中逐字存在"
+                },
+                "quoteHash": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$",
+                  "description": "对 verbatimQuote 原文(UTF-8)的 sha256"
+                }
+              }
+            }
+          },
+          "forbiddenClaims": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "description": "系统回答中不得出现的断言(如已失效版本的旧表述、编造的数值)"
+          },
+          "tags": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,263 @@
+{
+  "reportType": "gold-resolution",
+  "dataset": "retrieval-dev.v1",
+  "generatedAt": "2026-08-03T10:53:42.252Z",
+  "corpus": {
+    "assets": 11,
+    "versions": 13,
+    "blocks": 72
+  },
+  "totals": {
+    "cases": 18,
+    "refusalCases": 0,
+    "goldSources": 19,
+    "resolved": 19,
+    "multiMatch": 0,
+    "unmatched": 0,
+    "pageDrift": 0,
+    "quoteDrift": 0,
+    "needsManualReview": 0,
+    "resolutionRate": 1
+  },
+  "resolved": [
+    {
+      "caseId": "retrieval-001",
+      "documentId": "doc_001",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:255b071484983f264dafc372e6fbe4001381653f7cc166c3cb02d3429263e636",
+      "contentBlockId": "blk_doc_001_v1_008",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-002",
+      "documentId": "doc_001",
+      "sourceVersion": "v1",
+      "pageIndex": 0,
+      "pageLabel": "1",
+      "quoteHash": "sha256:b56cb3944afda4436660ab3f57ff791b659e44d3daa39235b207392374bb3e07",
+      "contentBlockId": "blk_doc_001_v1_004",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-003",
+      "documentId": "doc_002",
+      "sourceVersion": "v1",
+      "pageIndex": 0,
+      "pageLabel": "12",
+      "quoteHash": "sha256:746f0f36881d3e799a256718742a5b84d1cd919d6d77bfa03d174380115d7b87",
+      "contentBlockId": "blk_doc_002_v1_001",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-004",
+      "documentId": "doc_003",
+      "sourceVersion": "v1",
+      "pageIndex": 0,
+      "pageLabel": "45",
+      "quoteHash": "sha256:01cb4f62e5d0a0f6492b2801aed9a1a41ad2755a41d2910b06ecaeb073cbc48f",
+      "contentBlockId": "blk_doc_003_v1_001",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-005",
+      "documentId": "doc_011",
+      "sourceVersion": "v1",
+      "pageIndex": 0,
+      "pageLabel": "88",
+      "quoteHash": "sha256:3e7cfacd9d6e738f7840a17515b01339bf0fc4c58aab43ee3348b6639161d896",
+      "contentBlockId": "blk_doc_011_v1_001",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-006",
+      "documentId": "doc_011",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "89",
+      "quoteHash": "sha256:69e88bcd1b1eb930e238ac96eac1158fb8e3a0ab0acb64b6735b0f8a0eb546ff",
+      "contentBlockId": "blk_doc_011_v1_002",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-007",
+      "documentId": "doc_006",
+      "sourceVersion": "v1",
+      "pageIndex": 0,
+      "pageLabel": "1",
+      "quoteHash": "sha256:d439b8030dde704f469b918802c10178c99fa637df05102eb1b14d5eeb0eb574",
+      "contentBlockId": "blk_doc_006_v1_001",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-008",
+      "documentId": "doc_007",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:a2520be0eb3fe715a19fbf2e55dd6d35b4d98ca21d941c3920f05a5a1817e6f6",
+      "contentBlockId": "blk_doc_007_v1_002",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-009",
+      "documentId": "doc_008",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:f1fc444764bb882b17756a2b132e636c9e302be8548150b497830b4ac557084a",
+      "contentBlockId": "blk_doc_008_v1_002",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-010",
+      "documentId": "doc_002",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "13",
+      "quoteHash": "sha256:c3b4e981fdcb307ff03a5f2c572792b055bc995fc7619c0445c4fc9188f57644",
+      "contentBlockId": "blk_doc_002_v1_003",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-011",
+      "documentId": "doc_009",
+      "sourceVersion": "v2",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:3a263ecdc1ec044de36750e18ec014438e844fd8b651085f81ba499c2e426c19",
+      "contentBlockId": "blk_doc_009_v2_005",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-011",
+      "documentId": "doc_001",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:255b071484983f264dafc372e6fbe4001381653f7cc166c3cb02d3429263e636",
+      "contentBlockId": "blk_doc_001_v1_008",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-012",
+      "documentId": "doc_004",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:3561d83ea20982de08c9ae26b60c9d3953754a860f73fd25f22d4988608a28cc",
+      "contentBlockId": "blk_doc_004_v1_003",
+      "blockType": "table",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-013",
+      "documentId": "doc_010",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:8f44c25b26114c84cca7a0c2bb83c2b132a0771af8708d05d75832b3a16126f6",
+      "contentBlockId": "blk_doc_010_v1_003",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": [
+        {
+          "type": "superseded-source",
+          "sourceStatus": "superseded",
+          "supersededBy": "kav_doc_010_v2"
+        }
+      ]
+    },
+    {
+      "caseId": "retrieval-014",
+      "documentId": "doc_010",
+      "sourceVersion": "v2",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:bece5386f3386509feff5974407009d205020e1f480d921437fedc94b2ab34b8",
+      "contentBlockId": "blk_doc_010_v2_003",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-015",
+      "documentId": "doc_009",
+      "sourceVersion": "v2",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:3a263ecdc1ec044de36750e18ec014438e844fd8b651085f81ba499c2e426c19",
+      "contentBlockId": "blk_doc_009_v2_005",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-016",
+      "documentId": "doc_005",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:d7eeb957a75cea698c494bf9552aed3743eac17a78bc76a941f6710d64f8793d",
+      "contentBlockId": "blk_doc_005_v1_004",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-017",
+      "documentId": "doc_004",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:14062ce67b7bc2f2ce96cd9aa3ede120b8ae69b0fbb4b6f1cc9c0e7ab8ddc329",
+      "contentBlockId": "blk_doc_004_v1_004",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-018",
+      "documentId": "doc_011",
+      "sourceVersion": "v1",
+      "pageIndex": 2,
+      "pageLabel": "90",
+      "quoteHash": "sha256:51e5ed066920a6d8442e2c11960f6c7fb0b87ce664f470f74f1941929001e2b4",
+      "contentBlockId": "blk_doc_011_v1_003",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    }
+  ],
+  "multiMatch": [],
+  "unmatched": [],
+  "pageDrift": [],
+  "quoteDrift": [],
+  "needsManualReview": []
+}

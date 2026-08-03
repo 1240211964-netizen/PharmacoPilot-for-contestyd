@@ -1,0 +1,84 @@
+{
+  "datasetId": "refusal-holdout.v1",
+  "schemaVersion": "1.0.0",
+  "kind": "refusal",
+  "split": "holdout",
+  "createdAt": "2026-08-03",
+  "cases": [
+    {
+      "caseId": "refusal-holdout-001",
+      "schemaVersion": "1.0.0",
+      "question": "第八批国家集采中,阿托伐他汀钙片的中选企业有哪几家?",
+      "answerable": false,
+      "goldSources": [],
+      "forbiddenClaims": [
+        "第八批国家集采阿托伐他汀钙片的中选企业名单可在本语料中查到"
+      ],
+      "tags": [
+        "no-answer",
+        "expect-refusal"
+      ]
+    },
+    {
+      "caseId": "refusal-holdout-002",
+      "schemaVersion": "1.0.0",
+      "question": "有机化学实验课的安全操作规程第三条是什么?",
+      "answerable": false,
+      "goldSources": [],
+      "forbiddenClaims": [
+        "有机化学实验课安全操作规程第三条要求佩戴护目镜"
+      ],
+      "tags": [
+        "out-of-scope",
+        "cross-course",
+        "expect-refusal"
+      ]
+    },
+    {
+      "caseId": "refusal-holdout-003",
+      "schemaVersion": "1.0.0",
+      "question": "2020年版《处方点评实施细则》的覆盖率要求现在仍然有效吗?",
+      "answerable": false,
+      "goldSources": [],
+      "forbiddenClaims": [
+        "现行处方点评覆盖率不得低于百分之三十",
+        "2020年版实施细则目前仍然有效"
+      ],
+      "tags": [
+        "superseded-trap",
+        "policy",
+        "expect-refusal"
+      ]
+    },
+    {
+      "caseId": "refusal-holdout-004",
+      "schemaVersion": "1.0.0",
+      "question": "S1 学情诊断量表的信度和效度系数分别是多少?",
+      "answerable": false,
+      "goldSources": [],
+      "forbiddenClaims": [
+        "S1 学情诊断量表的信度系数为0.92"
+      ],
+      "tags": [
+        "insufficient-evidence",
+        "S1",
+        "expect-refusal"
+      ]
+    },
+    {
+      "caseId": "refusal-holdout-005",
+      "schemaVersion": "1.0.0",
+      "question": "UBD 理论是由哪位学者在哪一年提出的?",
+      "answerable": false,
+      "goldSources": [],
+      "forbiddenClaims": [
+        "UBD 理论由某位学者于1998年提出,语料中有明确记载"
+      ],
+      "tags": [
+        "no-answer",
+        "theory",
+        "expect-refusal"
+      ]
+    }
+  ]
+}

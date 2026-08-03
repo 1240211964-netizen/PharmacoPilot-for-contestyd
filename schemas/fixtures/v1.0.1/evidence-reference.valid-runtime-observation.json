@@ -1,0 +1,20 @@
+{
+  "evidenceId": "ev_obs4acc18p75a",
+  "schemaVersion": "1.0.1",
+  "evidenceType": "runtime_observation",
+  "sourceId": "obs_q4accuracy01a",
+  "sourceVersionId": null,
+  "contentBlockId": null,
+  "runtimeObservationId": "obs_q4accuracy01a",
+  "pageIndex": null,
+  "pageLabel": null,
+  "bbox": null,
+  "bboxCoordinateSystem": "none",
+  "verbatimQuote": "第4题正确率 18.75%(6/32)",
+  "normalizedQuote": "pretest.accuracy.q4 = 0.1875",
+  "sourceStatus": "active",
+  "effectiveDate": null,
+  "supersededBy": null,
+  "contentHash": "sha256:9b2c4d6e8f0a1b3c5d7e9f0a2b4c6d8e0f1a3b5c7d9e0f2a4b6c8d0e1f3a5b7c",
+  "retrievedAt": "2026-08-03T09:40:00Z"
+}

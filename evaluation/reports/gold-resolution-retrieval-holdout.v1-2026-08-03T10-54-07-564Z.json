@@ -1,0 +1,167 @@
+{
+  "reportType": "gold-resolution",
+  "dataset": "retrieval-holdout.v1",
+  "generatedAt": "2026-08-03T10:54:07.564Z",
+  "corpus": {
+    "assets": 11,
+    "versions": 13,
+    "blocks": 72
+  },
+  "totals": {
+    "cases": 10,
+    "refusalCases": 0,
+    "goldSources": 11,
+    "resolved": 11,
+    "multiMatch": 0,
+    "unmatched": 0,
+    "pageDrift": 0,
+    "quoteDrift": 0,
+    "needsManualReview": 0,
+    "resolutionRate": 1
+  },
+  "resolved": [
+    {
+      "caseId": "retrieval-holdout-001",
+      "documentId": "doc_001",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:7e7d83a58c4c1ed58f459662a7d434edd957fa8a864c5ad8f1594aae3151018c",
+      "contentBlockId": "blk_doc_001_v1_006",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-holdout-002",
+      "documentId": "doc_001",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:0ec1795531b5a0bbd2dd43e72a8bb3bbfe48fba58f74d78ff1e6bf994cbffbc6",
+      "contentBlockId": "blk_doc_001_v1_007",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-holdout-003",
+      "documentId": "doc_002",
+      "sourceVersion": "v1",
+      "pageIndex": 2,
+      "pageLabel": "14",
+      "quoteHash": "sha256:64f0eefc488e34597ea2d8886ccb2eda1013791df1de0418dbac87e28e3bedac",
+      "contentBlockId": "blk_doc_002_v1_005",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-holdout-004",
+      "documentId": "doc_003",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "46",
+      "quoteHash": "sha256:bf571de35636700f5d33e5a4872f6d33844fea3e50ca9e1d5cd47ac55e0b14b3",
+      "contentBlockId": "blk_doc_003_v1_002",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-holdout-005",
+      "documentId": "doc_004",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:7fe5eacaefcead454d41ff96e22e192cd5aca66c671dbe68b7413cb854662cd0",
+      "contentBlockId": "blk_doc_004_v1_003",
+      "blockType": "table",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-holdout-006",
+      "documentId": "doc_009",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:825572c5b0ad601c089389fcc491e3f8ef84bca3f324ca7e7b8604d8f23ded6b",
+      "contentBlockId": "blk_doc_009_v1_004",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": [
+        {
+          "type": "superseded-source",
+          "sourceStatus": "superseded",
+          "supersededBy": "kav_doc_009_v2"
+        }
+      ]
+    },
+    {
+      "caseId": "retrieval-holdout-007",
+      "documentId": "doc_006",
+      "sourceVersion": "v1",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:b960d8a45ade50d47cd58925ee1295c952eb65a297158fea87072498e503b670",
+      "contentBlockId": "blk_doc_006_v1_002",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-holdout-008",
+      "documentId": "doc_007",
+      "sourceVersion": "v1",
+      "pageIndex": 0,
+      "pageLabel": "1",
+      "quoteHash": "sha256:a2ac9efcb5e82e50835d12211ac5ea56a14d9f41a9ea3383bacbbde8851819d8",
+      "contentBlockId": "blk_doc_007_v1_001",
+      "blockType": "paragraph",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-holdout-009",
+      "documentId": "doc_009",
+      "sourceVersion": "v2",
+      "pageIndex": 0,
+      "pageLabel": "1",
+      "quoteHash": "sha256:67c308f59a9bf0095ecf6be518b2c8a7ee891307dc2f7c2795674a25a0b9d01f",
+      "contentBlockId": "blk_doc_009_v2_003",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-holdout-009",
+      "documentId": "doc_009",
+      "sourceVersion": "v2",
+      "pageIndex": 1,
+      "pageLabel": "2",
+      "quoteHash": "sha256:56ba32f90eb15afe0246558a4b4d5c62881d277648e4f9a40267675aa822f3f2",
+      "contentBlockId": "blk_doc_009_v2_004",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    },
+    {
+      "caseId": "retrieval-holdout-010",
+      "documentId": "doc_001",
+      "sourceVersion": "v1",
+      "pageIndex": 3,
+      "pageLabel": "4",
+      "quoteHash": "sha256:476b64d1aa47ac57077d425ee738ca3e03a74519e1a30d9c6ffb321a128caedf",
+      "contentBlockId": "blk_doc_001_v1_013",
+      "blockType": "policy_article",
+      "quoteHashMatch": true,
+      "warnings": []
+    }
+  ],
+  "multiMatch": [],
+  "unmatched": [],
+  "pageDrift": [],
+  "quoteDrift": [],
+  "needsManualReview": []
+}

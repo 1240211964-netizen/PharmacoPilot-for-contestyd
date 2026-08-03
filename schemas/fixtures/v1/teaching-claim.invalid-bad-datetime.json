@@ -1,0 +1,22 @@
+{
+  "claimId": "clm_3f8k2m9xq1ab2c",
+  "schemaVersion": "1.0.0",
+  "claimType": "factual_claim",
+  "statement": "课前测第4题(袢利尿剂作用部位)全班正确率仅18.75%(6/32)。",
+  "stageId": "S1",
+  "targetStageId": "S2",
+  "scope": {
+    "courseId": "crs_pharm101a2026",
+    "classId": "coh_2026fall01a",
+    "lessonId": "les_diuretics01a"
+  },
+  "evidenceIds": [
+    "ev_kb9f2m4x8q1zab"
+  ],
+  "confidenceStatus": "confirmed",
+  "validationStatus": "PASSED",
+  "createdBy": "rule",
+  "createdFromModelRunId": null,
+  "supersedesClaimId": null,
+  "createdAt": "not-a-datetime"
+}

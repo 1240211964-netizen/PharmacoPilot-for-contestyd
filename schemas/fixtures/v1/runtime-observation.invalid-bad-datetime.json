@@ -1,0 +1,23 @@
+{
+  "observationId": "obs_8f3k2m9xq1ab",
+  "schemaVersion": "1.0.0",
+  "observationType": "pretest_score",
+  "courseId": "crs_pharm101a2026",
+  "classId": "coh_2026fall01a",
+  "lessonId": "les_diuretics01a",
+  "stageId": "S1",
+  "metric": "pretest_item_accuracy",
+  "value": 0.1875,
+  "unit": "ratio",
+  "numerator": 6,
+  "denominator": 32,
+  "calculationRule": "correct_count / response_count for pretest item Q4",
+  "sourceRecordIds": [
+    "ans_0001",
+    "ans_0002",
+    "ans_0003"
+  ],
+  "aggregationLevel": "course",
+  "calculatedAt": "not-a-datetime",
+  "calculationVersion": "calc-2026.08"
+}
