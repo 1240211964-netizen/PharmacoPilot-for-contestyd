@@ -1,0 +1,647 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetId": "organization-design-evaluation-set",
+  "courseId": "course_mgmt_principles",
+  "chapterId": "ch_organization_design",
+  "generatedAt": "2026-08-03T16:48:08Z",
+  "notes": "《管理学原理》知识库 v0.1 组织设计章 30 条验收问题。锚定纪律沿用 docs/product-core/evaluation-dataset-design.md:五元组 documentId+version+page/小节+verbatimQuote+quoteHash,不锚 contentBlockId,未匹配即失败不移出分母。status 三态(2026-08-03 权限模型校正,定义见 statusDefinitions):ready_for_reference_retrieval / ready_for_ai_pipeline / pending_source,当前分布 24 / 0 / 6。expectedSourceIds 引用 organization-design-source-manifest.json 的 source_id。",
+  "statusDefinitions": {
+    "ready_for_reference_retrieval": "现有两份 OpenStax 足以支撑非模型参考检索(关键词/中文分词 FTS5/BM25/元数据精确过滤/锚点定位)实测;仅代表参考检索可用,不代表可用于 AI 管线",
+    "ready_for_ai_pipeline": "全部预期来源均已明确授权 AI 处理(embedding/LLM)的题目方可标记;当前数据集无任何题目达到此状态——OpenStax 为 prohibited_without_explicit_permission,其余来源权利范围待确认",
+    "pending_source": "依赖尚未到位或权利范围未确认的来源,到位前挂起,不计入实测分母"
+  },
+  "cases": [
+    {
+      "caseId": "od-eval-01",
+      "schemaVersion": "1.0.0",
+      "question": "什么是组织结构(organizational structure)?请给出定义并注明来源。",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["组织结构"],
+      "acceptableAnswerPoints": [
+        "组织结构是一个用于完成并连接工作组织内各项活动的系统",
+        "人们依靠结构知道:自己应做什么工作、自己的工作如何支持或依赖其他员工、这些工作活动如何实现组织目的",
+        "该定义出自 OpenStax《Principles of Management》第 10 章 10.1 节",
+        "应与组织设计区分:结构是系统本身,设计是建立结构的过程"
+      ],
+      "forbiddenOverreach": [
+        "不得虚构印刷页码(web 来源无页码,只能给章节小节位置)",
+        "不得把'组织设计'的定义当作'组织结构'的定义"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "来源已落盘。入库时在 ch10 文件 '## 10.1 Organizational Structures and Design' 开篇定义段('First, an organizational structure is...')提取逐字段落为 verbatimQuote,归一化后计算 quoteHash,以 documentId+asset_version+章节小节标识+verbatimQuote+quoteHash 五元组固化;不锚 contentBlockId;新增 asset_version 或解析器升级后按 evaluation-dataset-design.md §3 重跑 re-resolution,未匹配即失败且不移出分母。"
+    },
+    {
+      "caseId": "od-eval-02",
+      "schemaVersion": "1.0.0",
+      "question": "什么是组织设计(organizational design)?它与组织结构有什么区别?",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["组织结构"],
+      "acceptableAnswerPoints": [
+        "组织设计是建立组织结构以满足组织需要、并考量实现业务目标所涉复杂性的过程",
+        "组织结构是完成并连接组织内活动的系统(结果/形态),组织设计是建立该系统的过程",
+        "定义出自 ch10 10.1 节开篇定义段"
+      ],
+      "forbiddenOverreach": [
+        "不得声称来源给出了组织设计的具体步骤流程(10.1 未提供步骤清单)",
+        "不得虚构页码"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '## 10.1' 开篇 'Second, organizational design is...' 段提取逐字段落锚定五元组;纪律同 od-eval-01(re-resolution 未匹配即失败)。"
+    },
+    {
+      "caseId": "od-eval-03",
+      "schemaVersion": "1.0.0",
+      "question": "韦伯(Weber)的官僚制模型提出哪五个要素作为确定组织结构的基础?",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["组织结构", "管理幅度与管理层次", "集权与分权"],
+      "acceptableAnswerPoints": [
+        "五要素出自韦伯官僚制模型:专业化 specialization、指挥与控制 command-and-control、管理幅度 span of control、集权 centralization、正式化 formalization",
+        "专业化:按专长把人组织进子单元的程度",
+        "指挥与控制:组织内人们相互汇报与协调以完成工作的方式",
+        "管理幅度与集权:个人需问责的工作范围;资源集中于少数地点/少数人掌握资源使用决策权的程度",
+        "正式化:组织内角色被明确界定的程度"
+      ],
+      "forbiddenOverreach": [
+        "不得把部门化(departmentalization)列入韦伯五要素(它是 Table 10.1 的连续体维度,非韦伯五要素)",
+        "不得将五要素归于其他学者"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '#### Bureaucracy' 段('He proposed five elements...')锚定五元组;各要素定义可分别在 #### Specialization / #### Command-and-Control / #### Span of Control / #### Centralization / #### Formalization 小节追加锚点;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-04",
+      "schemaVersion": "1.0.0",
+      "question": "管理幅度(span of control)在来源中是如何定义的?",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["管理幅度与管理层次"],
+      "acceptableAnswerPoints": [
+        "管理幅度指组织中任何一个人需要问责(accountable)的工作范围",
+        "高层领导者通常对下属的全部工作负责,中层领导者职责范围较窄,基层员工通常执行非常具体的任务",
+        "层级中的每位管理者都处于上一层管理者的管理幅度之内",
+        "定义出自 ch10 10.1 'Span of Control' 小节"
+      ],
+      "forbiddenOverreach": [
+        "不得给出具体人数数值(来源未提供任何幅度数值建议)",
+        "不得将管理幅度与管理层次混为同一概念"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '#### Span of Control' 段提取逐字段落锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-05",
+      "schemaVersion": "1.0.0",
+      "question": "集权(centralization)在来源中如何定义?与它相对的组织形态是什么?",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["集权与分权"],
+      "acceptableAnswerPoints": [
+        "高度集权的组织把资源集中于一个或极少数地点,或只有少数人被授权决定资源的使用",
+        "相对形态是分散式(diffuse)组织:资源以及对资源使用的决策权更广泛地分布于组织系统",
+        "集权处理的是组织内资源流与信息流如何管理的问题",
+        "集权是韦伯官僚制五要素之一"
+      ],
+      "forbiddenOverreach": [
+        "不得把集权等同于'控制'(command-and-control 是另一个独立要素)",
+        "不得断言集权必然低效或分权必然高效"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '#### Centralization' 段提取逐字段落锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-06",
+      "schemaVersion": "1.0.0",
+      "question": "机械式组织结构(mechanistic structure)有哪些典型特征?",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["机械式与有机式组织"],
+      "acceptableAnswerPoints": [
+        "强科层组织形式,旨在产生高度标准化与控制(ch10)",
+        "呈垂直/高耸结构,管理层级多,依靠惯例与标准作业程序规定角色(ch10)",
+        "Table 10.1 维度:标准化高、专业化高/窄、集权、职能式部门化",
+        "4.3 补充:命令链高度集权并使用正式职权、窄管理幅度、刚性部门化,适合稳定、简单、低不确定的环境"
+      ],
+      "forbiddenOverreach": [
+        "不得断言机械式结构'已经过时'或'应被淘汰'(4.3 明确其在简单稳定环境仍适用)",
+        "不得虚构页码"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '### Mechanistic and Organic Structures' 节 mechanistic 段与 Table 10.1 表格行、ch04_s4_3 '## 4.3' 首段('Mechanistic organizational structures...')分别锚定五元组;两来源各至少一条锚点;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-07",
+      "schemaVersion": "1.0.0",
+      "question": "有机式组织结构(organic structure)有哪些典型特征?",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["机械式与有机式组织"],
+      "acceptableAnswerPoints": [
+        "依靠人们自组织、无需太多指令即可决策,从而能快速适应变化的环境(ch10)",
+        "常见水平/扁平结构,管理层级少,整个系统内许多人被授权做组织决策(ch10)",
+        "Table 10.1 维度:标准化低、专业化低/宽、分权、事业部式部门化",
+        "4.3 补充:参与式沟通与决策多向流动、规则更少、任务更通用且共享、更宽的管理幅度,适合不稳定、复杂、变化的环境"
+      ],
+      "forbiddenOverreach": [
+        "不得断言有机式等于'无结构/无管理'",
+        "不得断言有机式在所有方面优于机械式"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '### Mechanistic and Organic Structures' 节 organic 段与 Table 10.1、ch04_s4_3 '## 4.3' 第二段('Organic organizational structures...')分别锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-08",
+      "schemaVersion": "1.0.0",
+      "question": "正式组织与非正式组织分别指什么?二者与组织实际运转的关系是什么?",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["组织结构", "权责关系"],
+      "acceptableAnswerPoints": [
+        "正式组织:官方界定的一套关系、职责与联系,传统组织图是其最常见的表示方式",
+        "非正式组织:塑造人们实际联结方式的人际关系'隐形网络',是自然涌现(emergent)的",
+        "正式组织说明组织应如何运转,非正式组织说明组织实际如何运转",
+        "非正式组织既可助益也可阻碍组织的整体成功"
+      ],
+      "forbiddenOverreach": [
+        "不得断言非正式组织应当被消除或必然有害"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '## 10.1' 中 'The formal organization is...' 与 'The informal organization is...' 两段分别锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-09",
+      "schemaVersion": "1.0.0",
+      "question": "部门化(departmentalization)在机械式—有机式连续体两端的形态分别是什么?",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["部门化", "机械式与有机式组织"],
+      "acceptableAnswerPoints": [
+        "Table 10.1 将 departmentalization 列为结构连续体维度:机械式端为职能式(functional),有机式端为事业部式(divisional)",
+        "4.3:机械式结构实行刚性部门化——按部门专长把组织划分为执行专门化任务的部门",
+        "事业部式组合可按产品、市场、地域等业务需要划分(4.3)",
+        "部门化与标准化、专业化、集权化并列为连续体维度"
+      ],
+      "forbiddenOverreach": [
+        "不得虚构 Table 10.1 中不存在的维度或来源",
+        "不得虚构页码"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 Table 10.1 表格(departmentalization 行)与 ch04_s4_3 首段('rigid departmentalization' 句)分别锚定五元组;表格锚点以整行逐字文本为单位;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-10",
+      "schemaVersion": "1.0.0",
+      "question": "命令链(chain of command)与指挥与控制(command-and-control)分别指什么?各自出自哪份来源?",
+      "type": "concept_location",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["权责关系", "集权与分权"],
+      "acceptableAnswerPoints": [
+        "command-and-control:组织内人们相互汇报或联结协调以完成工作的方式,是韦伯五要素之一(ch10)",
+        "chain of command:4.3 用于描述机械式结构——命令链高度集权、使用正式职权",
+        "ch10 全文未出现 'chain of command' 表述,该词定位在 4.3(如实区分两来源)",
+        "命令链/指挥控制与集权是不同要素:前者讲汇报监督关系,后者讲资源与决策权配置"
+      ],
+      "forbiddenOverreach": [
+        "不得声称 chain of command 的定义出自 ch10(该章未使用该术语)",
+        "不得把命令链与集权混为一谈"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '#### Command-and-Control' 段与 ch04_s4_3 首段('The chain of command is highly centralized...' 句)分别锚定五元组;ch10 锚点仅覆盖 command-and-control,chain of command 锚点只挂 ch04_s4_3;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-11",
+      "schemaVersion": "1.0.0",
+      "question": "管理幅度与管理层次之间存在什么关系?请依据来源说明。(任务书示例题)",
+      "type": "comparison",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["管理幅度与管理层次"],
+      "acceptableAnswerPoints": [
+        "加大某管理者的管理幅度倾向于使层级扁平化(flatten the hierarchy)",
+        "收窄管理幅度倾向于强化/增高层级(reinforce the hierarchy)",
+        "机械式结构:管理层级多+窄管理幅度,便于加强监督;有机式结构:层级少+宽管理幅度,迫使管理者更多依赖下属决策",
+        "该关系是设计权衡而非固定定律,管理者精力有限是根本约束"
+      ],
+      "forbiddenOverreach": [
+        "不得给出'最佳管理幅度为 N 人'之类的具体数值(来源未提供)",
+        "不得断言幅度是层次的唯一决定因素(来源只给倾向性表述)"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '### Mechanistic and Organic Structures' 节 'The span of control assigned to any specific manager...' 段('increasing span of control...tends to flatten...' 句)锚定五元组;辅以 mechanistic(tall/many levels)与 organic(flat/few levels)两段的锚点;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-12",
+      "schemaVersion": "1.0.0",
+      "question": "职能制结构与事业部制结构各适用于什么条件?各有什么优劣?(任务书示例题)",
+      "type": "comparison",
+      "expectedSourceIds": ["src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["部门化", "组织设计的情境因素"],
+      "acceptableAnswerPoints": [
+        "职能制:按职能/专业领域部门化;适用于小公司、初创企业、简单稳定环境,也被大型政府组织与大公司内特定任务采用",
+        "职能制优势:高度专业化、部门内汇报简单直接、规模经济、组织成长时较易扩展;劣势:部门筒仓化、跨部门决策与协调慢、争夺权力与资源",
+        "事业部制:多个职能组归入事业部负责人之下,可按产品/市场/地域等组合;适合产品或服务面向特定细分市场、业务多元的大型企业",
+        "事业部制优势:聚焦业务板块、责任与问责清晰、客户响应更快、决策分权使总部不必微观管理;劣势:事业部彼此割裂封闭、各职能系统(技术/会计/广告/预算)可能不兼容并拖累战略目标"
+      ],
+      "forbiddenOverreach": [
+        "不得断言其中一种结构绝对优于另一种(选择取决于环境与企业业务需要)",
+        "不得虚构来源未给出的中国教材分类表述"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch04_s4_3 '### Types of Organizational Structures' 下 functional structure 段('The functional structure...' 及优劣两段)与 divisional structures 段('Divisional structures...' 及优劣段)分别锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-13",
+      "schemaVersion": "1.0.0",
+      "question": "机械式与有机式组织结构在标准化、专业化、集权化、部门化四个维度上有何差异?",
+      "type": "comparison",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["机械式与有机式组织", "部门化", "集权与分权"],
+      "acceptableAnswerPoints": [
+        "标准化(standardization):机械式高度正式化 vs 有机式低",
+        "专业化(specialization):机械式高/窄 vs 有机式低/宽",
+        "集权化(centralization):机械式集权 vs 有机式分权",
+        "部门化(departmentalization):机械式职能式 vs 有机式事业部式",
+        "两者是同一连续体两端的锚点,而非非此即彼的二分"
+      ],
+      "forbiddenOverreach": [
+        "不得调换四维度两端的方向",
+        "不得添加 Table 10.1 中不存在的维度并伪称出自该表"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 Table 10.1 四行逐字文本(含表头)锚定五元组;辅以表前'anchors on a continuum'句锚点;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-14",
+      "schemaVersion": "1.0.0",
+      "question": "矩阵结构与单一条线结构在权责关系上的核心差异是什么?矩阵结构的主要风险与化解条件是什么?",
+      "type": "comparison",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["权责关系", "部门化"],
+      "acceptableAnswerPoints": [
+        "矩阵结构=多重汇报线:员工同时对职能线与产品/地域/项目线负有问责(ch10)",
+        "单一条线结构=每名员工沿一条命令链汇报,权责关系单一",
+        "矩阵的潜在收益:员工更愿意同时关注多个业务部分的需要;主要风险:两名及以上经理不对齐时员工面临冲突(ch10)",
+        "4.3 补充:双重职权结构有效运作需要员工(含经理与项目领导)具备人际沟通、冲突管理与政治技能"
+      ],
+      "forbiddenOverreach": [
+        "不得断言矩阵结构必然导致失控或必然失败",
+        "不得声称来源推荐所有企业采用矩阵结构"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '### Business Structures' 节 matrix 段('A matrix structure describes...')与 ch04_s4_3 matrix 段('Matrix structures...' 及 'One of the weaknesses...' 句)分别锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-15",
+      "schemaVersion": "1.0.0",
+      "question": "本课程指定主教材与教师 PPT 对'集权与分权''管理幅度与管理层次'的表述,与 OpenStax 两份来源在术语与侧重点上有哪些差异?",
+      "type": "comparison",
+      "expectedSourceIds": ["src_textbook_main_orgdesign", "src_teacher_ppt_orgdesign", "src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["集权与分权", "管理幅度与管理层次"],
+      "acceptableAnswerPoints": [
+        "必须基于主教材与教师 PPT 原文与 OpenStax 原文逐字比对后作答(来源到位前不得作答)",
+        "差异须并列标注来源,按 spec §4 优先级呈现课程口径,不静默合并",
+        "可预期的比对维度:术语译名(如 span of control/centralization 的中文对应)、是否给出幅度经验数值、是否包含权责对等原则——但具体表述一律以来源原文为准",
+        "结论中本土教材特有表述须注明版本与页码"
+      ],
+      "forbiddenOverreach": [
+        "来源缺位时不得凭常识编造教材或 PPT 表述",
+        "不得虚构页码或版本信息"
+      ],
+      "shouldRefuse": false,
+      "status": "pending_source",
+      "anchorPlan": "主教材/PPT 到位并通过版权与脱敏流程入库后,在其组织设计章相应小节提取逐字段落,按 documentId+version+pageIndex/pageLabel+verbatimQuote+quoteHash 五元组锚定(有印刷页码的来源用页码锚);OpenStax 侧锚点沿用 od-eval-04/05;到位前本题保持 pending_source,不计入 ready_for_reference_retrieval 题指标分母。"
+    },
+    {
+      "caseId": "od-eval-16",
+      "schemaVersion": "1.0.0",
+      "question": "什么条件下组织更适合机械式结构?什么条件下更适合有机式结构?",
+      "type": "condition_boundary",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["机械式与有机式组织", "组织设计的情境因素"],
+      "acceptableAnswerPoints": [
+        "机械式适合稳定、简单、低至中等不确定性的环境(4.3)",
+        "有机式适合不稳定、复杂、变化的环境(4.3)",
+        "以创新为目标的组织需要更有机;以可靠性/一致性为目标的组织需要更机械(ch10)",
+        "结构选择取决于环境与组织目标的匹配,而非绝对优劣",
+        "4.3 明确:并非每个组织、或每个组织的每个部分都需要有机式结构"
+      ],
+      "forbiddenOverreach": [
+        "不得给出'有机式普遍更优'之类的普适排序",
+        "不得虚构来源未提及的权变因素清单(现来源仅有环境匹配层面的表述)"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch04_s4_3 首两段('best suited for environments...' 与 'work best in unstable, complex, changing environments' 句及 'not every organization...' 句)与 ch10 '### Mechanistic and Organic Structures' 节('an organization that produces innovation...' 段)分别锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-17",
+      "schemaVersion": "1.0.0",
+      "question": "组织在什么情况下应采用矩阵结构?其主要风险是什么、以什么条件化解?",
+      "type": "condition_boundary",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["权责关系", "部门化"],
+      "acceptableAnswerPoints": [
+        "适用情况:需要在职能化组织中整合决策、要求员工同时对项目/产品与职能负责时采用(4.3)",
+        "起源语境:1960 年代美国航空航天企业的政府合同要求展示项目团队与整体管理结构的关系,形成双重汇报(4.3)",
+        "主要风险:向两名经理汇报带来的混乱与冲突、效忠分裂(divided loyalties)",
+        "化解条件:经理之间目标对齐;员工具备良好的人际沟通、冲突管理与政治技能"
+      ],
+      "forbiddenOverreach": [
+        "不得断言矩阵适合所有环境或所有企业",
+        "不得虚构来源未给出的实施步骤"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch04_s4_3 matrix 各段('Matrix structures...'/'Aerospace firms were required...'/'One of the weaknesses...'/'divided loyalties...' 句)与 ch10 matrix 段分别锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-18",
+      "schemaVersion": "1.0.0",
+      "question": "集权与分权各自基于什么效率假设?选择集权还是分权的依据是什么?",
+      "type": "condition_boundary",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["集权与分权", "组织设计的情境因素"],
+      "acceptableAnswerPoints": [
+        "机械式(集权)假设:资源与决策以集中方式流动时系统产生效率",
+        "有机式(分权)假设:把资源分散、交由资源的使用者配置会带来更高效率",
+        "来源明确:两种视角都可能成立,取决于具体情境(Either perspective may work, depending on the circumstances)",
+        "选择依据是组织所处情境,而非先验的优劣判断"
+      ],
+      "forbiddenOverreach": [
+        "不得断言分权必然更高效或集权必然更可靠",
+        "不得虚构实证数据"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '### Mechanistic and Organic Structures' 节 'Centralization addresses assumptions...' 段(含 'Either perspective may work, depending on the circumstances' 句)锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-19",
+      "schemaVersion": "1.0.0",
+      "question": "扁平化是否必然能提升组织效率?请依据来源给出判断。(任务书示例题)",
+      "type": "condition_boundary",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["管理幅度与管理层次", "机械式与有机式组织", "组织设计的情境因素"],
+      "acceptableAnswerPoints": [
+        "不能断言'必然提效':来源仅支持结构须与环境及组织目标相匹配",
+        "扁平(有机)结构适合定义模糊、动态变化的环境;高耸(机械)结构在稳定、简单、低不确定环境中同样有效(4.3)",
+        "来源明确集权/分权两种效率视角'都可能成立,取决于具体情境'(ch10),结构效率无普适方向",
+        "可得的条件化结论:扁平化提效以环境动态性、任务性质、授权与自组织配套为边界条件"
+      ],
+      "forbiddenOverreach": [
+        "禁止断言'扁平化必然提升效率'",
+        "禁止反向断言'扁平化必然降低效率'",
+        "不得虚构实证研究或数据支撑任一方向的普适结论"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '### Mechanistic and Organic Structures' 节(flat/horizontal 段、'Either perspective may work...' 段)与 ch04_s4_3 环境匹配段分别锚定五元组;金标准要求系统输出条件化答案而非单向断言;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-20",
+      "schemaVersion": "1.0.0",
+      "question": "在 GSP 等药品经营监管要求下,医药商业企业设置质量管理机构时,其组织结构设计有哪些特殊边界条件?",
+      "type": "condition_boundary",
+      "expectedSourceIds": ["src_pharma_context_pack", "src_textbook_main_orgdesign"],
+      "targetConcepts": ["组织设计的情境因素", "部门化", "权责关系"],
+      "acceptableAnswerPoints": [
+        "必须以医药制度背景材料(GSP 等制度文本)与主教材为据作答,来源到位前不得作答",
+        "答题框架可借用机械式/正式化维度(强监管情境通常对应高正式化与高专业化要求),但具体监管要求必须以制度文本逐字为据",
+        "结论须区分来源支持部分(制度条款)与系统推断部分(结构建议)",
+        "制度文本与教材表述冲突时并列标注来源,不静默合并"
+      ],
+      "forbiddenOverreach": [
+        "不得虚构 GSP 条款、文号或监管要求",
+        "不得凭一般管理学常识代替制度文本直接作答"
+      ],
+      "shouldRefuse": false,
+      "status": "pending_source",
+      "anchorPlan": "医药背景材料到位并完成脱敏/校对流程入库后,对制度条款按五元组锚定(政策文本用条款号定位+verbatimQuote+quoteHash);主教材相应小节另锚;到位前本题保持 pending_source,不计入 ready_for_reference_retrieval 题指标分母。"
+    },
+    {
+      "caseId": "od-eval-21",
+      "schemaVersion": "1.0.0",
+      "question": "某医药企业组建一支创新药研发团队,需要快速探索未知方向。按机械式—有机式框架,该团队更适合哪种结构?依据是什么?(任务书示例题)",
+      "type": "case_judgment",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["机械式与有机式组织", "组织设计的情境因素"],
+      "acceptableAnswerPoints": [
+        "更适合有机式结构",
+        "依据:ch10 明确以创新为产出的组织需要更有机,以可靠性为追求的组织需要更机械",
+        "有机式支持自组织、低度指令下的决策与快速适应变化,规则更少、任务更通用,契合探索未知方向的任务性质",
+        "4.3 佐证:有机式适合不稳定、复杂、变化的环境"
+      ],
+      "forbiddenOverreach": [
+        "不得声称来源直接评价了该企业或该团队(属框架对题设情境的应用)",
+        "不得给出具体岗位设置、编制等超出框架的组织方案"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '### Mechanistic and Organic Structures' 节 'an organization that produces innovation needs to be more organic...' 段锚定五元组,辅以 ch04_s4_3 有机式环境匹配段;金标准要求答案明示'框架应用'性质;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-22",
+      "schemaVersion": "1.0.0",
+      "question": "一家 20 人的初创公司,业务单一、所处环境稳定,更适合职能制还是事业部制?依据是什么?",
+      "type": "case_judgment",
+      "expectedSourceIds": ["src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["部门化", "组织设计的情境因素"],
+      "acceptableAnswerPoints": [
+        "更适合职能制结构",
+        "依据:4.3 明确小公司、初创企业以及在简单稳定环境中运行的组织采用职能制",
+        "匹配理由:职能制提供高度专业化、简单直接的部门内汇报、规模经济,且组织成长时较易扩展",
+        "事业部制适合业务多元、面向特定细分市场的大型企业,与题设不匹配"
+      ],
+      "forbiddenOverreach": [
+        "不得声称来源直接讨论过该虚构公司",
+        "不得断言该公司'必须'采用某结构(来源给的是适用条件而非强制规定)"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch04_s4_3 functional structure 段('Small companies, start-ups, and organizations working in simple, stable environments use this structure...' 句及优劣段)锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-23",
+      "schemaVersion": "1.0.0",
+      "question": "某公司按产品线划分部门,每条产品线自负盈亏并配齐完整职能团队。这属于哪种结构?其优势与劣势是什么?",
+      "type": "case_judgment",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["部门化"],
+      "acceptableAnswerPoints": [
+        "属于产品式结构/事业部结构:按产品线或业务线组织员工(ch10 product structures)",
+        "题设'每条产品线配齐营销、生产等职能团队'符合 4.3 对事业部制的描述:多个职能组归入事业部负责人之下,类似含利润中心的产品结构",
+        "优势:聚焦业务板块、责任与问责清晰、客户响应更快、事业部内部协调更容易(4.3)",
+        "劣势:事业部间易割裂封闭;各职能系统(技术/会计/广告/预算)可能不兼容,拖累公司战略目标(4.3)"
+      ],
+      "forbiddenOverreach": [
+        "不得误判为矩阵结构(题设只有产品线单一汇报维度,无双重汇报)",
+        "不得声称来源评价过该虚构公司"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '### Business Structures' 节 'Product structures exist where...' 段与 ch04_s4_3 divisional structures 段分别锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-24",
+      "schemaVersion": "1.0.0",
+      "question": "根据所提供的两家医药企业年度报告,分别判断其组织结构更接近哪种类型,并给出年报中的依据。",
+      "type": "case_judgment",
+      "expectedSourceIds": ["src_annual_reports_2cos"],
+      "targetConcepts": ["部门化", "机械式与有机式组织"],
+      "acceptableAnswerPoints": [
+        "必须以年报原文(公司治理/组织架构披露章节)为据,到位前不得作答",
+        "判断框架:职能式/事业部式/地域式/矩阵等类型的特征(来自已入库概念来源)",
+        "每条判断须附年报逐字引用,引用须通过 quoteHash 机检",
+        "年报披露不足以判断的部分应明示'披露信息不足',不得强行归类"
+      ],
+      "forbiddenOverreach": [
+        "不得虚构企业名称、年报内容或组织架构图信息",
+        "不得把概念框架直接当作企业证据"
+      ],
+      "shouldRefuse": false,
+      "status": "pending_source",
+      "anchorPlan": "年报到位并确认引用范围入库后,对组织架构披露段落按 documentId+version+pageIndex/pageLabel+verbatimQuote+quoteHash 五元组锚定;到位前本题保持 pending_source,不计入 ready_for_reference_retrieval 题指标分母。"
+    },
+    {
+      "caseId": "od-eval-25",
+      "schemaVersion": "1.0.0",
+      "question": "依据两家医药企业年报披露的组织结构与研发布局,哪一家的结构更有利于创新药研发?请给出条件化判断。",
+      "type": "case_judgment",
+      "expectedSourceIds": ["src_annual_reports_2cos", "src_pharma_context_pack"],
+      "targetConcepts": ["机械式与有机式组织", "组织设计的情境因素"],
+      "acceptableAnswerPoints": [
+        "必须以年报与医药背景材料原文为据,到位前不得作答",
+        "判断逻辑:将'创新导向→更有机'的框架(ch10)与年报披露的实际结构事实结合,给出条件化结论",
+        "必须分列标注:来源支持部分(年报披露事实)与系统推断部分(框架应用)",
+        "证据不足以分出高下时,应如实给出'无法据现有披露判断'的结论而非强行排序"
+      ],
+      "forbiddenOverreach": [
+        "不得虚构年报数据或研发管线信息",
+        "不得把'有机式利于创新'的框架直接等同于对具体企业的结论"
+      ],
+      "shouldRefuse": false,
+      "status": "pending_source",
+      "anchorPlan": "年报与背景材料到位入库后按五元组锚定(年报用页码锚,政策/背景材料用条款号或章节锚);OpenStax 框架侧锚点沿用 od-eval-21;到位前本题保持 pending_source,不计入 ready_for_reference_retrieval 题指标分母。"
+    },
+    {
+      "caseId": "od-eval-26",
+      "schemaVersion": "1.0.0",
+      "question": "有学生认为'分权必然导致失控'。请依据来源辨析这一说法。(任务书示例题)",
+      "type": "misconception",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["集权与分权", "权责关系"],
+      "acceptableAnswerPoints": [
+        "该说法混淆了不同要素:集权/分权是资源与决策权的配置方式,指挥与控制是汇报监督体系——韦伯五要素中二者相互独立(ch10)",
+        "分权设计可以与协调控制机制并存:4.3 指出总部必须确保对各事业部/地域单元的有效协调与控制",
+        "来源承认分权的风险(地域单元自主权大、决策易分散),这说明需要机制配合,而非分权本身等于失控",
+        "正确表述:分权是否失控取决于协调与控制机制的设计,而非分权这一选择本身"
+      ],
+      "forbiddenOverreach": [
+        "不得走向另一极端断言'分权毫无风险'",
+        "不得断言集权必然更可控(来源明确两种效率视角都可能成立)"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '#### Centralization' 段与 '#### Command-and-Control' 段(两要素独立性的依据)、ch04_s4_3 geographic/divisional 段('Headquarters must ensure effective coordination and control...' 句)分别锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-27",
+      "schemaVersion": "1.0.0",
+      "question": "有学生认为'有机式组织在所有方面都优于机械式组织,现代组织都应改成有机式'。请依据来源辨析。",
+      "type": "misconception",
+      "expectedSourceIds": ["src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["机械式与有机式组织"],
+      "acceptableAnswerPoints": [
+        "来源明确机械式在简单、稳定、低不确定环境中仍然适用(如邮政与制造类组织,4.3)",
+        "4.3 明确:并非每个组织、或每个组织的每个部分都需要有机式结构",
+        "机械式与有机式是同一连续体两端的锚点,现实组织多为两端特征的某种组合(ch10)",
+        "选择标准是环境与组织目标的匹配,不是'新/旧'或'优/劣'的普适排序"
+      ],
+      "forbiddenOverreach": [
+        "不得断言机械式已经过时",
+        "不得虚构'现代组织全部有机化'的趋势数据"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch04_s4_3 首两段('this type of organizational design may still be relevant...' 与 'not every organization or every part of most organizations may require an organic type of structure' 句)与 ch10 'anchors on a continuum' 句分别锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-28",
+      "schemaVersion": "1.0.0",
+      "question": "有学生认为'组织结构图代表的就是组织实际运转的方式'。请依据来源辨析。",
+      "type": "misconception",
+      "expectedSourceIds": ["src_openstax_pom_ch10"],
+      "targetConcepts": ["组织结构", "权责关系"],
+      "acceptableAnswerPoints": [
+        "组织图描绘的是正式组织——组织应如何运转",
+        "组织的实际运转还受非正式组织影响——人际关系构成的'隐形网络'自然涌现、无法完全控制",
+        "正式组织与非正式组织通常相近但经常不同",
+        "非正式组织既可助益也可阻碍组织成功,管理者可通过创造建立关系的机会对其施加影响"
+      ],
+      "forbiddenOverreach": [
+        "不得断言非正式组织必然与正式组织冲突或必然有害"
+      ],
+      "shouldRefuse": false,
+      "status": "ready_for_reference_retrieval",
+      "anchorPlan": "在 ch10 '## 10.1' formal/informal organization 两段及 'In sum, the formal organization explains how an organization should function...' 段锚定五元组;纪律同 od-eval-01。"
+    },
+    {
+      "caseId": "od-eval-29",
+      "schemaVersion": "1.0.0",
+      "question": "请完整列出组织设计需要考虑的权变因素(contingency factors)清单,并说明各因素对结构选择的影响方向。",
+      "type": "refusal",
+      "expectedSourceIds": ["src_openstax_pom_ch03_s3_7", "src_textbook_main_orgdesign"],
+      "targetConcepts": ["组织设计的情境因素"],
+      "acceptableAnswerPoints": [
+        "应返回'当前知识库不足以支持该判断'",
+        "应如实说明缺口:现有两份 OpenStax 来源均无 contingency 的显式表述(FETCH-NOTES.md §3 已记录该缺口)",
+        "可指出候选来源 OpenStax 3.7 节(Contingency and System Management)与主教材待教师确认后纳入",
+        "不得以'环境'单因素冒充完整权变因素清单"
+      ],
+      "forbiddenOverreach": [
+        "不得凭常识罗列权变因素清单并伪称有来源支持",
+        "不得虚构来源、页码或逐字引用"
+      ],
+      "shouldRefuse": true,
+      "status": "pending_source",
+      "usageNote": "可用于验证系统契约(固定拒答话术+缺口说明输出)与确定性检索(候选来源到位后的锚定机制),但不得用 OpenStax 内容测试 LLM 拒答——OpenStax 文本禁止送入 LLM,LLM 拒答类测试须待至少一项明确 AI 授权的本土来源到位后另行设计。",
+      "anchorPlan": "候选来源 3.7 节经教师确认抓取、或主教材到位入库后,对权变因素相关段落按五元组锚定;到位前本题作为拒答正确性用例:金标准为固定拒答话术+缺口说明,不参与证据定位准确率计算,但计入拒答正确率。"
+    },
+    {
+      "caseId": "od-eval-30",
+      "schemaVersion": "1.0.0",
+      "question": "本课程主教材中'权责对等原则'的原文表述是什么?它与 OpenStax 的 command-and-control、centralization 表述有何异同?",
+      "type": "refusal",
+      "expectedSourceIds": ["src_textbook_main_orgdesign", "src_openstax_pom_ch10", "src_openstax_pom_ch04_s4_3"],
+      "targetConcepts": ["权责关系"],
+      "acceptableAnswerPoints": [
+        "应返回'当前知识库不足以支持该判断'(主教材未入库,'权责对等'原文无法核验)",
+        "可说明 OpenStax 侧已有相邻概念(command-and-control 汇报监督、centralization 决策权配置),但本土教材'权责对等'的原文表述不在现有来源中",
+        "待主教材通过版权与脱敏流程入库后,再按五元组锚定原文并做并列比对"
+      ],
+      "forbiddenOverreach": [
+        "不得凭常识默写教材原文并伪称引用",
+        "不得把 OpenStax 的相邻概念直接等同为'权责对等原则'"
+      ],
+      "shouldRefuse": true,
+      "status": "pending_source",
+      "usageNote": "可用于验证系统契约(固定拒答话术+缺口说明输出)与确定性检索(候选来源到位后的锚定机制),但不得用 OpenStax 内容测试 LLM 拒答——OpenStax 文本禁止送入 LLM,LLM 拒答类测试须待至少一项明确 AI 授权的本土来源到位后另行设计。",
+      "anchorPlan": "主教材到位入库后,对'权责对等'原文段落按 documentId+version+pageIndex/pageLabel+verbatimQuote+quoteHash 五元组锚定,OpenStax 侧锚点沿用 od-eval-05/10;到位前本题作为拒答正确性用例,金标准为固定拒答话术+缺口说明。"
+    }
+  ]
+}
