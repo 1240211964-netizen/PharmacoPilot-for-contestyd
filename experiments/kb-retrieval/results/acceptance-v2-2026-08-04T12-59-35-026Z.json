@@ -1,0 +1,2423 @@
+{
+  "schemaVersion": "2.0.0",
+  "generatedAt": "2026-08-04T12:59:35.026Z",
+  "datasetId": "organization-design-evaluation-set",
+  "courseId": "course_mgmt_principles",
+  "chapterId": "ch_organization_design",
+  "corpus": {
+    "legacyIngested": [
+      {
+        "sourceId": "src_openstax_pom_ch10",
+        "blockCount": 277
+      },
+      {
+        "sourceId": "src_openstax_pom_ch04_s4_3",
+        "blockCount": 48
+      }
+    ],
+    "ingestedSources": [
+      {
+        "sourceId": "openstax-pom-ch03-3-7",
+        "blockCount": 12,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "ocw-15-320-s11-syllabus",
+        "blockCount": 31,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "ocw-15-320-s11-lec03",
+        "blockCount": 18,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "ocw-15-320-s11-lec05",
+        "blockCount": 18,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "ocw-15-320-s11-lec12",
+        "blockCount": 4,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "cn-drug-admin-law-2019",
+        "blockCount": 184,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "cn-drug-admin-law-implementing-reg-2026",
+        "blockCount": 103,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "cn-gmp-2010",
+        "blockCount": 386,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "cn-mah-contract-mfg-supervision-2023-132",
+        "blockCount": 9,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "cn-contract-mfg-entrusted-2025-134",
+        "blockCount": 8,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "cn-med-inst-pharm-admin-2011",
+        "blockCount": 58,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "cn-prescription-review-2018",
+        "blockCount": 35,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "cn-antineoplastic-clinical-2020-487",
+        "blockCount": 58,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "cn-vbp-normalization-2021-2",
+        "blockCount": 12,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "ich-q10-pharmaceutical-quality-system",
+        "blockCount": 22,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "fda-quality-systems-approach-cgmp",
+        "blockCount": 33,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "eu-gmp-vol4-ch1-pharmaceutical-quality-system",
+        "blockCount": 9,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "eu-gmp-vol4-ch2-personnel",
+        "blockCount": 7,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "ema-gvp-module-i-pharmacovigilance-systems",
+        "blockCount": 26,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "who-drug-therapeutics-committees-practical-guide",
+        "blockCount": 156,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "doc_hengrui_600276_ar2025",
+        "blockCount": 236,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "doc_wuxiapptec_603259_ar2025",
+        "blockCount": 249,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "doc_shanghaipharma_601607_ar2025",
+        "blockCount": 229,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "doc_yifeng_603939_ar2025",
+        "blockCount": 257,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "doc_pfizer_10k_fy2025",
+        "blockCount": 2390,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "doc_cvs_10k_fy2025",
+        "blockCount": 2283,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "doc_roche_ar2025",
+        "blockCount": 213,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "doc_astrazeneca_ar2025",
+        "blockCount": 232,
+        "alreadyIngested": false
+      },
+      {
+        "sourceId": "src_openstax_pom_ch10",
+        "blockCount": 277,
+        "alreadyIngested": true
+      },
+      {
+        "sourceId": "src_openstax_pom_ch04_s4_3",
+        "blockCount": 48,
+        "alreadyIngested": true
+      }
+    ],
+    "skippedSources": [
+      {
+        "sourceId": "ocw-15-320-s11-lec01",
+        "status": "blocked",
+        "reason": "权限闸门:acquisitionStatus=blocked,deterministicParsingAllowed=true(blockedReason=Slides are image-only (scanned/rasterized); pypdf text layer contains only per-page copyright lines (2010 chars / 19 pages). No OCR performed per deterministic-extraction discipline.)"
+      }
+    ],
+    "totalBlocks": 7603,
+    "layerBlockCounts": {
+      "theory": 408,
+      "pharma_context": 1106,
+      "company_fact": 6089
+    },
+    "theoryUnits": 67,
+    "pharmaContextUnits": 148,
+    "companyFactUnits": 25,
+    "relations": 13,
+    "keytermExtraction": {
+      "created": 55,
+      "warnings": 29
+    },
+    "builder": {
+      "theoryCreated": 12,
+      "pharmaCreated": 148,
+      "companyCreated": 25,
+      "relationsCreated": 13,
+      "companyMissed": 0,
+      "relationsNotBuilt": 5,
+      "gapsResolved": [
+        "od-eval-20",
+        "od-eval-24",
+        "od-eval-25",
+        "od-eval-29"
+      ],
+      "gapsKeptOpen": [
+        "od-eval-15",
+        "od-eval-30"
+      ]
+    }
+  },
+  "caseStatusDistribution": {
+    "ready_for_reference_retrieval": 28,
+    "pending_source": 2,
+    "ready_for_ai_pipeline": 0,
+    "out_of_scope": 0
+  },
+  "denominatorDiscipline": "来源定位准确率/概念召回率分母 = status=ready_for_reference_retrieval 的题;pending_source 题全量跑检索验证拒答/缺口路径但不计入分母;无 out_of_scope 题。",
+  "metrics": {
+    "readyCaseCount": 28,
+    "pendingCaseCount": 2,
+    "locationHits": 27,
+    "locationAccuracy": 0.9642857142857143,
+    "conceptRecalled": 47,
+    "conceptTotal": 50,
+    "conceptRecallRate": 0.94,
+    "citationClaimsChecked": 280,
+    "citationClaimsPassed": 280,
+    "citationConsistency": 1,
+    "fabricatedCitations": 0,
+    "strongAnswerWithoutEvidence": 0,
+    "unauthorizedLeakViolations": 0,
+    "evidenceLinks": {
+      "runsChecked": 30,
+      "rowsLinked": 300,
+      "mismatches": []
+    },
+    "courseVoicePriorityRate": "N/A(主教材/大纲未到位,课程口径来源缺失,无法测量)"
+  },
+  "gates": {
+    "locationAccuracy": {
+      "value": 0.9642857142857143,
+      "detail": "27/28",
+      "threshold": 0.95,
+      "passed": true
+    },
+    "conceptRecall": {
+      "value": 0.94,
+      "detail": "47/50",
+      "threshold": 0.9,
+      "passed": true
+    },
+    "citationConsistency": {
+      "value": 1,
+      "detail": "280/280",
+      "threshold": 1,
+      "passed": true
+    },
+    "fabricatedCitations": {
+      "value": 0,
+      "threshold": 0,
+      "passed": true
+    },
+    "strongAnswerWithoutEvidence": {
+      "value": 0,
+      "threshold": 0,
+      "passed": true
+    },
+    "unauthorizedLeak": {
+      "value": 0,
+      "threshold": 0,
+      "passed": true
+    },
+    "evidenceLinks": {
+      "value": "300 行/30 run",
+      "threshold": "每 run 行数=结果数",
+      "passed": true
+    }
+  },
+  "allPassed": true,
+  "sourceResolution": {
+    "src_openstax_pom_ch10": {
+      "kind": "ids",
+      "ids": [
+        "src_openstax_pom_ch10"
+      ]
+    },
+    "src_openstax_pom_ch04_s4_3": {
+      "kind": "ids",
+      "ids": [
+        "src_openstax_pom_ch04_s4_3"
+      ]
+    },
+    "src_openstax_pom_ch03_s3_7": {
+      "kind": "ids",
+      "ids": [
+        "openstax-pom-ch03-3-7"
+      ],
+      "note": "旧 manifest 候选来源,2026-08-04 由权威 manifest 实例化(supersedes 登记)"
+    },
+    "src_pharma_context_pack": {
+      "kind": "layer",
+      "layer": "pharma_context",
+      "note": "聚合占位,解析为权威 manifest pharma_context 层 15 条(法规 9 + 国际标准 5 + EU GMP Ch1)"
+    },
+    "src_annual_reports_2cos": {
+      "kind": "layer",
+      "layer": "company_fact",
+      "note": "聚合占位(题面\"两家\"),解析为权威 manifest company_fact 层 8 家年报/10-K;题目内容不改,差异在报告说明"
+    },
+    "src_textbook_main_orgdesign": {
+      "kind": "missing",
+      "note": "主教材 awaiting_teacher_provided"
+    },
+    "src_teacher_ppt_orgdesign": {
+      "kind": "missing",
+      "note": "教师 PPT awaiting_teacher_provided"
+    }
+  },
+  "hitDistribution": {
+    "byLayer": {
+      "theory": 234,
+      "pharma_context": 17,
+      "company_fact": 49
+    },
+    "bySourceId": {
+      "src_openstax_pom_ch10": 167,
+      "ocw-15-320-s11-syllabus": 2,
+      "ocw-15-320-s11-lec03": 8,
+      "openstax-pom-ch03-3-7": 3,
+      "cn-gmp-2010": 3,
+      "src_openstax_pom_ch04_s4_3": 50,
+      "doc_hengrui_600276_ar2025": 10,
+      "ich-q10-pharmaceutical-quality-system": 1,
+      "ocw-15-320-s11-lec05": 4,
+      "doc_yifeng_603939_ar2025": 14,
+      "cn-drug-admin-law-2019": 4,
+      "doc_shanghaipharma_601607_ar2025": 9,
+      "doc_wuxiapptec_603259_ar2025": 15,
+      "fda-quality-systems-approach-cgmp": 2,
+      "cn-vbp-normalization-2021-2": 2,
+      "cn-med-inst-pharm-admin-2011": 5,
+      "doc_roche_ar2025": 1
+    }
+  },
+  "shortWords": [
+    {
+      "word": "组织",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": true,
+      "pharmaContextHits": 10,
+      "companyFactHits": 0,
+      "theoryHits": 0,
+      "topSourceId": "cn-prescription-review-2018",
+      "topScore": -6.524284850921822
+    },
+    {
+      "word": "授权",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": true,
+      "pharmaContextHits": 6,
+      "companyFactHits": 4,
+      "theoryHits": 0,
+      "topSourceId": "cn-drug-admin-law-implementing-reg-2026",
+      "topScore": -9.867107602029169
+    },
+    {
+      "word": "分权",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": false,
+      "pharmaContextHits": 0,
+      "companyFactHits": 1,
+      "theoryHits": 9,
+      "topSourceId": "src_openstax_pom_ch10",
+      "topScore": -30.521557934064916
+    },
+    {
+      "word": "集权",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": false,
+      "pharmaContextHits": 0,
+      "companyFactHits": 2,
+      "theoryHits": 8,
+      "topSourceId": "src_openstax_pom_ch10",
+      "topScore": -30.521557934064916
+    },
+    {
+      "word": "权责",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": false,
+      "pharmaContextHits": 1,
+      "companyFactHits": 1,
+      "theoryHits": 8,
+      "topSourceId": "src_openstax_pom_ch10",
+      "topScore": -33.31883036747581
+    },
+    {
+      "word": "矩阵",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": true,
+      "pharmaContextHits": 0,
+      "companyFactHits": 1,
+      "theoryHits": 9,
+      "topSourceId": "src_openstax_pom_ch04_s4_3",
+      "topScore": -25.767347793211243
+    },
+    {
+      "word": "质量",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": true,
+      "pharmaContextHits": 10,
+      "companyFactHits": 0,
+      "theoryHits": 0,
+      "topSourceId": "cn-gmp-2010",
+      "topScore": -6.672261075804921
+    },
+    {
+      "word": "委托",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": true,
+      "pharmaContextHits": 7,
+      "companyFactHits": 3,
+      "theoryHits": 0,
+      "topSourceId": "cn-mah-contract-mfg-supervision-2023-132",
+      "topScore": -8.85902366872155
+    },
+    {
+      "word": "药事",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": true,
+      "pharmaContextHits": 10,
+      "companyFactHits": 0,
+      "theoryHits": 0,
+      "topSourceId": "cn-med-inst-pharm-admin-2011",
+      "topScore": -13.79539386027053
+    },
+    {
+      "word": "采购",
+      "channel": "segmented",
+      "resultCount": 10,
+      "insufficientEvidence": false,
+      "verbatimPresentInResults": true,
+      "pharmaContextHits": 4,
+      "companyFactHits": 6,
+      "theoryHits": 0,
+      "topSourceId": "cn-vbp-normalization-2021-2",
+      "topScore": -9.361792226793998
+    }
+  ],
+  "refusalSemantics": [
+    {
+      "caseId": "od-eval-29",
+      "status": "ready_for_reference_retrieval",
+      "shouldRefuse": true,
+      "oovRefusalTriggered": false,
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "resultCount": 10,
+      "topScore": -19.215834777419943,
+      "topSourceId": "src_openstax_pom_ch04_s4_3",
+      "channel": "segmented",
+      "note": "权变来源(3.7)到位后 OOV 拒答不再触发属预期;该题正确终态=可定位权变来源,回答层须声明部分覆盖(完整清单仍缺主教材口径),不得凭常识补全。"
+    },
+    {
+      "caseId": "od-eval-30",
+      "status": "pending_source",
+      "shouldRefuse": true,
+      "oovRefusalTriggered": false,
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "resultCount": 10,
+      "topScore": -36.03426566617966,
+      "topSourceId": "src_openstax_pom_ch10",
+      "channel": "segmented",
+      "note": "主教材未到位;OOV 词 OpenStax 因语料元数据含该字面而不再触发拒答,拒答契约改由\"诉求短语(权责对等)缺失\"路径承载(见 pendingReports)。"
+    }
+  ],
+  "leakCheck": {
+    "resultsChecked": 300,
+    "violations": [],
+    "blockedSourceId": "ocw-15-320-s11-lec01",
+    "blockedSourceBlocks": 0,
+    "blockedSourceResults": 0
+  },
+  "cases": [
+    {
+      "caseId": "od-eval-01",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -28.90332663115568,
+      "topCoverage": 0.19047619047619047,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "结构"
+      ],
+      "bridgeTerms": [
+        "organizational",
+        "structure",
+        "bureaucracy",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model"
+      ],
+      "bridgeKeptCount": 91,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_IvKpi3UT6JNt61dLY3t5n"
+    },
+    {
+      "caseId": "od-eval-02",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "ocw-15-320-s11-syllabus",
+        "ocw-15-320-s11-lec03",
+        "openstax-pom-ch03-3-7"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -26.627374082873015,
+      "topCoverage": 0.21052631578947367,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "结构"
+      ],
+      "bridgeTerms": [
+        "organizational",
+        "design",
+        "bureaucracy",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model"
+      ],
+      "bridgeKeptCount": 108,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_EstBVLyR0Fnh1RaUqXCN4"
+    },
+    {
+      "caseId": "od-eval-03",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "openstax-pom-ch03-3-7",
+        "cn-gmp-2010"
+      ],
+      "returnedLayers": [
+        "theory",
+        "pharma_context"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -26.883506340829136,
+      "topCoverage": 0.10714285714285714,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "Weber",
+        "模型",
+        "提出",
+        "要素",
+        "结构"
+      ],
+      "bridgeTerms": [
+        "Weber",
+        "bureaucracy",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model"
+      ],
+      "bridgeKeptCount": 59,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        },
+        {
+          "concept": "管理幅度与管理层次",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 4
+        },
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_rmYBpCLVNY7hQdwAqdH5q"
+    },
+    {
+      "caseId": "od-eval-04",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -49.16951847412355,
+      "topCoverage": 0.22857142857142856,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "幅度",
+        "span"
+      ],
+      "bridgeTerms": [
+        "span",
+        "of",
+        "control",
+        "hierarchy",
+        "hierarchical",
+        "flatten",
+        "tall",
+        "command",
+        "authority",
+        "accountability",
+        "accountable",
+        "responsibility",
+        "span of control",
+        "flat organization",
+        "horizontal organizational structure",
+        "vertical organizational structure",
+        "chain of command",
+        "command-and-control",
+        "dual reporting"
+      ],
+      "bridgeKeptCount": 142,
+      "concepts": [
+        {
+          "concept": "管理幅度与管理层次",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 4
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_1v2qCj2mmA6zpd5PtoGJH"
+    },
+    {
+      "caseId": "od-eval-05",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "ocw-15-320-s11-lec03",
+        "src_openstax_pom_ch04_s4_3",
+        "doc_hengrui_600276_ar2025"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -23.674381213647273,
+      "topCoverage": 0.23076923076923078,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "centralization",
+        "相对",
+        "形态"
+      ],
+      "bridgeTerms": [
+        "centralization",
+        "centralized",
+        "decentralization",
+        "decentralized",
+        "diffuse"
+      ],
+      "bridgeKeptCount": 20,
+      "concepts": [
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_4PDCjX883tfBsyRB3fLPw"
+    },
+    {
+      "caseId": "od-eval-06",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -29.516612671817192,
+      "topCoverage": 0.20689655172413793,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "机械",
+        "结构",
+        "mechanistic"
+      ],
+      "bridgeTerms": [
+        "mechanistic",
+        "structure",
+        "bureaucracy",
+        "organic",
+        "standardization",
+        "specialization",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model",
+        "mechanistic structure",
+        "organic structure"
+      ],
+      "bridgeKeptCount": 41,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_XjljJCKep9v3rLS4WxXeG"
+    },
+    {
+      "caseId": "od-eval-07",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -29.516612671817192,
+      "topCoverage": 0.20689655172413793,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "有机",
+        "结构",
+        "organic"
+      ],
+      "bridgeTerms": [
+        "organic",
+        "structure",
+        "bureaucracy",
+        "mechanistic",
+        "standardization",
+        "specialization",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model",
+        "mechanistic structure",
+        "organic structure"
+      ],
+      "bridgeKeptCount": 41,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_RODZvEDs1g4Ps13Fxag4I"
+    },
+    {
+      "caseId": "od-eval-08",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -23.898953796738528,
+      "topCoverage": 0.21052631578947367,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "正式",
+        "运转"
+      ],
+      "bridgeTerms": [
+        "bureaucracy",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model"
+      ],
+      "bridgeKeptCount": 59,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        },
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_UMwVXU8GsXIipTJlTe7zt"
+    },
+    {
+      "caseId": "od-eval-09",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -58.67188474066968,
+      "topCoverage": 0.22857142857142856,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "departmentalization",
+        "机械",
+        "有机",
+        "连续",
+        "两",
+        "端的",
+        "形态"
+      ],
+      "bridgeTerms": [
+        "departmentalization",
+        "divisional",
+        "differentiation",
+        "mechanistic",
+        "organic",
+        "standardization",
+        "specialization",
+        "functional structure",
+        "divisional structure",
+        "product structure",
+        "geographic structure",
+        "matrix structure",
+        "mechanistic structure",
+        "organic structure"
+      ],
+      "bridgeKeptCount": 19,
+      "concepts": [
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_R3Xd1mqFNPNWkkTRldTHN"
+    },
+    {
+      "caseId": "od-eval-10",
+      "type": "concept_location",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "src_openstax_pom_ch10",
+        "ich-q10-pharmaceutical-quality-system",
+        "openstax-pom-ch03-3-7"
+      ],
+      "returnedLayers": [
+        "theory",
+        "pharma_context"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -36.782705858614925,
+      "topCoverage": 0.2608695652173913,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "链",
+        "command",
+        "指挥"
+      ],
+      "bridgeTerms": [
+        "chain",
+        "of",
+        "command",
+        "and",
+        "control",
+        "authority",
+        "accountability",
+        "accountable",
+        "responsibility",
+        "chain of command",
+        "command-and-control",
+        "dual reporting"
+      ],
+      "bridgeKeptCount": 138,
+      "concepts": [
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_AMNygc1PXmW0lv6PBvKnW"
+    },
+    {
+      "caseId": "od-eval-11",
+      "type": "comparison",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "ocw-15-320-s11-lec05",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -29.12076139246505,
+      "topCoverage": 0.22727272727272727,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "幅度",
+        "层次",
+        "任务",
+        "题"
+      ],
+      "bridgeTerms": [
+        "hierarchy",
+        "hierarchical",
+        "flatten",
+        "tall",
+        "span of control",
+        "flat organization",
+        "horizontal organizational structure",
+        "vertical organizational structure"
+      ],
+      "bridgeKeptCount": 40,
+      "concepts": [
+        {
+          "concept": "管理幅度与管理层次",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 4
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_heXw3CSHjK6JAcnvqxjpG"
+    },
+    {
+      "caseId": "od-eval-12",
+      "type": "comparison",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "doc_yifeng_603939_ar2025",
+        "cn-drug-admin-law-2019",
+        "src_openstax_pom_ch10"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact",
+        "pharma_context"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -25.767347793211243,
+      "topCoverage": 0.18518518518518517,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "职能",
+        "结构",
+        "事业",
+        "各有",
+        "劣",
+        "任务",
+        "题"
+      ],
+      "bridgeTerms": [
+        "departmentalization",
+        "divisional",
+        "differentiation",
+        "functional structure",
+        "divisional structure",
+        "product structure",
+        "geographic structure",
+        "matrix structure"
+      ],
+      "bridgeKeptCount": 20,
+      "concepts": [
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_hTH6hJrDSC7eMPTQKxw5q"
+    },
+    {
+      "caseId": "od-eval-13",
+      "type": "comparison",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "doc_shanghaipharma_601607_ar2025",
+        "src_openstax_pom_ch04_s4_3",
+        "doc_yifeng_603939_ar2025",
+        "doc_wuxiapptec_603259_ar2025"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -25.77057801100781,
+      "topCoverage": 0.109375,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "机械",
+        "有机",
+        "结构"
+      ],
+      "bridgeTerms": [
+        "bureaucracy",
+        "centralization",
+        "centralized",
+        "decentralization",
+        "decentralized",
+        "diffuse",
+        "departmentalization",
+        "divisional",
+        "differentiation",
+        "mechanistic",
+        "organic",
+        "standardization",
+        "specialization",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model",
+        "functional structure",
+        "divisional structure",
+        "product structure",
+        "geographic structure",
+        "matrix structure",
+        "mechanistic structure",
+        "organic structure"
+      ],
+      "bridgeKeptCount": 21,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_DcoUqtILMx6kufSevGANs"
+    },
+    {
+      "caseId": "od-eval-14",
+      "type": "comparison",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "src_openstax_pom_ch10",
+        "fda-quality-systems-approach-cgmp",
+        "doc_shanghaipharma_601607_ar2025",
+        "doc_yifeng_603939_ar2025"
+      ],
+      "returnedLayers": [
+        "theory",
+        "pharma_context",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -40.31592222850569,
+      "topCoverage": 0.10526315789473684,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "矩阵",
+        "结构",
+        "一条"
+      ],
+      "bridgeTerms": [
+        "departmentalization",
+        "divisional",
+        "differentiation",
+        "command",
+        "control",
+        "authority",
+        "accountability",
+        "accountable",
+        "responsibility",
+        "functional structure",
+        "divisional structure",
+        "product structure",
+        "geographic structure",
+        "matrix structure",
+        "chain of command",
+        "command-and-control",
+        "dual reporting"
+      ],
+      "bridgeKeptCount": 78,
+      "concepts": [
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_1PEhrYidJNVesXp8mzy1H"
+    },
+    {
+      "caseId": "od-eval-16",
+      "type": "condition_boundary",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -37.22356019066475,
+      "topCoverage": 0.35294117647058826,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "条件下",
+        "适合",
+        "机械",
+        "结构",
+        "有机"
+      ],
+      "bridgeTerms": [
+        "mechanistic",
+        "organic",
+        "standardization",
+        "specialization",
+        "mechanistic structure",
+        "organic structure"
+      ],
+      "bridgeKeptCount": 32,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_htb92MsZiRnQ0LYCRbLYs"
+    },
+    {
+      "caseId": "od-eval-17",
+      "type": "condition_boundary",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "src_openstax_pom_ch10",
+        "doc_hengrui_600276_ar2025",
+        "doc_yifeng_603939_ar2025",
+        "doc_wuxiapptec_603259_ar2025"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -25.767347793211243,
+      "topCoverage": 0.23809523809523808,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "矩阵",
+        "结构"
+      ],
+      "bridgeTerms": [
+        "departmentalization",
+        "divisional",
+        "differentiation",
+        "functional structure",
+        "divisional structure",
+        "product structure",
+        "geographic structure",
+        "matrix structure"
+      ],
+      "bridgeKeptCount": 20,
+      "concepts": [
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_gDh6awBGmCcw5xoTxNjBO"
+    },
+    {
+      "caseId": "od-eval-18",
+      "type": "condition_boundary",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "ocw-15-320-s11-lec03",
+        "src_openstax_pom_ch04_s4_3",
+        "doc_wuxiapptec_603259_ar2025"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -30.521557934064916,
+      "topCoverage": 0.23076923076923078,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "效率"
+      ],
+      "bridgeTerms": [
+        "centralization",
+        "centralized",
+        "decentralization",
+        "decentralized",
+        "diffuse"
+      ],
+      "bridgeKeptCount": 20,
+      "concepts": [
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_PKjCuLH09jX1zEmLWgBjy"
+    },
+    {
+      "caseId": "od-eval-19",
+      "type": "condition_boundary",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "doc_hengrui_600276_ar2025",
+        "doc_yifeng_603939_ar2025",
+        "cn-med-inst-pharm-admin-2011",
+        "ocw-15-320-s11-lec05"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact",
+        "pharma_context"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -29.12076139246505,
+      "topCoverage": 0.19230769230769232,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "扁平",
+        "提升",
+        "效率",
+        "任务",
+        "题"
+      ],
+      "bridgeTerms": [
+        "hierarchy",
+        "hierarchical",
+        "flatten",
+        "tall",
+        "span of control",
+        "flat organization",
+        "horizontal organizational structure",
+        "vertical organizational structure"
+      ],
+      "bridgeKeptCount": 40,
+      "concepts": [
+        {
+          "concept": "管理幅度与管理层次",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 4
+        },
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_zTyob4qYmUkvaaBKd2Asx"
+    },
+    {
+      "caseId": "od-eval-20",
+      "type": "condition_boundary",
+      "expectedSourceIds": [
+        "src_pharma_context_pack",
+        "src_textbook_main_orgdesign"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_pharma_context_pack"
+      ],
+      "unresolvableExpectedSourceIds": [
+        "src_textbook_main_orgdesign"
+      ],
+      "returnedSourceIds": [
+        "cn-gmp-2010",
+        "src_openstax_pom_ch10",
+        "cn-med-inst-pharm-admin-2011",
+        "cn-drug-admin-law-2019"
+      ],
+      "returnedLayers": [
+        "pharma_context",
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -29.586351586391924,
+      "topCoverage": 0.20588235294117646,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "GSP",
+        "监管",
+        "设置",
+        "结构",
+        "特殊",
+        "边界"
+      ],
+      "bridgeTerms": [
+        "GSP",
+        "bureaucracy",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model"
+      ],
+      "bridgeKeptCount": 62,
+      "concepts": [
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": false,
+          "viaUnit": false,
+          "viaMention": false,
+          "matchedUnitCount": 0
+        },
+        {
+          "concept": "部门化",
+          "recalled": false,
+          "viaUnit": false,
+          "viaMention": false,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_Hplp4MZ2JZqCAijJSEWXm"
+    },
+    {
+      "caseId": "od-eval-21",
+      "type": "case_judgment",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3",
+        "doc_hengrui_600276_ar2025",
+        "doc_wuxiapptec_603259_ar2025",
+        "doc_shanghaipharma_601607_ar2025"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -31.716901906461814,
+      "topCoverage": 0.12121212121212122,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "一支",
+        "团队",
+        "快速",
+        "探索",
+        "未知",
+        "机械",
+        "有机",
+        "框架",
+        "适合",
+        "结构",
+        "任务",
+        "题"
+      ],
+      "bridgeTerms": [
+        "mechanistic",
+        "organic",
+        "standardization",
+        "specialization",
+        "mechanistic structure",
+        "organic structure"
+      ],
+      "bridgeKeptCount": 32,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_73ch8wJZf14zjviEXxFGc"
+    },
+    {
+      "caseId": "od-eval-22",
+      "type": "case_judgment",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "ocw-15-320-s11-lec05",
+        "doc_yifeng_603939_ar2025",
+        "doc_wuxiapptec_603259_ar2025",
+        "src_openstax_pom_ch10"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -24.66426621535228,
+      "topCoverage": 0.1282051282051282,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "一家",
+        "人的",
+        "初创",
+        "单一",
+        "适合",
+        "职能",
+        "事业"
+      ],
+      "bridgeTerms": [
+        "departmentalization",
+        "divisional",
+        "differentiation",
+        "contingency",
+        "environment",
+        "uncertainty",
+        "stable",
+        "unstable",
+        "circumstances",
+        "functional structure",
+        "divisional structure",
+        "product structure",
+        "geographic structure",
+        "matrix structure",
+        "contingency factors"
+      ],
+      "bridgeKeptCount": 43,
+      "concepts": [
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_B6fZSoEcnjGjZZLtHCnIC"
+    },
+    {
+      "caseId": "od-eval-23",
+      "type": "case_judgment",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "doc_hengrui_600276_ar2025",
+        "doc_yifeng_603939_ar2025",
+        "doc_wuxiapptec_603259_ar2025",
+        "src_openstax_pom_ch10",
+        "doc_shanghaipharma_601607_ar2025"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -24.66426621535228,
+      "topCoverage": 0.13333333333333333,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "盈亏",
+        "齐",
+        "职能",
+        "团队",
+        "结构"
+      ],
+      "bridgeTerms": [
+        "departmentalization",
+        "divisional",
+        "differentiation",
+        "functional structure",
+        "divisional structure",
+        "product structure",
+        "geographic structure",
+        "matrix structure"
+      ],
+      "bridgeKeptCount": 20,
+      "concepts": [
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_yP5wAkz3eQzmX0bWMvi7B"
+    },
+    {
+      "caseId": "od-eval-24",
+      "type": "case_judgment",
+      "expectedSourceIds": [
+        "src_annual_reports_2cos"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_annual_reports_2cos"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "doc_hengrui_600276_ar2025",
+        "doc_shanghaipharma_601607_ar2025",
+        "doc_wuxiapptec_603259_ar2025"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -15.327758993879327,
+      "topCoverage": 0.09090909090909091,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "两",
+        "结构",
+        "接近",
+        "类型",
+        "年报"
+      ],
+      "bridgeTerms": [
+        "bureaucracy",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model",
+        "annual report",
+        "10-K"
+      ],
+      "bridgeKeptCount": 141,
+      "concepts": [
+        {
+          "concept": "部门化",
+          "recalled": false,
+          "viaUnit": false,
+          "viaMention": false,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_xrCkvJu0ZrqUBxj2WwOvr"
+    },
+    {
+      "caseId": "od-eval-25",
+      "type": "case_judgment",
+      "expectedSourceIds": [
+        "src_annual_reports_2cos",
+        "src_pharma_context_pack"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_annual_reports_2cos"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "doc_shanghaipharma_601607_ar2025",
+        "doc_wuxiapptec_603259_ar2025"
+      ],
+      "returnedLayers": [
+        "theory",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -15.327758993879327,
+      "topCoverage": 0.08571428571428572,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "两",
+        "年报",
+        "结构",
+        "布局",
+        "哪一",
+        "更有",
+        "利于"
+      ],
+      "bridgeTerms": [
+        "bureaucracy",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model",
+        "annual report",
+        "10-K"
+      ],
+      "bridgeKeptCount": 141,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_xyYDMSGDgDvB7JaAPTbt5"
+    },
+    {
+      "caseId": "od-eval-26",
+      "type": "misconception",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "ocw-15-320-s11-lec03",
+        "src_openstax_pom_ch04_s4_3",
+        "cn-med-inst-pharm-admin-2011",
+        "doc_yifeng_603939_ar2025",
+        "cn-vbp-normalization-2021-2"
+      ],
+      "returnedLayers": [
+        "theory",
+        "pharma_context",
+        "company_fact"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -30.521557934064916,
+      "topCoverage": 0.15789473684210525,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "失控",
+        "任务",
+        "题"
+      ],
+      "bridgeTerms": [
+        "centralization",
+        "centralized",
+        "decentralization",
+        "decentralized",
+        "diffuse"
+      ],
+      "bridgeKeptCount": 20,
+      "concepts": [
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_Mc5TifeKNGnyd0pVApZFR"
+    },
+    {
+      "caseId": "od-eval-27",
+      "type": "misconception",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -37.22356019066475,
+      "topCoverage": 0.3,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "有机",
+        "方面",
+        "优于",
+        "机械",
+        "现代"
+      ],
+      "bridgeTerms": [
+        "mechanistic",
+        "organic",
+        "standardization",
+        "specialization",
+        "mechanistic structure",
+        "organic structure"
+      ],
+      "bridgeKeptCount": 32,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_uhIYHT1roqV5K60tTOo3j"
+    },
+    {
+      "caseId": "od-eval-28",
+      "type": "misconception",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "matchedExpectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "unresolvableExpectedSourceIds": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedLayers": [
+        "theory"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -23.898953796738528,
+      "topCoverage": 0.19047619047619047,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "结构",
+        "图",
+        "代表",
+        "运转"
+      ],
+      "bridgeTerms": [
+        "bureaucracy",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model"
+      ],
+      "bridgeKeptCount": 59,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        },
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_THlTNHnJbKTL6ciYqt3S0"
+    },
+    {
+      "caseId": "od-eval-29",
+      "type": "refusal",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch03_s3_7",
+        "src_textbook_main_orgdesign"
+      ],
+      "matchedExpectedSourceIds": [],
+      "unresolvableExpectedSourceIds": [
+        "src_textbook_main_orgdesign"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "src_openstax_pom_ch10",
+        "ocw-15-320-s11-lec05",
+        "cn-gmp-2010"
+      ],
+      "returnedLayers": [
+        "theory",
+        "pharma_context"
+      ],
+      "locationHit": false,
+      "resultCount": 10,
+      "topScore": -19.215834777419943,
+      "topCoverage": 0.21212121212121213,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "distinctiveTerms": [
+        "因素",
+        "contingency",
+        "结构"
+      ],
+      "bridgeTerms": [
+        "contingency",
+        "factors",
+        "bureaucracy",
+        "environment",
+        "uncertainty",
+        "stable",
+        "unstable",
+        "circumstances",
+        "organizational structure",
+        "organization structure",
+        "organizational design",
+        "formal organization",
+        "informal organization",
+        "organizational chart",
+        "bureaucratic model",
+        "contingency factors"
+      ],
+      "bridgeKeptCount": 76,
+      "concepts": [
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_iwDvfGklLgrkB73yiSrgW"
+    }
+  ],
+  "pendingCases": [
+    {
+      "caseId": "od-eval-15",
+      "question": "本课程指定主教材与教师 PPT 对'集权与分权''管理幅度与管理层次'的表述,与 OpenStax 两份来源在术语与侧重点上有哪些差异?",
+      "shouldRefuse": false,
+      "resultCount": 10,
+      "topScore": -30.521557934064916,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "doc_yifeng_603939_ar2025",
+        "cn-vbp-normalization-2021-2",
+        "doc_hengrui_600276_ar2025",
+        "doc_wuxiapptec_603259_ar2025"
+      ],
+      "demandProbes": [
+        "权责对等"
+      ],
+      "demandProbesPresentInResults": [],
+      "demandedContentAbsent": true,
+      "weakOnly": false,
+      "satisfiedVia": "demanded_content_absent",
+      "gapContractSatisfied": true,
+      "missingExpectedSources": [
+        "src_textbook_main_orgdesign",
+        "src_teacher_ppt_orgdesign"
+      ]
+    },
+    {
+      "caseId": "od-eval-30",
+      "question": "本课程主教材中'权责对等原则'的原文表述是什么?它与 OpenStax 的 command-and-control、centralization 表述有何异同?",
+      "shouldRefuse": true,
+      "resultCount": 10,
+      "topScore": -36.03426566617966,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3",
+        "fda-quality-systems-approach-cgmp",
+        "doc_roche_ar2025"
+      ],
+      "demandProbes": [
+        "权责对等",
+        "权责对等原则"
+      ],
+      "demandProbesPresentInResults": [],
+      "demandedContentAbsent": true,
+      "weakOnly": false,
+      "satisfiedVia": "demanded_content_absent",
+      "gapContractSatisfied": true,
+      "missingExpectedSources": [
+        "src_textbook_main_orgdesign"
+      ]
+    }
+  ]
+}

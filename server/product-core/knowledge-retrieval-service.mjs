@@ -12,8 +12,25 @@
 //      两个列均为 unicode61(migration 已冻结不可改);trigram 在探针中对 <3 字查询结构性失效,
 //      本语料为英文长词文本,unicode61 原文通道承担同一"兜底"职责,语义等价。
 //   3. 精确字段过滤(不走全文):courseId/chapterId(content_blocks.parser_metadata_json)、
-//      sourceType(knowledge_assets.type)、reviewStatus/concept(kb_knowledge_units)。
+//      sourceType(knowledge_assets.type)、reviewStatus/concept(kb_knowledge_units)、
+//      layer(kb_chapter_sources,008)、authorityLevel(kb_source_permissions,008)、
+//      company(kb_company_fact_units 经 kb_company_fact_fragments,008)。
 //   4. 后处理:同 asset_version 相邻 order_index 命中块合并为一个结果(还原上下文,保留首块锚点)。
+//   5. 精确子串兜底通道(exact_substring):前两通道均无过门槛结果时,对含 CJK 的有效查询词
+//      以 instr(content_raw, term) 精确子串匹配取候选。unicode61 对连续中文不切词
+//      (整段成一个 token),原文通道对两字中文词结构性失效;migration 004 已冻结,
+//      不能加 trigram 列,故用确定性子串匹配承担同一兜底职责。该通道只在精确命中时
+//      产生候选(子串存在即最强词法证据),合成 rank 取 BM25_SCORE_THRESHOLD 恰好过线,
+//      覆盖率门禁照常执行,不会绕过误召回门禁放进无命中噪声。
+//   6. 跨语言桥接通道(segmented_bridge):中英混合语料下,中文题面的高频共享词(组织/结构
+//      等,df 数千)在 OR 语义 + bm25 长度归一下会把只含英文核心词的理论片段挤出结果前列
+//      (2026-08-04 复验实测:理论来源过门禁但名次被挤到 10 名外,被 limit 截断)。题面
+//      自写的拉丁词元(用户已完成跨语言桥接)与词典扩展的拉丁面形(CONCEPT_QUERY_ALIASES/
+//      COURSE_TERM_ALIASES,中文诉求 → 英文语料的桥)合为桥接词集,在分词通道单独重跑
+//      一次,过同样两道门禁(覆盖率分母=桥接词集,与通道查询集同口径,门禁未降),
+//      与通用通道(及显著词通道)结果做 RRF 融合且取最终融合位(见 searchKnowledge 注释)。
+//      查询无拉丁词元或桥接词集与有效词集重合时通道不启用,行为与先前一致(拒答路径
+//      不受影响)。
 //
 // 误召回门禁(spec §5.2):探针实测分词通道 OR 语义对无答案题误召回率 0.667(共享词元捞回噪声),
 // 故候选必须同时通过两道确定性门槛才进入结果集:
@@ -21,9 +38,13 @@
 //   - MIN_QUERY_TERM_COVERAGE:有效查询词覆盖率下限(命中词数/有效词数,合并组内取并集)。
 //   阈值在本文件头冻结为常量,标定记录见 experiments/kb-retrieval/(拒答题必须被门槛拦下)。
 //
-// 权限闸门(manifest permissionModel.defaultDeny):片段所属来源的 allowedOperations
-// (随 parser_metadata_json 落库)必须显式含 'exact_or_lexical_search' 才可被检索;
-// 未登记授权的片段一律排除。OpenStax 两份 acquired_reference_only 来源天然满足。
+// 权限闸门(manifest permissionModel.defaultDeny,两路登记等价承认):
+//   - 旧管线(organization-design-source-manifest.json):片段所属来源的 allowedOperations
+//     (随 parser_metadata_json 落库)必须显式含 'exact_or_lexical_search';
+//   - 新管线(008,organization-design-authoritative-sources-manifest.json):来源在
+//     kb_source_permissions 登记 lexical_indexing_allowed=1(经 knowledge_assets 关联)。
+//   两路满足其一即可被检索;均未登记授权的片段一律排除(default-deny)。
+//   llmInputAllowed=0 是全量口径(008 摄入服务遇 true 即 FAIL),检索通道天然不含模型路径。
 //
 // 审核纪律:rejected 单元的片段默认排除(片段仅当被 rejected 单元独占链接时排除;
 // 同时被非 rejected 单元链接的片段保留);unitId 标注只挂非 rejected 单元。
@@ -59,6 +80,12 @@ import { normalizeText } from '../document-parsers/manual-markdown-parser.mjs';
 // ---------------------------------------------------------------------------
 export const BM25_SCORE_THRESHOLD = -0.05;
 export const MIN_QUERY_TERM_COVERAGE = 0.08;
+// 显著词(distinctive term)判定线:同范围语料中 df 占比 <= 该比率的词为显著词。
+// 用于"显著词第二通道"(见 searchKnowledge):OR 语义下高频共享词会把只含低频核心词的
+// 片段挤出候选前列,显著词子集重跑可将其召回;两道门禁(分值/覆盖率)对该通道同样适用。
+export const DF_DISTINCTIVE_MAX_RATIO = 0.01;
+// 显著词通道只在中长查询启用(有效词数下限);短查询无共享词挤占问题,跳过省一次扫描。
+const DISTINCTIVE_PASS_MIN_TERMS = 4;
 
 export const DEFAULT_RESULT_LIMIT = 10;
 export const MAX_RESULT_LIMIT = 50;
@@ -72,6 +99,9 @@ const KB_RETRIEVAL_STATE_MACHINE_VERSION = '1.0.0';
 export const INSUFFICIENT_EVIDENCE_MESSAGE = '当前知识库不足以支持该判断';
 
 // 中文查询停用词:问句套话,对定位无贡献,保留只会稀释覆盖率门禁。确定性小词表,可审查。
+// 2026-08-04 增补(权威语料复验标定):定义/注明/出处/区别/情况/方式/清单 同为问句模板词
+// ("请给出定义并注明来源"类),在 7603 块中英混合语料上会把只含套话的中文噪声块顶到
+// 理论来源之前;剔除后题面实义实词(组织/结构/contingency 等)决定排序。
 const ZH_STOPWORDS = new Set([
   '什么', '的', '了', '与', '和', '或', '及', '在', '是', '都', '也', '就', '不', '更', '各',
   '哪些', '如何', '有', '无', '请', '给出', '说明', '分别', '指', '依据', '出自', '哪份', '来源',
@@ -81,6 +111,7 @@ const ZH_STOPWORDS = new Set([
   '原文', '表述', '异同', '含义', '为什么', '怎么', '怎样', '是否', '必然', '吗', '呢', '它',
   '以及', '并且', '而且', '但', '但是', '而', '则', '即', '若', '如', '比如', '例如', '中',
   '出自', '哪', '哪些', '何', '各自', '基于', '假设', '选择', '还是', '属于', '哪种', '二者',
+  '定义', '注明', '出处', '区别', '情况', '方式',
 ]);
 
 // ---------------------------------------------------------------------------
@@ -134,6 +165,70 @@ export const CONCEPT_QUERY_ALIASES = Object.freeze({
     en: Object.freeze(['contingency', 'contingency factors', 'environment', 'uncertainty', 'stable', 'unstable', 'circumstances']),
   }),
 });
+
+// ---------------------------------------------------------------------------
+// 课程术语同义别名表(人工维护的课程词典,非模型;中英文/全称缩写互指,单一事实源)。
+// 与 CONCEPT_QUERY_ALIASES 的分工:概念表服务七大核心概念(查询扩展 + concept 过滤归并);
+// 本表服务医药行业术语与课程惯用语(法规/监管/企业披露语料的跨语言互指),不参与 concept 过滤。
+// 用途一:查询扩展——题面命中某组任一面形(中文子串/英文大小写不敏感子串)时,把同组其余
+//   面形补入查询,使中文题面可命中英文条款(如 药物警戒 → pharmacovigilance),反之亦然。
+// 用途二:OOV 拒答豁免——查询显式写出的外文摘写(如 QP)本身零命中,但其注册别名在语料中
+//   存在时,该词元所代表的诉求语料可以支撑,不判 missing(词典声明等价,不是查询级作弊)。
+// ---------------------------------------------------------------------------
+export const COURSE_TERM_ALIASES = Object.freeze([
+  Object.freeze({ key: 'qualified_person', aliases: Object.freeze(['质量受权人', 'QP', 'Qualified Person']) }),
+  Object.freeze({ key: 'pharmacovigilance', aliases: Object.freeze(['药物警戒', 'pharmacovigilance']) }),
+  Object.freeze({ key: 'vbp', aliases: Object.freeze(['集采', '集中带量采购', 'volume-based procurement', 'VBP']) }),
+  Object.freeze({ key: 'annual_report', aliases: Object.freeze(['年报', '年度报告', 'annual report', '10-K']) }),
+  Object.freeze({ key: 'gsp', aliases: Object.freeze(['GSP', '药品经营质量管理规范']) }),
+  Object.freeze({ key: 'gmp', aliases: Object.freeze(['GMP', '药品生产质量管理规范']) }),
+  Object.freeze({
+    key: 'mah',
+    aliases: Object.freeze(['MAH', '药品上市许可持有人', '上市许可持有人', 'marketing authorization holder']),
+  }),
+  Object.freeze({
+    key: 'dtc',
+    aliases: Object.freeze(['药事委员会', '药事管理与药物治疗学委员会', 'drug and therapeutics committee', 'DTC']),
+  }),
+  Object.freeze({ key: 'contract_manufacturing', aliases: Object.freeze(['委托生产', 'contract manufacturing', 'outsourced operations']) }),
+  Object.freeze({ key: 'prescription_review', aliases: Object.freeze(['处方审核', 'prescription review']) }),
+]);
+
+/** 词元的注册别名全集(含自身;未注册返回 [term] 本身)。OOV 豁免与测试共用,单一事实源。 */
+export function aliasesOfTerm(term) {
+  const lowered = term.toLowerCase();
+  for (const group of COURSE_TERM_ALIASES) {
+    if (group.aliases.some((alias) => alias.toLowerCase() === lowered)) return [...group.aliases];
+  }
+  return [term];
+}
+
+/**
+ * 术语别名扩展:题面命中某组任一面形时,同组其余面形补入查询(多词面形作短语)。
+ * 返回 { expansionTerms, expansionPhrases, matchedGroups }(与概念扩展同构,调用方合并)。
+ */
+export function expandQueryByTermAliases(query, alreadySeen) {
+  const lowered = query.toLowerCase();
+  const seen = alreadySeen ?? new Set();
+  const expansionTerms = [];
+  const expansionPhrases = [];
+  const matchedGroups = [];
+  for (const group of COURSE_TERM_ALIASES) {
+    const hit = group.aliases.some((alias) =>
+      /[a-z]/i.test(alias) ? lowered.includes(alias.toLowerCase()) : query.includes(alias),
+    );
+    if (!hit) continue;
+    matchedGroups.push(group.key);
+    for (const alias of group.aliases) {
+      const key = alias.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if (/[\s-]/.test(alias)) expansionPhrases.push(alias);
+      else expansionTerms.push(alias);
+    }
+  }
+  return { expansionTerms, expansionPhrases, matchedGroups };
+}
 
 const segmenter = new Intl.Segmenter('zh', { granularity: 'word' });
 
@@ -283,8 +378,9 @@ function globalCorpusVersionHash(db) {
   return `sha256:${createHash('sha256').update(JSON.stringify(rows.map((r) => r.content_hash))).digest('hex')}`;
 }
 
-const FILTER_KEYS = new Set(['courseId', 'chapterId', 'sourceType', 'reviewStatus', 'concept']);
+const FILTER_KEYS = new Set(['courseId', 'chapterId', 'sourceType', 'reviewStatus', 'concept', 'layer', 'company', 'authorityLevel']);
 const REVIEW_STATUSES = new Set(['machine_extracted', 'teacher_verified', 'needs_review', 'rejected']);
+const LAYERS = new Set(['theory', 'pharma_context', 'company_fact']);
 
 function validateFilters(filters) {
   for (const key of Object.keys(filters)) {
@@ -294,6 +390,15 @@ function validateFilters(filters) {
   }
   if (filters.reviewStatus !== undefined && !REVIEW_STATUSES.has(filters.reviewStatus)) {
     failCode('KB_RETRIEVAL_INPUT_INVALID', `reviewStatus 必须是 ${[...REVIEW_STATUSES].join('/')}`);
+  }
+  if (filters.layer !== undefined && !LAYERS.has(filters.layer)) {
+    failCode('KB_RETRIEVAL_INPUT_INVALID', `layer 必须是 ${[...LAYERS].join('/')}`);
+  }
+  if (filters.authorityLevel !== undefined && ![1, 2].includes(filters.authorityLevel)) {
+    failCode('KB_RETRIEVAL_INPUT_INVALID', `authorityLevel 必须是 1 或 2(经 kb_source_permissions 过滤)`);
+  }
+  if (filters.company !== undefined && !isNonEmptyString(filters.company)) {
+    failCode('KB_RETRIEVAL_INPUT_INVALID', 'company 必须是非空字符串(经 kb_company_fact_units 过滤)');
   }
 }
 
@@ -305,9 +410,12 @@ function corpusTermPresence(db, term, filters) {
   const where = [
     "av.source_status = 'active'",
     'instr(lower(cb.content_raw), lower(?)) > 0',
-    `EXISTS (
-       SELECT 1 FROM json_each(json_extract(cb.parser_metadata_json, '$.allowedOperations')) op
-       WHERE op.value = '${RETRIEVAL_PERMISSION}'
+    // 权限闸门两路等价(见文件头):旧管线片段级 allowedOperations,或 008 来源级 lexical_indexing_allowed=1。
+    `(
+       EXISTS (
+         SELECT 1 FROM json_each(json_extract(cb.parser_metadata_json, '$.allowedOperations')) op
+         WHERE op.value = '${RETRIEVAL_PERMISSION}'
+       ) OR sp.lexical_indexing_allowed = 1
      )`,
   ];
   const params = [term];
@@ -323,42 +431,137 @@ function corpusTermPresence(db, term, filters) {
     SELECT cb.id
     FROM content_blocks cb
     JOIN asset_versions av ON av.id = cb.asset_version_id
+    JOIN knowledge_assets ka ON ka.id = av.asset_id
+    LEFT JOIN kb_source_permissions sp ON sp.source_id = ka.id
     WHERE ${where.join('\n      AND ')}
     LIMIT 1`;
   return db.prepare(sql).get(...params) !== undefined;
 }
 
 /**
+ * 词元文档频数(df):同范围语料(active + 已授权检索 + 同 course/chapter 过滤)中
+ * 含该词元(instr 精确子串)的片段数。显著词判定(DF_DISTINCTIVE_MAX_RATIO)用。
+ */
+function corpusTermDf(db, term, filters) {
+  const where = [
+    "av.source_status = 'active'",
+    'instr(lower(cb.content_raw), lower(?)) > 0',
+    `(
+       EXISTS (
+         SELECT 1 FROM json_each(json_extract(cb.parser_metadata_json, '$.allowedOperations')) op
+         WHERE op.value = '${RETRIEVAL_PERMISSION}'
+       ) OR sp.lexical_indexing_allowed = 1
+     )`,
+  ];
+  const params = [term];
+  if (filters.courseId !== undefined) {
+    where.push(`json_extract(cb.parser_metadata_json, '$.courseId') = ?`);
+    params.push(filters.courseId);
+  }
+  if (filters.chapterId !== undefined) {
+    where.push(`json_extract(cb.parser_metadata_json, '$.chapterId') = ?`);
+    params.push(filters.chapterId);
+  }
+  const sql = `
+    SELECT COUNT(*) AS c
+    FROM content_blocks cb
+    JOIN asset_versions av ON av.id = cb.asset_version_id
+    JOIN knowledge_assets ka ON ka.id = av.asset_id
+    LEFT JOIN kb_source_permissions sp ON sp.source_id = ka.id
+    WHERE ${where.join('\n      AND ')}`;
+  return db.prepare(sql).get(...params).c;
+}
+
+/** 同范围语料片段总数(active + 已授权检索 + 同 course/chapter 过滤)。显著词 df 占比的分母。 */
+function corpusScopeBlockCount(db, filters) {
+  const where = [
+    "av.source_status = 'active'",
+    `(
+       EXISTS (
+         SELECT 1 FROM json_each(json_extract(cb.parser_metadata_json, '$.allowedOperations')) op
+         WHERE op.value = '${RETRIEVAL_PERMISSION}'
+       ) OR sp.lexical_indexing_allowed = 1
+     )`,
+  ];
+  const params = [];
+  if (filters.courseId !== undefined) {
+    where.push(`json_extract(cb.parser_metadata_json, '$.courseId') = ?`);
+    params.push(filters.courseId);
+  }
+  if (filters.chapterId !== undefined) {
+    where.push(`json_extract(cb.parser_metadata_json, '$.chapterId') = ?`);
+    params.push(filters.chapterId);
+  }
+  const sql = `
+    SELECT COUNT(*) AS c
+    FROM content_blocks cb
+    JOIN asset_versions av ON av.id = cb.asset_version_id
+    JOIN knowledge_assets ka ON ka.id = av.asset_id
+    LEFT JOIN kb_source_permissions sp ON sp.source_id = ka.id
+    WHERE ${where.join('\n      AND ')}`;
+  return db.prepare(sql).get(...params).c;
+}
+
+/**
  * 候选检索:FTS5 MATCH + 精确过滤,返回按 bm25 升序(越负越优)的候选行。
- * channel: 'segmented'(分词主通道)| 'raw'(原文关键词兜底通道)。
+ * channel: 'segmented'(分词主通道)| 'raw'(原文关键词兜底通道)|
+ *   'exact_substring'(CJK 精确子串兜底,instr 匹配,不走 FTS;合成 rank=BM25_SCORE_THRESHOLD,
+ *   子串存在即最强词法证据,覆盖率门禁仍照常执行)。
  */
 function fetchCandidates(db, { channel, terms, phrases, filters, conceptNames }) {
-  const column = channel === 'segmented' ? 'content_segmented' : 'content_raw';
-  const matchExpr = buildFtsMatchExpr(column, terms, phrases);
-  if (matchExpr === null) return [];
+  const where = ["av.source_status = 'active'"];
+  const params = [];
 
-  const where = ['content_blocks_fts MATCH ?', "av.source_status = 'active'"];
-  const params = [matchExpr];
+  if (channel === 'exact_substring') {
+    // 只取含 CJK 的词元(该通道为中文短词兜底而设);每个词元 instr 精确子串,OR 组合。
+    const cjkTerms = terms.filter((t) => /[㐀-鿿豈-﫿]/.test(t));
+    if (cjkTerms.length === 0) return [];
+    where.push(`(${cjkTerms.map(() => 'instr(cb.content_raw, ?) > 0').join(' OR ')})`);
+    params.push(...cjkTerms);
+  } else {
+    const column = channel === 'segmented' ? 'content_segmented' : 'content_raw';
+    const matchExpr = buildFtsMatchExpr(column, terms, phrases);
+    if (matchExpr === null) return [];
+    where.push('content_blocks_fts MATCH ?');
+    params.push(matchExpr);
+  }
 
-  // 权限闸门:片段来源必须显式授权 exact_or_lexical_search(defaultDeny,未登记即排除)。
-  where.push(
-    `EXISTS (
-       SELECT 1 FROM json_each(json_extract(cb.parser_metadata_json, '$.allowedOperations')) op
-       WHERE op.value = '${RETRIEVAL_PERMISSION}'
-     )`,
-  );
-  // rejected 单元独占链接的片段默认排除(同时被非 rejected 单元链接的片段保留)。
-  // 注意:OR 组合必须整体加括号——SQL 中 AND 优先级高于 OR,不括号化会旁路其后的全部过滤条件。
+  // 权限闸门两路等价(见文件头):片段来源显式授权 exact_or_lexical_search(旧管线,
+  // 片段级元数据)或 kb_source_permissions.lexical_indexing_allowed=1(008,来源级登记)。
   where.push(
     `(
-       NOT EXISTS (
-         SELECT 1 FROM kb_unit_fragments uf
-         JOIN kb_knowledge_units u ON u.id = uf.unit_id
-         WHERE uf.fragment_id = cb.id
+       EXISTS (
+         SELECT 1 FROM json_each(json_extract(cb.parser_metadata_json, '$.allowedOperations')) op
+         WHERE op.value = '${RETRIEVAL_PERMISSION}'
+       ) OR sp.lexical_indexing_allowed = 1
+     )`,
+  );
+  // rejected 单元独占链接的片段默认排除(三层并集判断:片段仅当其全部链接单元——
+  // theory/pharma_context/company_fact 三层合计——都是 rejected 时才排除;存在任一非 rejected
+  // 链接即保留)。注意:OR 组合必须整体加括号——SQL 中 AND 优先级高于 OR,不括号化会旁路
+  // 其后的全部过滤条件。
+  where.push(
+    `(
+       (
+         NOT EXISTS (
+           SELECT 1 FROM kb_unit_fragments uf WHERE uf.fragment_id = cb.id
+         ) AND NOT EXISTS (
+           SELECT 1 FROM kb_pharma_context_fragments pf WHERE pf.fragment_id = cb.id
+         ) AND NOT EXISTS (
+           SELECT 1 FROM kb_company_fact_fragments cf WHERE cf.fragment_id = cb.id
+         )
        ) OR EXISTS (
          SELECT 1 FROM kb_unit_fragments uf
          JOIN kb_knowledge_units u ON u.id = uf.unit_id
          WHERE uf.fragment_id = cb.id AND u.review_status <> 'rejected'
+       ) OR EXISTS (
+         SELECT 1 FROM kb_pharma_context_fragments pf
+         JOIN kb_pharma_context_units pu ON pu.id = pf.unit_id
+         WHERE pf.fragment_id = cb.id AND pu.review_status <> 'rejected'
+       ) OR EXISTS (
+         SELECT 1 FROM kb_company_fact_fragments cf
+         JOIN kb_company_fact_units cu ON cu.id = cf.unit_id
+         WHERE cf.fragment_id = cb.id AND cu.review_status <> 'rejected'
        )
      )`,
   );
@@ -375,15 +578,58 @@ function fetchCandidates(db, { channel, terms, phrases, filters, conceptNames })
     where.push('ka.type = ?');
     params.push(filters.sourceType);
   }
-  if (filters.reviewStatus !== undefined) {
+  if (filters.layer !== undefined) {
+    // layer 经 kb_chapter_sources(008);course/chapter 过滤同给时归属行须同范围。
+    let clause = `EXISTS (
+       SELECT 1 FROM kb_chapter_sources cs
+       WHERE cs.asset_id = ka.id AND cs.layer = ?`;
+    params.push(filters.layer);
+    if (filters.courseId !== undefined) {
+      clause += ' AND cs.course_id = ?';
+      params.push(filters.courseId);
+    }
+    if (filters.chapterId !== undefined) {
+      clause += ' AND cs.chapter_id = ?';
+      params.push(filters.chapterId);
+    }
+    clause += '\n     )';
+    where.push(clause);
+  }
+  if (filters.authorityLevel !== undefined) {
+    // 经 kb_source_permissions(008);未登记权限行的来源在该过滤下不出现。
+    where.push('sp.authority_level = ?');
+    params.push(filters.authorityLevel);
+  }
+  if (filters.company !== undefined) {
     where.push(
       `EXISTS (
-         SELECT 1 FROM kb_unit_fragments uf
-         JOIN kb_knowledge_units u ON u.id = uf.unit_id
-         WHERE uf.fragment_id = cb.id AND u.review_status = ?
+         SELECT 1 FROM kb_company_fact_fragments cf
+         JOIN kb_company_fact_units cu ON cu.id = cf.unit_id
+         WHERE cf.fragment_id = cb.id AND cu.company = ?
        )`,
     );
-    params.push(filters.reviewStatus);
+    params.push(filters.company);
+  }
+  if (filters.reviewStatus !== undefined) {
+    // 单元级审核状态过滤,三层并集:片段被任一该状态单元(theory/pharma_context/company_fact)链接即满足。
+    where.push(
+      `(
+         EXISTS (
+           SELECT 1 FROM kb_unit_fragments uf
+           JOIN kb_knowledge_units u ON u.id = uf.unit_id
+           WHERE uf.fragment_id = cb.id AND u.review_status = ?
+         ) OR EXISTS (
+           SELECT 1 FROM kb_pharma_context_fragments pf
+           JOIN kb_pharma_context_units pu ON pu.id = pf.unit_id
+           WHERE pf.fragment_id = cb.id AND pu.review_status = ?
+         ) OR EXISTS (
+           SELECT 1 FROM kb_company_fact_fragments cf
+           JOIN kb_company_fact_units cu ON cu.id = cf.unit_id
+           WHERE cf.fragment_id = cb.id AND cu.review_status = ?
+         )
+       )`,
+    );
+    params.push(filters.reviewStatus, filters.reviewStatus, filters.reviewStatus);
   }
   if (conceptNames !== null) {
     const placeholders = conceptNames.map(() => '?').join(', ');
@@ -395,6 +641,22 @@ function fetchCandidates(db, { channel, terms, phrases, filters, conceptNames })
        )`,
     );
     params.push(...conceptNames);
+  }
+
+  if (channel === 'exact_substring') {
+    // 无 FTS:直接扫表(过滤条件同上),合成 rank 恰好过 bm25 线;覆盖率门禁在合并组上照常执行。
+    const sql = `
+      SELECT cb.id, cb.asset_version_id, cb.block_type, cb.order_index, cb.page_index, cb.page_label,
+             cb.content_raw, cb.content_hash, cb.parser_metadata_json,
+             ${BM25_SCORE_THRESHOLD} AS rank
+      FROM content_blocks cb
+      JOIN asset_versions av ON av.id = cb.asset_version_id
+      JOIN knowledge_assets ka ON ka.id = av.asset_id
+      LEFT JOIN kb_source_permissions sp ON sp.source_id = ka.id
+      WHERE ${where.join('\n      AND ')}
+      ORDER BY cb.asset_version_id, cb.order_index
+      LIMIT ${MAX_CANDIDATE_ROWS}`;
+    return db.prepare(sql).all(...params);
   }
 
   // FTS5 的 MATCH 要求 FTS 表为驱动表;多表 JOIN 会让规划器改序并报
@@ -414,7 +676,8 @@ function fetchCandidates(db, { channel, terms, phrases, filters, conceptNames })
     JOIN content_blocks cb ON cb.rowid = f.rowid
     JOIN asset_versions av ON av.id = cb.asset_version_id
     JOIN knowledge_assets ka ON ka.id = av.asset_id
-    WHERE ${where.slice(1).join('\n      AND ')}
+    LEFT JOIN kb_source_permissions sp ON sp.source_id = ka.id
+    WHERE ${where.slice(2).join('\n      AND ')}
     ORDER BY f.rank`;
   return db.prepare(sql).all(...params);
 }
@@ -435,8 +698,40 @@ function matchedTermCount(terms, groupRows) {
   return matched;
 }
 
-/** 同 asset_version 相邻 order_index 命中块合并为一组(还原上下文),保留首块锚点;组分值取组内最优 rank。 */
-function mergeAdjacentRows(rows) {
+// RRF 名次平滑常数(Reciprocal Rank Fusion 标准取值 60):防止任一单通道第 1 名绝对化,
+// 两通道同名次贡献可比。确定性常数,标定记录见 experiments/kb-retrieval/(acceptance-v2)。
+const RRF_K = 60;
+
+/**
+ * Reciprocal Rank Fusion:通用通道与显著词通道两个已过门禁的组列表按 RRF 融合排序
+ * (score = Σ 1/(RRF_K + rank));同分取通用通道名次靠前者(确定性 tie-break)。
+ * 组键 = 组内片段 id 有序拼接;不同组但片段重叠的,按融合序贪心保留首个
+ * (结果级 fragmentId 必须唯一,007 UNIQUE(retrieval_run_id, content_block_id))。
+ */
+function rrfFuseGroups(generalGroups, distinctiveGroups) {
+  const keyOf = (group) => group.map((row) => row.id).sort().join('|');
+  const scored = new Map();
+  generalGroups.forEach((group, index) => {
+    scored.set(keyOf(group), { group, score: 1 / (RRF_K + index + 1), generalRank: index });
+  });
+  distinctiveGroups.forEach((group, index) => {
+    const key = keyOf(group);
+    const entry = scored.get(key);
+    if (entry) entry.score += 1 / (RRF_K + index + 1);
+    else scored.set(key, { group, score: 1 / (RRF_K + index + 1), generalRank: Number.POSITIVE_INFINITY });
+  });
+  const fused = [...scored.values()].sort((a, b) => b.score - a.score || a.generalRank - b.generalRank);
+  const seen = new Set();
+  const out = [];
+  for (const { group } of fused) {
+    if (group.some((row) => seen.has(row.id))) continue;
+    for (const row of group) seen.add(row.id);
+    out.push(group);
+  }
+  return out;
+}
+
+/** 同 asset_version 相邻 order_index 命中块合并为一组(还原上下文),保留首块锚点;组分值取组内最优 rank。 */function mergeAdjacentRows(rows) {
   const byVersion = new Map();
   for (const row of rows) {
     if (!byVersion.has(row.asset_version_id)) byVersion.set(row.asset_version_id, []);
@@ -609,7 +904,9 @@ export function persistRetrievalEvidence(db, { retrievalRunId, actorContext = {}
  * @param {object} db node:sqlite DatabaseSync(已完成 migrations)
  * @param {object} args
  * @param {string} args.query 查询文本(中英文均可)
- * @param {object} [args.filters] { courseId?, chapterId?, sourceType?, reviewStatus?, concept? }
+ * @param {object} [args.filters] { courseId?, chapterId?, sourceType?, reviewStatus?, concept?,
+ *   layer?, company?, authorityLevel? }(layer 经 kb_chapter_sources、company 经 kb_company_fact_units、
+ *   authorityLevel 经 kb_source_permissions,均为 008 登记的精确过滤)
  * @param {number} [args.limit] 结果上限(默认 10,最大 50)
  * @param {object} [args.actorContext] { actorType?, actorId? }
  * @param {string} [args.workflowInstanceId] 已有工作流;缺省时必须给 workflowScope 由本函数创建
@@ -686,6 +983,13 @@ export function searchKnowledge(
       : globalCorpusVersionHash(db);
 
   const expansion = expandQueryByConcepts(query);
+  // 术语别名扩展(COURSE_TERM_ALIASES):seen 集以概念扩展结果初始化,避免重复补词。
+  const aliasExpansion = expandQueryByTermAliases(
+    query,
+    new Set([...expansion.primary, ...expansion.expansionTerms, ...expansion.expansionPhrases].map((t) => t.toLowerCase())),
+  );
+  expansion.expansionTerms.push(...aliasExpansion.expansionTerms);
+  expansion.expansionPhrases.push(...aliasExpansion.expansionPhrases);
   const effectiveTerms = effectiveTermList(expansion);
 
   // --- 零命中词元拒答(spec §6.2 无来源支撑即拒答的词元级实现) ---
@@ -694,9 +998,11 @@ export function searchKnowledge(
   // 共享词元噪声(探针实测误召回 0.667 的来源)不得顶替,直接判 insufficientEvidence,
   // 缺口词元随返回值与审计如实列出。中文词元对英文语料天然零命中,不参与本规则
   // (其中文诉求已由概念别名扩展承担)。
+  // 别名豁免:词元在 COURSE_TERM_ALIASES 注册且其任一同组别名在语料中存在时,视为可支撑
+  // (词典声明等价;如题面写 QP、语料为"质量受权人"/"Qualified Person")。
   const primaryLatinTerms = expansion.primary.filter((t) => /[a-z]/i.test(t));
   const missingTerms = primaryLatinTerms.filter(
-    (term) => !corpusTermPresence(db, term, filters),
+    (term) => !aliasesOfTerm(term).some((alias) => corpusTermPresence(db, alias, filters)),
   );
 
   // concept 过滤:概念别名归并(中文概念名可命中英文 unit concept),大小写不敏感精确匹配。
@@ -710,28 +1016,35 @@ export function searchKnowledge(
     conceptNames = [...names];
   }
 
-  // --- 通道执行:分词为主,原文关键词兜底;OOV 拒答时不进任何通道,如实记 'none'。 ---
+  // --- 通道执行:分词为主,原文关键词兜底,CJK 精确子串再兜底;OOV 拒答时不进任何通道,记 'none'。 ---
   let channel = missingTerms.length > 0 ? 'none' : 'segmented';
   let candidates = [];
   let passed = [];
   let gatedOut = 0;
+  let distinctiveTermsUsed = [];
+  let distinctiveKeptCount = 0;
+  let bridgeTermsUsed = [];
+  let bridgeKeptCount = 0;
   if (missingTerms.length === 0) {
+    const allTerms = [...expansion.primary, ...expansion.expansionTerms];
     candidates = fetchCandidates(db, {
       channel,
-      terms: [...expansion.primary, ...expansion.expansionTerms],
+      terms: allTerms,
       phrases: expansion.expansionPhrases,
       filters,
       conceptNames,
     });
 
-    // --- 误召回门禁:bm25 分值门槛 + 有效查询词覆盖率(合并组内取并集)。 ---
-    const gateGroups = (rows) => {
+    // --- 误召回门禁:bm25 分值门槛 + 查询词覆盖率(合并组内取并集)。
+    // coverageTerms 为覆盖率分母:通用通道=全部有效词;显著词通道=显著词子集
+    // (该通道的语义即"谁承载了查询的低频核心",分母与通道查询集同口径,门禁未降)。 ---
+    const gateGroups = (rows, coverageTerms = effectiveTerms) => {
       const groups = mergeAdjacentRows(rows);
       const kept = [];
       let dropped = 0;
       for (const group of groups) {
         const coverage =
-          effectiveTerms.length === 0 ? 0 : matchedTermCount(effectiveTerms, group) / effectiveTerms.length;
+          coverageTerms.length === 0 ? 0 : matchedTermCount(coverageTerms, group) / coverageTerms.length;
         if (group.bestRank <= BM25_SCORE_THRESHOLD && coverage >= MIN_QUERY_TERM_COVERAGE) {
           group.coverage = coverage;
           kept.push(group);
@@ -743,12 +1056,116 @@ export function searchKnowledge(
     };
 
     ({ kept: passed, dropped: gatedOut } = gateGroups(candidates));
+
+    // --- 显著词第二通道(DF_DISTINCTIVE_MAX_RATIO,见常量区注释) ---
+    // OR 语义 + bm25 长度归一的叠加下,高频共享词(如 组织/设计/environment)会把只含低频
+    // 核心词(如 contingency/权变)的片段挤出候选前列。确定性补救:题面自写词(primary,
+    // 不含词典扩展词——扩展词的作用是把中文诉求桥接到英文语料,不定义查询的区分度)中
+    // df 占比 <= 阈值的显著词非空且为真子集时,以显著词集在分词通道重跑,过同样两道门禁
+    // (覆盖率分母=显著词子集,与通道查询集同口径,门禁未降),与通用通道结果做 RRF 融合
+    // (rrfFuseGroups;显著词组不绝对置顶,两通道同名次互抬)。
+    if (expansion.primary.length >= DISTINCTIVE_PASS_MIN_TERMS) {
+      const scopeBlocks = corpusScopeBlockCount(db, filters);
+      if (scopeBlocks > 0) {
+        const distinctive = expansion.primary.filter((t) => {
+          const df = corpusTermDf(db, t, filters);
+          return df >= 1 && df <= scopeBlocks * DF_DISTINCTIVE_MAX_RATIO;
+        });
+        if (distinctive.length > 0 && distinctive.length < effectiveTerms.length) {
+          distinctiveTermsUsed = distinctive;
+          const dCandidates = fetchCandidates(db, {
+            channel: 'segmented',
+            terms: distinctive.filter((t) => !/[\s-]/.test(t)),
+            phrases: distinctive.filter((t) => /[\s-]/.test(t)),
+            filters,
+            conceptNames,
+          });
+          const { kept: dKept } = gateGroups(dCandidates, distinctive);
+          distinctiveKeptCount = dKept.length;
+          if (dKept.length > 0) {
+            if (passed.length === 0) {
+              // 通用通道全灭而显著词通道有获:通道记 'segmented_distinctive',
+              // 不再退 raw/exact(显著词已命中,共享词噪声兜底无意义)。
+              channel = 'segmented_distinctive';
+              passed = dKept;
+            } else {
+              // RRF 融合(见 rrfFuseGroups):显著词组与通用组按名次互抬,不做绝对置顶。
+              passed = rrfFuseGroups(passed, dKept);
+            }
+          }
+        }
+      }
+    }
+    // --- 跨语言桥接通道(文件头通道 6):查询拉丁词元集单独重跑分词通道 + RRF 融合。 ---
+    // 桥接词集 = 题面自写的拉丁词元(如 contingency/departmentalization/Weber——用户已经
+    // 自己完成跨语言桥接的词)+ 词典扩展(概念表 + 术语表)的拉丁面形;中文词元不入
+    // (它们与通用通道同分布,不构成桥)。覆盖率门禁分母 = 桥接词集(与通道查询集同口径)。
+    // 融合顺序确定性:通用 → 显著词 → 桥接,依次 RRF 汇入同一 passed 列表;名次互抬,
+    // 不做绝对置顶。桥接放最后融合是有依据的:rrfFuseGroups 每次只传递名次、不传递分数,
+    // 后融合的通道对最终序有更大影响;桥接词集是题面核心语义的跨语言直接承载,而显著词
+    // 通道只是抗共享词挤占的召回辅助(其词元如 机械/有机 在中文语料中另有高频他义,
+    // 双通道叠加曾把噪声顶到理论片段之前,见 acceptance-v2 标定记录),故把最终抬升位
+    // 留给桥接通道。各通道门禁口径各自独立,均未降。纯中文查询无桥接词集、纯英文查询
+    // 桥接词集与有效词集重合,两种情形通道都不启用,行为与先前完全一致。
+    const bridgeTermPool = [...expansion.primary, ...expansion.expansionTerms];
+    const bridgeSeen = new Set();
+    const bridgeTerms = [];
+    const bridgePhrases = [];
+    for (const term of bridgeTermPool) {
+      if (!/[a-z]/i.test(term)) continue;
+      const key = term.toLowerCase();
+      if (bridgeSeen.has(key)) continue;
+      bridgeSeen.add(key);
+      if (/[\s-]/.test(term)) bridgePhrases.push(term);
+      else bridgeTerms.push(term);
+    }
+    for (const phrase of expansion.expansionPhrases) {
+      if (!/[a-z]/i.test(phrase)) continue;
+      const key = phrase.toLowerCase();
+      if (bridgeSeen.has(key)) continue;
+      bridgeSeen.add(key);
+      bridgePhrases.push(phrase);
+    }
+    const bridgeQuerySet = [...bridgeTerms, ...bridgePhrases];
+    if (bridgeQuerySet.length > 0 && bridgeQuerySet.length < effectiveTerms.length) {
+      const bCandidates = fetchCandidates(db, {
+        channel: 'segmented',
+        terms: bridgeTerms,
+        phrases: bridgePhrases,
+        filters,
+        conceptNames,
+      });
+      const { kept: bKept } = gateGroups(bCandidates, bridgeQuerySet);
+      if (bKept.length > 0) {
+        bridgeTermsUsed = bridgeQuerySet;
+        bridgeKeptCount = bKept.length;
+        if (passed.length === 0) {
+          // 通用通道全灭而桥接有获:通道记 'segmented_bridge',不再退 raw/exact。
+          channel = 'segmented_bridge';
+          passed = bKept;
+        } else {
+          passed = rrfFuseGroups(passed, bKept);
+        }
+      }
+    }
+
     if (passed.length === 0) {
       channel = 'raw';
       candidates = fetchCandidates(db, {
         channel,
-        terms: [...expansion.primary, ...expansion.expansionTerms],
+        terms: allTerms,
         phrases: expansion.expansionPhrases,
+        filters,
+        conceptNames,
+      });
+      ({ kept: passed, dropped: gatedOut } = gateGroups(candidates));
+    }
+    if (passed.length === 0) {
+      channel = 'exact_substring';
+      candidates = fetchCandidates(db, {
+        channel,
+        terms: allTerms,
+        phrases: [],
         filters,
         conceptNames,
       });
@@ -759,6 +1176,15 @@ export function searchKnowledge(
   // --- 结果组装:首块锚点 + 标题路径 + 原文截取 + 单元标注。 ---
   // 锚点块选择:组内首个非标题块。标题块命中只作上下文(它同时把标题路径带进锚点),
   // 锚点/引文/contentHash 必须落在正文块上,引文才是可逐字核验的证据;全为标题块的组退回首块。
+  // 防御性去重:跨通道合并后若仍有首块 id 重复(理论上已被重叠去重消除),保留首个,
+  // 结果级 fragmentId 必须唯一(007 UNIQUE(retrieval_run_id, content_block_id))。
+  const seenResultIds = new Set();
+  const uniquePassed = passed.filter((group) => {
+    const first = group.find((row) => row.block_type !== 'heading') ?? group[0];
+    if (seenResultIds.has(first.id)) return false;
+    seenResultIds.add(first.id);
+    return true;
+  });
   const headingCache = new Map();
   const headingsOf = (assetVersionId) => {
     if (!headingCache.has(assetVersionId)) {
@@ -774,7 +1200,7 @@ export function searchKnowledge(
     return headingCache.get(assetVersionId);
   };
 
-  const results = passed.slice(0, limit).map((group) => {
+  const results = uniquePassed.slice(0, limit).map((group) => {
     const first = group.find((row) => row.block_type !== 'heading') ?? group[0];
     const meta = JSON.parse(first.parser_metadata_json ?? '{}');
     const fragmentIds = group.map((row) => row.id);
@@ -909,11 +1335,16 @@ export function searchKnowledge(
     refusalMessage: insufficientEvidence ? INSUFFICIENT_EVIDENCE_MESSAGE : null,
     channel,
     matchedConcepts: expansion.matchedConcepts,
+    matchedTermGroups: aliasExpansion.matchedGroups,
     gateDiagnostics: {
       bm25ScoreThreshold: BM25_SCORE_THRESHOLD,
       minQueryTermCoverage: MIN_QUERY_TERM_COVERAGE,
       candidateCount: candidates.length,
       gatedOutCount: gatedOut,
+      distinctiveTerms: distinctiveTermsUsed,
+      distinctiveKeptCount,
+      bridgeTerms: bridgeTermsUsed,
+      bridgeKeptCount,
     },
   };
 }

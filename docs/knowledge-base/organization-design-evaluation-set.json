@@ -324,6 +324,7 @@
       ],
       "shouldRefuse": false,
       "status": "pending_source",
+      "usageNote": "2026-08-04 复核:主教材(src_textbook_main_orgdesign)与教师 PPT(src_teacher_ppt_orgdesign)仍 awaiting_teacher_provided,课程口径比对所需本土表述不在库内,保持 pending_source;OpenStax 侧锚点已可用(od-eval-04/05),到位前不计入实测分母。",
       "anchorPlan": "主教材/PPT 到位并通过版权与脱敏流程入库后,在其组织设计章相应小节提取逐字段落,按 documentId+version+pageIndex/pageLabel+verbatimQuote+quoteHash 五元组锚定(有印刷页码的来源用页码锚);OpenStax 侧锚点沿用 od-eval-04/05;到位前本题保持 pending_source,不计入 ready_for_reference_retrieval 题指标分母。"
     },
     {
@@ -430,7 +431,8 @@
         "不得凭一般管理学常识代替制度文本直接作答"
       ],
       "shouldRefuse": false,
-      "status": "pending_source",
+      "status": "ready_for_reference_retrieval",
+      "usageNote": "2026-08-04 复核:法规层已到位(药品管理法/实施条例/GMP 等 pharma_context 15 条入库,质量管理机构相关条款可检索命中),参考检索可用;主教材(src_textbook_main_orgdesign)仍 awaiting_teacher_provided,作答时教材口径部分不得引用,制度条款以入库法规原文为据。",
       "anchorPlan": "医药背景材料到位并完成脱敏/校对流程入库后,对制度条款按五元组锚定(政策文本用条款号定位+verbatimQuote+quoteHash);主教材相应小节另锚;到位前本题保持 pending_source,不计入 ready_for_reference_retrieval 题指标分母。"
     },
     {
@@ -514,7 +516,8 @@
         "不得把概念框架直接当作企业证据"
       ],
       "shouldRefuse": false,
-      "status": "pending_source",
+      "status": "ready_for_reference_retrieval",
+      "usageNote": "2026-08-04 复核:company_fact 层 8 家年报/10-K 已入库(恒瑞/药明康德/上海医药/益丰/Pfizer/CVS/Roche/AstraZeneca),组织架构披露可检索命中。题面'两家'口径与实际入库 8 家的差异不改题目,验收按 layer 解析预期来源(见 run-acceptance-v2 SOURCE_RESOLUTION)。",
       "anchorPlan": "年报到位并确认引用范围入库后,对组织架构披露段落按 documentId+version+pageIndex/pageLabel+verbatimQuote+quoteHash 五元组锚定;到位前本题保持 pending_source,不计入 ready_for_reference_retrieval 题指标分母。"
     },
     {
@@ -535,7 +538,8 @@
         "不得把'有机式利于创新'的框架直接等同于对具体企业的结论"
       ],
       "shouldRefuse": false,
-      "status": "pending_source",
+      "status": "ready_for_reference_retrieval",
+      "usageNote": "2026-08-04 复核:company_fact 层 8 家年报与 pharma_context 层制度文本均已入库,年报事实+行业情境可检索命中;题面'两家'口径差异同 od-eval-24 处理。",
       "anchorPlan": "年报与背景材料到位入库后按五元组锚定(年报用页码锚,政策/背景材料用条款号或章节锚);OpenStax 框架侧锚点沿用 od-eval-21;到位前本题保持 pending_source,不计入 ready_for_reference_retrieval 题指标分母。"
     },
     {
@@ -618,8 +622,8 @@
         "不得虚构来源、页码或逐字引用"
       ],
       "shouldRefuse": true,
-      "status": "pending_source",
-      "usageNote": "可用于验证系统契约(固定拒答话术+缺口说明输出)与确定性检索(候选来源到位后的锚定机制),但不得用 OpenStax 内容测试 LLM 拒答——OpenStax 文本禁止送入 LLM,LLM 拒答类测试须待至少一项明确 AI 授权的本土来源到位后另行设计。",
+      "status": "ready_for_reference_retrieval",
+      "usageNote": "2026-08-04 复核:权变来源 OpenStax 3.7 节已实例化入库(openstax-pom-ch03-3-7,supersedes 旧候选登记),contingency 可检索命中,OOV 拒答不再触发属预期。shouldRefuse 字段按开工闸纪律不改;语义复核结论:该题正确终态为可定位权变来源的参考检索,回答层须声明部分覆盖(完整权变因素清单仍缺主教材口径),不得凭常识罗列补全。原 LLM 拒答测试约束不变(OpenStax 文本禁止送入 LLM)。复验残留(如实记录):默认 limit=10 下 top10 为 ch10/4.3 权变内容,3.7 实例名次 25/50 未进 top10,本题计为定位 miss(见 acceptance-v2-report.md)。",
       "anchorPlan": "候选来源 3.7 节经教师确认抓取、或主教材到位入库后,对权变因素相关段落按五元组锚定;到位前本题作为拒答正确性用例:金标准为固定拒答话术+缺口说明,不参与证据定位准确率计算,但计入拒答正确率。"
     },
     {
@@ -640,7 +644,7 @@
       ],
       "shouldRefuse": true,
       "status": "pending_source",
-      "usageNote": "可用于验证系统契约(固定拒答话术+缺口说明输出)与确定性检索(候选来源到位后的锚定机制),但不得用 OpenStax 内容测试 LLM 拒答——OpenStax 文本禁止送入 LLM,LLM 拒答类测试须待至少一项明确 AI 授权的本土来源到位后另行设计。",
+      "usageNote": "2026-08-04 复核:主教材仍 awaiting_teacher_provided,'权责对等'原文无法核验,保持 pending_source。新语料下 OOV 词 OpenStax 因语料元数据含该字面不再触发零命中拒答,拒答契约改由诉求短语缺失路径验证(任何返回片段均不含'权责对等')。原 LLM 拒答测试约束不变(OpenStax 文本禁止送入 LLM,LLM 拒答类测试须待至少一项明确 AI 授权的本土来源到位后另行设计)。",
       "anchorPlan": "主教材到位入库后,对'权责对等'原文段落按 documentId+version+pageIndex/pageLabel+verbatimQuote+quoteHash 五元组锚定,OpenStax 侧锚点沿用 od-eval-05/10;到位前本题作为拒答正确性用例,金标准为固定拒答话术+缺口说明。"
     }
   ]

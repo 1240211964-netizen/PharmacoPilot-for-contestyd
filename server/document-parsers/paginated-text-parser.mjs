@@ -213,20 +213,28 @@ export function createPaginatedTextParser() {
         });
       }
 
-      const blocks = rawBlocks.map((raw, index) => ({
-        blockId: `b${String(index + 1).padStart(4, "0")}`,
-        blockType: "paragraph",
-        readingOrder: index,
-        parentBlockId: null,
-        pageIndex: raw.pageIndex,
-        pageLabel: raw.pageLabel,
-        bbox: null,
-        bboxCoordinateSystem: "none",
-        contentRaw: raw.raw,
-        normalizedText: normalizeText(raw.raw),
-        contentHash: sha256Hex(raw.raw),
-        anchor: raw.anchor,
-      }));
+      const blocks = rawBlocks.map((raw, index) => {
+        // NUL(U+0000)清洗:PDF 机器抽取稿合法含 NUL(实测益丰年报抽取稿 10 处),
+        // 而 SQLite TEXT 经 node:sqlite 绑定时在 NUL 处截断——不清洗则落库的
+        // content_raw 是被截断的串,与摄入时按完整串计算的 content_hash 永不一致
+        // (引用完整性机检必判伪引用),且 NUL 之后的正文静默丢失。解析侧确定性剔除,
+        // 保证 content_hash 与最终落库文本可互相机检;锚点行号不受影响。
+        const contentRaw = raw.raw.replace(/\u0000/g, "");
+        return {
+          blockId: `b${String(index + 1).padStart(4, "0")}`,
+          blockType: "paragraph",
+          readingOrder: index,
+          parentBlockId: null,
+          pageIndex: raw.pageIndex,
+          pageLabel: raw.pageLabel,
+          bbox: null,
+          bboxCoordinateSystem: "none",
+          contentRaw,
+          normalizedText: normalizeText(contentRaw),
+          contentHash: sha256Hex(contentRaw),
+          anchor: raw.anchor,
+        };
+      });
 
       const parsed = {
         schemaVersion: "1.0.0",
