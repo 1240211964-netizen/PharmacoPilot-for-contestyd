@@ -41,7 +41,7 @@
     evidenceFigure: {
       title: "认知前测 4 题 + 经验入口分布",
       subtitle: "看本班最可能卡在哪里",
-      evidenceNote: "学情入口决定 SWOT 课能否在 30 分钟实战段真正起飞。",
+      evidenceNote: "学情入口决定 SWOT 课能否在 27 分钟结构化实战中真正起飞。",
 
       // 4 题前测（与 figureStation02 默认值兼容）
       preTest: [

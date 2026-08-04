@@ -216,4 +216,104 @@ for (const page of ["index.html", "login.html", "opening-story.html", "nav-3d.ht
 assert.match(themeBridge, /localStorage\.getItem\(THEME_KEY\)\s*\|\|\s*["']light["']/,
   "教学导航首次访问必须默认纸色，不得暗中跟随系统主题");
 
+// ── 共享 chrome 不得继承可读模式(TYPOGRAPHY.md §1.4 / 铁律 7) ──────────────
+// is-readable-detail 挂在 <body>,会重映射低四档 --fs-* 并抬高行高。跨页共享的
+// chrome(顶栏/丝带/页脚)若用了这四个 token,就会在"有可读模式"与"无可读模式"的
+// 页面上渲染成两副面孔。已发生三次:已移除的丝带 28/24px、顶栏 74/67px、页脚链接 17/14px。
+// 这条门禁只管 bc-chrome.css 里的 chrome 选择器;页面内容仍应跟随可读模式。
+const REMAPPED = ["--fs-2xs", "--fs-xs", "--fs-sm", "--fs-md"];
+const CHROME_PREFIXES = [
+  ".issue-strip", ".masthead", ".mast-brand", ".mast-actions",
+  ".app-tabs", ".cmdbar", ".colophon", ".colo",
+];
+const chromeViolations = [];
+{
+  const css = fs.readFileSync(path.join(root, "shared/bc-chrome.css"), "utf8");
+  const stripped = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const [, selector, body] of stripped.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const sel = selector.replace(/\s+/g, " ").trim();
+    if (sel.startsWith("@") || !sel.startsWith(".")) continue;
+    // 命中 chrome 前缀,且该前缀是选择器的第一个类
+    const head = sel.split(/[\s,>]/)[0];
+    if (!CHROME_PREFIXES.some((p) => head === p || head.startsWith(p + ":") || head.startsWith(p + "."))) continue;
+    const fontSize = /font-size\s*:\s*([^;]+)/.exec(body);
+    if (!fontSize) continue;
+    const used = REMAPPED.find((t) => fontSize[1].includes(t));
+    if (used) {
+      chromeViolations.push(
+        `${sel} 用了 ${used}\n` +
+        `    → chrome 跨页必须一致,改用 var(--text-caption/--text-control/--text-body/--text-body-strong)`
+      );
+    }
+  }
+}
+assert.deepEqual(
+  chromeViolations, [],
+  `共享 chrome 字号门禁失败(TYPOGRAPHY.md §1.4):\n${chromeViolations.map((v) => "  " + v).join("\n")}`
+);
+
+// chrome 容器还必须显式定行高 —— 只锁字号不够:顶栏那次锁完字号仍差 3px,
+// 因为行高仍继承 body(可读模式 28.05px vs 普通页 normal)。
+for (const [sel, css] of [
+  [".masthead-inner", fs.readFileSync(path.join(root, "shared/bc-chrome.css"), "utf8")],
+  [".colophon", fs.readFileSync(path.join(root, "shared/bc-chrome.css"), "utf8")],
+]) {
+  const block = new RegExp(`\\${sel}\\s*\\{([^{}]*)\\}`).exec(css.replace(/\/\*[\s\S]*?\*\//g, ""));
+  assert.ok(
+    block && /line-height\s*:/.test(block[1]),
+    `${sel} 必须显式声明 line-height,否则会继承 body 的可读模式行高(TYPOGRAPHY.md §1.4)`
+  );
+}
+
+// 页面内联样式不得再定义未限定的共享 chrome 选择器。
+// 真有页面差异时，必须通过 body[data-*] / 祖先修饰类，或组件自身修饰类显式收窄。
+const INLINE_CHROME_PAGES = [
+  "index.html", "login.html", "opening-story.html", "nav-3d.html",
+  "nav-detail.html", "practice-detail.html", "data-detail.html",
+];
+const INLINE_CHROME_CLASS = /\.(?:issue-strip|masthead(?:-inner)?|mast-brand|mast-actions|app-tabs|cmdbar|colophon|colo(?:-grid|-brand|-foot)?)\b/g;
+
+function inlineChromeOverrides(source, relative) {
+  const found = [];
+  for (const style of source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
+    const css = style[1].replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const rule of css.matchAll(/([^{}]+)\{/g)) {
+      const prelude = rule[1].replace(/\s+/g, " ").trim();
+      if (!prelude || prelude.startsWith("@")) continue;
+      for (const selector of prelude.split(",").map((part) => part.trim())) {
+        INLINE_CHROME_CLASS.lastIndex = 0;
+        const match = INLINE_CHROME_CLASS.exec(selector);
+        if (!match) continue;
+        const before = selector.slice(0, match.index);
+        const after = selector.slice(match.index + match[0].length);
+        const qualifiedByAncestor = /\[data-[^\]]+\]|\.(?!issue-strip\b|masthead\b|masthead-inner\b|mast-brand\b|mast-actions\b|app-tabs\b|cmdbar\b|colophon\b|colo\b)[a-z_][\w-]*/i.test(before);
+        const qualifiedOnSelf = /^\s*(?:\.[a-z_][\w-]*|\[data-[^\]]+\])/i.test(after);
+        if (!qualifiedByAncestor && !qualifiedOnSelf) found.push(`${relative}: ${selector}`);
+      }
+    }
+  }
+  return found;
+}
+
+// 负向样例：裸选择器必须被抓住；页面身份与修饰类必须放行。
+assert.equal(inlineChromeOverrides("<style>.masthead{display:block}</style>", "bad.html").length, 1);
+assert.equal(inlineChromeOverrides("<style>body[data-page='opening'] .masthead{position:relative}.masthead.is-translucent{opacity:.9}</style>", "good.html").length, 0);
+
+const inlineChromeViolations = INLINE_CHROME_PAGES.flatMap((relative) =>
+  inlineChromeOverrides(fs.readFileSync(path.join(root, relative), "utf8"), relative)
+);
+assert.deepEqual(
+  inlineChromeViolations, [],
+  `页面内联 <style> 不得重定义未限定的共享 chrome:\n${inlineChromeViolations.map((v) => "  " + v).join("\n")}\n` +
+  `    → 通用规则移入 shared/bc-chrome.css；页面差异用 body[data-*] 或 .is-* 修饰类收窄。`
+);
+
+// 会话丝带已退出信息架构：全局页面不得再挂载，共享层也不得保留死样式。
+assert.doesNotMatch(sharedChrome, /\.issue-strip\b/, "bc-chrome.css 不得恢复已移除的全局状态栏");
+for (const relative of INLINE_CHROME_PAGES) {
+  const source = fs.readFileSync(path.join(root, relative), "utf8");
+  assert.doesNotMatch(source, /class=["'][^"']*\bissue-strip\b/, `${relative} 不得恢复全局黑色状态栏`);
+  assert.doesNotMatch(source, /shared\/live-stats\.js/, `${relative} 不得重新加载虚拟全局遥测脚本`);
+}
+
 console.log(`verify-style-tokens: ok (${files.length} production files)`);

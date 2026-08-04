@@ -74,7 +74,7 @@
       subtitle: "看小组是否真的协作 · 角色分配是否回应议程",
       evidenceNote: "协作不是分组讨论，而是每个角色都有证据产出，且角色与学生意愿对应。",
 
-      // 主图：4 角色任务密度（v4.2 新增 timeBudget：45 min 课中 13 min 微实战段的角色时间分配）
+      // 主图：4 角色任务密度（timeBudget：45 min 课中，26′→39′ 协作与质询阶段 13 min 的角色时间分配）
       bars: [
         ["资料员", 72, { source: "财报 + 集采数据提取",    status: "ok",   timeBudget: "实战 13 min · 资料员先行 3 min 提取关键数据" }],
         ["判断员", 66, { source: "SWOT 内外分类 + TOWS",    status: "ok",   timeBudget: "资料员后 5 min · 与质询员交叉判断" }],
@@ -82,14 +82,26 @@
         ["汇报员", 58, { source: "综合表达 + 战略输出",     status: "ok",   timeBudget: "末 3 min · 收束 SO/WT 战略矩阵" }],
       ],
 
-      // 13 min 微实战段的整体时间分配（与 station7 timeline 12'→25' 段对齐）
+      // 13 分钟协作与质询阶段的时间分配（与 station7 timeline 26'→39' 段对齐；
+      // 该段是 27 分钟结构化实战的后半程，前半程是 12'→26' 的分析阶段）
+      // v4.3 · 每个角色段显式声明它服务哪条学习目标(servesGoals 用 S2 的 metricId)。
+      // 建设性对齐(Biggs)要求 目标 ↔ 活动 ↔ 评价 三者对齐;此前系统只接通了
+      // 目标↔评价(station4.goalEvidenceMap ↔ station10.rubric,靠 metricId 一一对应),
+      // 活动这条边只有顶卡上的一根连线、无数据映射,因而答不出「资料员在教哪条目标」。
+      // 映射依据是各段既有的 desc,未新增教学设计。
+      // 注:S2 目标 5「指出 SWOT 工具局限」→ s7_artifact_critical_reflection 不在本段,
+      // 它由反馈段 39′–42′ 的「工具批判圆桌」承担(见 station5 的 no-self-critique 干预)。
       roleTimeBudget: {
         totalRoleMin: 13,
         sequence: [
-          { t: 0,  end: 3,  primaryRole: "资料员", desc: "提取年报研发投入 / 集采降幅 / 出口数据 3 条核心证据" },
-          { t: 3,  end: 8,  primaryRole: "判断员", desc: "完成 SWOT 四象限填表，质询员交叉追问证据出处" },
-          { t: 8,  end: 10, primaryRole: "判断员", desc: "TOWS 推导（SO / WT 二选一）" },
-          { t: 10, end: 13, primaryRole: "汇报员", desc: "整理 1 张展示卡：1 条 SWOT 最强项 + 1 条 TOWS 战略" },
+          { t: 0,  end: 3,  primaryRole: "资料员", desc: "提取年报研发投入 / 集采降幅 / 出口数据 3 条核心证据",
+            servesGoals: ["s7_artifact_evidence_citation"] },
+          { t: 3,  end: 8,  primaryRole: "判断员", desc: "完成 SWOT 四象限填表，质询员交叉追问证据出处",
+            servesGoals: ["s7_artifact_classification_score", "s7_artifact_defense_quality"] },
+          { t: 8,  end: 10, primaryRole: "判断员", desc: "TOWS 推导（SO / WT 二选一）",
+            servesGoals: ["s7_artifact_tows_actionability"] },
+          { t: 10, end: 13, primaryRole: "汇报员", desc: "整理 1 张展示卡：1 条 SWOT 最强项 + 1 条 TOWS 战略",
+            servesGoals: ["s7_artifact_tows_actionability", "s7_artifact_evidence_citation"] },
         ],
         note: "若某组质询员能力弱，建议教师巡视时主动追问该组，弥补脚本不足。",
       },
@@ -214,7 +226,7 @@
         outputTitle: "教师巡视与追问提示",
         outputCue: "把巡视从「看气氛」变成「按角色定向追问」。",
         artifactLines: {
-          evidence: "30 分钟实战中，教师巡视若无脚本，会偏向参与活跃组、忽略沉默组。",
+          evidence: "13 分钟协作与质询阶段中，教师巡视若无脚本，会偏向参与活跃组、忽略沉默组。",
           action: "为每角色准备 2 句追问模板（如「质询员请指出对方证据中最弱的一条」）。",
           constraints: [
             "追问必须指向证据而非观点",

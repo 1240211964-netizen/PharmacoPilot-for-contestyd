@@ -31,7 +31,6 @@ const retiredUiLabels = [
   "INFORMED BY",
   "STAGE OVERVIEW",
   "FIGURE ·",
-  "for Pharmacy Education",
   "· ACCOUNT",
   "· EMAIL",
   "· PASSWORD",
@@ -95,4 +94,14 @@ for (const relative of productionUiFiles) {
   });
 }
 assert.deepEqual(uiHits, [], `retired decorative English found in production UI: ${uiHits.join(", ")}`);
+
+// 品牌名与英文副标不属于装饰性英文，不得随界面术语一起中文化。
+for (const relative of [
+  "index.html", "login.html", "opening-story.html",
+  "nav-detail.html", "practice-detail.html", "data-detail.html",
+]) {
+  const source = fs.readFileSync(path.join(root, relative), "utf8");
+  assert.match(source, /<span class="ed">for Pharmacy Education<\/span>/,
+    `${relative} 必须保留 PharmacoPilot 英文品牌副标`);
+}
 console.log("verify-terminology: ok");

@@ -547,7 +547,7 @@
           reuseExistingDecisionBank: true,
           transitionLine: "你已经看清各段占比(Q1),也理解了分析 31% 是高阶训练的合理预算(Q2)。现在你来拍板——",
           postSelectReflection: {
-            prompt: "你这堂 45 分钟课,如果学生在 12-25 分钟微实战段做不完 SWOT+TOWS(只做了 SWOT),你愿意把这堂课当成「按计划完成」吗?用一句话说明。",
+            prompt: "你这堂 45 分钟课,如果学生在 12-39 分钟结构化实战段做不完 SWOT+TOWS(只做了 SWOT),你愿意把这堂课当成「按计划完成」吗?用一句话说明。",
             field: "towsCompletionReflection",
             placeholder: "例:不愿意,TOWS 是 SWOT 的终点,缺它整节课失重…",
             // 梯度须与本题动词一致（本题问「愿意…吗」）
@@ -557,7 +557,7 @@
         {
           step: 4, kind: "transfer", openEnded: true, blocksProgress: false,
           transferAxis: "换班级规模",
-          stem: "假设班级从 40 人减到 15 人,4 段比例(讲授/分析/协作/反馈)该怎么调?协作段的 30 分钟实战还合适吗?",
+          stem: "假设班级从 40 人减到 15 人,4 段比例(讲授/分析/协作/反馈)该怎么调?协作段的 13 分钟协作与质询阶段还合适吗?",
           scaffold: [
             "协作单位:15 人能否拆 3-4 组(每组 3-5 人),还是 1 大组 + 2 小组?",
             "巡视密度:15 人比 40 人教师更容易追问到每个学生,反馈段是否可以缩到 8%?",
@@ -726,7 +726,7 @@
           stem: "看「5 维评价雷达图 + Pareto 低分」，5 个评价维度中平均分最低的是哪一维？",
           options: [
             { key: "classify",  label: "内外分类准确性 (78)",  mistakeType: "misread" },
-            { key: "concise",   label: "条目精炼度 (62)",      mistakeType: "misread" },
+            { key: "defense",   label: "质询与辩护质量 (58)",  mistakeType: "misread" },
             { key: "evidence",  label: "条目证据性 (46)",      mistakeType: "misread" },
             { key: "critical",  label: "批判意识 (38)",        correct: true },
           ],

@@ -172,7 +172,7 @@ body.dx-mag .faq-a { font-size: var(--fs-md); }
       <div class="faq-num">Q · 05</div>
       <details class="faq-block">
         <summary class="faq-q">理论基础是什么？<span class="faq-toggle">＋</span></summary>
-        <div class="faq-a"><i>ADDIE × Backward Design × 建设性对齐（Biggs）× ICAP × ZPD × 认知负荷理论 × 教学评一体化（崔允漷）× 课例研究（顾泠沅）</i>。三个内页底栏均挂出对应 theory chip，可逐条溯源到原始文献。</div>
+        <div class="faq-a"><i>UbD 逆向设计 × 建设性对齐（Biggs）× ICAP 学习参与 × ZPD × 认知负荷理论 × 教学评一体化（崔允漷）</i>。三个内页底栏均挂出对应 theory chip，可逐条溯源到原始文献；每条都能在系统中指出对应机制，指不出机制的标签已于 2026-08-03 撤除。</div>
       </details>
     </div>
 

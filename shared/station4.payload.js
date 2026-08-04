@@ -68,12 +68,56 @@
       ],
 
       // 目标—评价证据 5 条对齐（推荐模板）
+      // v4.3 · 每条目标显式声明量具身份。此前只写「≥ 80%」而不指明这是个人层面的
+      // 分类小测、还是小组作品的评分维度,导致 S7 的小组作品得分 78 与 S2 的个人测验
+      // 阈值 80% 被混写成同一个「78」。三要素缺一不可:
+      //   metricId          —— 唯一量具标识,跨环节引用时不得换名
+      //   aggregationLevel  —— individual / group / class,决定能否与阈值直接比较
+      //   threshold         —— 达标线,由 S6/S7 各自判定 met / not_met
       goalEvidenceMap: [
-        { goal: "能区分 SWOT 四象限并识别条目所属象限",        evidence: "5 道分类题正确率 ≥ 80%" },
-        { goal: "能为每条 SWOT 配证据（量化 / 文件 / 政策）",  evidence: "小组 SWOT 产出每条配出处 · 第 1 个评价维度" },
-        { goal: "能从 SWOT 推导 ≥ 3 条 TOWS 战略",              evidence: "30 分钟实战段产出 TOWS 表 · 第 4 个评价维度" },
-        { goal: "能在质询环节为本组论据辩护",                 evidence: "交叉质询中每组至少应对 2 轮 · 录像评分" },
-        { goal: "能指出 SWOT 工具的至少 2 个局限",            evidence: "课末口述 · 第 5 个评价维度「批判意识」" },
+        {
+          goal: "能区分 SWOT 四象限并识别条目所属象限",
+          evidence: "5 道分类题正确率 ≥ 80%",
+          // 同一目标由两个量具分别取证,不可互相替代、更不可混写为同一个分数
+          metrics: [
+            { metricId: "s6_classification_quiz_accuracy", label: "证据A｜形成性评价 · 个人分类题正确率",
+              aggregationLevel: "individual", threshold: ">= 80%", collectedAt: "S6" },
+            { metricId: "s7_artifact_classification_score", label: "证据B｜表现性评价 · 小组作品内外分类准确性",
+              aggregationLevel: "group", threshold: ">= 80", collectedAt: "S7" },
+          ],
+        },
+        {
+          goal: "能为每条 SWOT 配证据（量化 / 文件 / 政策）",
+          evidence: "小组 SWOT 产出每条配出处 · 第 1 个评价维度",
+          metrics: [
+            { metricId: "s7_artifact_evidence_citation", label: "表现性评价 · 条目证据性",
+              aggregationLevel: "group", threshold: ">= 60", collectedAt: "S7" },
+          ],
+        },
+        {
+          goal: "能从 SWOT 推导 ≥ 3 条 TOWS 战略",
+          evidence: "学生在 14 分钟分析与 13 分钟协作阶段完成包含不少于 3 条策略的 TOWS 表 · 第 4 个评价维度",
+          metrics: [
+            { metricId: "s7_artifact_tows_actionability", label: "表现性评价 · TOWS 可操作性",
+              aggregationLevel: "group", threshold: ">= 60", collectedAt: "S7" },
+          ],
+        },
+        {
+          goal: "能在质询环节为本组论据辩护",
+          evidence: "交叉质询中每组至少应对 2 轮 · 录像评分 · 第 3 个评价维度",
+          metrics: [
+            { metricId: "s7_artifact_defense_quality", label: "表现性评价 · 质询与辩护质量",
+              aggregationLevel: "group", threshold: ">= 60", collectedAt: "S7" },
+          ],
+        },
+        {
+          goal: "能指出 SWOT 工具的至少 2 个局限",
+          evidence: "课末口述 · 第 5 个评价维度「批判意识」",
+          metrics: [
+            { metricId: "s7_artifact_critical_reflection", label: "表现性评价 · 批判意识",
+              aggregationLevel: "group", threshold: ">= 60", collectedAt: "S7" },
+          ],
+        },
       ],
 
       flow: ["看缺口", "改目标", "配证据"],

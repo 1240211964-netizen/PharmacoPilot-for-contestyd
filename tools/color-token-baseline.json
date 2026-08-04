@@ -377,14 +377,6 @@
       "values": {},
       "fallbackValues": {}
     },
-    "shared/live-stats.js": {
-      "hex": 0,
-      "functional": 0,
-      "tokenFallbacks": 0,
-      "unique": 0,
-      "values": {},
-      "fallbackValues": {}
-    },
     "shared/metaverse-classroom-3d.js": {
       "hex": 78,
       "functional": 0,

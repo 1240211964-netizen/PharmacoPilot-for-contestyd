@@ -394,7 +394,9 @@
       subNodeIds: [1, "2-3", "1b"],
       iterationModel: "v0 草拟 → 学情议程综合诊断 → v1 回写修订",
       pharmacyContext: "药学生家人慢病比例 / 社区药店实习 / 一致性评价前测 / 集采伦理议程张力",
-      theoryDrawer: ["Bruner 螺旋课程", "Dewey 经验连续性", "Freire 问题提出", "Knowles 成人学习"],
+      theoryDrawer: ["Bruner 螺旋课程", "Dewey 经验连续性", "Freire 问题提出"],
+      // 2026-08-03 移除 Knowles 成人学习:全站仅 3 处层标签字符串,andragogy 六假设
+      // 无一被检验或使用;且与 Freire 立场差异大,并列易被追问。见 THEORY-AUDIT.md。
     },
     {
       id: "S2", phase: "pre", title: "预期学习结果与评价证据设计", shortLabel: "预期学习结果与评价证据设计",
@@ -418,7 +420,10 @@
       getDeliverable: "问题链 + 误区清单",
       subNodeIds: [5],
       pharmacyContext: "MAH / MA / 生产证概念边界 / 法规条文易混点",
-      theoryDrawer: ["Chi 概念变化", "Shulman PCK"],
+      theoryDrawer: ["Shulman PCK"],
+      // 2026-08-03 移除 Chi 概念变化:系统未对 5 类误区做 belief revision /
+      // mental model transformation / categorical shift 的类型判别,全部采用同一种
+      // 干预(正反例对照卡),不构成该理论的应用。S3 仍由 Shulman PCK 支撑。
     },
     {
       id: "S4", phase: "pre", title: "真实性学习情境与资源设计", shortLabel: "真实性学习情境与资源设计",
@@ -429,7 +434,13 @@
       getDeliverable: "案例包 + 议程—证据对照表",
       subNodeIds: [6],
       pharmacyContext: "NMPA 文件 + 医保政策 + 药企财报 + 利益相关者立场",
-      theoryDrawer: ["Wiggins 真实性评价", "Christensen 哈佛案例法", "Lave & Wenger 情境学习"],
+      theoryDrawer: ["Lave & Wenger 情境学习"],
+      // 2026-08-03 Wiggins 真实性评价移至 S7:真实性评价约束的是**评价任务本身**
+      // (真实情境复杂度、允许多解、要求整合判断、评分标准公开),不是「使用真实材料」。
+      // 材料真实 ≠ 任务真实。S4 的机制是案例材料证据密度,落点不在此。
+      // 2026-08-03 移除 Christensen 哈佛案例法:该方法以讨论主导、教师不讲授、
+      // 冷点名课堂契约为定义特征,与本课 12 分钟讲授段(27%)直接冲突。
+      // 案例材料设计参考商学院案例写作规范,但教学法不是案例法。
     },
     {
       id: "S5", phase: "pre", title: "学习活动与教学支架设计", shortLabel: "学习活动与教学支架设计",
@@ -440,7 +451,7 @@
       getDeliverable: "锁定版时间线 + 协作任务单 + 3 个学情校准点位置",
       subNodeIds: [7, 8, "7b"],
       iterationModel: "时间线 v0（经验值）→ 协作任务设计 → 时间线 v1 回写（基于任务复杂度调整）",
-      pharmacyContext: "30 分钟实战段 / 4 角色（资料员 / 判断员 / 质询员 / 汇报员）/ 3 个 ZPD 锚点",
+      pharmacyContext: "27 分钟结构化实战（14′ 分析 + 13′ 协作与质询）/ 4 角色（资料员 / 判断员 / 质询员 / 汇报员）/ 3 个 ZPD 锚点",
       theoryDrawer: ["Chi ICAP", "Vygotsky ZPD", "Wood/Bruner 支架理论"],
     },
     {
@@ -453,7 +464,16 @@
       subNodeIds: ["9-z1", "9-z2", "9-z3"],
       iterationModel: "Z1 条文测温 → Z2 推演投票 → Z3 知识封闭，每锚点独立编辑规则",
       pharmacyContext: "条文测温 / 推演投票 / 知识封闭测温 三类微评估",
-      theoryDrawer: ["Black & Wiliam 形成性评价", "Feuerstein 动态评估"],
+      theoryDrawer: ["Black & Wiliam 形成性评价", "Feuerstein 动态评估", "Schön 反思性实践（行动中）"],
+      // 2026-08-03 加挂 Schön:Z1/Z2 的「依当堂证据当场调整」正是
+      // reflection-in-action(行动中反思)。此前 Schön 只挂在 S8,
+      // 而 S8 是 reflection-on-action(行动后反思) —— 系统实际覆盖了两类,
+      // 却只声称了一类。这条整改是「加」不是「减」。
+      // Feuerstein 保留的条件已于 2026-08-03 满足:station9 建立了
+      // Z1(A 卷) → 介入 → Z3(B 卷) 的同构平行卷前后测,并记录 Δ
+      // (s6_mah_boundary_gain)。此前该标签仅是标题里的「动态评估」四字。
+      // 注:本环节 3 个锚点并非同质 —— Z1/Z2 为即时形成性调控(当堂执行),
+      // Z3 为课末封闭测温(触发下一课时),不可笼统并称为形成性评价。
     },
     {
       id: "S7", phase: "post", title: "表现性评价与学习成效诊断", shortLabel: "表现性评价与学习成效诊断",
@@ -465,7 +485,9 @@
       subNodeIds: ["10-a", "10-b", "10-c"],
       iterationModel: "数据采集（评分）→ 教学动作（反馈/画像）→ 元动作（评价标准修订回写 S2）",
       pharmacyContext: "5 维评价结果 / 低分维度 Pareto / 能力画像 / 反馈语模板 / 评价标准反向修订建议",
-      theoryDrawer: ["Hattie 可见的学习", "Hattie 反馈层级"],
+      theoryDrawer: ["Hattie 可见的学习", "Hattie 与 Timperley 反馈框架", "Wiggins 真实性评价"],
+      // 2026-08-03 自 S4 移入:S7 要求学生产出带证据的 SWOT-TOWS 并接受交叉质询,
+      // 评分标准(5 维 rubric)对学生公开 —— 这些正是 Wiggins 对真实性评价的要求。
       supportsRubricRevision: { to: "S2", channelKey: "rubricRevision" },
     },
     {
@@ -477,7 +499,9 @@
       getDeliverable: "复盘报告 + 改进决策",
       subNodeIds: ["11a"],
       pharmacyContext: "议程兑现回顾 + 学情触发摘要 + 学生作品低分诊断",
-      theoryDrawer: ["Schön 反思性实践", "Kolb 经验学习圈"],
+      theoryDrawer: ["Schön 反思性实践（行动后）", "Kolb 经验学习圈"],
+      // 2026-08-03 标注为「行动后」:与 S6 的「行动中」成对。
+      // Schön 区分 reflection-in-action 与 reflection-on-action,S8 只覆盖后者。
     },
     {
       id: "S9", phase: "post", title: "教学知识建构与专业共享", shortLabel: "教学知识建构与专业共享",
@@ -488,7 +512,13 @@
       getDeliverable: "资产清单 + 知识库更新",
       subNodeIds: ["11b"],
       pharmacyContext: "案例 v2 / 评价标准 v2 / 法规更新日志 / 学期末汇编",
-      theoryDrawer: ["Senge 学习型组织", "Nonaka SECI 知识转化", "Siemens 学习分析"],
+      theoryDrawer: ["受知识管理研究启发的资产沉淀（Nonaka 等）"],
+      // 2026-08-03 收缩:
+      // · 删 Senge 学习型组织 —— 五项修炼作用于组织,本系统面向单一教师;
+      // · 删 Siemens 学习分析 —— S9 无任何学习者数据的测量/分析/预测机制,
+      //   实际动作是教师侧的资产价值排序与入库;
+      // · Nonaka SECI 降级为「受启发」—— 现有动作至多覆盖表出化与联结化的一部分,
+      //   共同化与内在化两环缺失,不得声称实现了完整 SECI 循环。
     },
   ];
 
@@ -600,7 +630,7 @@
     "6":   { stageId: "S4", subTitle: "真实案例与证据包",          legacyStationId: 6,  order: 1 },
     "7":   { stageId: "S5", subTitle: "课堂时间线",                legacyStationId: 7,  order: 1, revisionPass: "v0", subjectName: "课堂时间线" },
     "8":   { stageId: "S5", subTitle: "协作任务与角色分配",        legacyStationId: 8,  order: 2 },
-    "7b":  { stageId: "S5", subTitle: "再校准时间线",              legacyStationId: 7,  order: 3, splitOf: 7, revisionPass: "v1", subjectName: "课堂时间线", revisionSource: "协作任务与角色分配", revisionAction: "基于任务复杂度和角色任务量回写时间分配，调整 13 分钟微实战段配比与 3 个学情校准点位置",
+    "7b":  { stageId: "S5", subTitle: "再校准时间线",              legacyStationId: 7,  order: 3, splitOf: 7, revisionPass: "v1", subjectName: "课堂时间线", revisionSource: "协作任务与角色分配", revisionAction: "基于任务复杂度和角色任务量回写时间分配，调整 27 分钟结构化实战（14′ 分析 + 13′ 协作与质询）的段内配比与 3 个学情校准点位置",
       // v4.2: 鸡蛋型回写硬约束 + 数据联动 — 必须先完成 station 8 协作任务判断
       enterCondition: {
         requires: [{ stationId: 8, type: "judgmentSaved", reason: "v1 时间线回写必须读取协作任务设计的 4 角色任务密度与时间预算" }],
@@ -853,7 +883,17 @@
     "不得让学习者议程站（子节点 3）退化为“学生意见调查表”；议程必须在至少 4 个回响点显式回应（S2/S4/S5/S8）。",
     "不得让形成性评价机制（L1）退化为“随便提问几个学生”；每个 ZPD 锚点必须有“如果 X 则 Y”的决策规则。",
     // v4 新增
-      "不得在前台铺陈教育理论标签（如 ZPD / UbD / Bloom 等术语）；理论收进每个教学环节的「方法依据」抽屉。",
+      // 2026-08-03 改写。原条款为「不得在前台铺陈教育理论标签（如 ZPD / UbD / Bloom
+      // 等术语）」，但首页与两个内页实际常驻 27 条 theory chip，其中恰好包含该条款
+      // 点名的 ZPD / UbD / Bloom —— 硬约束与实际做法长期打架，比没有硬约束更糟。
+      // 现按「课程级可展示、环节级必须收进抽屉」重新划界，并附可核验的前置条件。
+      "理论标签分两级：课程级学理底盘（theory-chip）可在前台常驻，用于说明整套设计的方法来源；"
+        + "环节级理论依据必须收进该教学环节的「方法依据」抽屉，不得散落在前台。",
+      "前台展示的每一条 theory-chip 都必须在系统中指得出对应机制；"
+        + "指不出机制的标签一律撤除，不得只作学理装饰。"
+        + "（2026-08-03 据此撤除 ADDIE / OBE / Gagné 九步 / 5E / TPACK / 课例研究 6 条，27 → 18 条）",
+      "同一理论在前台与抽屉必须同名同署名，不得一处写 Backward Design、另一处写 UbD；"
+        + "署名以原始文献为准（如 ICAP 为 Chi & Wylie 2014，不写 Chi 2014）。",
       "不得让教学环节 7 的「评价标准反向修订」失效；学生作品发现的评价标准问题必须可回写到教学环节 2。",
     "不得把横向机制（L1/L2/L3）退化为内部数据；议程横条 / 锚点 ◇ 标 / 顶卡产出链必须前台可见。",
     "不得在前台出现「11 节点」「10 tiles」「0/11」等旧叙事；统一为「9 个教学环节 + 12 子节点」。",

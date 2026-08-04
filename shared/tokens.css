@@ -58,6 +58,17 @@
   --shadow-2: 0 1px 0 rgba(27, 25, 22, .04), 0 12px 28px -10px rgba(80, 50, 30, .12);
   --shadow-3: 0 24px 60px -28px rgba(60, 35, 20, .35);
 
+  /* Motion — 统一缓动与时长。此前全站 7 条 transition 都吃浏览器默认 ease
+     (两端对称、中段匀速),观感发"木";下面三条曲线快起慢收,才是"丝滑"的来源。
+     用途分工:交互反馈用 --ease-out;两态互换用 --ease-in-out;
+     --ease-spring 带轻微过冲,只给需要强调的确认动作,别用在常驻元素上。 */
+  --ease-out:    cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --dur-1: 120ms;  /* 微反馈:颜色、边框 */
+  --dur-2: 220ms;  /* 常规:悬停、展开 */
+  --dur-3: 380ms;  /* 大位移:吸顶、抽屉 */
+
   /* Fonts — 四种字族各有分工，新增内容按用途选用，勿混用 */
   --sans:     "Geist", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;   /* UI / 正文默认（body 已设） */
   --serif-cn: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC", serif;                  /* 中文标题 / 编辑式正文强调 / chip 名称 */

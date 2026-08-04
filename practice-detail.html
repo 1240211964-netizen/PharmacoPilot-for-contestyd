@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=7-native-control-theming" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=10-native-control-theming" />
+<link rel="stylesheet" href="./shared/tokens.css?v=8-motion-tokens" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=24-status-strip-removed" />
 <!-- 虚拟教室 3D：Three.js 本地自托管（零外部依赖，内网/离线/受限网络均可显示）。
      若本地文件缺失或 WebGL 不可用 → 3D 模块自动回退到 2.5D 渲染器。 -->
 <script type="importmap">
@@ -2587,7 +2587,6 @@ window.__ANIM = window.__ANIM || { reveal: { step: 75 } };
 </script>
 <!-- 共享脚本统一带 ?v= 防缓存 desync：无版本号时 returning 浏览器可能吃旧缓存→脚本版本对不上→运行时静默 bail（阶段不交互、候选数停 0）。改文件必须 bump ?v=。 -->
 <script src="./shared/wendao.js?v=3" defer></script>
-<script src="./shared/live-stats.js?v=1" defer></script>
 <!-- ===== Practice runtime: 4 stages now actually run ===== -->
 <script src="./shared/pharmaco-store.js?v=31" defer></script>
 <script src="./shared/nav-stations-contract.js?v=31" defer></script>
@@ -2617,22 +2616,12 @@ window.addEventListener('load', function () {
 });
 </script>
 
-<!-- ===== Issue strip ===== -->
-<div class="issue-strip">
-  <span>药事管理 · 2026 春季</span>
-  <span class="sep">—</span>
-  <span>课程设计</span>
-  <span class="sep">—</span>
-  <span><span class="pulse"></span><span data-live="teachers" data-baseline="17">17</span> 位教师在线</span>
-  <span class="r">教学场次 #3417 · 演练 <span data-live="timer" data-start="132" data-cap="2700">02:12</span> / 45:00 · 录制中</span>
-</div>
-
 <!-- ===== Masthead ===== -->
 <header class="masthead">
   <div class="masthead-inner">
     <a class="mast-brand" href="./index.html">
       <span class="logo">Pharmaco<span class="it">Pilot</span></span>
-      <span class="ed">药学教育版</span>
+      <span class="ed">for Pharmacy Education</span>
     </a>
     <div class="app-tabs">
       <a href="./index.html">概览</a>
@@ -2641,7 +2630,7 @@ window.addEventListener('load', function () {
       <a href="./data-detail.html">教学数据 <kbd>3</kbd></a>
     </div>
     <div class="cmdbar">⌕ 搜索 <kbd>⌘K</kbd></div>
-    <div style="display:flex;gap:8px;white-space:nowrap">
+    <div class="mast-actions">
       <a class="pill-cap ghost" href="./login.html">登录</a>
       <a class="pill-cap fill" href="./nav-detail.html">进入工作台 →</a>
     </div>
@@ -2654,7 +2643,7 @@ window.addEventListener('load', function () {
   <!-- ---- Page hero ---- -->
   <section class="page-hero">
     <!-- v2: 移除右侧 hero 状态栏（plan.md / 数据源 / 阶段计时等），hero 收为单栏让 slogan 舒展。
-         这些运行态信息在下方三步循环 + masthead 计时里已有体现，不必在 hero 重复。
+         这些运行态信息在下方三步循环 + 仿真播放器里已有体现，不必在 hero 重复。
          （管理它的 JS 带 if(!meta) return 守卫，删除元素后自动空跑） -->
     <div class="page-hero-grid is-solo" data-reveal>
       <div>
@@ -3178,7 +3167,7 @@ window.addEventListener('load', function () {
   </div>
   <div class="colo-foot">
     <span>© 2026 PharmacoPilot · v2.0.4</span>
-    <span>教学场次 #3417 · 演练 #03 · 累计沉淀 17</span>
+    <span>本轮演练 #03 · 累计沉淀 17</span>
   </div>
 </footer>
 

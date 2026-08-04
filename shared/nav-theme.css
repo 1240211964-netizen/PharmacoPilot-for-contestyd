@@ -10,11 +10,6 @@ html[data-theme="dark"] body { background: var(--ink); color: var(--ivory); }
 html[data-theme="dark"] { --mute: var(--on-dark); --mute-2: var(--on-dark-mute); }
 html[data-theme="dark"] { color-scheme: dark; accent-color: var(--amber); }
 
-html[data-theme="dark"] .issue-strip {
-  background: var(--ink);
-  border-bottom: 1px solid color-mix(in srgb, var(--ivory) 6%, transparent);
-}
-
 html[data-theme="dark"] .masthead {
   background: var(--ink-2);
   border-bottom-color: color-mix(in srgb, var(--ivory) 12%, transparent);

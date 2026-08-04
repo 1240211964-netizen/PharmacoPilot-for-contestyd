@@ -11,151 +11,25 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=7-native-control-theming" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=10-native-control-theming" />
+<link rel="stylesheet" href="./shared/tokens.css?v=8-motion-tokens" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=24-status-strip-removed" />
 <style>
 /* ============== Direction BC — Editorial × Workbench ============== */
 body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01", "cv11", "tnum"; }
 .wrap { max-width: 1280px; margin: 0 auto; padding: 0 48px; }
 
 /* ============ Masthead (from C) + App-shell hooks (from B) ============ */
-.issue-strip {
-  background: var(--ink); color: var(--ivory);
-  padding: 7px 48px; font-family: var(--mono); font-size: var(--fs-2xs);
-  letter-spacing: 0.06em; display: flex; gap: 20px; align-items: center;
-  white-space: nowrap; overflow: hidden;
-}
-.issue-strip > span { flex: 0 0 auto; }
-.issue-strip .r {
-  margin-left: auto; overflow: hidden; text-overflow: ellipsis;
-  min-width: 0; flex: 0 1 auto;
-}
-.issue-strip i { width: 4px; height: 4px; border-radius: 50%; background: var(--amber); display: inline-block; margin: 0 6px; vertical-align: middle; }
-.issue-strip .sep { color: color-mix(in srgb, var(--ivory) 30%, transparent); }
-.issue-strip .pulse {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
-  animation: pulse 1.6s infinite ease-in-out; display: inline-block; margin-right: 5px;
-  vertical-align: middle;
-}
+/* @keyframes pulse 保留:本页 .pill-live i 等 3 处仍在用(丝带自身已改用
+   bc-chrome 的 ribbon-breathe)。缓动换成 token,与全站动效口径一致。 */
 @keyframes pulse { 50% { opacity: 0.4; } }
-.issue-strip .r { margin-left: auto; }
-
-.masthead {
-  border-bottom: 1px solid var(--ink);
-  background: var(--paper);
-  position: sticky; top: 0; z-index: 20;
-}
-.masthead-inner {
-  display: grid; grid-template-columns: auto 1fr auto auto;
-  align-items: center; gap: 16px; padding: 14px 40px;
-}
-.mast-brand { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; text-decoration: none; color: inherit; }
-.mast-brand .logo {
-  font-family: var(--serif-en); font-size: var(--fs-2xl); font-weight: 600;
-  letter-spacing: -0.025em; line-height: 1;
-}
-.mast-brand .logo .it { font-style: italic; color: var(--amber-deep); }
-.mast-brand .ed {
-  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--mute); padding-left: 12px;
-  border-left: 1px solid var(--rule-2); white-space: nowrap;
+@media (prefers-reduced-motion: reduce) {
+  .pill-live i { animation: none; }
 }
 
-/* B-style app tabs in the masthead */
-.app-tabs {
-  display: flex; gap: 2px; padding: 2px; justify-self: center;
-  background: var(--paper-2); border-radius: 8px; border: 1px solid var(--rule);
-  white-space: nowrap;
-}
-.app-tabs a {
-  padding: 6px 12px; font-size: var(--fs-xs); color: var(--mute); border-radius: 6px;
-  display: inline-flex; align-items: center; gap: 6px; font-family: var(--serif-cn);
-  white-space: nowrap;
-}
-.app-tabs a:hover { color: var(--ink); }
-.app-tabs a.is-active { background: var(--ivory); color: var(--ink); box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 5%, transparent); }
-.app-tabs a kbd { font-family: var(--mono); font-size: var(--fs-2xs); padding: 0 4px;
-                  background: var(--paper-3); border-radius: 3px; color: var(--mute); }
-
-.cmdbar {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 6px 6px 6px 11px;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  background: var(--paper-2);
-  font-size: var(--fs-xs); color: var(--mute); cursor: text;
-  white-space: nowrap; min-width: 0;
-  transition: border-color .18s, background .18s, box-shadow .18s;
-}
-.cmdbar:hover {
-  border-color: color-mix(in oklab, var(--amber-deep) 35%, var(--rule));
-  background: var(--ivory);
-}
-.cmdbar:focus-within {
-  border-color: var(--amber-deep);
-  background: var(--ivory);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--amber-deep) 14%, transparent);
-}
-.cmdbar kbd {
-  margin-left: 0;
-  font-family: var(--mono); font-size: var(--fs-2xs);
-  background: var(--paper-2); color: var(--mute);
-  padding: 2px 7px;
-  border: 1px solid var(--rule); border-radius: 999px;
-  letter-spacing: 0.04em;
-  transition: background .18s, color .18s, border-color .18s;
-}
-.cmdbar:focus-within kbd {
-  background: var(--amber-deep); color: var(--ivory);
-  border-color: var(--amber-deep);
-}
-.cmdbar-form {
-  display: inline-flex; align-items: center; gap: 6px;
-  width: 100%;
-}
-.cmdbar-brand {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--serif-cn);
-  font-size: var(--fs-xs);
-  color: color-mix(in oklab, var(--amber-deep) 70%, var(--ink));
-  letter-spacing: 0.01em;
-  flex-shrink: 0;
-  font-weight: 500;
-  padding-right: 2px;
-}
-.cmdbar-brand-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--amber-deep);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--amber-deep) 18%, transparent);
-  animation: cmdbarDot 2.4s ease-in-out infinite;
-}
-@keyframes cmdbarDot {
-  50% { box-shadow: 0 0 0 5px color-mix(in oklab, var(--amber-deep) 8%, transparent); }
-}
-.cmdbar-sep { display: none; }
-.cmdbar-input {
-  flex: 0 1 60px;
-  min-width: 0; width: 60px;
-  border: 0; outline: 0; background: transparent;
-  font: inherit; color: var(--ink);
-  padding: 0;
-  caret-color: var(--amber-deep);
-  transition: width .2s, flex-basis .2s;
-}
-.cmdbar:focus-within .cmdbar-input { width: 200px; flex-basis: 200px; }
-.cmdbar-input::placeholder { color: var(--mute); }
-.cmdbar-input::-webkit-search-cancel-button { display: none; }
-
-.pill-cap {
-  font-size: var(--fs-xs); padding: 8px 16px; border-radius: 999px;
-  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
-  transition: all .2s; white-space: nowrap;
-  text-decoration: none;
-}
-.pill-cap.ghost { border: 1px solid var(--ink); color: var(--ink); background: transparent; }
-.pill-cap.ghost:hover { background: var(--ink); color: var(--ivory); }
-.pill-cap.fill { background: var(--amber-deep); color: var(--ivory); border: 1px solid var(--amber-deep); }
-.pill-cap.fill:hover { background: var(--maroon); border-color: var(--maroon); }
+/* 顶栏 + pill-cap 曾在此内联一整份副本(30 个选择器,与 bc-chrome.css 逐条重复,
+   且停留在旧版:.pill-cap 还留着 transition:all、按钮无缓动 token)。
+   因排在 bc-chrome.css 之后,它会盖住共享层的响应式分级 —— 改共享层本页不跟随。
+   已删除,统一继承 bc-chrome.css。本页专属的 .wrap 1280 与 960 档重排仍保留。 */
 
 .btn-s {
   font-size: var(--fs-xs); padding: 6px 12px; border-radius: 6px;
@@ -169,7 +43,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .pill { font-family: var(--mono); font-size: var(--fs-2xs); padding: 2px 8px;
         border-radius: 4px; letter-spacing: 0.04em; display: inline-flex; align-items: center; gap: 5px; }
 .pill-live { background: color-mix(in srgb, var(--sage) 14%, transparent); color: var(--sage); }
-.pill-live i { width: 5px; height: 5px; border-radius: 50%; background: var(--sage); animation: pulse 1.6s infinite ease-in-out; }
+.pill-live i { width: 5px; height: 5px; border-radius: 50%; background: var(--sage); animation: pulse 1.6s infinite var(--ease-in-out); }
 .pill-amber { background: var(--amber-wash); color: var(--amber-deep); }
 .pill-ink { background: var(--ink); color: var(--ivory); }
 .pill-sage { background: var(--sage-soft); color: var(--sage); }
@@ -295,7 +169,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .console-card .frame-h .rr i {
   width: 6px; height: 6px; border-radius: 50%; background: var(--amber-deep);
-  animation: pulse 1.6s infinite ease-in-out;
+  animation: pulse 1.6s infinite var(--ease-in-out);
 }
 .console-inner {
   background: var(--ink); color: var(--paper-3);
@@ -433,7 +307,7 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 }
 .atlas-strip-head .subline .here::before {
   content: ""; width: 5px; height: 5px; border-radius: 50%;
-  background: var(--amber); animation: pulse 1.6s infinite ease-in-out;
+  background: var(--amber); animation: pulse 1.6s infinite var(--ease-in-out);
 }
 .atlas-strip-head .subline .here b {
   color: var(--ivory); font-weight: 500;
@@ -1342,21 +1216,9 @@ body { background: var(--paper); color: var(--ink); font-feature-settings: "ss01
 .wenda-actions .hint { font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute); }
 
 /* ============ Colophon ============ */
-.colophon { background: var(--ink); color: var(--ivory); padding: 50px 48px 36px; }
-.colo-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; }
-.colo-brand .logo { font-family: var(--serif-en); font-size: var(--fs-3xl); font-weight: 600; letter-spacing: -0.02em; }
-.colo-brand .logo .it { font-style: italic; color: var(--amber); }
-.colo-brand p { color: color-mix(in srgb, var(--ivory) 55%, transparent); font-size: var(--fs-xs); line-height: 1.7; margin: 10px 0 0; }
-.colo h5, .colo h3 { font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.16em;
-           text-transform: uppercase; color: color-mix(in srgb, var(--ivory) 40%, transparent); margin: 0 0 14px; }
-.colo a { display: block; font-family: var(--serif-cn); font-size: var(--fs-sm);
-          color: color-mix(in srgb, var(--ivory) 85%, transparent); padding: 4px 0; text-decoration: none; }
-.colo a:hover { color: var(--amber-soft); }
-.colo-foot {
-  margin-top: 36px; padding-top: 20px; border-top: 1px solid color-mix(in srgb, var(--ivory) 10%, transparent);
-  display: flex; justify-content: space-between; font-family: var(--mono); font-size: var(--fs-2xs);
-  color: color-mix(in srgb, var(--ivory) 60%, transparent); /* a11y: .4→.6 on --ink ≈6.8:1(此内联规则覆盖共享 bc-chrome,故须在此改) */
-}
+/* 页脚曾在此内联一整份副本(9 条,8 条与 bc-chrome 逐条重复)。它排在共享层之后,
+   会盖住共享样式 —— 且其中 .colo h5/h3 停留在 40% 不透明度,把共享层已修到 60%
+   (≈6.8:1)的 a11y 又倒了回去。已删除,h3 选择器已并入 bc-chrome。 */
 
 /* Theory citation row — academic basis under sec-h */
 .theory-row {
@@ -1494,11 +1356,11 @@ html.lenis, html.lenis body { height: auto; }
   .section.dark { padding-left: 24px; padding-right: 24px; }
 
   /* masthead 精简：藏搜索；导航降为整宽可横滑的第二行（三模块在平板/手机始终可达，不再丢失入口） */
-  .masthead-inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 12px; padding: 12px 24px; }
-  .cmdbar { display: none; }
-  .mast-brand .ed { display: none; }
-  .app-tabs { order: 3; flex-basis: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .app-tabs a kbd { display: none; }
+  body[data-page="overview"] .masthead-inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 12px; padding: 12px 24px; }
+  body[data-page="overview"] .cmdbar { display: none; }
+  body[data-page="overview"] .mast-brand .ed { display: none; }
+  body[data-page="overview"] .app-tabs { order: 3; flex-basis: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  body[data-page="overview"] .app-tabs a kbd { display: none; }
 
   /* hero 两栏 → 单栏，console 卡移到文字下方、不再被挤压 */
   .hero-grid { grid-template-columns: 1fr; gap: 32px; }
@@ -1525,7 +1387,6 @@ html.lenis, html.lenis body { height: auto; }
   .wrap { padding: 0 18px; }
   .section { padding: 56px 0; }
   .section.dark { padding-left: 18px; padding-right: 18px; }
-  .issue-strip { padding-left: 18px; padding-right: 18px; }
 
   /* 中文标签去掉英文副标后，小屏改为自然换行，避免原有单行容器撑宽页面。 */
   .hero-grid,
@@ -1555,13 +1416,13 @@ html.lenis, html.lenis body { height: auto; }
   .toolbar { flex-wrap: wrap; }
   .theory-chip { max-width: 100%; flex-wrap: wrap; }
   .flow-handoff { padding-left: 18px; padding-right: 18px; }
-  .colophon { padding-left: 18px; padding-right: 18px; }
+  body[data-page="overview"] .colophon { padding-left: 18px; padding-right: 18px; }
 
   /* KPI / 数据汇总 / 工程 db / 页脚 → 单或双栏 */
   .kpi-row { grid-template-columns: 1fr; gap: 16px; }
   .data-summary { grid-template-columns: 1fr; }
   .db-grid { grid-template-columns: 1fr; }
-  .colo-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  body[data-page="overview"] .colo-grid { grid-template-columns: 1fr 1fr; gap: 24px; }
 
   /* hero 标题缩一档 */
   .hero h1 { font-size: var(--fs-3xl); }
@@ -1573,7 +1434,7 @@ html.lenis, html.lenis body { height: auto; }
 
 </style>
 </head>
-<body>
+<body data-page="overview">
   <script>
   /* Scheme A guard · 仅在支持 IntersectionObserver 且未开启 reduce-motion 时
      启用入场隐藏态。同步运行于内容解析前，避免内容闪现(FOUC)；
@@ -1605,23 +1466,13 @@ html.lenis, html.lenis body { height: auto; }
   </script>
   <script src="./shared/wendao.js?v=3" defer></script>
   <script src="./shared/fanya.js?v=2" defer></script>
-  <script src="./shared/live-stats.js?v=1" defer></script>
   <script src="./shared/toast.js?v=3-color-token" defer></script>
   <script src="./shared/faq.js?v=2-neutral-color" defer></script>
-  <div class="issue-strip">
-    <span>药事管理 · 2026 春季</span>
-    <span class="sep">—</span>
-    <span>课程设计</span>
-    <span class="sep">—</span>
-    <span><span class="pulse"></span><span data-live="teachers" data-baseline="17">17</span> 位教师在线</span>
-    <span class="r">教学场次 #3417 · 节点 03 / 9 · 已耗时 <span data-live="timer" data-start="132">02:12</span></span>
-  </div>
-
   <header class="masthead">
     <div class="masthead-inner">
       <a class="mast-brand" href="./index.html">
         <span class="logo">Pharmaco<span class="it">Pilot</span></span>
-        <span class="ed">药学教育版</span>
+        <span class="ed">for Pharmacy Education</span>
       </a>
       <nav class="app-tabs" aria-label="主导航">
         <a href="./index.html" class="is-active" aria-current="page">概览</a>
@@ -1630,7 +1481,7 @@ html.lenis, html.lenis body { height: auto; }
         <a href="./data-detail.html">教学数据 <kbd>3</kbd></a>
       </nav>
       <div class="cmdbar">⌕ 搜索 <kbd>⌘K</kbd></div>
-      <div style="display:flex;gap:8px;white-space:nowrap">
+      <div class="mast-actions">
         <a class="pill-cap ghost" href="./login.html">登录</a>
         <a class="pill-cap fill" href="./nav-detail.html">进入工作台 →</a>
       </div>
@@ -1642,7 +1493,6 @@ html.lenis, html.lenis body { height: auto; }
     <section class="hero">
       <div class="hero-grid">
         <div class="hero-left" data-reveal-stagger>
-          <div class="eyebrow">第 04 期 · 2026 春季封面故事 · 面向新教师</div>
           <h1>
             与新教师<span class="it">协同</span>，<br/>
             重构<span class="it">药事管理</span>课程，<br/>
@@ -1880,24 +1730,18 @@ html.lenis, html.lenis body { height: auto; }
           <p class="lede">把"一节课怎么备、怎么上、怎么复盘"拆成可推进的 9 个教学环节。每个教学环节只做一个关键教学判断、产出一份可被审校的材料——课前 5 个、课中 1 个、课后 3 个。</p>
           <div class="theory-row">
             <span class="theory-h">理论底盘</span>
-            <span class="theory-chip">ADDIE 教学设计 <small>Branson 1975</small></span>
-            <span class="theory-chip">Backward Design <small>Wiggins &amp; McTighe 1998</small></span>
+            <span class="theory-chip">UbD 逆向设计 <small>Wiggins &amp; McTighe 1998</small></span>
             <span class="theory-chip">建设性对齐 <small>Biggs 1996</small></span>
-            <span class="theory-chip">OBE 成果导向教育 <small>Spady 1994</small></span>
-            <span class="theory-chip">教学事件九步 <small>Gagné 1985</small></span>
-            <span class="theory-chip">5E 教学模型 <small>Bybee 1989</small></span>
             <span class="theory-chip">经验学习圈 <small>Kolb 1984</small></span>
             <span class="theory-chip">最近发展区 ZPD <small>Vygotsky 1978</small></span>
             <span class="theory-chip">认知负荷 <small>Sweller 1988</small></span>
             <span class="theory-chip">情境学习 <small>Lave &amp; Wenger 1991</small></span>
-            <span class="theory-chip">ICAP 参与层级 <small>Chi 2014</small></span>
-            <span class="theory-chip">TPACK <small>Mishra &amp; Koehler 2006</small></span>
+            <span class="theory-chip">ICAP 学习参与 <small>Chi &amp; Wylie 2014</small></span>
             <span class="theory-chip">形成性评价 <small>Black &amp; Wiliam 1998</small></span>
             <span class="theory-chip">教学评一体化 <small>崔允漷</small></span>
-            <span class="theory-chip">课例研究 <small>顾泠沅</small></span>
             <span class="theory-chip">反思性实践 <small>Schön 1983</small></span>
             <span class="theory-chip">药事管理教育 <small>全国规划教材</small></span>
-            <span class="theory-chip">药学教育成果 CAPE <small>AACP 2013</small></span>
+            <span class="theory-chip">CAPE 教育成果 <small>AACP 2013</small></span>
           </div>
           <div class="toolbar">
             <a class="btn-s" href="./nav-detail.html">▸ 打开 9 个教学环节工作台</a>
@@ -2200,7 +2044,6 @@ html.lenis, html.lenis body { height: auto; }
             <span class="theory-h">评价依据</span>
             <span class="theory-chip">教学评一体化 <small>崔允漷</small></span>
             <span class="theory-chip">建设性对齐 <small>Biggs 1996</small></span>
-            <span class="theory-chip">OBE 成果导向 <small>Spady 1994</small></span>
             <span class="theory-chip">Bloom × SOLO 认知层级 <small>Biggs &amp; Collis 1982</small></span>
             <span class="theory-chip">教师 PCK <small>Shulman 1987</small></span>
             <span class="theory-chip">形成性评价 <small>Black &amp; Wiliam 1998</small></span>

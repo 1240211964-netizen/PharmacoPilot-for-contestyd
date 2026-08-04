@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=7-native-control-theming" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=10-native-control-theming" />
+<link rel="stylesheet" href="./shared/tokens.css?v=8-motion-tokens" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=24-status-strip-removed" />
 <style>
 /* ============ 教学数据 详情页 ============ */
 
@@ -63,6 +63,217 @@
 .s-cell .basis-list {
   display: flex; flex-wrap: wrap; gap: 5px;
 }
+/* 概览卡曲线：可点击下钻到环节抽屉 */
+.s-cell .spark-btn {
+  display: block; width: 100%; padding: 0; border: 0; background: transparent;
+  cursor: pointer; text-align: left; border-radius: 6px;
+  transition: background var(--dur-1) var(--ease-out);
+}
+.s-cell .spark-btn:hover { background: color-mix(in oklab, var(--ink) 4%, transparent); }
+.s-cell .spark-btn:focus-visible {
+  outline: 2px solid var(--amber-deep); outline-offset: 2px;
+}
+.s-cell .spark-cta {
+  display: block; margin-top: 2px;
+  font-family: var(--mono); font-size: var(--text-micro); color: var(--mute);
+  transition: color var(--dur-1) var(--ease-out);
+}
+.s-cell .spark-btn:hover .spark-cta { color: var(--amber-deep); }
+
+/* 判断依据折叠：概览层只留标题，展开才读论证 */
+.s-cell .basis-fold > summary {
+  cursor: pointer; list-style: none; user-select: none;
+  display: flex; align-items: baseline; gap: 4px;
+}
+.s-cell .basis-fold > summary::-webkit-details-marker { display: none; }
+.s-cell .basis-fold > summary::after {
+  content: "▾"; font-size: var(--text-micro); color: var(--mute);
+  transition: transform var(--dur-1) var(--ease-out);
+}
+.s-cell .basis-fold[open] > summary::after { transform: rotate(180deg); }
+.s-cell .basis-count { font-family: var(--mono); color: var(--mute); font-weight: 400; }
+
+/* 评价依据 · 单层折叠后置 */
+.theory-disclosure {
+  margin-top: 24px; border-top: 1px solid var(--rule); padding-top: 14px;
+}
+.theory-disclosure > summary {
+  cursor: pointer; list-style: none; display: flex; align-items: baseline;
+  gap: 10px; flex-wrap: wrap;
+}
+.theory-disclosure > summary::-webkit-details-marker { display: none; }
+.td-title { font-family: var(--mono); font-size: var(--text-caption); color: var(--ink-soft); }
+.td-title b { color: var(--amber-deep); font-variant-numeric: tabular-nums; }
+.td-preview { font-size: var(--text-caption); color: var(--mute); flex: 1 1 auto; min-width: 0; }
+.td-cta {
+  font-family: var(--mono); font-size: var(--text-caption); color: var(--amber-deep);
+  border: 1px solid var(--rule-2); border-radius: 999px; padding: 1px 10px;
+}
+.theory-disclosure[open] .td-cta::after { content: " ▴"; }
+.theory-disclosure:not([open]) .td-cta::after { content: " ▾"; }
+.theory-disclosure__body { margin-top: 12px; }
+
+/* ══ 教学决策摘要页 · 重构后结构 ═══════════════════════════════════════
+   信息顺序：本轮判断 → 支持数据 → 下一轮动作 → 理论与计算依据。
+   理论依据保留，但从「阅读前置条件」降为「判断的可查依据」。 */
+.data-h1 {
+  /* 原两行超大标题约 70px、占近 1/4 屏；压到单行 48–52px，首屏让给判断本身 */
+  font: 600 clamp(38px, 3.6vw, 52px)/1.15 var(--serif-cn);
+  margin: 6px 0 0; letter-spacing: -0.01em;
+}
+.data-h1 .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-deep); }
+.data-sub { margin: 10px 0 0; font-size: var(--text-control); color: var(--mute); max-width: 46em; }
+.data-status {
+  margin: 8px 0 0; font-size: var(--text-body-strong); font-weight: 500; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.data-status b { color: var(--amber-deep); }
+
+/* ── 9 环节状态轨道 ── */
+.stage-track {
+  display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 0;
+  padding-top: 14px; border-top: 1px solid var(--rule);
+}
+.st-node {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--rule-2); background: transparent;
+  font-family: var(--mono); font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums; color: var(--mute);
+  transition: border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+.st-node:hover { border-color: var(--ink); color: var(--ink); }
+.st-node:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 2px; }
+.st-node .st-mark { font-weight: 700; }
+.st-node.is-keep { border-color: var(--sage); color: var(--sage); }
+.st-node.is-fix  { border-color: var(--amber-deep); color: var(--amber-deep); }
+.st-node.is-queued { border-style: dashed; }
+/* 无状态节点不是按钮：本轮没有结果，不应看起来同样可操作 */
+.st-node.is-idle { cursor: default; opacity: .55; }
+.st-state { font-family: var(--serif-cn); }
+/* 轨道定位后的短暂高亮；reduced-motion 下由 JS 关掉平滑滚动，此处只做描边 */
+.is-track-highlighted {
+  outline: 2px solid var(--amber-deep); outline-offset: 3px; border-radius: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-track-highlighted { transition: none; }
+}
+
+/* ── 8 列判断 + 4 列行动 ── */
+.decision-layout {
+  display: grid; grid-template-columns: 8fr 4fr; gap: 20px; margin-top: 22px;
+  align-items: start;
+}
+.col-h {
+  margin: 0 0 12px; font: 500 var(--text-body-strong)/1.3 var(--serif-cn); color: var(--ink);
+}
+.verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ── 判断卡 ── */
+.verdict-card {
+  border: 1px solid var(--rule-2); border-radius: 12px; padding: 16px 18px 14px;
+  background: var(--ivory); display: flex; flex-direction: column; gap: 12px;
+}
+.verdict-card.is-keep { border-left: 3px solid var(--sage); }
+.verdict-card.is-fix  { border-left: 3px solid var(--amber-deep); }
+/* 状态同时用图标 + 文字，不单靠颜色 */
+.vc-state {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  font-family: var(--mono); font-size: var(--text-caption); letter-spacing: .06em;
+}
+.is-keep .vc-state { color: var(--sage); }
+.is-fix  .vc-state { color: var(--amber-deep); }
+.vc-env { display: flex; align-items: baseline; gap: 10px; }
+.vc-num { font: 600 var(--fs-3xl)/1 var(--serif-en); font-style: italic; }
+.is-keep .vc-num { color: var(--sage); }
+.is-fix  .vc-num { color: var(--amber-deep); }
+.vc-name { font: 500 var(--text-body)/1.35 var(--serif-cn); }
+.vc-block { display: flex; flex-direction: column; gap: 6px; }
+.vc-lab {
+  font-family: var(--mono); font-size: var(--text-caption); color: var(--mute);
+  display: flex; align-items: center; gap: 5px;
+}
+.vc-info {
+  border: 0; background: transparent; cursor: help; padding: 0;
+  color: var(--mute); font-size: var(--text-caption);
+}
+/* Δ 并列数字：等宽数字位保证两侧对齐 */
+.vc-deltas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.vd-item { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vd-lab { font-size: var(--text-caption); color: var(--mute); }
+.vd-val {
+  font: 600 var(--fs-xl)/1.1 var(--serif-en);
+  font-variant-numeric: tabular-nums; color: var(--ink);
+}
+.vd-val.is-muted {
+  font: 400 var(--text-caption)/1.4 var(--serif-cn); color: var(--mute-2);
+}
+/* 有界量表：0–4 轨道，不用任何折线语言 */
+.vc-gauge {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: var(--text-micro); color: var(--mute);
+}
+.vg-track {
+  flex: 1; height: 8px; border-radius: 999px; background: var(--paper-3);
+  overflow: hidden; min-width: 0;
+}
+.vg-fill { display: block; height: 100%; border-radius: 999px; background: var(--sage); }
+.is-fix .vg-fill { background: var(--amber-deep); }
+.vg-val {
+  font-size: var(--text-caption); color: var(--ink); font-weight: 600;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.vc-band { font-family: var(--mono); font-size: var(--text-micro); color: var(--mute); }
+.vc-verdict { margin: 0; font-size: var(--text-body); line-height: var(--lh-body); color: var(--ink-soft); }
+.vc-basis > summary {
+  cursor: pointer; list-style: none; font-family: var(--mono);
+  font-size: var(--text-caption); color: var(--amber-deep);
+}
+.vc-basis > summary::-webkit-details-marker { display: none; }
+.vc-basis > summary::after { content: " →"; }
+.vc-basis[open] > summary::after { content: " ↓"; }
+.vc-basis .basis-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+/* ── 行动区 ── */
+.action-col {
+  border: 1px solid var(--rule-2); border-radius: 12px; padding: 16px 18px;
+  background: color-mix(in oklab, var(--amber-wash) 40%, var(--ivory));
+}
+.ac-count { margin: 0 0 12px; font-size: var(--text-body); color: var(--ink-soft); }
+.ac-count b { font: 600 var(--fs-2xl)/1 var(--serif-en); font-style: italic; color: var(--amber-deep); }
+.ac-list { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ac-item { display: flex; gap: 10px; align-items: baseline; }
+.ac-env {
+  font-family: var(--mono); font-size: var(--text-caption); color: var(--amber-deep);
+  font-variant-numeric: tabular-nums; flex: 0 0 auto;
+}
+.ac-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ac-body b { font: 500 var(--text-control)/1.35 var(--serif-cn); }
+.ac-body small { font-size: var(--text-caption); color: var(--mute); }
+/* 一页只留一个主按钮 */
+.ac-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+/* 主按钮占满可用宽度，触控高度 ≥44px；次级操作是文本链接，不会挤窄它 */
+.ac-actions .q-btn.is-primary {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; min-height: 44px; box-sizing: border-box; text-align: center;
+}
+.q-btn.is-text {
+  border: 0; background: transparent; padding: 2px 0; color: var(--ink-soft);
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+  font-size: var(--text-caption);
+}
+.q-btn.is-text:hover { color: var(--amber-deep); }
+
+@media (max-width: 1100px) {
+  .decision-layout { grid-template-columns: 1fr; }
+  .verdict-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  /* 移动端轨道改 3×3 宫格，不横向压扁 */
+  .stage-track { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .vc-deltas { grid-template-columns: 1fr; }
+}
+
 .s-cell .basis-chip {
   font-family: var(--serif-cn); font-size: var(--fs-2xs);
   padding: 2px 7px; border-radius: 999px;
@@ -72,6 +283,11 @@
   cursor: default;
   max-width: 100%;
   overflow-wrap: anywhere;
+}
+/* chip 用了 overflow-wrap:anywhere 防中文长词溢出，代价是数值也会被从中间劈开
+   （曾出现「Δ+4」与「.7」分处两行）。数值统一包在 .nb 里豁免断行。 */
+.s-cell .basis-chip .nb {
+  white-space: nowrap; overflow-wrap: normal; font-style: normal;
 }
 .s-cell .basis-chip small {
   font-family: var(--serif-en); font-style: italic;
@@ -1691,26 +1907,35 @@
 }
 
 /* ============ Data Source Badge + Drawer ============ */
+.data-hero-kicker {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 18px;
+}
+.data-hero-kicker .eyebrow { margin-bottom: 0; }
 .ds-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.06em;
-  background: color-mix(in srgb, var(--ivory) 8%, transparent); color: var(--ivory);
-  border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent); border-radius: 999px;
-  padding: 3px 10px; cursor: pointer;
-  transition: background .15s, border-color .15s;
+  font-family: var(--mono); font-size: var(--text-caption); letter-spacing: 0.04em;
+  line-height: 1.3;
+  background: var(--paper-2); color: var(--ink-soft);
+  border: 1px solid var(--rule); border-radius: 999px;
+  padding: 6px 11px; cursor: pointer;
+  transition: background var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
 }
-.ds-badge:hover { background: color-mix(in srgb, var(--ivory) 16%, transparent); border-color: color-mix(in srgb, var(--ivory) 40%, transparent); }
+.ds-badge:hover { background: var(--ivory); border-color: var(--amber-deep); }
+.ds-badge:focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 2px; }
 .ds-badge .ds-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--mute);
 }
 .ds-badge.is-live .ds-dot { background: #6bce8a; box-shadow: 0 0 0 3px rgba(107,206,138,.18); }
 .ds-badge.is-live { border-color: rgba(107,206,138,.5); }
-.ds-badge .ds-meta { color: color-mix(in srgb, var(--ivory) 55%, transparent); font-size: var(--fs-2xs); }
+.ds-badge .ds-meta { color: var(--mute); font-size: var(--text-micro); }
 
 .ds-drawer {
-  position: fixed; right: 24px; top: 96px;
+  position: fixed; right: 24px; top: 78px;
   width: min(520px, calc(100vw - 48px));
+  max-height: calc(100dvh - 102px); overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--ivory); color: var(--ink);
   border: 1px solid var(--ink); border-radius: 12px;
   box-shadow: 0 18px 48px -16px color-mix(in srgb, var(--ink) 45%, transparent);
@@ -1757,17 +1982,24 @@
   display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
   margin-top: 12px;
 }
+@media (max-width: 640px) {
+  .data-hero-kicker { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .ds-badge .ds-meta { display: none; }
+  .ds-drawer {
+    right: 12px; top: 72px; width: calc(100vw - 24px);
+    max-height: calc(100dvh - 84px);
+  }
+}
 </style>
 </head>
 <body class="is-readable-detail">
 <script src="./shared/wendao.js?v=3" defer></script>
 <script src="./shared/fanya.js?v=2" defer></script>
-<script src="./shared/live-stats.js?v=1" defer></script>
 <script src="./shared/faq.js?v=2-neutral-color" defer></script>
 <!-- COUPLING 契约先加载；framework 校验 LIVE couplingRubric 时直接复用它。 -->
 <script src="./shared/evaluation-contract.js?v=7-association-summary" defer></script>
 <script src="./shared/evaluation-framework.js?v=14-measurement-contract" defer></script>
-<script src="./shared/data-render.js?v=18-measurement-state" defer></script>
+<script src="./shared/data-render.js?v=21-decision-freeze" defer></script>
 <script src="./shared/theory-chips.js?v=33-color-token" defer></script>
 <script src="./shared/rerun-bridge.js?v=3" defer></script>
 <script>
@@ -1909,21 +2141,6 @@
 })();
 </script>
 
-<!-- ===== Issue strip ===== -->
-<div class="issue-strip">
-  <span>药事管理 · 2026 春季</span>
-  <span class="sep">—</span>
-  <span>课程设计</span>
-  <span class="sep">—</span>
-  <span><span class="pulse"></span><span>17</span> 教师样本</span>
-  <button type="button" class="ds-badge" id="dsBadge" aria-haspopup="dialog" aria-controls="dsDrawer">
-    <span class="ds-dot" aria-hidden="true"></span>
-    <span class="ds-text">样本数据</span>
-    <span class="ds-meta" id="dsBadgeMeta"></span>
-  </button>
-  <span class="r">教学场次 #3417 · 已耗时 <span data-live="timer" data-start="132">02:12</span></span>
-</div>
-
 <!-- ===== Data Source Drawer ===== -->
 <aside class="ds-drawer" id="dsDrawer" hidden role="dialog" aria-label="接入真实课堂数据">
   <div class="ds-drawer-inner">
@@ -1952,7 +2169,7 @@
   <div class="masthead-inner">
     <a class="mast-brand" href="./index.html">
       <span class="logo">Pharmaco<span class="it">Pilot</span></span>
-      <span class="ed">药学教育版</span>
+      <span class="ed">for Pharmacy Education</span>
     </a>
     <div class="app-tabs">
       <a href="./index.html">概览</a>
@@ -1961,7 +2178,7 @@
       <a href="./data-detail.html" class="is-active">教学数据 <kbd>3</kbd></a>
     </div>
     <div class="cmdbar">⌕ 搜索 <kbd>⌘K</kbd></div>
-    <div style="display:flex;gap:8px;white-space:nowrap">
+    <div class="mast-actions">
       <a class="pill-cap ghost" href="./login.html">登录</a>
       <a class="pill-cap fill" href="./nav-detail.html">进入工作台 →</a>
     </div>
@@ -1974,124 +2191,179 @@
     <!-- hero 不重复输出测量结果；平均分差与关联覆盖率集中在下方测量快照。 -->
     <div class="page-hero-grid is-solo">
       <div>
-        <div class="eyebrow">03 · 教学数据</div>
-        <h1>把课堂信号，<br/>写回 <span class="it">9 个教学环节</span>。</h1>
+        <div class="data-hero-kicker">
+          <div class="eyebrow">03 · 教学数据</div>
+          <!-- 「样本数据」未说明证据身份；改为直接写清这是什么数据。 -->
+          <button type="button" class="ds-badge" id="dsBadge" aria-haspopup="dialog" aria-controls="dsDrawer">
+            <span class="ds-dot" aria-hidden="true"></span>
+            <span class="ds-text">样本演练 · 非真实课堂</span>
+            <span class="ds-meta" id="dsBadgeMeta"></span>
+          </button>
+        </div>
+        <!-- 本页主任务不是「展示数据」，而是把课堂证据转化为教学决策并写回。
+             标题从两行超大字压到单行，腾出的首屏给本轮判断本身。 -->
+        <h1 class="data-h1">从课堂信号<span class="it">到教学决策</span></h1>
+        <p class="data-sub">将师生变化映射到 9 个教学环节，决定哪些保留、哪些修正、哪些继续验证。</p>
+        <p class="data-status" data-slot="round-status">
+          本轮已形成 <b data-slot="verdict-count">2</b> 项环节判断；下一轮有 <b data-slot="queue-count">4</b> 条建议待写回。
+        </p>
       </div>
     </div>
+
+    <!-- 9 环节状态轨道：标题说「写回 9 个教学环节」，页面就该看得见这 9 个环节各自怎么了。
+         由 data-render.js renderStageTrack() 填充状态；点击定位到对应判断或建议。
+         状态不只靠颜色 —— ✓/! 图标 + 文字标签，避免红绿色觉障碍读不出差异。 -->
+    <nav class="stage-track" data-slot="stage-track" aria-label="9 个教学环节本轮状态">
+      <!-- rendered by data-render.js -->
+    </nav>
 
     <!-- 评价依据：横向铺满 hero 宽度，与上方左右两栏视觉对齐 -->
-    <div class="theory-row theory-row-wide" data-store-key="pp.theoryAdds.data">
-      <span class="theory-h">评价依据</span>
-      <span class="theory-chip">教学评一体化 <small>崔允漷</small></span>
-      <span class="theory-chip">建设性对齐 <small>Biggs 1996</small></span>
-      <span class="theory-chip">OBE 成果导向 <small>Spady 1994</small></span>
-      <span class="theory-chip">Bloom × SOLO 认知层级 <small>Biggs &amp; Collis 1982</small></span>
-      <span class="theory-chip">教师 PCK <small>Shulman 1987</small></span>
-      <span class="theory-chip">形成性评价 <small>Black &amp; Wiliam 1998</small></span>
-      <span class="theory-chip">可见的学习 <small>Hattie 2009</small></span>
-      <span class="theory-chip">ICAP 学习参与 <small>Chi &amp; Wylie 2014</small></span>
-      <span class="theory-chip">自我调节学习 <small>Zimmerman 2002</small></span>
-      <span class="theory-chip">药事管理教育 <small>全国规划教材</small></span>
-      <span class="theory-chip">药学服务评价 <small>史录文 · 北大</small></span>
-      <span class="theory-chip">药事法规与监管科学 <small>杨悦 · 沈药</small></span>
-      <span class="theory-chip">CAPE 教育成果 <small>AACP 2013</small></span>
-      <button type="button" class="theory-add" id="theoryAddBtn" aria-expanded="false">接入文献 / 专家</button>
-      <div class="theory-add-panel" id="theoryAddPanel" role="region" aria-label="接入新的评价依据">
-        <div class="hint">
-          <span>在 <b>闻道</b> 检索教育评价文献 / 专家方法 →</span>
-          <button type="button" class="go-wenda" data-wendao="launch" data-wendao-query="教育学评价 文献">⌕ 去闻道检索</button>
-          <span style="opacity:.55">把找到的标题与出处粘到下方，加入本节评价依据。</span>
+
+    <!-- 2026-08-03 撤下页首「指标怎么读」图例。逐条核对后它并未解决实际理解障碍：
+         · T1–T8 / S1–S7 两行是冗余 —— 本屏出现的每个代号，卡片自己都配了中文名
+           （「互动调控 T6 教师维度」），现描述行已改为「中文名（代号）」，更不需要前置图例；
+         · 关联强度公式（X2–X5 × 证据系数 × X1）的对象在 1200px 之外的图谱区，
+           而图谱区的「评价框架」折叠面板本就完整写着同一句，此处属重复且过早；
+         · Δ分差的「非真实成效」口径已由下方证据带承担。
+         真正难懂的三处（关联强度量程、延迟相关、评价指标计算）图例一条都没覆盖，
+         已改为在卡片内就地说清。见 data-render.js renderSummaryRow()。 -->
+
+    <!-- 判断区 8 列 + 行动区 4 列：两张判断卡是页面主体，行动区重要但不该与判断争主视觉 -->
+    <div class="decision-layout">
+      <section class="verdict-col" aria-labelledby="verdictColH">
+        <h2 class="col-h" id="verdictColH">本轮判断</h2>
+        <div class="verdict-grid" data-summary-row>
+        <article class="verdict-card is-keep" data-verdict-card data-summary-role="keep">
+          <!-- 状态同时给图标与文字，不单靠颜色区分（红绿色觉） -->
+          <div class="vc-state"><span class="vc-icon" aria-hidden="true">✓</span>保留</div>
+          <div class="vc-env">
+            <span class="vc-num it" data-slot="num">06</span>
+            <span class="vc-name" data-slot="name">形成性评价与适应性调控</span>
+          </div>
+
+          <div class="vc-block">
+            <div class="vc-lab">较基线变化
+              <button type="button" class="vc-info" aria-label="什么是较基线变化"
+                      title="同一维度从基线到当前的分数差">ⓘ</button>
+            </div>
+            <div class="vc-deltas" data-slot="deltas"><!-- filled by data-render.js --></div>
+          </div>
+
+          <div class="vc-block">
+            <div class="vc-lab">当前关联强度 · 单次快照</div>
+            <!-- 有界量表而非折线：数据只有一个标量快照，折线语言会暗示不存在的时间趋势。
+                 端点固定 0 与 4，不画自造阈值线。 -->
+            <div class="vc-gauge" data-slot="gauge" role="img" data-slot-aria>
+              <span class="vg-end">0</span>
+              <span class="vg-track"><span class="vg-fill" data-slot="gauge-fill"></span></span>
+              <span class="vg-end">4</span>
+              <b class="vg-val" data-slot="gauge-val">—</b>
+            </div>
+            <div class="vc-band" data-slot="gauge-band"></div>
+          </div>
+
+          <p class="vc-verdict" data-slot="verdict"></p>
+
+          <details class="vc-basis">
+            <summary>查看判断依据<span class="basis-count" data-slot="chip-count"></span></summary>
+            <div class="basis-list" data-slot="chips"></div>
+          </details>
+        </article>
+        <article class="verdict-card is-fix" data-verdict-card data-summary-role="fix">
+          <!-- 状态同时给图标与文字，不单靠颜色区分（红绿色觉） -->
+          <div class="vc-state"><span class="vc-icon" aria-hidden="true">!</span>修正</div>
+          <div class="vc-env">
+            <span class="vc-num it" data-slot="num">07</span>
+            <span class="vc-name" data-slot="name">表现性评价与学习成效诊断</span>
+          </div>
+
+          <div class="vc-block">
+            <div class="vc-lab">较基线变化
+              <button type="button" class="vc-info" aria-label="什么是较基线变化"
+                      title="同一维度从基线到当前的分数差">ⓘ</button>
+            </div>
+            <div class="vc-deltas" data-slot="deltas"><!-- filled by data-render.js --></div>
+          </div>
+
+          <div class="vc-block">
+            <div class="vc-lab">当前关联强度 · 单次快照</div>
+            <!-- 有界量表而非折线：数据只有一个标量快照，折线语言会暗示不存在的时间趋势。
+                 端点固定 0 与 4，不画自造阈值线。 -->
+            <div class="vc-gauge" data-slot="gauge" role="img" data-slot-aria>
+              <span class="vg-end">0</span>
+              <span class="vg-track"><span class="vg-fill" data-slot="gauge-fill"></span></span>
+              <span class="vg-end">4</span>
+              <b class="vg-val" data-slot="gauge-val">—</b>
+            </div>
+            <div class="vc-band" data-slot="gauge-band"></div>
+          </div>
+
+          <p class="vc-verdict" data-slot="verdict"></p>
+
+          <details class="vc-basis">
+            <summary>查看判断依据<span class="basis-count" data-slot="chip-count"></span></summary>
+            <div class="basis-list" data-slot="chips"></div>
+          </details>
+        </article>
         </div>
-        <form class="row" id="theoryAddForm">
-          <input type="text" name="title"  aria-label="名称" placeholder="名称 — 例如「同伴评价」/「评价三角」/「Stiggins 课堂评价」" required />
-          <input type="text" name="source" aria-label="出处" placeholder="出处 / 作者 — 例如 Stiggins 2005" />
-          <button type="submit" class="submit" disabled>加入</button>
-          <button type="button" class="cancel" id="theoryAddCancel">取消</button>
-        </form>
-      </div>
+      </section>
+
+      <aside class="action-col" data-summary-role="next" aria-labelledby="actionColH">
+        <h2 class="col-h" id="actionColH">下一轮优先动作</h2>
+        <p class="ac-count"><b data-slot="count">4</b> 条建议待写回</p>
+        <!-- 原「立即/本周/暂缓/后续」时间轴是硬编码装饰：队列真实的优先级模型是 P1/P2/P3，
+             两者不是一套东西。无真实排期数据即删除，不留装饰性步骤条。 -->
+        <ol class="ac-list" data-slot="action-list"><!-- filled by data-render.js --></ol>
+        <div class="ac-actions">
+          <a href="#writebackQueue" class="q-btn is-primary">进入教学实践重跑 →</a>
+          <!-- 一页只留一个主按钮，其余降为次级/文本操作 -->
+          <button type="button" class="q-btn is-text">更新本课实践包</button>
+          <button type="button" class="q-btn is-text">写入教学资产库</button>
+        </div>
+      </aside>
     </div>
 
-    <!-- 指标图例：解释 T# / S# / COUPLING / ↑n 记号（样式见 bc-chrome.css .metric-legend） -->
-    <div class="metric-legend" role="note" aria-label="指标读法图例">
-      <span class="lead">指标怎么读 ·</span>
-      <span><b>T1–T8</b> 教师 · 教学环节指标</span>
-      <span><b>S1–S7</b> 学生 · 能力维度</span>
-      <span><b>关联强度</b> 师生环节关联信号 — 局部 X2–X5 × 证据系数 × X1 全局系数</span>
-      <span class="dim"><b>Δ分差</b> 前后变化（可正可负；样本为设计预演读数）· <b>非</b>真实成效</span>
-    </div>
-
-    <div class="summary-row" data-summary-row>
-      <div class="s-cell s" data-summary-role="keep">
-        <div class="l">最值得保留</div>
-        <!-- 静态默认对齐契约单一信源（KEEP = co 池中 COUPLING 最强 = 06 形成性评价与适应性调控）；data-render.js 会按 LIVE 数据重渲 -->
-        <div class="v"><span class="it" data-slot="num">06</span><small data-slot="name">形成性评价与适应性调控</small></div>
-        <div class="d" data-slot="desc">同期观测：教师 T6 ↑6.8 · 学生 S3 ↑5.5；关联强度 2.3</div>
-        <svg class="spark" viewBox="0 0 200 36" preserveAspectRatio="none"
-             role="img" aria-label="当前关联快照，无连续时间序列" data-slot="spark">
-          <title data-slot="spark-title">当前关联快照</title>
-          <defs><linearGradient id="data-spark-keep" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4d6257" stop-opacity="0.2"/><stop offset="1" stop-color="#4d6257" stop-opacity="0"/></linearGradient></defs>
-          <path d="M0,16 L200,16 L200,36 L0,36 Z" fill="url(#data-spark-keep)" data-slot="spark-area"/>
-          <polyline points="0,16 200,16" fill="none" stroke="#4d6257" stroke-width="1.5" data-slot="spark-line"/>
-        </svg>
-        <div class="basis">
-          <div class="basis-lab">判断依据</div>
-          <div class="basis-list" data-slot="chips">
-            <span class="basis-chip">互动调控 <small>T6 教师维度</small></span>
-            <span class="basis-chip">利益相关者 <small>S3 学生维度</small></span>
-            <span class="basis-chip">即时反馈可能贡献 <small>ICAP 2014</small></span>
+    <!-- 评价依据后置：它是「判断的可查依据」，不是阅读前置条件。
+         单层折叠 —— summary 自身承担开合，内部不再出现「+N 更多理论依据」二级控制
+         （data-theory-limit=999 使 theory-chips.js 的收起逻辑整体跳过）。
+         计数与预览词由 data-render.js renderTheoryDisclosure() 从实际 chip 数算出。 -->
+    <details class="theory-disclosure">
+      <summary>
+        <span class="td-title">评价依据 · 已接入 <b data-slot="theory-count">—</b> 项</span>
+        <span class="td-preview" data-slot="theory-preview"></span>
+        <span class="td-cta" aria-hidden="true">查看</span>
+      </summary>
+      <div class="theory-disclosure__body">
+      <div class="theory-row theory-row-wide" data-store-key="pp.theoryAdds.data" data-theory-limit="999">
+        <span class="theory-chip">教学评一体化 <small>崔允漷</small></span>
+        <span class="theory-chip">建设性对齐 <small>Biggs 1996</small></span>
+        <span class="theory-chip">Bloom × SOLO 认知层级 <small>Biggs &amp; Collis 1982</small></span>
+        <span class="theory-chip">教师 PCK <small>Shulman 1987</small></span>
+        <span class="theory-chip">形成性评价 <small>Black &amp; Wiliam 1998</small></span>
+        <span class="theory-chip">可见的学习 <small>Hattie 2009</small></span>
+        <span class="theory-chip">ICAP 学习参与 <small>Chi &amp; Wylie 2014</small></span>
+        <span class="theory-chip">自我调节学习 <small>Zimmerman 2002</small></span>
+        <span class="theory-chip">药事管理教育 <small>全国规划教材</small></span>
+        <span class="theory-chip">药学服务评价 <small>史录文 · 北大</small></span>
+        <span class="theory-chip">药事法规与监管科学 <small>杨悦 · 沈药</small></span>
+        <span class="theory-chip">CAPE 教育成果 <small>AACP 2013</small></span>
+        <button type="button" class="theory-add" id="theoryAddBtn" aria-expanded="false">接入文献 / 专家</button>
+        <div class="theory-add-panel" id="theoryAddPanel" role="region" aria-label="接入新的评价依据">
+          <div class="hint">
+            <span>在 <b>闻道</b> 检索教育评价文献 / 专家方法 →</span>
+            <button type="button" class="go-wenda" data-wendao="launch" data-wendao-query="教育学评价 文献">⌕ 去闻道检索</button>
+            <span style="opacity:.55">把找到的标题与出处粘到下方，加入本节评价依据。</span>
           </div>
+          <form class="row" id="theoryAddForm">
+            <input type="text" name="title"  aria-label="名称" placeholder="名称 — 例如「同伴评价」/「评价三角」/「Stiggins 课堂评价」" required />
+            <input type="text" name="source" aria-label="出处" placeholder="出处 / 作者 — 例如 Stiggins 2005" />
+            <button type="submit" class="submit" disabled>加入</button>
+            <button type="button" class="cancel" id="theoryAddCancel">取消</button>
+          </form>
         </div>
       </div>
-      <div class="s-cell" data-summary-role="fix">
-        <div class="l">最需要修正</div>
-        <div class="v"><span class="it" data-slot="num">07</span><small data-slot="name">表现性评价与学习成效诊断</small></div>
-        <div class="d" data-slot="desc">评价标准 R-04 立场迁移度 2 处歧义 · 评分者一致性偏低 · 政策证据引用不足</div>
-        <!-- y-range mirrors KEEP (6–30) so the two trend lines are visually comparable -->
-        <svg class="spark" viewBox="0 0 200 36" preserveAspectRatio="none"
-             role="img" aria-label="当前关联快照，局部评价标准歧义未解" data-slot="spark">
-          <title data-slot="spark-title">当前关联快照</title>
-          <defs><linearGradient id="data-spark-fix" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#d97757" stop-opacity="0.2"/><stop offset="1" stop-color="#d97757" stop-opacity="0"/></linearGradient></defs>
-          <path d="M0,16 L200,16 L200,36 L0,36 Z" fill="url(#data-spark-fix)" data-slot="spark-area"/>
-          <polyline points="0,16 200,16" fill="none" stroke="#a8492a" stroke-width="1.5" data-slot="spark-line"/>
-        </svg>
-        <div class="basis">
-          <div class="basis-lab">判断依据</div>
-          <div class="basis-list" data-slot="chips">
-            <span class="basis-chip">证据反馈与评价诊断 <small>T7 教师维度</small></span>
-            <span class="basis-chip">政策证据识读 <small>S2 学生维度</small></span>
-            <span class="basis-chip">评价标准歧义建议修正 <small>Biggs 1996</small></span>
-          </div>
-        </div>
       </div>
-      <div class="s-cell x is-emphasized" data-summary-role="next">
-        <div class="l">下一轮优先动作</div>
-        <div class="v"><span class="it" data-slot="count">4</span><small>条建议待写回</small></div>
-        <div class="d" data-slot="desc">写回 07 表现性评价与学习成效诊断 · 08 反思性实践与教学改进 · 06 形成性评价与适应性调控 · 03 教学内容结构化与前概念诊断</div>
-        <!-- 4 dots = 4 queued actions. First (filled amber, larger) = 立即；others = 本周 / 暂缓 / 后续（静态默认与 data-render.js renderNextSpark 运行时输出一致） -->
-        <svg class="spark" viewBox="0 0 200 36"
-             role="img" aria-label="4 条建议待写回">
-          <title>4 条建议待写回</title>
-          <line x1="20" y1="14" x2="180" y2="14" stroke="#1b1916" stroke-width="1" stroke-dasharray="2 3" opacity="0.2"/>
-          <circle cx="40"  cy="14" r="7" fill="#a8492a" stroke="#a8492a" stroke-width="1.4" opacity="1"/>
-          <text x="40"  y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" text-anchor="middle" fill="#a8492a" opacity="1">立即</text>
-          <circle cx="80"  cy="14" r="5" fill="none" stroke="#1b1916" stroke-width="1.4" opacity="0.55"/>
-          <text x="80"  y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" text-anchor="middle" fill="#1b1916" opacity="0.55">本周</text>
-          <circle cx="120" cy="14" r="5" fill="none" stroke="#1b1916" stroke-width="1.4" opacity="0.55"/>
-          <text x="120" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" text-anchor="middle" fill="#1b1916" opacity="0.55">暂缓</text>
-          <circle cx="160" cy="14" r="5" fill="none" stroke="#1b1916" stroke-width="1.4" opacity="0.55"/>
-          <text x="160" y="32" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" text-anchor="middle" fill="#1b1916" opacity="0.55">后续</text>
-        </svg>
-        <div class="basis">
-          <div class="basis-lab">直接操作</div>
-          <div class="action-row">
-            <a href="#writebackQueue" class="q-btn is-primary">进入教学实践重跑 →</a>
-            <button type="button" class="q-btn">更新本课实践包</button>
-            <button type="button" class="q-btn is-ghost">写入教学资产库</button>
-            <button type="button" class="q-btn is-ghost">暂缓</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    </details>
 
     <!-- 数据源与证据等级 · Hero 下方一行 4 卡 · 由 data-render.js 填充 -->
     <div class="evidence-strip" id="evidenceStrip">
@@ -2612,7 +2884,7 @@
   </div>
   <div class="colo-foot">
     <span>© 2026 PharmacoPilot · v2.0.4</span>
-    <span>教学场次 #3417 · 7 周 · 17 次模拟课堂</span>
+    <span>7 周 · 17 次模拟课堂</span>
   </div>
 </footer>
 

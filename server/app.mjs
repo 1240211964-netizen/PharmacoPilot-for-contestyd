@@ -20,7 +20,11 @@ import {
   recordClaimId,
   submitTeacherDecision,
 } from "./product-core/decisions.mjs";
-import { ProductCoreError } from "./product-core/errors.mjs";
+import { appendAuditEvent } from "./product-core/audit.mjs";
+import { failCode, ProductCoreError } from "./product-core/errors.mjs";
+import { newId, nowIso } from "./product-core/ids.mjs";
+import { searchKnowledge } from "./product-core/knowledge-retrieval-service.mjs";
+import { setUnitReviewStatus } from "./product-core/knowledge-unit-service.mjs";
 import {
   computeFactsAndAdvance,
   enterTeacherReview,

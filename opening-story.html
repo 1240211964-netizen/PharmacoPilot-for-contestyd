@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=7-native-control-theming" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=10-native-control-theming" />
+<link rel="stylesheet" href="./shared/tokens.css?v=8-motion-tokens" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=24-status-strip-removed" />
 <style>
 /* =========================================================
    PharmacoPilot · Opening Story · Cinematic Revision
@@ -63,45 +63,13 @@ a { color: inherit; text-decoration: none; }
 button { font: inherit; }
 
 /* --- existing chrome compatible fallbacks --- */
-.issue-strip {
-  background: var(--ink);
-  color: var(--ivory);
-  padding: 7px 48px;
-  font-family: var(--mono);
-  font-size: var(--fs-2xs);
-  letter-spacing: .06em;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  white-space: nowrap;
-  overflow: hidden;
-}
-.issue-strip .sep { color: color-mix(in srgb, var(--ivory) 28%, transparent); }
-.issue-strip .r { margin-left: auto; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.issue-strip .pulse {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
-  display: inline-block; margin-right: 5px; vertical-align: middle;
-  animation: pulse 1.6s infinite ease-in-out;
-}
-@keyframes pulse { 50% { opacity: .42; transform: scale(.86); } }
-.masthead { background: rgba(244,238,226,.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--ink); position: relative; z-index: 20; }
-.masthead-inner { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 16px; padding: 14px 40px; }
-.mast-brand { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; color: inherit; }
-.mast-brand .logo { font-family: var(--serif-en); font-size: var(--fs-2xl); font-weight: 600; letter-spacing: -.025em; line-height: 1; }
-.mast-brand .logo .it { font-style: italic; color: var(--amber-deep); }
-.mast-brand .ed { font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); padding-left: 12px; border-left: 1px solid var(--rule-2); }
-.app-tabs { display: flex; gap: 2px; padding: 2px; justify-self: center; background: var(--paper-2); border-radius: 8px; border: 1px solid var(--rule); white-space: nowrap; }
-.app-tabs a { padding: 6px 12px; font-size: var(--fs-xs); color: var(--mute); border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-family: var(--serif-cn); }
-.app-tabs a:hover { color: var(--ink); }
-.app-tabs a.is-opening { background: var(--ivory); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
-.app-tabs a kbd { font-family: var(--mono); font-size: var(--fs-2xs); padding: 0 4px; background: var(--paper-3); border-radius: 3px; color: var(--mute); }
-.cmdbar { display: inline-flex; align-items: center; gap: 8px; padding: 6px 11px; border: 1px solid var(--rule); border-radius: 999px; background: var(--paper-2); font-size: var(--fs-xs); color: var(--mute); white-space: nowrap; }
-.cmdbar kbd { margin-left: 2px; font-family: var(--mono); font-size: var(--fs-2xs); background: var(--ivory); color: var(--mute); padding: 2px 7px; border: 1px solid var(--rule); border-radius: 999px; letter-spacing: .04em; }
-.pill-cap { font-size: var(--fs-xs); padding: 8px 16px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all .2s; white-space: nowrap; text-decoration: none; }
-.pill-cap.ghost { border: 1px solid var(--ink); color: var(--ink); background: transparent; }
-.pill-cap.ghost:hover { background: var(--ink); color: var(--ivory); }
-.pill-cap.fill { background: var(--amber-deep); color: var(--ivory); border: 1px solid var(--amber-deep); }
-.pill-cap.fill:hover { background: var(--maroon); border-color: var(--maroon); transform: translateY(-1px); }
+/* 顶栏基础样式已全部收归 bc-chrome.css(原先此处是一份停留在旧版的副本,
+   会盖住共享层的 1500/1180/900 响应式分级)。下面只保留本页真正的差异。 */
+/* 开场页顶栏不吸顶、走毛玻璃,与工作台的实心纸底刻意不同 */
+body[data-page="opening"] .masthead { background: rgba(244,238,226,.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--ink); position: relative; z-index: 20; }
+/* 本页导航的选中态用 .is-opening,不是工作台的 .is-active */
+body[data-page="opening"] .app-tabs a.is-opening { background: var(--ivory); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.pill-cap.fill:hover { transform: translateY(-1px); }
 
 /* --- cinematic layout --- */
 .opening-shell {
@@ -1233,8 +1201,8 @@ button { font: inherit; }
   .story-stage { min-height: 860px; }
 }
 @media (max-width: 980px) {
-  .masthead-inner { grid-template-columns: 1fr; align-items: start; }
-  .app-tabs { justify-self: start; max-width: 100%; overflow-x: auto; }
+  body[data-page="opening"] .masthead-inner { grid-template-columns: 1fr; align-items: start; }
+  body[data-page="opening"] .app-tabs { justify-self: start; max-width: 100%; overflow-x: auto; }
   .opening-shell { width: 100%; max-width: none; min-height: auto; padding: 24px 22px 34px; }
   .opening-head { grid-template-columns: 1fr; }
   .chapter-meta { text-align: left; min-width: 0; }
@@ -1245,11 +1213,13 @@ button { font: inherit; }
   .story-controls { justify-content: flex-start; }
 }
 @media (max-width: 620px) {
-  .issue-strip { padding-inline: 18px; }
-  .masthead-inner { padding: 14px 18px; }
-  .mast-brand { max-width: 100%; min-width: 0; }
-  .mast-brand .ed, .issue-strip .r, .cmdbar { display: none; }
-  .app-tabs { width: 100%; }
+  body[data-page="opening"] .masthead-inner { padding: 14px 18px; }
+  body[data-page="opening"] .mast-brand { max-width: 100%; min-width: 0; }
+  /* 本页 .r 只有「开场故事」四个字,不像工作台那样长,窄屏无需隐藏。
+     (原先本页没有 .r,这条是空转;丝带统一后若照旧会把它整个藏掉。) */
+  body[data-page="opening"] .mast-brand .ed,
+  body[data-page="opening"] .cmdbar { display: none; }
+  body[data-page="opening"] .app-tabs { width: 100%; }
   .opening-shell { padding-inline: 16px; grid-template-rows: minmax(900px, auto) auto; }
   .story-stage { min-height: 900px; border-radius: 12px; }
   .story-scene { padding: 26px 18px; }
@@ -1295,18 +1265,12 @@ button { font: inherit; }
 }
 </style>
 </head>
-<body>
-  <div class="issue-strip">
-    <span>产品短片 · 第一章</span>
-    <span class="sep">—</span>
-    <span><span class="pulse"></span>开场故事</span>
-  </div>
-
+<body data-page="opening">
   <header class="masthead">
     <div class="masthead-inner">
       <a class="mast-brand" href="./index.html" aria-label="PharmacoPilot 首页">
         <span class="logo">Pharmaco<span class="it">Pilot</span></span>
-        <span class="ed">药学教育版</span>
+        <span class="ed">for Pharmacy Education</span>
       </a>
       <nav class="app-tabs" aria-label="PharmacoPilot 演示导航">
         <a href="./opening-story.html" class="is-opening">开场</a>
@@ -1316,7 +1280,7 @@ button { font: inherit; }
         <a href="./data-detail.html">教学数据 <kbd>3</kbd></a>
       </nav>
       <div class="cmdbar">⌕ 演示章节 <kbd>01</kbd></div>
-      <div style="display:flex;gap:8px;white-space:nowrap">
+      <div class="mast-actions">
         <a class="pill-cap ghost" href="./index.html">跳过开场</a>
         <a class="pill-cap fill" href="./index.html">进入 PharmacoPilot →</a>
       </div>

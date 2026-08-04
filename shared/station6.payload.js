@@ -84,7 +84,7 @@
       // v4.2: 显式声明 bars 数据为示例值，避免教师误读为"已分析自己上传的材料"
       dataNotice: {
         type: "example",
-        text: "⚠ 当前显示为华海药业样例数据。上传自己的案例材料后，证据密度将基于实际内容自动重算。",
+        text: "⚠ 当前显示为华海药业样例数据。证据密度为示例性判断，不随案例材料自动计算（案例上传与重算功能尚未实现）。",
         showWhenNoUserUpload: true,
       },
       bars: [
@@ -160,7 +160,7 @@
         {
           key: "more",
           label: "继续增加背景材料，让案例更丰满",
-          rationale: "材料越多不一定越好。证据图显示 S/O/T 维已 ≥70%，再加会压垮学生 30 分钟实战节奏。",
+          rationale: "材料越多不一定越好。证据图显示 S/O/T 维已 ≥70%，再加会压垮学生 27 分钟结构化实战节奏。",
           score: 1.9,
           meta: { lintTriggers: ["material-overload"] },
         },
@@ -194,7 +194,7 @@
       "more": {
         summary: "✕ 材料过载风险",
         riskBadges: ["认知负荷", "时间挤压"],
-        detail: "证据图显示 S/O/T 三象限证据已充足。继续增加材料会让 30 分钟实战阶段无法完成 TOWS。",
+        detail: "证据图显示 S/O/T 三象限证据已充足。继续增加材料会让 27 分钟结构化实战无法完成 TOWS。",
       },
       "answer": {
         summary: "✕ 违反 contract 禁条",

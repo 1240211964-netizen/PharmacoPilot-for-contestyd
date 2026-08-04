@@ -325,7 +325,9 @@
       { source: 'station10Swot5D.批判意识', sourceLabel: 'SWOT / TOWS 任务 · 批判意识', target: 'S7', mappingType: 'supporting', note: '批判意识不是完整的自我调节循环' },
       { source: 'station10Swot5D.条目证据性', sourceLabel: 'SWOT / TOWS 任务 · 条目证据性', target: 'S2', mappingType: 'supporting', note: '须另核政策证据类型与引用准确性' },
       { source: 'station10Swot5D.内外分类准确性', sourceLabel: 'SWOT / TOWS 任务 · 内外分类准确性', target: null, mappingType: 'task-only', note: '评价 SWOT 分类表现，不直接代表任一跨任务能力维度' },
-      { source: 'station10Swot5D.条目精炼度', sourceLabel: 'SWOT / TOWS 任务 · 条目精炼度', target: null, mappingType: 'task-only', note: '评价表达质量，不直接计入能力总分' },
+      { source: 'station10Swot5D.质询与辩护质量', sourceLabel: 'SWOT / TOWS 任务 · 质询与辩护质量', target: 'S5', mappingType: 'supporting', note: '对应 S2 目标 4「能在质询环节为本组论据辩护」；证据来自 S5 协作与质询阶段的交叉质询轮次与应对质量' },
+      // 「条目精炼度」自 v4.3 起降为不计分的反馈性观察指标（见 station10.feedbackOnlyIndicators），
+      // 因其从未在 S2 学习目标中向学生声明，不得影响能力画像与总分，故不在此映射。
     ],
   };
 

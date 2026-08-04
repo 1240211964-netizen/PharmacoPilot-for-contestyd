@@ -25,7 +25,7 @@ const DIST = join(WEB, "dist");
 // 每页 → 该页 <script src> 的有序列表(去掉 ?v= 查询)。顺序必须与 HTML 一致。
 const BUNDLES = {
   "nav-detail": [
-    "wendao.js", "fanya.js", "live-stats.js", "toast.js", "faq.js",
+    "wendao.js", "fanya.js", "toast.js", "faq.js",
     "nav-stations-contract.js", "nav-decision-bank.js",
     "station1.payload.js", "station2.payload.js", "station3.payload.js", "station4.payload.js",
     "station5.payload.js", "station6.payload.js", "station7.payload.js", "station8.payload.js",

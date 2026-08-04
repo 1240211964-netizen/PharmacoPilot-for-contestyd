@@ -480,8 +480,15 @@
         .chain-completed-cta {
           margin-top: 14px;
           display: flex; gap: 10px; justify-content: flex-end;
+          align-items: baseline; flex-wrap: wrap;
           padding-top: 12px;
           border-top: 1px dashed var(--rule);
+        }
+        /* 产物未生成时的说明。按钮禁用只表达"不能点",这句解释"为什么、去哪做"。 */
+        .chain-cta-hint {
+          flex-basis: 100%; margin: 6px 0 0; text-align: right;
+          font-family: var(--serif-cn); font-size: var(--fs-xs);
+          color: var(--mute); line-height: var(--lh-ui);
         }
         .chain-completed-cta .btn-next-stage {
           font-family: var(--mono); font-size: var(--fs-xs); padding: 8px 16px;
@@ -1882,32 +1889,11 @@
       `;
     }
 
-    // ---- Render: issue strip / page hero (v4 stage-aware) ----
-    function renderTopChrome() {
-      const s = stationById[activeId];
-      if (!s) return;
-      const lbl = TILE_LABELS[s.id];
+    // ---- Render: stage deck progress ----
+    function renderDeckProgress() {
       const stageId = currentStageId();
-      const g = stageById[stageId];
       const stageIdx = STAGES.findIndex((x) => x.id === stageId) + 1;
       const stagePadIdx = String(stageIdx).padStart(2, "0");
-      const stageTag = g ? g.tag : "";
-
-      const sessionEl = document.getElementById("sessionStation");
-      if (sessionEl) {
-        sessionEl.innerHTML = `${stagePadIdx} / ${TOTAL_STAGES} · ${esc(stageTag)} · ${esc(lbl.cn)}`;
-      }
-
-      const meta = document.getElementById("heroMeta");
-      if (meta) {
-        const sc = stageCounts();
-        meta.innerHTML = `
-          <div class="row"><dt>当前示例</dt><dd><b>《管理学原理》</b> 本科 · 药事管理 24 级</dd></div>
-          <div class="row"><dt>本节主题</dt><dd>SWOT 分析</dd></div>
-          <div class="row"><dt>当前环节</dt><dd><span class="it">${stagePadIdx} · ${esc(g ? g.title : lbl.cn)}</span></dd></div>
-          <div class="row"><dt>进度</dt><dd>${sc.done} 完成 · ${sc.active} 进行中 · ${sc.todo} 待开始</dd></div>
-        `;
-      }
 
       const deckHead = document.getElementById("deckProgress");
       if (deckHead) {
@@ -2137,7 +2123,7 @@
         return `
           <div class="sub-pass-banner sub-pass-teaching">
             <span class="spb-lbl">${esc(part)} · 教学动作 · 反馈与画像</span>
-            <span class="spb-body">基于评分数据写可行动反馈语（Hattie 反馈层级：任务 / 过程 / 自我调节 / 自我），并把班级低分项汇总为能力画像。每位学生至少一条针对性反馈。</span>
+            <span class="spb-body">基于评分数据写可行动反馈：指出当前任务差距、给出改进方法、提示学生如何自检；不评价人格或天赋。随后汇总低分项形成能力画像，每位学生至少一条针对性反馈。</span>
           </div>
         `;
       }
@@ -2519,8 +2505,48 @@
           ✓ 你的迁移判断已存入本地 · 样本累积中——后续其他教师的回答会被聚合成参考分布
         </p>
       ` : "";
+      // 题链走完 ≠ 环节完成。payload 的 stateMachine 明确区分：
+      //   D saved        = 已保存判断
+      //   E artifactDone = 已生成产物 · 教学环节完成
+      // 此前只要题链 4/4 就给出「下一环节」，与同一面板上「产物生成区已解锁,
+      // 可生成本节点产物」自相矛盾——一边请用户去生成，一边给跳过的出口。
+      // 判定口径与产物卡（本文件 renderArtifactScaffold）保持一致：
+      // 别的环节写回的结构化数据只是输入证据，不能冒充本站产物已生成。
+      const artsForGate = (store && store.getArtifacts)
+        ? (store.getArtifacts(s.id) || []).filter((item) => item && item.data
+            && item.data.kind !== "s1-diagnostic-writeback"
+            && item.data.kind !== "trainmap-writeback")
+        : [];
+      // S1 的产物区已改为「学情诊断与教学情境判断单」,教师确认写入独立槽位
+      // state.s1DecisionArtifact,不进 state.artifacts[1] —— 只查 getArtifacts
+      // 会把 S1 永久锁死。status 从 pending_teacher_review 变为
+      // confirmed_provisional / rejected / deferred 三者之一即算教师已作判断
+      // (「不采纳」也是一次明确判断,同样构成本环节产物)。
+      const pl = (typeof payloadOf === "function") ? (payloadOf(s.id) || {}) : {};
+      const usesSheet = !!pl.decisionArtifactSeed;
+      let sheetDone = false;
+      if (usesSheet && store && typeof store.getS1DecisionArtifact === "function") {
+        try {
+          const sheet = store.getS1DecisionArtifact();
+          sheetDone = !!(sheet && sheet.status && sheet.status !== "pending_teacher_review");
+        } catch (e) { sheetDone = false; }
+      }
+      // 该站既无常规产物、也无判断单机制时不设闸 —— 宁可放行,不可把教师锁死
+      const hasArtifactMechanism = !!(pl.artifacts && pl.artifacts.length) || usesSheet;
+      const artifactDone = !hasArtifactMechanism
+        || artsForGate.length > 0
+        || (usesSheet && sheetDone);
+
       let ctaHtml = "";
-      if (nextStage) {
+      if (!artifactDone) {
+        // 未生成产物：不给跳过出口，改为指回产物生成区
+        ctaHtml = `
+          <div class="chain-completed-cta">
+            <button class="btn-s btn-next-stage" disabled>先生成本节点产物，再进入下一环节</button>
+            <p class="chain-cta-hint">下方「产物生成区」已解锁 —— 生成后本环节才算完成。</p>
+          </div>
+        `;
+      } else if (nextStage) {
         const firstSub = (nextStage.subNodeIds || [])[0];
         const nextStid = (typeof firstSub === "number") ? firstSub
           : ((SUB_NODES[String(firstSub)] || {}).legacyStationId);
@@ -3204,7 +3230,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const roleTimeBudget = (e8 && e8.roleTimeBudget) || null;
       return `
         <div class="figure-card rich-08">
-          <div class="fcard-lbl"><span>探究泳道</span><b>4 组 × 13 分钟微实战</b></div>
+          <div class="fcard-lbl"><span>探究泳道</span><b>4 组 × 13 分钟协作与质询</b></div>
           <div class="swim-body">
             <div class="swim-axis">
               <span>0'</span><span>4'</span><span>9'</span><span>13'</span>
@@ -3534,7 +3560,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       const e10 = efigOf(10);
       const bars = (e10 && e10.bars && e10.bars.length) ? e10.bars : [
         ["条目证据性", 46, { status: "miss" }], ["内外分类准确性", 78, { status: "ok" }],
-        ["条目精炼度", 62, { status: "warn" }], ["TOWS 可操作性", 44, { status: "miss" }],
+        ["质询与辩护质量", 58, { status: "warn" }], ["TOWS 可操作性", 44, { status: "miss" }],
         ["批判意识", 38, { status: "miss" }],
       ];
       const pareto = (e10 && e10.paretoLowDimensions && e10.paretoLowDimensions.length) ? e10.paretoLowDimensions : [
@@ -4307,13 +4333,18 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
       // 阶段分段：phase 节点两两相邻
       const phases = timeline.filter((t) => t.type === "phase");
       const segs = [];
-      const ICAP_COLORS = ["#d9d9d9", "#b8c5b0", "#a8b9d4", "var(--amber-soft)", "var(--amber)", "#c0c0c0"];
+      // 阶段色板 —— 仅用于在时间轴上区分相邻阶段,**不编码任何认知参与层级**。
+      // 取色是位置性的(按 phase 序号取数组下标),与 ICAP 的 P/A/C/I 无对应关系。
+      // 此前该色带标注为「ICAP 参与层级」并附 P·A·C·I 图例,构成了数据不支持的声称
+      // (详见 THEORY-AUDIT.md · Chi ICAP 条)。要恢复该标注,须先为每个 phase 增加
+      // 显式 icapLevel 字段并由该字段驱动取色,而不是靠下标。
+      const PHASE_COLORS = ["#d9d9d9", "#b8c5b0", "#a8b9d4", "var(--amber-soft)", "var(--amber)", "#c0c0c0"];
       for (let i = 0; i < phases.length - 1; i++) {
         const a = phases[i], b = phases[i + 1];
         const left = (a.t / totalMin) * 100;
         const width = ((b.t - a.t) / totalMin) * 100;
         if (width <= 0.1) continue;
-        segs.push({ label: a.label, left, width, color: ICAP_COLORS[i % ICAP_COLORS.length] });
+        segs.push({ label: a.label, left, width, color: PHASE_COLORS[i % PHASE_COLORS.length] });
       }
 
       // 轴刻度 4 等分
@@ -4335,10 +4366,10 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
                 return `<span class="tl-anchor" style="left:${lf}%" title="${esc(a.id)} · ${a.t}'"><i>◇</i><small>${a.t}'</small></span>`;
               }).join("")}
             </div>
-            <div class="tl-icap">
-              <span class="icap-lbl">ICAP 参与层级 →</span>
-              <span class="icap-bar">${segs.map((g) => `<i style="left:${g.left.toFixed(2)}%;width:${g.width.toFixed(2)}%;background:${g.color}"></i>`).join("")}</span>
-              <span class="icap-key"><b>P</b>assive <b>A</b>ctive <b>C</b>onstructive <b>I</b>nteractive</span>
+            <div class="tl-phase">
+              <span class="phase-lbl">课堂阶段 →</span>
+              <span class="phase-bar">${segs.map((g) => `<i style="left:${g.left.toFixed(2)}%;width:${g.width.toFixed(2)}%;background:${g.color}"></i>`).join("")}</span>
+              <span class="phase-key">讲授 · 分析 · 协作与质询 · 反馈</span>
             </div>
           </div>
           <div class="zpd-detail">
@@ -4833,7 +4864,7 @@ ${s.backendCheckpoints.map((b) => `[${esc(b)}]`).join(" ")}
     };
 
     function renderAll() {
-      renderTopChrome();
+      renderDeckProgress();
       renderStageBreadcrumb();
       renderSubNodeRow();
       renderPhaseProgress();

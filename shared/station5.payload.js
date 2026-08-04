@@ -28,7 +28,7 @@
       ],
       outputsTo: [
         { stationId: 6, label: "案例", outKey: "问题链 → 案例切入点" },
-        { stationId: 7, label: "时间线", outKey: "问题链 → 30 分钟实战节奏" },
+        { stationId: 7, label: "时间线", outKey: "问题链 → 27 分钟结构化实战节奏" },
       ],
     },
 
@@ -83,7 +83,7 @@
           key: "no-self-critique",
           text: "完全不指出 SWOT 工具局限",
           frequency: 0.78, stage: "lvl-6",
-          intervention: "在小结段（38'-42'）专门留 4 分钟做「工具批判圆桌」，由教师抛出 2 条挑战（如「SWOT 没有时间维度」「内外边界模糊」），要求学生现场回应；写入「批判意识」评价维度（占 28%）。",
+          intervention: "在反馈段（39′–42′）留 3 分钟做「工具批判圆桌」，由教师抛出 2 条挑战（如「SWOT 没有时间维度」「内外边界模糊」），要求学生现场回应；随后 42′ 接 Z3 课末测温，44′–45′ 收尾。写入「批判意识」评价维度（占 28%）。",
         },
       ],
 
@@ -135,7 +135,7 @@
       "chain":          { summary: "✓ 触发所有 5 类误区",       riskBadges: ["方法论主链"],     detail: "选此后建议真实性学习情境与资源设计环节 案例每条 SWOT 显式标注「事实 / 政策 / 数据 / 角色 / 风险边界」5 类标签，对应第 3 层证据要求。" },
       "agenda-reverse": { summary: "✓ 议程深度联动",         riskBadges: ["议程联动"],        detail: "5 条议程将映射为问题链 1-5 题。但需在第 6 题强制加批判（议程通常不会自带）。" },
       "case":           { summary: "△ 迁移性弱",                riskBadges: ["概念跳跃"],       detail: "建议改用 chain 主线 + 华海作为单一案例锚（而非主线）。" },
-      "textbook":       { summary: "✕ 违反「不得退化讲授」禁条", riskBadges: ["禁条触发"],      detail: "教材顺序会让 30 分钟实战段被压缩。" },
+      "textbook":       { summary: "✕ 违反「不得退化讲授」禁条", riskBadges: ["禁条触发"],      detail: "教材顺序会让 27 分钟结构化实战被压缩。" },
     },
 
     artifacts: [
@@ -145,7 +145,7 @@
         outputTitle: "课堂问题链 v1 · 6 层方法论严谨链",
         outputCue: "把 6 层方法论严谨度排成 6 道课堂问题，每道触发一类典型误区。",
         artifactLines: {
-          evidence: "6 层难度阶梯：lvl-1 卡点 5% → lvl-6 卡点 72%。高价值教学点集中在 3/5/6 层。",
+          evidence: "6 层难度阶梯 · 问题链卡点率（metricId: s3_question_chain_blocking，individual）：lvl-1 5% → lvl-6 72%。高价值教学点集中在 3/5/6 层。",
           action: "为每层准备 1 道触发性问题 + 1 条预设反例；第 6 层必须落到「SWOT 工具局限」。",
           constraints: [
             "≤ 6 题（避免认知过载）",
@@ -161,7 +161,7 @@
         outputTitle: "概念边界说明 v1",
         outputCue: "为学生提供「内 / 外 · 事实 / 立场 · 现状 / 趋势」3 组关键边界判断卡。",
         artifactLines: {
-          evidence: "5 类高频误区集中在 lvl-2 / lvl-3 / lvl-5 / lvl-6；最高 78% 学生完全不批判 SWOT 工具。",
+          evidence: "5 类高频误区 · 误区发生频率（metricId: s3_misconception_frequency，individual）：集中在 lvl-2 / lvl-3 / lvl-5 / lvl-6；最高 78% 学生完全不批判 SWOT 工具。注意本项与上方「问题链卡点率」是两个不同量具，同一 lvl 的数值不可互相替代（如 lvl-6：卡点率 72% ≠ 误区频率 78%）。",
           action: "把 5 类误区编为「正反例对照卡」嵌入真实性学习情境与资源设计环节 案例材料 + 形成性评价与适应性调控环节 ZPD 锚点测温题。",
           constraints: [
             "每个误区配 1 个正例 + 1 个反例",

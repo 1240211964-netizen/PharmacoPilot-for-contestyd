@@ -49,16 +49,23 @@
         { vertex: "药事 · 产出", label: "带证据带 TOWS 的 SWOT 报告", weight: 0.28 },
       ],
 
-      // v4.2: 数据来源声明 — bars 为样例值；render 层会在用户保存 station2 前测后
-      // 通过 Store.getJudgment(2) 读取 cohortExperience 数据，动态调整"学情起点适配"分值。
-      // 详见 nav-render.js:figureStation01 的 dynamicScoreFromCohort() 钩子。
+      // v4.3 · 答辩版停用。此前声明 enabled:true 并承诺"上传当班前测后将自动重算",
+      // 但其渲染层消费钩子从未实现,属于功能过度声明。且原模型即使
+      // 接上线也不能产生有效决策:
+      //   (1) 变量选错 —— 家人慢病经历反映药学服务共情,不能直接推导 SWOT 认知准备度;
+      //       真正相关的是 Q4 的 W/T 分类正确率(19%);
+      //   (2) 对 4 类候选定位同幅加减分,排序恒定不变,推荐结果永远是"综合决策型"。
+      // 宁可明确尚未实现,也不保留一个形式上数据驱动、实质上永不改变结论的算法。
       dynamicScoring: {
-        enabled: true,
-        sourceStation: 2,
-        sourceField: "cohortExperience",
-        adjustsDim: "学情起点适配",
-        rule: "if station2 saved AND cohortExperience exists: 学情起点适配 = baseScore + (家人慢病比例 - 0.5) * 10; 否则用 bars 默认值",
-        notice: "未保存 station2 前测时，下列分值为通用样例；上传当班前测后将自动重算。",
+        enabled: false,
+        status: "not_implemented",
+        disclaimer: "下列分值为示例性判断，不随班级数据自动计算。",
+        plannedInputs: [
+          "Q4 内外分类错误率（个人层面）",
+          "课前任务响应率",
+          "基础待巩固群体占比",
+        ],
+        plannedDesign: "各候选定位需配置不同权重，否则同幅调整不改变排序；实现前不得对外承诺自动重算。",
       },
       // 4 种定位类型权重对比（用 bars）
       // breakdown 字段：每类定位按 5 维评价标准得出的分数，让 Q2 反思有据可循
@@ -149,8 +156,8 @@
     },
 
     feedbackByKey: {
-      "comprehensive": { summary: "✓ 与课程主线对齐",          riskBadges: ["定位起点", "高一致性"], detail: "本定位下，预期学习结果与评价证据设计环节 目标会被改写为「能用 SWOT 完成药事管理决策」，学习活动与教学支架设计环节 时间线 30 分钟实战段是合理预算。" },
-      "research":      { summary: "△ 偏离判断属性",            riskBadges: ["定位偏移"],            detail: "证据型定位会让 30 分钟实战变成「查资料」，丧失高阶判断训练机会。" },
+      "comprehensive": { summary: "✓ 与课程主线对齐",          riskBadges: ["定位起点", "高一致性"], detail: "本定位下，预期学习结果与评价证据设计环节 目标会被改写为「能用 SWOT 完成药事管理决策」，学习活动与教学支架设计环节 时间线 27 分钟结构化实战（14′ 分析 + 13′ 协作与质询）是合理预算。" },
+      "research":      { summary: "△ 偏离判断属性",            riskBadges: ["定位偏移"],            detail: "证据型定位会让 27 分钟结构化实战变成「查资料」，丧失高阶判断训练机会。" },
       "service":       { summary: "△ 分析对象不匹配",          riskBadges: ["对象错位"],            detail: "门店级 SWOT 与药企 SWOT 在权重维度上差异显著，建议换案例对象再选此项。" },
       "policy":        { summary: "△ 张力维度被放大",          riskBadges: ["政治化风险"],          detail: "若学生议程已经偏向政策（学习者议程 显示集采伦理为最高票），叠加此定位会让 SWOT 退化为政策辩论。" },
     },

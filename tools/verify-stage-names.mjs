@@ -77,7 +77,7 @@ assert.match(renderer, /matchMedia\("\(max-width: 1180px\)"\)/, "tablet layout a
 assert.match(renderer, /document\.addEventListener\("click", \(e\) => \{[\s\S]*#stageNavigation \[data-stage\][\s\S]*\}, true\)/, "selecting a stage in the mobile drawer must close it before the global route redraws the list");
 assert.doesNotMatch(renderer, /function renderStageChips\(/, "the retired duplicate stage-chip navigation must not be rendered");
 assert.doesNotMatch(read("nav-detail.html"), /id="stageChips"/, "top overview must not duplicate the primary stage navigation");
-assert.match(read("nav-detail.html"), /nav-detail\.bundle\.js\?v=23-s1-decision-sheet/, "navigation bundle cache key must expose the S1 structured decision-sheet revision");
+assert.match(read("nav-detail.html"), /nav-detail\.bundle\.js\?v=25-feedback-structure/, "navigation bundle cache key must expose the current navigation revision");
 assert.match(read("nav-detail.html"), /class="seg-label">课中 · <b>实施<\/b><\/span>/, "phase labels must stay grouped instead of collapsing into vertical text");
 assert.match(read("nav-detail.html"), /class="mast-actions"/, "masthead actions need a responsive layout hook");
 assert.match(renderer, /当前 · <b>\$\{stagePadIdx\}<\/b>/, "top progress must identify the current stage rather than imply multiple stages are in progress");

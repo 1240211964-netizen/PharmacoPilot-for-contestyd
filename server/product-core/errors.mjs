@@ -49,6 +49,10 @@ export const ERROR_CODES = Object.freeze({
   // 权威来源摄入(kb-authoritative-ingest,migration 008)补充码:
   KB_PERMISSION_GATE: 422,
   KB_SOURCE_CONFLICT: 409,
+  // 三层单元构建(kb-unit-builder,migration 008)补充码:
+  KB_RELATION_INPUT_INVALID: 422,
+  KB_GAP_INPUT_INVALID: 422,
+  KB_GAP_NOT_FOUND: 404,
 });
 
 export function failCode(code, message, details) {

@@ -162,7 +162,7 @@
           {
             id: "context",
             title: "1. 课堂概况",
-            placeholder: "本节课时长、班级、议程关键字、关键节点（如「微实战段超时 3 min」「Z2 触发 1 次」）。",
+            placeholder: "本节课时长、班级、议程关键字、关键节点（如「结构化实战段超时 3 min」「Z2 触发 1 次」）。",
             requiredFields: ["classDuration", "agendaCount", "criticalMoments"],
           },
           {
@@ -213,7 +213,11 @@
           schema: [
             { field: "regulationName",     label: "法规名称", example: "《药品管理法》" },
             { field: "version",            label: "版本号 / 发布日期", example: "2019 年修订 / 2019-08-26" },
-            { field: "citedClauses",       label: "本课引用条款", example: "第 30 条（持有人义务）/ 第 100 条（仿制药一致性评价）" },
+            { field: "citedClauses",       label: "本课引用条款", example: "《药品管理法》第 30 条（上市许可持有人定义与全生命周期责任）/ 第 31 条（质量保证体系与质量负责人）；仿制药一致性评价不在《药品管理法》条文内，须另引国办发〔2016〕8 号、国办发〔2018〕20 号，必要时补《药品注册管理办法》第 18 条" },
+            // 勘误：原示例把该法第一百条误标为仿制药一致性评价依据。该条实为药品监督
+            // 管理部门开展药品质量抽查检验的规定，与一致性评价无关，已删除。
+            // 另：第 30 条用于持有人定义与责任；若表述涉及「建立质量保证体系、配备
+            // 独立质量管理人员」，应引第 31 条，不可笼统都写第 30 条。
             { field: "lastChecked",        label: "本次复盘核查日期", example: "2026-05-29" },
             { field: "updateNeeded",       label: "是否需要更新", example: "否 / 是（备注：新政策待并入）" },
             { field: "nextReviewDate",     label: "下一次复核计划", example: "2026-11-29（每 6 个月）" },

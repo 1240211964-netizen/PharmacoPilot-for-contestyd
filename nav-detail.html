@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Geist:wght@300;400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap"></noscript>
-<link rel="stylesheet" href="./shared/tokens.css?v=7-native-control-theming" />
-<link rel="stylesheet" href="./shared/bc-chrome.css?v=10-native-control-theming" />
+<link rel="stylesheet" href="./shared/tokens.css?v=8-motion-tokens" />
+<link rel="stylesheet" href="./shared/bc-chrome.css?v=24-status-strip-removed" />
 <link rel="stylesheet" href="./shared/nav-theme.css?v=1-nav-only" />
 <style>
 /* ============ 教学导航 详情页 ============ */
@@ -997,21 +997,21 @@ html[data-theme="dark"] .figure-drill .drill-misc { color: var(--amber-soft); }
   color: var(--amber-deep); font-weight: 600; letter-spacing: 0.04em;
   background: var(--paper); padding: 1px 4px; border-radius: 3px;
 }
-.tl-icap { margin-top: 18px; display: flex; flex-direction: column; gap: 4px; }
-.tl-icap .icap-lbl {
+.tl-phase { margin-top: 18px; display: flex; flex-direction: column; gap: 4px; }
+.tl-phase .phase-lbl {
   font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.06em;
 }
-.tl-icap .icap-bar {
+.tl-phase .phase-bar {
   position: relative; height: 6px; background: var(--paper-2); border-radius: 3px;
   overflow: hidden;
 }
-.tl-icap .icap-bar i { position: absolute; top: 0; height: 100%; display: block; }
-.tl-icap .icap-key {
+.tl-phase .phase-bar i { position: absolute; top: 0; height: 100%; display: block; }
+.tl-phase .phase-key {
   font-family: var(--mono); font-size: var(--fs-2xs); color: var(--mute);
   letter-spacing: 0.04em; display: flex; gap: 8px; flex-wrap: wrap;
 }
-.tl-icap .icap-key b { color: var(--ink); font-weight: 600; }
+.tl-phase .phase-key b { color: var(--ink); font-weight: 600; }
 .zpd-detail {
   margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--rule);
   display: flex; flex-direction: column; gap: 6px;
@@ -1511,11 +1511,8 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
 
 /* 平板端：长环节名不再与主任务区争抢宽度，侧栏提前收入抽屉。 */
 @media (max-width: 1180px) {
-  .masthead-inner { grid-template-columns: auto 1fr auto; gap: 10px; padding: 12px 20px; }
-  .cmdbar { display: none; }
-  .mast-brand .ed { display: none; }
-  .mast-actions .pill-cap.ghost { display: none; }
-  .mast-actions .pill-cap.fill { padding-inline: 14px; }
+  /* 顶栏 1180 档已收归 shared/bc-chrome.css §顶栏收缩(原先只有本页有,导致
+     practice/data/login 在 901–1180 无适配)。此处只留本页专属的 .stage-row。 */
   .stage-row {
     grid-template-columns: minmax(0, 5fr) minmax(150px, 2fr) minmax(0, 3fr);
     gap: 6px;
@@ -1567,7 +1564,9 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
   .core-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .detail-tags .right { width: 100%; margin-left: 0; padding-top: 2px; }
   .save-strip { align-items: flex-start; gap: 12px; flex-wrap: wrap; }
-  .mast-actions { min-width: 0; justify-content: flex-end; }
+  /* 外层 .save-strip 换行不够:内层这排按钮自然宽 592px,从 ~640px 起就放不下。
+     原先只在 560 档换行,561–640 是空档(实测 600px 横向溢出 31px)。 */
+  .save-strip .save-actions { flex-wrap: wrap; }
 }
 
 /* === 移动端响应式断点(2026-05-29 修复) === */
@@ -1643,7 +1642,7 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
 }
 
 @media (max-width: 560px) {
-  .masthead { position: relative; }
+  /* .masthead 取消吸顶已收归 bc-chrome.css §顶栏收缩 560 档 */
   .chain-topcard { padding: 14px; }
   .chain-list li { grid-template-columns: 26px minmax(0, 1fr) max-content; }
   .chain-out-note { grid-template-columns: minmax(0, 1fr); }
@@ -1667,30 +1666,20 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
 </style>
 </head>
 <body class="is-readable-detail">
-<!-- ===== 教学导航脚本:24 个经典脚本已由构建步骤按序拼接+压缩为单个 bundle =====
+<!-- ===== 教学导航脚本:23 个经典脚本已由构建步骤按序拼接+压缩为单个 bundle =====
      源文件仍在 shared/(照常手改),改完跑 `npm run build` 重新生成 dist/。
-     顺序/清单见项目根 build.mjs 的 BUNDLES["nav-detail"]。含 wendao/fanya/live-stats/
+     顺序/清单见项目根 build.mjs 的 BUNDLES["nav-detail"]。含 wendao/fanya/
      toast/faq/contract/decision-bank/station1-11.payload/store/sample-collection/
      nav-render/theory-chips/store-bridge/practice-feedback-bridge。 -->
-<script src="./dist/nav-detail.bundle.js?v=23-s1-decision-sheet" defer></script>
+<script src="./dist/nav-detail.bundle.js?v=25-feedback-structure" defer></script>
 <script src="./shared/backend-client.js?v=6-color-token" defer></script>
-
-<!-- ===== Issue strip ===== -->
-<div class="issue-strip">
-  <span>药事管理 · 2026 春季</span>
-  <span class="sep">—</span>
-  <span>课程设计</span>
-  <span class="sep">—</span>
-  <span><span class="pulse"></span><span data-live="teachers" data-baseline="17">17</span> 位教师在线</span>
-  <span class="r">教学场次 #3417 · <span id="sessionStation">01 / 9 · 课前 · 学习者与教学情境分析</span> · 已耗时 <span data-live="timer" data-start="132">02:12</span></span>
-</div>
 
 <!-- ===== Masthead ===== -->
 <header class="masthead">
   <div class="masthead-inner">
     <a class="mast-brand" href="./index.html">
       <span class="logo">Pharmaco<span class="it">Pilot</span></span>
-      <span class="ed">药学教育版</span>
+      <span class="ed">for Pharmacy Education</span>
     </a>
     <div class="app-tabs">
       <a href="./index.html">概览</a>
@@ -1699,7 +1688,7 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
       <a href="./data-detail.html">教学数据 <kbd>3</kbd></a>
     </div>
     <div class="cmdbar">⌕ 搜索 <kbd>⌘K</kbd></div>
-    <div class="mast-actions" style="display:flex;gap:8px;white-space:nowrap">
+    <div class="mast-actions">
       <a class="pill-cap ghost" href="./login.html">登录</a>
       <a class="pill-cap fill" href="./nav-detail.html">进入工作台 →</a>
     </div>
@@ -1709,9 +1698,7 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
 <!-- ===== Page hero ===== -->
 <main class="wrap">
   <section class="page-hero">
-    <!-- v2: 移除右侧 hero 状态栏（示例课程/主题/当前环节）。它由 nav-render.js 实时更新，
-         但下方 stage-deck（阶段进度 + sessionStation）本身就是更丰富的实时位置指示器，
-         hero 面板属重复。收为单栏让 slogan 舒展。nav-render.js 对 #heroMeta 有 if(meta) 守卫，删除后空跑。 -->
+    <!-- 右侧 hero 状态面板与下方环节总览重复，收为单栏让主题词舒展。 -->
     <div class="page-hero-grid is-solo">
       <div>
         <div class="eyebrow">01 · 教学导航</div>
@@ -1723,24 +1710,18 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
          理论默认收起、点「+N 更多理论依据」才展开；每个教学环节另有 per-stage「方法依据」popover。 -->
     <div class="theory-row theory-row-wide" data-store-key="pp.theoryAdds.nav" data-theory-limit="0">
       <span class="theory-h">方法依据 · 理论底盘</span>
-      <span class="theory-chip">ADDIE 教学设计 <small>Branson 1975</small></span>
-      <span class="theory-chip">Backward Design <small>Wiggins &amp; McTighe 1998</small></span>
+      <span class="theory-chip">UbD 逆向设计 <small>Wiggins &amp; McTighe 1998</small></span>
       <span class="theory-chip">建设性对齐 <small>Biggs 1996</small></span>
-      <span class="theory-chip">OBE 成果导向教育 <small>Spady 1994</small></span>
-      <span class="theory-chip">教学事件九步 <small>Gagné 1985</small></span>
-      <span class="theory-chip">5E 教学模型 <small>Bybee 1989</small></span>
       <span class="theory-chip">经验学习圈 <small>Kolb 1984</small></span>
       <span class="theory-chip">最近发展区 ZPD <small>Vygotsky 1978</small></span>
       <span class="theory-chip">认知负荷 <small>Sweller 1988</small></span>
       <span class="theory-chip">情境学习 <small>Lave &amp; Wenger 1991</small></span>
-      <span class="theory-chip">ICAP 参与层级 <small>Chi 2014</small></span>
-      <span class="theory-chip">TPACK <small>Mishra &amp; Koehler 2006</small></span>
+      <span class="theory-chip">ICAP 学习参与 <small>Chi &amp; Wylie 2014</small></span>
       <span class="theory-chip">形成性评价 <small>Black &amp; Wiliam 1998</small></span>
       <span class="theory-chip">教学评一体化 <small>崔允漷</small></span>
-      <span class="theory-chip">课例研究 <small>顾泠沅</small></span>
       <span class="theory-chip">反思性实践 <small>Schön 1983</small></span>
       <span class="theory-chip">药事管理教育 <small>全国规划教材</small></span>
-      <span class="theory-chip">药学教育成果 CAPE <small>AACP 2013</small></span>
+      <span class="theory-chip">CAPE 教育成果 <small>AACP 2013</small></span>
       <button type="button" class="theory-add" id="theoryAddBtn" aria-expanded="false">接入文献 / 专家</button>
       <div class="theory-add-panel" id="theoryAddPanel" role="region" aria-label="接入新的理论底盘">
         <div class="hint">
@@ -1844,7 +1825,7 @@ html[data-theme="dark"] .swot > div p { color: var(--on-dark-mute); }
   </div>
   <div class="colo-foot">
     <span>© 2026 PharmacoPilot · v2.0.4</span>
-    <span>教学场次 #3417 · 01 / 9 · 已耗时 02:12</span>
+    <span>当前进度 · 01 / 9</span>
   </div>
 </footer>
 

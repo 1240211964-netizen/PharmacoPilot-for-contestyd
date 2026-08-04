@@ -346,7 +346,28 @@
     }).join('');
   }
 
+  // ── 渲染完成哨兵 ─────────────────────────────────────────────────────
+  // 教训来源：一次误删 const MODES 导致 render 从中途全线中断，而 175 项静态
+  // 门禁仍全绿、控制台一条错误都没有（异常被上游吞掉）。静态断言只能证明
+  // 「源码里有这段」，证明不了「页面真的渲染完成」。
+  // 因此把渲染结果写进 DOM 契约：<html data-data-render-state=loading|ready|error>，
+  // 出错时同时记 data-data-render-error 并 console.error —— 不再静默吞错，
+  // 也不让旧 DOM 内容伪装成最新结果。
   function render(mode) {
+    const root = document.documentElement;
+    root.dataset.dataRenderState = 'loading';
+    try {
+      renderInner(mode);
+      root.dataset.dataRenderState = 'ready';
+      root.removeAttribute('data-data-render-error');
+    } catch (error) {
+      root.dataset.dataRenderState = 'error';
+      root.dataset.dataRenderError = (error && error.name) || 'UnknownError';
+      console.error('[data-render] page render failed', error);
+    }
+  }
+
+  function renderInner(mode) {
     const data = DATA[mode];
     if (!data) return;
     // COUPLING 单一信源：只消费 buildDataset 已按统一契约生成的结果。
@@ -486,6 +507,9 @@
     const wrap = root.querySelector('[data-slot="chips"]');
     if (!wrap) return;
     wrap.innerHTML = chipHtmls.join('');
+    // 折叠态下让教师知道里面有几条，否则不知道值不值得展开
+    const count = root.querySelector('[data-slot="chip-count"]');
+    if (count) count.textContent = chipHtmls.length ? ` · ${chipHtmls.length} 条` : '';
   }
 
   function renderNextSpark(root, count) {
@@ -729,20 +753,69 @@
     `;
   }
 
+  // ── 判断卡 · 状态轨道 · 行动清单 ────────────────────────────────────────
+  // 本页主任务是「把课堂证据转化为教学决策并写回」，不是展示仪表盘。
+  // 因此：判断状态→标签+环节号；变化量→并列 Δ 数字；水平值→有界量表；
+  //       判断依据→折叠；下一步→有序任务+唯一主按钮；理论来源→后置抽屉。
+  // 档位取自契约 COUPLING_THRESHOLDS，但只呈现「关联强弱」这一层含义。
+  // 契约里的 label 形如「较强关联证据 ★」，会把「关联强度档位」与「证据质量」
+  // 两个不同概念混在一起：2.3 说明关联档位较强，不等于证据质量高，更不等于因果成立。
+  // ★ 在前台没有稳定可见的含义（刚撤掉全局图例，不宜新增未解释符号），故只取档位词。
+  function couplingBand(v) {
+    const T = EF?.COUPLING_THRESHOLDS;
+    if (!T || typeof v !== 'number') return null;
+    for (const key of ['strong', 'moderate', 'weak']) {
+      const b = T[key];
+      if (b && v >= b.min && v <= b.max) {
+        const tier = String(b.label || '').replace(/关联证据.*$/, '').replace(/\s*★\s*/g, '').trim();
+        return tier ? `档位：${tier}` : null;
+      }
+    }
+    return null;
+  }
+
+  function fillDeltas(root, items) {
+    const wrap = root.querySelector('[data-slot="deltas"]');
+    if (!wrap) return;
+    // Δ 是差值不是水平值：不加 /10、不用进度条、不转百分比。
+    // 上方「较基线变化」一行已说明它是变化量，无需全局图例。
+    wrap.innerHTML = items.map((it) => `
+      <div class="vd-item">
+        <span class="vd-lab">${escHtml(it.label)}</span>
+        <span class="vd-val${it.muted ? ' is-muted' : ''}">${escHtml(it.value)}</span>
+      </div>`).join('');
+  }
+
+  function fillGauge(root, v) {
+    const fill = root.querySelector('[data-slot="gauge-fill"]');
+    const val = root.querySelector('[data-slot="gauge-val"]');
+    const band = root.querySelector('[data-slot="gauge-band"]');
+    const gauge = root.querySelector('[data-slot="gauge"]');
+    const ok = typeof v === 'number';
+    const pct = ok ? Math.max(0, Math.min(4, v)) / 4 * 100 : 0;
+    if (fill) fill.style.width = pct.toFixed(1) + '%';
+    if (val) val.textContent = ok ? `${v.toFixed(1)} / 4` : '—';
+    const label = ok ? couplingBand(v) : null;
+    if (band) band.textContent = label || '';
+    if (gauge) {
+      gauge.setAttribute('aria-label',
+        ok ? `当前关联强度 ${v.toFixed(1)}，量表上限 4，单次评价快照${label ? '，' + label : ''}`
+           : '当前关联强度暂无数据');
+    }
+  }
+
   function renderSummaryRow(mode, data, couplingArrIn) {
     if (!EF) return;
-    const row = document.querySelector('[data-summary-row]');
-    if (!row) return;
     const envs = EF.ENVIRONMENTS;
-    // 用 active getter 取数（LIVE 覆盖 SAMPLE），而不是直接读 SAMPLE
     const teacherDeltas = EF.getActiveTeacherDeltas?.(mode) || EF.SAMPLE_TEACHER_DELTAS[mode] || {};
     const studentDeltas = EF.getActiveStudentDeltas?.(mode) || EF.SAMPLE_STUDENT_DELTAS[mode] || {};
-    // COUPLING 单一信源：用 render() 传入的契约结果，与 hot 标记、bridge、
-    // KEEP/FIX 卡保持同源；LIVE 缺评价指标时该数组仅含 null。
     const couplingArr = couplingArrIn || data.coupling || [];
 
-    // KEEP — 师生共在 (co) 池
-    const keepRoot = row.querySelector('[data-summary-role="keep"]');
+    let verdictCount = 0;
+    const trackState = {};   // envIdx → { icon, state, cls }
+
+    // ── KEEP ──────────────────────────────────────────────────────────
+    const keepRoot = document.querySelector('[data-summary-role="keep"]');
     const keepIdx = pickKeepEnv(couplingArr);
     if (keepRoot && keepIdx != null) {
       const env = envs[keepIdx];
@@ -750,34 +823,41 @@
       const sTop = topDimContribution(studentDeltas, EF.STUDENT_MATRIX[env.id], EF.STUDENT_DIMS);
       setSlot(keepRoot, 'num', env.num);
       setSlot(keepRoot, 'name', env.short);
-      const tBit = tTop ? `教师 ${tTop.id} Δ${fmtDelta(tTop.delta)}` : null;
-      const sBit = sTop ? `学生 ${sTop.id} Δ${fmtDelta(sTop.delta)}` : null;
-      const desc = `同期观测：${[tBit, sBit].filter(Boolean).join(' · ')}；关联强度 ${couplingArr[keepIdx].toFixed(1)}`;
-      setSlot(keepRoot, 'desc', desc);
-      const sp = buildSnapshotPoints(keepIdx, couplingArr);
-      setSpark(keepRoot, sp.linePts, sp.areaPath, `当前快照：${env.num} ${env.short} · 环节关联 ${couplingArr[keepIdx].toFixed(1)} / 4（无连续时间序列）`);
+      keepRoot.dataset.envIdx = String(keepIdx);
+      keepRoot.setAttribute('data-summary-anchor', `verdict-${env.num}`);
+      fillDeltas(keepRoot, [
+        tTop ? { label: `${tTop.short}（${tTop.id}）`, value: `Δ${fmtDelta(tTop.delta)}` } : null,
+        sTop ? { label: `${sTop.short}（${sTop.id}）`, value: `Δ${fmtDelta(sTop.delta)}` } : null,
+      ].filter(Boolean));
+      fillGauge(keepRoot, couplingArr[keepIdx]);
+      const names = [tTop && tTop.short, sTop && sTop.short].filter(Boolean).join('和');
+      setSlot(keepRoot, 'verdict',
+        `${names ? names + '均' : ''}较基线提高，现有设计予以保留，并进入下一轮继续验证。`);
       const chips = [];
       if (tTop) chips.push(`<span class="basis-chip">${tTop.short} <small>${tTop.id} 教师维度</small></span>`);
       if (sTop) chips.push(`<span class="basis-chip">${sTop.short} <small>${sTop.id} 学生维度</small></span>`);
-      chips.push(`<span class="basis-chip is-coupling">关联强度 ${couplingArr[keepIdx].toFixed(1)} <small>评价指标计算 · ${data.label || mode}</small></span>`);
-      // 副信号：教师独立改动里最值得保留的（solo 池 teacher delta top）
+      chips.push(`<span class="basis-chip is-coupling">关联强度 ${couplingArr[keepIdx].toFixed(1)} / 4 <small>由师生同期分差与证据等级算出 · ${escHtml(data.label || mode)}</small></span>`);
       const soloIdx = pickSoloDesignBest(data.teacher, true);
       if (soloIdx != null) {
         const soloEnv = envs[soloIdx];
-        const soloVal = data.teacher[soloIdx];
-        chips.push(`<span class="basis-chip is-solo-aside">同期教师独立 · <b>${soloEnv.num} ${soloEnv.short}</b> Δ${fmtDelta(soloVal)} <small>延迟相关</small></span>`);
+        chips.push(`<span class="basis-chip is-solo-aside">同期教师独立 · <b>${soloEnv.num} ${soloEnv.short}</b> <i class="nb">Δ${fmtDelta(data.teacher[soloIdx])}</i> <small>教师先动、学生表现滞后显现</small></span>`);
       }
       setChips(keepRoot, chips);
+      trackState[keepIdx] = { icon: '✓', state: '保留', cls: 'is-keep' };
+      verdictCount += 1;
     } else if (keepRoot) {
+      // 空状态必须清空陈旧内容,否则 LIVE 切换后会留着上一次的判断
+      delete keepRoot.dataset.envIdx;
       setSlot(keepRoot, 'num', '—');
-      setSlot(keepRoot, 'name', '暂无可保留项');
-      setSlot(keepRoot, 'desc', '当前数据未形成正向师生共在耦合。');
+      setSlot(keepRoot, 'name', '本轮暂无可保留项');
+      fillDeltas(keepRoot, []);
+      fillGauge(keepRoot, null);   // 当前未计算环节关联 → 量表归零并改 aria
+      setSlot(keepRoot, 'verdict', '当前数据未形成正向师生共在关联，先补齐课堂证据。');
       setChips(keepRoot, ['<span class="basis-chip">先补齐课堂证据 <small>实时数据</small></span>']);
-      setSpark(keepRoot, '0,30 200,30', 'M0,30 L200,30 L200,36 L0,36 Z', '当前未计算环节关联');
     }
 
-    // FIX — 师生共在 (co) 池
-    const fixRoot = row.querySelector('[data-summary-role="fix"]');
+    // ── FIX ───────────────────────────────────────────────────────────
+    const fixRoot = document.querySelector('[data-summary-role="fix"]');
     const fixIdx = pickFixEnv(couplingArr);
     if (fixRoot && fixIdx != null) {
       const env = envs[fixIdx];
@@ -785,65 +865,139 @@
       const sTop = topDimContribution(studentDeltas, EF.STUDENT_MATRIX[env.id], EF.STUDENT_DIMS);
       setSlot(fixRoot, 'num', env.num);
       setSlot(fixRoot, 'name', env.short);
-      const issueBits = [];
-      if (tTop) issueBits.push(`${tTop.short}分差 ${fmtDelta(tTop.delta)}`);
-      if (sTop) issueBits.push(`${sTop.short} ${sTop.id} 分差可能被遮蔽`);
-      issueBits.push(`关联强度 ${couplingArr[fixIdx].toFixed(1)} 本轮最强但评价标准存在歧义`);
-      setSlot(fixRoot, 'desc', issueBits.join(' · '));
-      const sp = buildSnapshotPoints(fixIdx, couplingArr);
-      setSpark(fixRoot, sp.linePts, sp.areaPath, `当前快照：${env.num} ${env.short} · 环节关联 ${couplingArr[fixIdx].toFixed(1)} / 4，局部评价标准歧义未解`);
+      fixRoot.dataset.envIdx = String(fixIdx);
+      fixRoot.setAttribute('data-summary-anchor', `verdict-${env.num}`);
+      // 学生侧「可能被遮蔽」不是数值，不能与教师侧 Δ 伪装成同类数字。
+      fillDeltas(fixRoot, [
+        tTop ? { label: `${tTop.short}（${tTop.id}）`, value: `Δ${fmtDelta(tTop.delta)}` } : null,
+        sTop ? { label: `${sTop.short}（${sTop.id}）`, value: '当前变化可能被评分口径遮蔽', muted: true } : null,
+      ].filter(Boolean));
+      fillGauge(fixRoot, couplingArr[fixIdx]);
+      setSlot(fixRoot, 'verdict',
+        `当前评分口径可能遮蔽${sTop ? sTop.short : '学生'}维度的变化，应先统一评价标准，再进入下一轮验证。`);
       const chips = [];
       if (tTop) chips.push(`<span class="basis-chip">${tTop.short} <small>${tTop.id} 教师维度</small></span>`);
       if (sTop) chips.push(`<span class="basis-chip">${sTop.short} <small>${sTop.id} 学生维度</small></span>`);
-      chips.push(`<span class="basis-chip is-coupling">关联强度 ${couplingArr[fixIdx].toFixed(1)} <small>评价指标计算 · 歧义待修</small></span>`);
-      // 副信号：教师独立带 FIX 信号的环节（如 E08 复盘评价标准）
-      const soloFixIdx = pickSoloFixBest(data.teacher);
-      if (soloFixIdx != null) {
-        const sEnv = envs[soloFixIdx];
-        const sVal = data.teacher[soloFixIdx];
-        chips.push(`<span class="basis-chip is-solo-aside">同期教师独立 · <b>${sEnv.num} ${sEnv.short}</b> Δ${fmtDelta(sVal)} <small>延迟相关 · 待修正</small></span>`);
-      } else {
-        chips.push(`<span class="basis-chip">评价标准歧义建议修正 <small>Biggs 1996</small></span>`);
-      }
+      chips.push(`<span class="basis-chip is-coupling">关联强度 ${couplingArr[fixIdx].toFixed(1)} / 4 <small>由师生同期分差与证据等级算出 · 歧义待修</small></span>`);
       setChips(fixRoot, chips);
+      trackState[fixIdx] = { icon: '!', state: '修正', cls: 'is-fix' };
+      verdictCount += 1;
     } else if (fixRoot) {
+      delete fixRoot.dataset.envIdx;
       setSlot(fixRoot, 'num', '—');
-      setSlot(fixRoot, 'name', '暂无高风险项');
-      setSlot(fixRoot, 'desc', '当前数据未检测到需要优先修正的师生共在耦合。');
-      setChips(fixRoot, ['<span class="basis-chip">持续观察 <small>无需优先修正</small></span>']);
-      setSpark(fixRoot, '0,30 200,30', 'M0,30 L200,30 L200,36 L0,36 Z', '当前未计算环节关联');
+      setSlot(fixRoot, 'name', '本轮暂无待修正项');
+      fillDeltas(fixRoot, []);
+      fillGauge(fixRoot, null);   // 当前未计算环节关联 → 量表归零并改 aria
+      setSlot(fixRoot, 'verdict', '当前数据未形成需优先修正的关联信号。');
+      setChips(fixRoot, ['<span class="basis-chip">先补齐课堂证据 <small>实时数据</small></span>']);
     }
 
-    // NEXT — 由 .queue-item 实际数量驱动；desc 列出 KEEP/FIX 涉及的 env
-    const nextRoot = row.querySelector('[data-summary-role="next"]');
-    if (nextRoot) {
-      const queueItems = document.querySelectorAll('.queue-list .queue-item');
-      const count = queueItems.length || 0;
-      setSlot(nextRoot, 'count', String(count));
-      // desc 从 queue 第一字段"写回位置"里抓 env num/short，找不到就用 KEEP/FIX 兜底
-      const targets = [];
-      queueItems.forEach(item => {
-        const envChip = item.querySelector('.queue-field .env');
-        if (envChip) {
-          const num = envChip.textContent.trim();
-          const e = envs.find(x => x.num === num);
-          if (e && !targets.find(t => t.num === e.num)) targets.push(e);
-        }
-      });
-      if (!targets.length) {
-        if (keepIdx != null) targets.push(envs[keepIdx]);
-        if (fixIdx != null && fixIdx !== keepIdx) targets.push(envs[fixIdx]);
+    renderStageTrack(trackState);
+    renderActionList();
+    const vc = document.querySelector('[data-slot="verdict-count"]');
+    if (vc) vc.textContent = String(verdictCount);
+  }
+
+  // 9 环节状态轨道 —— 本页的「状态索引」，不是 9 环节的完整功能导航。
+  // 因此只有本轮真的产生了结果的节点才是 <button>；无状态节点用 <span>，
+  // 避免 5 个空节点伪装成同样可操作。点击停留在本页定位，不打开环节抽屉：
+  // 教师点 06 是想知道「为什么保留」，不该被带离当前决策上下文。
+  function renderStageTrack(state) {
+    const track = document.querySelector('[data-slot="stage-track"]');
+    if (!track || !EF) return;
+    const queued = new Set(
+      [...document.querySelectorAll('.queue-list .queue-item[data-env]')]
+        .map((el) => el.dataset.env)
+    );
+    track.innerHTML = EF.ENVIRONMENTS.map((env, i) => {
+      const st = state[i];
+      const isQueued = queued.has(env.num);
+      const base = `<span class="st-num">${escHtml(env.num)}</span>`;
+      if (st) {
+        return `<button type="button" class="st-node ${st.cls}" data-env-track-node
+          data-summary-target="verdict-${escHtml(env.num)}"
+          aria-label="${escHtml(env.num)} ${escHtml(env.short)}，本轮判断为${escHtml(st.state)}">
+          ${base}<span class="st-mark" aria-hidden="true">${st.icon}</span><span class="st-state">${escHtml(st.state)}</span>
+        </button>`;
       }
-      const desc = targets.length
-        ? '写回 ' + targets.map(e => `${e.num} ${e.short}`).join(' · ')
-        : '暂无待写回建议';
-      setSlot(nextRoot, 'desc', desc);
-      renderNextSpark(nextRoot, count);
+      if (isQueued) {
+        return `<button type="button" class="st-node is-queued" data-env-track-node
+          data-summary-target="action-${escHtml(env.num)}"
+          aria-label="${escHtml(env.num)} ${escHtml(env.short)}，本轮有待写回建议">
+          ${base}<span class="st-state">待写回</span>
+        </button>`;
+      }
+      return `<span class="st-node is-idle" data-env-track-node
+        aria-label="${escHtml(env.num)} ${escHtml(env.short)}，本轮无新增判断">${base}</span>`;
+    }).join('');
+  }
+
+  // 轨道点击 → 在本页定位并聚焦目标，不跳转、不开抽屉
+  function focusSummaryTarget(target) {
+    if (!target) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+    target.classList.add('is-track-highlighted');
+    window.setTimeout(() => target.classList.remove('is-track-highlighted'), 1200);
+  }
+
+  // 评价依据折叠头：条数与预览词从实际 chip 算出，不硬编码
+  function renderTheoryDisclosure() {
+    const box = document.querySelector('.theory-disclosure');
+    if (!box) return;
+    const chips = [...box.querySelectorAll('.theory-chip')];
+    const cnt = box.querySelector('[data-slot="theory-count"]');
+    const prev = box.querySelector('[data-slot="theory-preview"]');
+    if (cnt) cnt.textContent = String(chips.length);
+    if (prev) {
+      const names = chips.slice(0, 3).map((c) => {
+        const clone = c.cloneNode(true);
+        clone.querySelectorAll('small').forEach((x) => x.remove());
+        return clone.textContent.replace(/\s+/g, ' ').trim();
+      });
+      prev.textContent = names.length ? names.join('、') + (chips.length > names.length ? '等' : '') : '';
     }
   }
 
-  /* ---------- 交互绑定 ---------- */
+  function bindStageTrack() {
+    const track = document.querySelector('[data-slot="stage-track"]');
+    if (!track) return;
+    track.addEventListener('click', (e) => {
+      const node = e.target.closest('[data-summary-target]');
+      if (!node) return;
+      const key = node.getAttribute('data-summary-target');
+      focusSummaryTarget(document.querySelector(`[data-summary-anchor="${key}"]`));
+    });
+  }
 
+  // 行动清单：直接说明「哪一环节、改什么」
+  function renderActionList() {
+    const list = document.querySelector('[data-slot="action-list"]');
+    if (!list) return;
+    const items = [...document.querySelectorAll('.queue-list .queue-item[data-env]')];
+    const cnt = document.querySelector('.action-col [data-slot="count"]');
+    if (cnt) cnt.textContent = String(items.length);
+    const qc = document.querySelector('[data-slot="queue-count"]');
+    if (qc) qc.textContent = String(items.length);
+    const fieldText = (el, label) => {
+      const f = [...el.querySelectorAll('.queue-field')]
+        .find((x) => (x.querySelector('.lbl') || {}).textContent?.trim() === label);
+      return f ? ((f.querySelector('.v') || {}).textContent || '').replace(/\s+/g, ' ').trim() : '';
+    };
+    list.innerHTML = items.map((el) => {
+      const num = el.dataset.env || '';
+      const env = EF?.ENVIRONMENTS?.find((e) => e.num === num);
+      const act = fieldText(el, '建议动作');
+      return `<li class="ac-item" data-action-item data-summary-anchor="action-${escHtml(num)}">
+        <span class="ac-env">${escHtml(num)}</span>
+        <span class="ac-body"><b>${escHtml(env ? env.short : '')}</b><small>${escHtml(act.slice(0, 46))}</small></span>
+      </li>`;
+    }).join('');
+  }
+
+  /* ---------- 交互绑定 ---------- */
   const MODES = ['cumulative', 'weekly', 'single'];
 
   function bindToggles() {
@@ -1271,6 +1425,16 @@
       const idx = parseInt(target.dataset.col, 10);
       if (!isNaN(idx)) openEnvDrawer(idx);
     });
+    // 概览卡的曲线下钻 —— 用 <button> 承载，click 与键盘由浏览器原生处理，
+    // 不需要像上面图谱格子那样另写 keydown。
+    document.querySelectorAll('[data-summary-drill]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cell = btn.closest('[data-summary-role]');
+        const idx = cell ? parseInt(cell.dataset.envIdx, 10) : NaN;
+        if (!isNaN(idx)) openEnvDrawer(idx);
+      });
+    });
+
     document.getElementById('envDrawerClose')?.addEventListener('click', closeEnvDrawer);
     document.getElementById('envDrawerBackdrop')?.addEventListener('click', closeEnvDrawer);
 
@@ -1582,6 +1746,8 @@
     ).findIndex(c => c.classList.contains('is-active'));
     render(MODES[activeIdx >= 0 ? activeIdx : 0]);
     bindToggles();
+    bindStageTrack();   // 事件委托挂在静态 <nav>，须在 DOM 就绪后绑定
+    renderTheoryDisclosure();
     tagColumnIndices();
     bindHoverLinkage();
     bindEnvDrawer();

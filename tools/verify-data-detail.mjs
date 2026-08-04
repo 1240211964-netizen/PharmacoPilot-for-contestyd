@@ -304,7 +304,7 @@ assert(
   /\.ed-rubric-summary\s*\{/.test(dataHtml) &&
     /\.ed-rubric-summary:focus-visible\s*\{/.test(dataHtml) &&
     /evaluation-framework\.js\?v=14-measurement-contract/.test(dataHtml) &&
-    /data-render\.js\?v=18-measurement-state/.test(dataHtml),
+    /data-render\.js\?v=21-decision-freeze/.test(dataHtml),
   'rubric disclosure must be styled, keyboard-visible, and cache-busted'
 );
 assert(
@@ -450,8 +450,12 @@ assert(
 );
 assert(
   /if \(!bridges\.length\)[\s\S]*svg\.setAttribute\('aria-label', data\?\.couplingStatus\?\.reason/.test(dataRender) &&
-    (dataRender.match(/setSpark\([^\n]*当前未计算环节关联/g) || []).length >= 2,
-  'empty LIVE association state must clear stale bridge and summary-chart accessibility labels'
+    // 判断卡改为量表后，空状态由 fillGauge(root, null) 承担：数值显示 —、
+    // aria 改为「当前关联强度暂无数据」，并清空 Δ 组、判断句与依据 chip。
+    (dataRender.match(/fillGauge\((?:keepRoot|fixRoot), null\)/g) || []).length >= 2 &&
+    /当前关联强度暂无数据/.test(dataRender) &&
+    (dataRender.match(/fillDeltas\((?:keepRoot|fixRoot), \[\]\)/g) || []).length >= 2,
+  'empty LIVE association state must clear stale bridge and verdict-card accessibility labels'
 );
 assert(
   !/<meta name="description"[^>]*师生耦合指数/.test(dataHtml),
@@ -459,3 +463,39 @@ assert(
 );
 
 console.log('verify-data-detail: ok');
+
+// ── 渲染完成哨兵与运行时冒烟契约（2026-08-03）─────────────────────────────
+// 背景：一次误删 const MODES 让 render() 中途中断，静态门禁却全绿、控制台无错。
+// 静态断言证明不了「页面真的渲染完成」，故补 DOM 哨兵 + Playwright 冒烟测试，
+// 并在此锁住三者不被悄悄拆掉。
+assert(
+  /root\.dataset\.dataRenderState = 'loading'/.test(dataRender) &&
+    /root\.dataset\.dataRenderState = 'ready'/.test(dataRender) &&
+    /root\.dataset\.dataRenderState = 'error'/.test(dataRender) &&
+    /console\.error\('\[data-render\] page render failed'/.test(dataRender),
+  'render() 必须写 data-render-state 哨兵并在失败时 console.error，不得静默吞错'
+);
+assert(
+  /data-env-track-node/.test(dataRender) && /data-verdict-card/.test(dataHtml) &&
+    /data-action-item/.test(dataRender),
+  '轨道节点 / 判断卡 / 行动项必须带运行时冒烟测试可定位的 data 属性'
+);
+assert(
+  fs.existsSync(path.join(root, 'tools/smoke-data-detail.mjs')),
+  '教学数据页的运行时冒烟测试 tools/smoke-data-detail.mjs 不得删除'
+);
+// 轨道是「状态索引」不是「详情导航」：无状态节点不得是 button，
+// 点击不得直接打开环节抽屉（那会把教师带离当前决策上下文）。
+assert(
+  /<span class="st-node is-idle"/.test(dataRender) &&
+    !/data-summary-target[\s\S]{0,400}openEnvDrawer/.test(dataRender),
+  '9 环节轨道只做本页定位：无状态节点用 span，点击不得调用 openEnvDrawer'
+);
+// 评价依据：单层折叠、后置于判断区、计数由数据算出
+assert(
+  /<details class="theory-disclosure">/.test(dataHtml) &&
+    dataHtml.indexOf('class="decision-layout"') < dataHtml.indexOf('class="theory-disclosure"') &&
+    /data-theory-limit="999"/.test(dataHtml) &&
+    /\[data-slot="theory-count"\]/.test(dataRender),
+  '评价依据必须是单层折叠、位于判断区之后、条数由实际 chip 计算'
+);

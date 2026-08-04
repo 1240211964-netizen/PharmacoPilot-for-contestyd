@@ -54,27 +54,85 @@
       ],
 
       // 3 个锚点的推荐规则（生成产物时写入 Store.setPulseRule）— 45 min 课堂
+      // ── 共同构念与同构平行卷（2026-08-03）────────────────────────────────
+      // Z1 与 Z3 测同一构念「MAH 概念边界」，但使用同构平行卷 A/B，不重复原题：
+      // 原题重复会引入记忆效应，测到的是「记住了答案」而非「理解了概念」。
+      // 两卷题量与题型一致（5 题单选），这是 Δ 可比的前提；只有表层情境不同。
+      // 这一对锚点因此同时承担两件事：
+      //   · 前测 → 介入 → 后测 的动态评估结构（Feuerstein 的最小实现）
+      //   · 三步分类卡的柔性渐隐依据（Wood/Bruner 支架的撤除特征）
+      construct: {
+        id: "mah_boundary",
+        label: "MAH 概念边界（上市许可持有人 / 生产者 / 生产许可的关系）",
+        measuredBy: ["Z1", "Z3"],
+        parallelForms: true,
+        note: "两卷同构不同题；Z1 为 A 卷（课前段），Z3 为 B 卷（课末段）。",
+      },
+      deltaMeasure: {
+        metricId: "s6_mah_boundary_gain",
+        from: "Z1", to: "Z3",
+        meaning: "同一构念在同构平行卷上的正确率差（B 卷 − A 卷）",
+        aggregationLevel: "individual",
+        limitations: "单班单课时的一次前后测。可作为本节教学的即时信号，"
+          + "不能据此推断稳定学习增益，也不得换算为效应量。",
+      },
       pulseRules: [
         {
           anchorId: "Z1",
           t: 10,
-          microFormat: "雨课堂 5 题单选 · ≤ 3 min",
+          checkpointType: "realtime",
+          actionTiming: "immediate",
+          microFormat: "雨课堂 5 题单选 · A 卷 · ≤ 3 min",
+          constructId: "mah_boundary",
+          formId: "A",
+          metricId: "s6_clause_quiz_accuracy",
+          aggregationLevel: "individual",
+          threshold: ">= 70%",
           ifCond: "条文正确率 < 70%",
           thenAct: "回炉精讲《药品管理法》第 30 条，并要求学生口头复述「持有人 vs 生产者」差异",
+          // 支架的定义特征是逐步撤除（fading）；但撤除必须是柔性的 ——
+          // 写成「达标者禁止使用支架」会与差异化支持和可及性原则冲突。
+          scaffoldFading: {
+            scaffoldId: "three-step-classification-card",
+            trigger: "Z1 达标（>= 70%）",
+            defaultAction: "默认不再发放三步分类卡",
+            studentOptIn: true,
+            teacherOverride: true,
+            note: "达标者默认不发，但学生可自主领取、教师可随时人工恢复。"
+              + "撤除的是「默认供给」，不是「使用权」。",
+          },
         },
         {
           anchorId: "Z2",
           t: 28,
+          checkpointType: "realtime",
+          actionTiming: "immediate",
           microFormat: "推演裁决投票 + 理由词云 · ≤ 3 min",
+          metricId: "s6_debate_vote_split",
+          aggregationLevel: "class",
+          threshold: ">= 15%",
           ifCond: "争议票数差距 < 15%（即学生分歧显著）",
           thenAct: "延伸 3 分钟立场切换辩论，让支持方与反对方角色互换",
         },
         {
           anchorId: "Z3",
           t: 42,
-          microFormat: "MAH/MA/生产证 3 选 1 判断 · ≤ 2 min",
-          ifCond: "错误率 > 30%",
-          thenAct: "次节课首 5 分钟回炉，并在期末考前再做 1 次同题测温",
+          // 位于 42′/45′,本节课已无调控余地。它不是即时调控点,而是课末封闭测温:
+          // 采集本节学习结果,触发的是下一课时的教学调整,而非当堂动作。
+          checkpointType: "exit_ticket",
+          actionTiming: "next_session",
+          microFormat: "MAH 边界 5 题单选 · B 卷（与 A 卷同构不同题）· ≤ 2 min",
+          constructId: "mah_boundary",
+          formId: "B",
+          pairedWith: "Z1",
+          metricId: "s6_exit_ticket_error_rate",
+          aggregationLevel: "individual",
+          threshold: "<= 30%",
+          ifCond: "MAH 边界判断错误率 > 30%",
+          thenAct: "次节课首 5 分钟回炉，并用 C 卷（第三份同构卷）在期末考前再测一次",
+          // 与 Z1 构成 前测→介入→后测；Δ 记入 s6_mah_boundary_gain。
+          // 注意：仍不得因此把 Z3 称为「即时形成性调控」——它在 42′，
+          // actionTiming 仍是 next_session。
         },
       ],
 
@@ -87,7 +145,7 @@
         {
           key: "z1-concept",
           label: "Z1 条文理解（10'）· 防止学生带着误区进入推演",
-          rationale: "推演若建立在错误条文理解上，12-25 分钟微实战段全部浪费。Z1 是最高 ROI 锚点。",
+          rationale: "推演若建立在错误条文理解上，12–39 分钟结构化实战段全部浪费。Z1 是最高 ROI 锚点。",
           score: 3.9,
           meta: { recommended: true },
         },
@@ -132,7 +190,7 @@
           action: "为 Z1/Z2/Z3 分别写 microFormat + ifCond + thenAct，确保阈值可量化、动作可执行。",
           constraints: [
             "每条规则必须有可量化的 ifCond（如「正确率 < 70%」）",
-            "thenAct 必须是教师当场可做的动作",
+            "所有评价信号必须对应明确、可执行且标明时点的教学动作；实时锚点当场执行，课末锚点可触发下一课时调整",
             "微评估时长 ≤ 3 min",
           ],
         },

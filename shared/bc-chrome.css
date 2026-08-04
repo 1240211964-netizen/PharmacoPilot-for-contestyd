@@ -15,30 +15,6 @@ body {
    index.html 有自己的内联 .wrap 覆盖，故概览页仍保持 1280。 */
 .wrap { max-width: 1540px; margin: 0 auto; padding: 0 48px; }
 
-/* ===== Issue strip ===== */
-.issue-strip {
-  background: var(--ink); color: var(--ivory);
-  padding: 7px 48px; font-family: var(--mono); font-size: var(--fs-2xs);
-  letter-spacing: 0.06em; display: flex; gap: 20px; align-items: center;
-  white-space: nowrap; overflow: hidden;
-}
-.issue-strip > span { flex: 0 0 auto; }
-.issue-strip i {
-  width: 4px; height: 4px; border-radius: 50%; background: var(--amber);
-  display: inline-block; margin: 0 6px; vertical-align: middle;
-}
-.issue-strip .sep { color: color-mix(in srgb, var(--ivory) 30%, transparent); }
-.issue-strip .pulse {
-  width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
-  animation: pulse 1.6s infinite ease-in-out;
-  display: inline-block; margin-right: 5px; vertical-align: middle;
-}
-.issue-strip .r {
-  margin-left: auto; overflow: hidden; text-overflow: ellipsis;
-  min-width: 0; flex: 0 1 auto;
-}
-@keyframes pulse { 50% { opacity: 0.4; } }
-
 /* ===== Masthead ===== */
 .masthead {
   border-bottom: 1px solid var(--ink);
@@ -48,6 +24,10 @@ body {
 .masthead-inner {
   display: grid; grid-template-columns: auto 1fr auto auto;
   align-items: center; gap: 16px; padding: 14px 40px;
+  /* 显式定行高。否则顶栏继承 body:工作台三页的 .is-readable-detail 把行高抬到
+     28.05px,index/login 是 normal(≈1.2),同样的字号却渲染出 74px vs 71px 两种
+     顶栏高度。控件行高是 chrome 的一部分,不该跟着正文阅读行高走。 */
+  line-height: 1.25;
 }
 .mast-brand { display: flex; align-items: baseline; gap: 12px; white-space: nowrap; text-decoration: none; color: inherit; }
 .mast-brand .logo {
@@ -56,10 +36,21 @@ body {
 }
 .mast-brand .logo .it { font-style: italic; color: var(--amber-deep); }
 .mast-brand .ed {
-  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.14em;
+  font-family: var(--mono); font-size: var(--text-caption); letter-spacing: 0.14em;
   text-transform: uppercase; color: var(--mute); padding-left: 12px;
   border-left: 1px solid var(--rule-2); white-space: nowrap;
 }
+/* 顶栏是 auto 1fr auto auto,四列里只有 .cmdbar 设了 min-width:0,所以宽度不够时
+   全部缺口由它独自吸收 —— 1280 下实测被压到 19px(自然宽 211px),搜索框等于消失。
+   而副标是纯装饰,却占 257px,比 logo 本身(193px)还宽。
+   既有分级在 1180/900/600,1181–1500 是空档,正是塌陷发生的区间。
+   这里补上:装饰先于功能让位。隐藏副标释放约 269px,四列自然需求 1378 → 1109,
+   1280 可用 1152,搜索框回到全宽。≥1500 仍展示完整品牌签名。 */
+@media (max-width: 1500px) {
+  .mast-brand .ed { display: none; }
+}
+/* 其余顶栏分级(1180 / 560)统一放在文件末尾的响应式区 —— 媒体查询不增加
+   特异性,写在 .cmdbar/.masthead 基础规则之前会被后面的基础规则直接盖掉。 */
 
 .app-tabs {
   display: flex; gap: 2px; padding: 2px; justify-self: center;
@@ -67,16 +58,29 @@ body {
   white-space: nowrap;
 }
 .app-tabs a {
-  padding: 6px 12px; font-size: var(--fs-xs); color: var(--mute); border-radius: 6px;
+  transition: color var(--dur-1) var(--ease-out), background var(--dur-2) var(--ease-out);
+  padding: 6px 12px; font-size: var(--text-control); color: var(--mute); border-radius: 6px;
   display: inline-flex; align-items: center; gap: 6px; font-family: var(--serif-cn);
   white-space: nowrap; text-decoration: none;
 }
 .app-tabs a:hover { color: var(--ink); }
-.app-tabs a.is-active { background: var(--ivory); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+.app-tabs a.is-active {
+  background: var(--ivory); color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+}
 .app-tabs a kbd {
-  font-family: var(--mono); font-size: var(--fs-2xs); padding: 0 4px;
+  font-family: var(--mono); font-size: var(--text-caption); padding: 0 4px;
   background: var(--paper-3); border-radius: 3px; color: var(--mute);
 }
+
+/* 顶栏右侧动作区。此前 6 个页面里只有 nav-detail 挂了 .mast-actions 类,其余 5 页
+   是裸 div + 内联 style —— 于是响应式区里所有 .mast-actions 规则在那 5 页全是死的,
+   900px 下「登录」不该显示却仍在,practice-detail 因此横向溢出 45px。 */
+.mast-actions {
+  display: flex; gap: 8px; white-space: nowrap; align-items: center;
+}
+/* 顶栏内的按钮同样锁语义角色;正文里的 .pill-cap 不动,仍跟随页面阅读模式 */
+.mast-actions .pill-cap { font-size: var(--text-control); }
 
 .cmdbar {
   display: inline-flex; align-items: center; gap: 8px;
@@ -84,9 +88,9 @@ body {
   border: 1px solid var(--rule);
   border-radius: 999px;
   background: var(--paper-2);
-  font-size: var(--fs-xs); color: var(--mute); cursor: text;
+  font-size: var(--text-control); color: var(--mute); cursor: text;
   white-space: nowrap; min-width: 0;
-  transition: border-color .18s, background .18s, box-shadow .18s;
+  transition: border-color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
 }
 .cmdbar:hover {
   border-color: color-mix(in oklab, var(--amber-deep) 35%, var(--rule));
@@ -99,12 +103,12 @@ body {
 }
 .cmdbar kbd {
   margin-left: 0;
-  font-family: var(--mono); font-size: var(--fs-2xs);
+  font-family: var(--mono); font-size: var(--text-caption);
   background: var(--paper-2); color: var(--mute);
   padding: 2px 7px;
   border: 1px solid var(--rule); border-radius: 999px;
   letter-spacing: 0.04em;
-  transition: background .18s, color .18s, border-color .18s;
+  transition: background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
 }
 .cmdbar:focus-within kbd {
   background: var(--amber-deep); color: var(--ivory);
@@ -117,7 +121,7 @@ body {
 .cmdbar-brand {
   display: inline-flex; align-items: center; gap: 6px;
   font-family: var(--serif-cn);
-  font-size: var(--fs-xs);
+  font-size: var(--text-control);
   color: color-mix(in oklab, var(--amber-deep) 70%, var(--ink));
   letter-spacing: 0.01em;
   flex-shrink: 0;
@@ -128,10 +132,13 @@ body {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--amber-deep);
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--amber-deep) 18%, transparent);
-  animation: cmdbarDot 2.4s ease-in-out infinite;
+  animation: cmdbarDot 2.4s var(--ease-in-out) infinite;
 }
 @keyframes cmdbarDot {
   50% { box-shadow: 0 0 0 5px color-mix(in oklab, var(--amber-deep) 8%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cmdbar-brand-dot { animation: none; }
 }
 .cmdbar-sep { display: none; }
 .cmdbar-input {
@@ -141,7 +148,7 @@ body {
   font: inherit; color: var(--ink);
   padding: 0;
   caret-color: var(--amber-deep);
-  transition: width .2s, flex-basis .2s;
+  transition: width var(--dur-2) var(--ease-in-out), flex-basis var(--dur-2) var(--ease-in-out);
 }
 .cmdbar:focus-within .cmdbar-input { width: 200px; flex-basis: 200px; }
 .cmdbar-input::placeholder { color: var(--mute); }
@@ -152,7 +159,10 @@ body {
 .pill-cap {
   font-size: var(--fs-xs); padding: 8px 16px; border-radius: 999px;
   display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
-  transition: all .2s; white-space: nowrap; font-family: inherit;
+  transition: background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out),
+              border-color var(--dur-1) var(--ease-out), box-shadow var(--dur-2) var(--ease-out),
+              transform var(--dur-1) var(--ease-out);
+  white-space: nowrap; font-family: inherit;
   text-decoration: none;
 }
 .pill-cap.ghost { border: 1px solid var(--ink); color: var(--ink); background: transparent; }
@@ -262,7 +272,7 @@ body {
   color: var(--ink); white-space: nowrap;
   cursor: default;
   position: relative;
-  transition: padding-right .15s;
+  transition: padding-right var(--dur-2) var(--ease-out);
 }
 .theory-chip .x {
   position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
@@ -270,7 +280,7 @@ body {
   display: inline-flex; align-items: center; justify-content: center;
   font-size: var(--fs-xs); line-height: 1; color: var(--mute);
   background: transparent; border: 0; cursor: pointer; padding: 0;
-  opacity: 0; transition: opacity .15s, color .15s, background .15s;
+  opacity: 0; transition: opacity var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out);
   pointer-events: none;
 }
 .theory-chip:hover {
@@ -313,7 +323,7 @@ body {
   background: transparent; color: var(--mute);
   cursor: pointer; letter-spacing: 0.04em;
   display: inline-flex; align-items: center; gap: 5px;
-  transition: border-color .18s, color .18s, background .18s;
+  transition: border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out);
 }
 .theory-add::before {
   content: "+"; font-size: var(--fs-sm); font-weight: 400; line-height: 0;
@@ -431,27 +441,32 @@ body {
 .page-hero-meta .row dd .it { font-family: var(--serif-en); font-style: italic; color: var(--amber-deep); }
 
 /* ===== Colophon footer ===== */
-.colophon { background: var(--ink); color: var(--ivory); padding: 50px 48px 36px; }
+/* 页脚与顶栏同理:它是每页都有的 app chrome,不该跟随页面阅读模式。
+   显式定行高 + 下方各项锁语义角色 token,否则 index/login 与工作台三页会渲染出
+   两套页脚(实测链接 14px vs 17px、底行 12px vs 15px)。 */
+.colophon { background: var(--ink); color: var(--ivory); padding: 50px 48px 36px; line-height: 1.5; }
 .colo-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; }
 .colo-brand .logo { font-family: var(--serif-en); font-size: var(--fs-3xl); font-weight: 600; letter-spacing: -0.02em; }
 .colo-brand .logo .it { font-style: italic; color: var(--amber); }
-.colo-brand p { color: rgba(255,255,255,.55); font-size: var(--fs-xs); line-height: 1.7; margin: 10px 0 0; }
+.colo-brand p { color: rgba(255,255,255,.55); font-size: var(--text-control); line-height: 1.7; margin: 10px 0 0; }
 .colo-brand p.brand-demo-note {
-  color: rgba(255,255,255,.55); font-size: var(--fs-2xs); font-family: var(--mono); /* a11y: .35→.55 on --ink ≈5.8:1 */
+  color: rgba(255,255,255,.55); font-size: var(--text-caption); font-family: var(--mono); /* a11y: .35→.55 on --ink ≈5.8:1 */
   letter-spacing: 0.02em; margin-top: 8px;
 }
-.colo h5 {
-  font-family: var(--mono); font-size: var(--fs-2xs); letter-spacing: 0.16em;
+/* index 的页脚栏目用 h3、其余页用 h5,一并接住 */
+.colo h5,
+.colo h3 {
+  font-family: var(--mono); font-size: var(--text-caption); letter-spacing: 0.16em;
   text-transform: uppercase; color: rgba(255,255,255,.6); margin: 0 0 14px; /* a11y: .4→.6 on --ink ≈6.8:1 */
 }
 .colo a {
-  display: block; font-family: var(--serif-cn); font-size: var(--fs-sm);
+  display: block; font-family: var(--serif-cn); font-size: var(--text-body);
   color: rgba(255,255,255,.85); padding: 4px 0; text-decoration: none;
 }
 .colo a:hover { color: var(--amber-soft); }
 .colo-foot {
   margin-top: 36px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.1);
-  display: flex; justify-content: space-between; font-family: var(--mono); font-size: var(--fs-2xs);
+  display: flex; justify-content: space-between; font-family: var(--mono); font-size: var(--text-caption);
   color: rgba(255,255,255,.6); /* a11y: .4→.6 on --ink ≈6.8:1 */
 }
 
@@ -462,26 +477,28 @@ body {
  *  R · RESPONSIVE — 窄屏(平板/手机)适配  (2026-05-29)
  * ============================================================ */
 
-/* issue strip:本来 white-space:nowrap + overflow:hidden,窄屏会裁掉右半段。改为可换行,右段不再用 margin-left:auto 强推 */
-@media (max-width: 900px) {
-  .issue-strip {
-    flex-wrap: wrap;
-    gap: 6px 14px;
-    padding: 6px 16px;
-    white-space: normal;
-    overflow: visible;
-  }
-  .issue-strip .r { margin-left: 0; }
-
-  /* masthead 收缩:中间 cmdbar 隐藏,改为右上角按钮触发(后续可加),目前先省 */
+/* §顶栏收缩 —— 1180 档。
+   原先只有 nav-detail 在自己的 <style> 里内联了这一档,于是 901–1180 区间
+   practice-detail / data-detail / login 完全没有顶栏适配:实测 practice-detail
+   @1000px 搜索框同样塌成 19px,还外带 12px 横向溢出。收归共享层,全站一致。
+   顺序:1500 藏副标 → 1180 藏搜索与次要动作 → 900 丝带换行 → 600 导航降行。 */
+@media (max-width: 1180px) {
   .masthead-inner {
     grid-template-columns: auto 1fr auto;
     gap: 10px;
     padding: 12px 20px;
   }
+  /* 搜索有 ⌘K 快捷键兜底,窄屏藏掉比压成一条缝好 */
   .cmdbar { display: none; }
-  /* mast-brand 的 "for pharmaceutical education" 副标在窄屏也吃宽度,藏掉 */
-  .mast-brand .ed { display: none; }
+  /* 次要动作让位,主 CTA 收窄但保留 */
+  .mast-actions .pill-cap.ghost { display: none; }
+  .mast-actions .pill-cap.fill { padding-inline: 14px; }
+}
+
+@media (max-width: 900px) {
+  .mast-actions { min-width: 0; justify-content: flex-end; }
+  /* 顶栏收缩(cmdbar/副标/ghost)已由上方 §顶栏收缩 1180 档统一处理,
+     900 档不再重复声明 —— 1180 是它的超集。 */
 }
 
 @media (max-width: 600px) {
@@ -497,7 +514,11 @@ body {
     -webkit-overflow-scrolling: touch;
   }
   .app-tabs a kbd { display: none; }
-  .issue-strip { font-size: var(--fs-2xs); }
+}
+
+/* 小屏取消吸顶:顶栏 + 丝带在 560 宽下会占掉过多首屏,让它随页面滚走。 */
+@media (max-width: 560px) {
+  .masthead { position: relative; }
 }
 
 /* page-hero(概览/导航/实践/数据 各页通用):双栏 → 单栏 */
