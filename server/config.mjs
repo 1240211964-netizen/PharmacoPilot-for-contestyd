@@ -35,7 +35,9 @@ export function loadConfig(overrides = {}) {
     webRoot: resolve(overrides.webRoot || rootDir),
     dataDir: resolve(overrides.dataDir || process.env.PHARMACO_DATA_DIR || resolve(rootDir, ".pharmaco-data")),
     host,
-    port: overrides.port ?? integerEnv("PHARMACO_PORT", 4173, { min: 0, max: 65535 }),
+    port: overrides.port
+      ?? integerEnv("PORT", null, { min: 1, max: 65535 })
+      ?? integerEnv("PHARMACO_PORT", 4173, { min: 0, max: 65535 }),
     apiToken,
     bodyLimitBytes: overrides.bodyLimitBytes ?? integerEnv("PHARMACO_BODY_LIMIT_BYTES", 2 * 1024 * 1024, { min: 1024 }),
     modelBaseUrl: normalizeModelBaseUrl(
