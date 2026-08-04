@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0.0",
+  "gate": "source-completion",
+  "task": "management-principles-kb-v0.1-source-completion",
+  "createdAt": "2026-08-04T09:03:12Z",
+  "branch": "feat/management-principles-kb-v0.1",
+  "headCommit": "33120fe1ec08e2dca855ddc214e469cf7f547f60",
+  "hashes": {
+    "algorithm": "sha256",
+    "sourceManifest": {
+      "path": "docs/knowledge-base/organization-design-source-manifest.json",
+      "sha256": "272fa8cf80a6b8f000efc3f53825b0bbd0d381f637cc89d0c4f4407558459afc"
+    },
+    "evaluationSet": {
+      "path": "docs/knowledge-base/organization-design-evaluation-set.json",
+      "sha256": "b11d66ec8872cb6460d749c37f9c101b25fc406ba22a74ca643fa55b54da5d24"
+    },
+    "migrations": [
+      {
+        "path": "server/migrations/000_baseline.sql",
+        "sha256": "fdb85ffdb11385e085b9701488b95deaf63bf401d27a9898a59bd96b0f98f521"
+      },
+      {
+        "path": "server/migrations/001_product_core_domain.sql",
+        "sha256": "7e66a748c219a9efe6c6f4b18c56e656174602765b3de772cb59b0f691ceb03b"
+      },
+      {
+        "path": "server/migrations/002_decision_and_evidence.sql",
+        "sha256": "453a0199b93107db4ded54072815891a8ce53be031507066a03c3d0710ec48b0"
+      },
+      {
+        "path": "server/migrations/003_workflow_and_audit.sql",
+        "sha256": "94d6d8289318beb75238513fb052cc7c421423b82012c8a7e14324ea359e37cd"
+      },
+      {
+        "path": "server/migrations/004_content_search_indexes.sql",
+        "sha256": "32202e419cb8bbc90fc63c744d249a8338dd3f2fb31e0376937b344cb00336bf"
+      },
+      {
+        "path": "server/migrations/005_teaching_claims_workflow.sql",
+        "sha256": "4ec5eac6b4c058c2678aa5d51463c21e0e7636efcc944fc69b804a0ee253ffeb"
+      },
+      {
+        "path": "server/migrations/006_knowledge_base.sql",
+        "sha256": "d4e19e2b32a8eb83ec21caa525dd0f99180a63400a2b825f240cd7d2e8a84abf"
+      },
+      {
+        "path": "server/migrations/007_kb_retrieval_evidence.sql",
+        "sha256": "5f91092706572d471485012bbbdd5d14d983ea136ce3077ec4dacad4a1eec58c"
+      }
+    ]
+  },
+  "testBaseline": {
+    "command": "npm run test:backend",
+    "tests": 175,
+    "pass": 175,
+    "fail": 0,
+    "runAt": "2026-08-04T09:03:12Z"
+  },
+  "evaluationSetStatus": {
+    "total": 30,
+    "ready_for_reference_retrieval": 24,
+    "ready_for_ai_pipeline": 0,
+    "pending_source": 6,
+    "pendingSourceCaseIds": [
+      "od-eval-15",
+      "od-eval-20",
+      "od-eval-24",
+      "od-eval-25",
+      "od-eval-29",
+      "od-eval-30"
+    ]
+  },
+  "constraints": [
+    "本闸不改动 30 题内容、manifest 来源内容与任何代码",
+    "OpenStax 来源仅 acquired_reference_only,禁止一切模型处理(embedding/LLM),defaultDeny:未列入 allowedOperations 的操作一律禁止",
+    "pending_source 题在来源到位前不计入实测分母;到位后须按五元组锚定并留痕授权变更"
+  ],
+  "auditRecord": "docs/product-core/management-principles-source-completion-audit.md"
+}
