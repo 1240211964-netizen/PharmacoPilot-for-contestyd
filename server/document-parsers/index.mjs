@@ -5,23 +5,26 @@
 
 import { ParserError } from "./parser-contract.mjs";
 import { createManualMarkdownParser } from "./manual-markdown-parser.mjs";
+import { createPaginatedTextParser } from "./paginated-text-parser.mjs";
 import { createMineruAdapter, detectMineruEnvironment } from "./mineru-adapter.mjs";
 import { createDoclingAdapter, detectDoclingEnvironment } from "./docling-adapter.mjs";
 
 const factories = new Map([
   ["manual-markdown", createManualMarkdownParser],
+  ["paginated-text", createPaginatedTextParser],
   ["mineru", createMineruAdapter],
   ["docling", createDoclingAdapter],
 ]);
 
 const availabilityProbes = new Map([
   ["manual-markdown", () => ({ available: true, executablePath: null, reason: null })],
+  ["paginated-text", () => ({ available: true, executablePath: null, reason: null })],
   ["mineru", detectMineruEnvironment],
   ["docling", detectDoclingEnvironment],
 ]);
 
 /**
- * @param {string} name 'manual-markdown' | 'mineru' | 'docling'
+ * @param {string} name 'manual-markdown' | 'paginated-text' | 'mineru' | 'docling'
  * @throws {ParserError} code='PARSER_NOT_FOUND'
  */
 export function getParser(name) {

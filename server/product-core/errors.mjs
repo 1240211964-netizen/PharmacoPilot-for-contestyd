@@ -46,6 +46,9 @@ export const ERROR_CODES = Object.freeze({
   KB_WORKFLOW_SCOPE_REQUIRED: 422,
   KB_CITATION_INPUT_INVALID: 422,
   KB_RETRIEVAL_RUN_NOT_FOUND: 404,
+  // 权威来源摄入(kb-authoritative-ingest,migration 008)补充码:
+  KB_PERMISSION_GATE: 422,
+  KB_SOURCE_CONFLICT: 409,
 });
 
 export function failCode(code, message, details) {

@@ -316,11 +316,12 @@ test("registry", async (t) => {
     });
   });
 
-  await t.test("listParsers 含可用性状态：manual 可用，mineru/docling 当前不可用", () => {
+  await t.test("listParsers 含可用性状态：manual/paginated-text 可用，mineru/docling 当前不可用", () => {
     const listed = listParsers();
-    assert.equal(listed.length, 3);
+    assert.equal(listed.length, 4);
     const byId = Object.fromEntries(listed.map((p) => [p.id, p]));
     assert.equal(byId["manual-markdown"].available, true);
+    assert.equal(byId["paginated-text"].available, true);
     assert.equal(byId.mineru.available, false);
     assert.match(byId.mineru.availabilityReason, /Python/);
     assert.equal(byId.docling.available, false);
