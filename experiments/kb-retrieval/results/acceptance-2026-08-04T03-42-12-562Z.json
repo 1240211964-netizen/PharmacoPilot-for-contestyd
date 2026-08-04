@@ -1,0 +1,1104 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-08-04T03:42:12.562Z",
+  "datasetId": "organization-design-evaluation-set",
+  "courseId": "course_mgmt_principles",
+  "chapterId": "ch_organization_design",
+  "corpus": {
+    "ingestedSources": [
+      {
+        "sourceId": "src_openstax_pom_ch10",
+        "blockCount": 277
+      },
+      {
+        "sourceId": "src_openstax_pom_ch04_s4_3",
+        "blockCount": 48
+      }
+    ],
+    "skippedSources": [],
+    "pendingSources": [
+      "src_teacher_ppt_orgdesign",
+      "src_syllabus_mp",
+      "src_textbook_main_orgdesign",
+      "src_pharma_context_pack",
+      "src_openstax_pom_ch03_s3_7",
+      "src_annual_reports_2cos"
+    ],
+    "unitCount": 55,
+    "keytermExtraction": {
+      "created": 55,
+      "skipped": 0,
+      "warnings": [
+        {
+          "code": "KEY_TERMS_SECTION_NOT_FOUND",
+          "versionId": "kav_qFeKFOH5VPkMIdjUsRvt3",
+          "message": "该版本无 Key Terms 小节,0 产出(如实返回,不硬凑)"
+        }
+      ]
+    }
+  },
+  "metrics": {
+    "readyCaseCount": 24,
+    "locationHits": 24,
+    "locationAccuracy": 1,
+    "conceptRecalled": 42,
+    "conceptTotal": 42,
+    "conceptRecallRate": 1,
+    "fabricatedCitations": 0,
+    "refusalSatisfied": 2,
+    "refusalCaseCount": 2,
+    "evidenceLinks": {
+      "runsChecked": 24,
+      "rowsLinked": 181,
+      "mismatches": []
+    }
+  },
+  "gates": {
+    "locationAccuracy": {
+      "value": 1,
+      "threshold": 0.95,
+      "passed": true
+    },
+    "conceptRecall": {
+      "value": 1,
+      "threshold": 0.9,
+      "passed": true
+    },
+    "fabricatedCitations": {
+      "value": 0,
+      "threshold": 0,
+      "passed": true
+    },
+    "refusalContract": {
+      "value": "2/2",
+      "passed": true
+    },
+    "evidenceLinks": {
+      "value": "181 行/24 run",
+      "threshold": "每 run 行数=结果数",
+      "passed": true
+    }
+  },
+  "allPassed": true,
+  "cases": [
+    {
+      "caseId": "od-eval-01",
+      "type": "concept_location",
+      "question": "什么是组织结构(organizational structure)?请给出定义并注明来源。",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -10.27138583966813,
+      "topCoverage": 0.17391304347826086,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 160,
+      "gatedOutCount": 24,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_rhk0kJktcjCtfVI8xmWjK"
+    },
+    {
+      "caseId": "od-eval-02",
+      "type": "concept_location",
+      "question": "什么是组织设计(organizational design)?它与组织结构有什么区别?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -11.670281886403478,
+      "topCoverage": 0.2,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 141,
+      "gatedOutCount": 22,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_qHq20yivnqzYWwmv26a0q"
+    },
+    {
+      "caseId": "od-eval-03",
+      "type": "concept_location",
+      "question": "韦伯(Weber)的官僚制模型提出哪五个要素作为确定组织结构的基础?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "locationHit": true,
+      "resultCount": 6,
+      "topScore": -11.793577556420862,
+      "topCoverage": 0.10714285714285714,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 64,
+      "gatedOutCount": 38,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        },
+        {
+          "concept": "管理幅度与管理层次",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 4
+        },
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 6,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_bxOtC5xFQWipCri9zHao9"
+    },
+    {
+      "caseId": "od-eval-04",
+      "type": "concept_location",
+      "question": "管理幅度(span of control)在来源中是如何定义的?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -23.211779658388775,
+      "topCoverage": 0.3888888888888889,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 200,
+      "gatedOutCount": 60,
+      "concepts": [
+        {
+          "concept": "管理幅度与管理层次",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 4
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_Ms83H8DjYJRa4YcdStHFM"
+    },
+    {
+      "caseId": "od-eval-05",
+      "type": "concept_location",
+      "question": "集权(centralization)在来源中如何定义?与它相对的组织形态是什么?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 5,
+      "topScore": -16.46885887939732,
+      "topCoverage": 0.21428571428571427,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 11,
+      "gatedOutCount": 5,
+      "concepts": [
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 5,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_ZqLJt5DsCcs117yRYZA8c"
+    },
+    {
+      "caseId": "od-eval-06",
+      "type": "concept_location",
+      "question": "机械式组织结构(mechanistic structure)有哪些典型特征?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -16.86304464136439,
+      "topCoverage": 0.3103448275862069,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 121,
+      "gatedOutCount": 24,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_tOAPvpVNOmy95oYBnSHyM"
+    },
+    {
+      "caseId": "od-eval-07",
+      "type": "concept_location",
+      "question": "有机式组织结构(organic structure)有哪些典型特征?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -16.86304464136439,
+      "topCoverage": 0.3103448275862069,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 121,
+      "gatedOutCount": 24,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_UvGjBZQ88Przr2zntgnc3"
+    },
+    {
+      "caseId": "od-eval-08",
+      "type": "concept_location",
+      "question": "正式组织与非正式组织分别指什么?二者与组织实际运转的关系是什么?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -9.38343938621442,
+      "topCoverage": 0.21052631578947367,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 64,
+      "gatedOutCount": 25,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        },
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_6BUmxgGer1TgViOiigJE9"
+    },
+    {
+      "caseId": "od-eval-09",
+      "type": "concept_location",
+      "question": "部门化(departmentalization)在机械式—有机式连续体两端的形态分别是什么?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -27.918331256261826,
+      "topCoverage": 0.22857142857142856,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 60,
+      "gatedOutCount": 20,
+      "concepts": [
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_zvuouAWVgNjxTLSFCE1Xo"
+    },
+    {
+      "caseId": "od-eval-10",
+      "type": "concept_location",
+      "question": "命令链(chain of command)与指挥与控制(command-and-control)分别指什么?各自出自哪份来源?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "src_openstax_pom_ch10"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -19.477711062576734,
+      "topCoverage": 0.2608695652173913,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 200,
+      "gatedOutCount": 43,
+      "concepts": [
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_ESiHXNj0274JjRy86zEY8"
+    },
+    {
+      "caseId": "od-eval-11",
+      "type": "comparison",
+      "question": "管理幅度与管理层次之间存在什么关系?请依据来源说明。(任务书示例题)",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 9,
+      "topScore": -13.679374893863596,
+      "topCoverage": 0.22727272727272727,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 24,
+      "gatedOutCount": 10,
+      "concepts": [
+        {
+          "concept": "管理幅度与管理层次",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 4
+        }
+      ],
+      "citationClaimsChecked": 9,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_iDParywvi3fUc20Y41gnh"
+    },
+    {
+      "caseId": "od-eval-12",
+      "type": "comparison",
+      "question": "职能制结构与事业部制结构各适用于什么条件?各有什么优劣?(任务书示例题)",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 3,
+      "topScore": -11.138445020681973,
+      "topCoverage": 0.18518518518518517,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 25,
+      "gatedOutCount": 12,
+      "concepts": [
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 3,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_9OEjmQUjjO8haMIHVsue8"
+    },
+    {
+      "caseId": "od-eval-13",
+      "type": "comparison",
+      "question": "机械式与有机式组织结构在标准化、专业化、集权化、部门化四个维度上有何差异?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 7,
+      "topScore": -44.38719013565915,
+      "topCoverage": 0.203125,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 107,
+      "gatedOutCount": 40,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 7,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_63EIr9Hz8Q866m9DVTQAv"
+    },
+    {
+      "caseId": "od-eval-14",
+      "type": "comparison",
+      "question": "矩阵结构与单一条线结构在权责关系上的核心差异是什么?矩阵结构的主要风险与化解条件是什么?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "src_openstax_pom_ch10"
+      ],
+      "locationHit": true,
+      "resultCount": 9,
+      "topScore": -20.409260149053054,
+      "topCoverage": 0.10526315789473684,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 58,
+      "gatedOutCount": 24,
+      "concepts": [
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        }
+      ],
+      "citationClaimsChecked": 9,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_wvsWGWyKuRp5Fp52RZqdO"
+    },
+    {
+      "caseId": "od-eval-16",
+      "type": "condition_boundary",
+      "question": "什么条件下组织更适合机械式结构?什么条件下更适合有机式结构?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -16.86304464136439,
+      "topCoverage": 0.35294117647058826,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 44,
+      "gatedOutCount": 12,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_15Lcx8KgSlnsC41EiETWU"
+    },
+    {
+      "caseId": "od-eval-17",
+      "type": "condition_boundary",
+      "question": "组织在什么情况下应采用矩阵结构?其主要风险是什么、以什么条件化解?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3",
+        "src_openstax_pom_ch10"
+      ],
+      "locationHit": true,
+      "resultCount": 6,
+      "topScore": -11.138445020681973,
+      "topCoverage": 0.22727272727272727,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 25,
+      "gatedOutCount": 9,
+      "concepts": [
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        }
+      ],
+      "citationClaimsChecked": 6,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_TCXnDEH6ude8cgYaSvvSa"
+    },
+    {
+      "caseId": "od-eval-18",
+      "type": "condition_boundary",
+      "question": "集权与分权各自基于什么效率假设?选择集权还是分权的依据是什么?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 5,
+      "topScore": -16.46885887939732,
+      "topCoverage": 0.23076923076923078,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 11,
+      "gatedOutCount": 5,
+      "concepts": [
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 5,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_tfYTnhEBv2bI78ZuN8cVF"
+    },
+    {
+      "caseId": "od-eval-19",
+      "type": "condition_boundary",
+      "question": "扁平化是否必然能提升组织效率?请依据来源给出判断。(任务书示例题)",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "locationHit": true,
+      "resultCount": 2,
+      "topScore": -13.679374893863596,
+      "topCoverage": 0.19230769230769232,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 24,
+      "gatedOutCount": 17,
+      "concepts": [
+        {
+          "concept": "管理幅度与管理层次",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 4
+        },
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 2,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_7BsqYyCwOWDNeg9BMNSzd"
+    },
+    {
+      "caseId": "od-eval-21",
+      "type": "case_judgment",
+      "question": "某医药企业组建一支创新药研发团队,需要快速探索未知方向。按机械式—有机式框架,该团队更适合哪种结构?依据是什么?(任务书示例题)",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 7,
+      "topScore": -16.86304464136439,
+      "topCoverage": 0.18181818181818182,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 44,
+      "gatedOutCount": 20,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 7,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_IGnweEgn52gYNMma3FuvR"
+    },
+    {
+      "caseId": "od-eval-22",
+      "type": "case_judgment",
+      "question": "一家 20 人的初创公司,业务单一、所处环境稳定,更适合职能制还是事业部制?依据是什么?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 4,
+      "topScore": -11.138445020681973,
+      "topCoverage": 0.1794871794871795,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 50,
+      "gatedOutCount": 31,
+      "concepts": [
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        },
+        {
+          "concept": "组织设计的情境因素",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 0
+        }
+      ],
+      "citationClaimsChecked": 4,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_7NPzRukUWbMS0Ov0nbcuv"
+    },
+    {
+      "caseId": "od-eval-23",
+      "type": "case_judgment",
+      "question": "某公司按产品线划分部门,每条产品线自负盈亏并配齐完整职能团队。这属于哪种结构?其优势与劣势是什么?",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 3,
+      "topScore": -11.138445020681973,
+      "topCoverage": 0.16666666666666666,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 25,
+      "gatedOutCount": 12,
+      "concepts": [
+        {
+          "concept": "部门化",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 2
+        }
+      ],
+      "citationClaimsChecked": 3,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_wcSv2vXzTEyIe94fzBa3c"
+    },
+    {
+      "caseId": "od-eval-26",
+      "type": "misconception",
+      "question": "有学生认为'分权必然导致失控'。请依据来源辨析这一说法。(任务书示例题)",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 5,
+      "topScore": -16.46885887939732,
+      "topCoverage": 0.15789473684210525,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 11,
+      "gatedOutCount": 5,
+      "concepts": [
+        {
+          "concept": "集权与分权",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        },
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 5,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_eBAgJV9iiagOnbuHZb0PG"
+    },
+    {
+      "caseId": "od-eval-27",
+      "type": "misconception",
+      "question": "有学生认为'有机式组织在所有方面都优于机械式组织,现代组织都应改成有机式'。请依据来源辨析。",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -16.86304464136439,
+      "topCoverage": 0.3,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 44,
+      "gatedOutCount": 12,
+      "concepts": [
+        {
+          "concept": "机械式与有机式组织",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_ieOODla8vehcHtdzCQ5Hz"
+    },
+    {
+      "caseId": "od-eval-28",
+      "type": "misconception",
+      "question": "有学生认为'组织结构图代表的就是组织实际运转的方式'。请依据来源辨析。",
+      "expectedSourceIds": [
+        "src_openstax_pom_ch10"
+      ],
+      "returnedSourceIds": [
+        "src_openstax_pom_ch10",
+        "src_openstax_pom_ch04_s4_3"
+      ],
+      "locationHit": true,
+      "resultCount": 10,
+      "topScore": -9.38343938621442,
+      "topCoverage": 0.18181818181818182,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "candidateCount": 64,
+      "gatedOutCount": 25,
+      "concepts": [
+        {
+          "concept": "组织结构",
+          "recalled": true,
+          "viaUnit": true,
+          "viaMention": true,
+          "matchedUnitCount": 5
+        },
+        {
+          "concept": "权责关系",
+          "recalled": true,
+          "viaUnit": false,
+          "viaMention": true,
+          "matchedUnitCount": 1
+        }
+      ],
+      "citationClaimsChecked": 10,
+      "citationFailures": 0,
+      "hashMismatches": 0,
+      "retrievalRunId": "krr_zQJz5T62ItsVtIzatef6o"
+    }
+  ],
+  "refusalCases": [
+    {
+      "caseId": "od-eval-29",
+      "question": "请完整列出组织设计需要考虑的权变因素(contingency factors)清单,并说明各因素对结构选择的影响方向。",
+      "status": "pending_source",
+      "resultCount": 0,
+      "topScore": null,
+      "channel": "none",
+      "insufficientEvidence": true,
+      "missingTerms": [
+        "contingency"
+      ],
+      "refusalMessage": "当前知识库不足以支持该判断",
+      "refusalMessageCorrect": true,
+      "strongScoreBar": -3,
+      "weakOnly": true,
+      "demandedZhTerms": [
+        "组织",
+        "设计",
+        "权",
+        "变",
+        "因素",
+        "并",
+        "结构"
+      ],
+      "demandedZhPresentInResults": [],
+      "demandedContentAbsent": true,
+      "satisfiedVia": "insufficientEvidence",
+      "contractSatisfied": true,
+      "candidateCount": 0,
+      "gatedOutCount": 0,
+      "missingExpectedSources": [
+        "src_openstax_pom_ch03_s3_7",
+        "src_textbook_main_orgdesign"
+      ]
+    },
+    {
+      "caseId": "od-eval-30",
+      "question": "本课程主教材中'权责对等原则'的原文表述是什么?它与 OpenStax 的 command-and-control、centralization 表述有何异同?",
+      "status": "pending_source",
+      "resultCount": 9,
+      "topScore": -16.691507669661142,
+      "channel": "segmented",
+      "insufficientEvidence": false,
+      "missingTerms": [],
+      "refusalMessage": null,
+      "refusalMessageCorrect": null,
+      "strongScoreBar": -3,
+      "weakOnly": false,
+      "demandedZhTerms": [
+        "本",
+        "课程",
+        "主",
+        "教材",
+        "权",
+        "责",
+        "原则",
+        "有何",
+        "异",
+        "同"
+      ],
+      "demandedZhPresentInResults": [],
+      "demandedContentAbsent": true,
+      "satisfiedVia": "demanded_content_absent",
+      "contractSatisfied": true,
+      "candidateCount": 200,
+      "gatedOutCount": 54,
+      "missingExpectedSources": [
+        "src_textbook_main_orgdesign"
+      ]
+    }
+  ],
+  "skippedCases": [
+    {
+      "caseId": "od-eval-15",
+      "status": "pending_source",
+      "reason": "pending_source:依赖来源未到位或权利范围未确认(src_textbook_main_orgdesign, src_teacher_ppt_orgdesign, src_openstax_pom_ch10, src_openstax_pom_ch04_s4_3),按 statusDefinitions 挂起不计入实测分母"
+    },
+    {
+      "caseId": "od-eval-20",
+      "status": "pending_source",
+      "reason": "pending_source:依赖来源未到位或权利范围未确认(src_pharma_context_pack, src_textbook_main_orgdesign),按 statusDefinitions 挂起不计入实测分母"
+    },
+    {
+      "caseId": "od-eval-24",
+      "status": "pending_source",
+      "reason": "pending_source:依赖来源未到位或权利范围未确认(src_annual_reports_2cos),按 statusDefinitions 挂起不计入实测分母"
+    },
+    {
+      "caseId": "od-eval-25",
+      "status": "pending_source",
+      "reason": "pending_source:依赖来源未到位或权利范围未确认(src_annual_reports_2cos, src_pharma_context_pack),按 statusDefinitions 挂起不计入实测分母"
+    }
+  ]
+}
