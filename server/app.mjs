@@ -1077,7 +1077,585 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
     };
   }
 
+  // ---------- 知识库(KB)API(/api/product-core/kb/) ----------
+  // 教师审核 + Product Core 检索闭环(migration 006/008 表)。与 S1 块同纪律:
+  // 路由层只做参数校验、服务层编排调用与视图组装;单元 statement/definition 不可改
+  // (006/008 触发器),修订一律走 supersedes 链新建单元(原单元保留原文),状态流转
+  // 全部写审计。全程无模型调用(检索服务为 FTS5 + bm25 + 确定性门禁)。
+  const KB_LAYERS = Object.freeze({
+    theory: { table: "kb_knowledge_units", fragments: "kb_unit_fragments", entityType: "knowledge_unit", idPrefix: "ku" },
+    pharma_context: { table: "kb_pharma_context_units", fragments: "kb_pharma_context_fragments", entityType: "pharma_context_unit", idPrefix: "pcx" },
+    company_fact: { table: "kb_company_fact_units", fragments: "kb_company_fact_fragments", entityType: "company_fact_unit", idPrefix: "cfx" },
+  });
+  const KB_REVIEW_STATUSES = Object.freeze(["machine_extracted", "teacher_verified", "needs_review", "rejected"]);
+  const KB_GAP_STATUSES = Object.freeze(["open", "resolved", "out_of_scope"]);
+
+  function kbLayerOr400(layer) {
+    const def = KB_LAYERS[layer];
+    if (!def) {
+      fail(400, "KB_LAYER_INVALID", `layer 必须是 ${Object.keys(KB_LAYERS).join("/")},收到 ${JSON.stringify(layer)}`);
+    }
+    return def;
+  }
+
+  function kbGetUnitOr404(layer, layerDef, unitId) {
+    const unit = pcdb.prepare(`SELECT * FROM ${layerDef.table} WHERE id = ?`).get(unitId);
+    if (!unit) failCode("KB_UNIT_NOT_FOUND", `知识单元不存在(layer=${layer}): ${unitId}`, { layer, unitId });
+    return unit;
+  }
+
+  // 关联知识点:三层各自的知识点定位字段(theory=concept,pharma=aspect,company=公司+事实类型)。
+  function kbKnowledgePoint(layer, row) {
+    if (layer === "theory") return row.concept;
+    if (layer === "pharma_context") return row.aspect;
+    return `${row.company} · ${row.fact_type}`;
+  }
+
+  function kbUnitContent(layer, row) {
+    if (layer === "theory") {
+      return {
+        concept: row.concept,
+        definition: row.definition,
+        claim: row.claim,
+        conditions: row.conditions,
+        counterexample: row.counterexample,
+        relatedConcepts: JSON.parse(row.related_concepts_json ?? "[]"),
+        confidence: row.confidence,
+        extractionMethod: row.extraction_method,
+      };
+    }
+    if (layer === "pharma_context") {
+      return {
+        industryStage: row.industry_stage,
+        aspect: row.aspect,
+        statement: row.statement,
+        regulatorContext: row.regulator_context,
+      };
+    }
+    return {
+      company: row.company,
+      reportPeriod: row.report_period,
+      factType: row.fact_type,
+      statement: row.statement,
+      caseCandidate: row.case_candidate === 1,
+    };
+  }
+
+  function kbAuditRow(row) {
+    return {
+      id: row.id,
+      eventType: row.event_type,
+      actorType: row.actor_type,
+      actorId: row.actor_id,
+      entityType: row.entity_type,
+      entityId: row.entity_id,
+      workflowInstanceId: row.workflow_instance_id,
+      previousState: row.previous_state,
+      nextState: row.next_state,
+      payload: row.payload_json ? JSON.parse(row.payload_json) : null,
+      eventHash: row.event_hash,
+      createdAt: row.created_at,
+    };
+  }
+
+  // 标题层级启发与 knowledge-retrieval-service 同口径(编号模式重建标题路径;章节锚,非页码虚构)。
+  const KB_HEADING_LEVEL1_RE = /^chapter\s+\d+/i;
+  const KB_HEADING_LEVEL2_RES = [
+    /^\d+\.\d+(\s|$|:)/,
+    /^(introduction|key terms|summary of learning outcomes|chapter review questions|management skills application exercises|managerial decision exercises|critical thinking case)\b/i,
+  ];
+  function kbHeadingLevel(text) {
+    if (KB_HEADING_LEVEL1_RE.test(text)) return 1;
+    if (KB_HEADING_LEVEL2_RES.some((re) => re.test(text))) return 2;
+    return 3;
+  }
+  function kbSectionAnchor(assetVersionId, orderIndex) {
+    const headings = pcdb
+      .prepare("SELECT order_index, content_raw FROM content_blocks WHERE asset_version_id = ? AND block_type = 'heading' ORDER BY order_index")
+      .all(assetVersionId);
+    const last = [null, null, null];
+    for (const heading of headings) {
+      if (heading.order_index > orderIndex) break;
+      last[kbHeadingLevel(heading.content_raw) - 1] = heading.content_raw;
+    }
+    const path = [];
+    for (const text of last) {
+      if (text !== null && !path.includes(text)) path.push(text);
+    }
+    return path;
+  }
+
+  // 单元详情视图:内容、来源(asset 标题/authorityLevel/permissionStatus)、原文片段
+  // (verbatim + 页码/章节锚)、片段级五项权限、模型处理状态、该单元的审计时间线。
+  function kbUnitDetailView(layer, layerDef, unit) {
+    const fragmentRows = pcdb
+      .prepare(
+        `SELECT cb.id AS fragment_id, cb.block_type, cb.order_index, cb.page_index, cb.page_label,
+                cb.content_raw, cb.content_hash, cb.parser_metadata_json,
+                av.id AS asset_version_id, av.asset_id, av.source_status, av.effective_date,
+                ka.title AS asset_title, ka.authority AS asset_authority
+         FROM ${layerDef.fragments} f
+         JOIN content_blocks cb ON cb.id = f.fragment_id
+         JOIN asset_versions av ON av.id = cb.asset_version_id
+         JOIN knowledge_assets ka ON ka.id = av.asset_id
+         WHERE f.unit_id = ?
+         ORDER BY cb.order_index`,
+      )
+      .all(unit.id);
+
+    // 权限:kb_source_permissions 逐源登记(008);未登记的旧管线资产如实为 null,不虚构。
+    const permSelect = pcdb.prepare("SELECT * FROM kb_source_permissions WHERE source_id = ?");
+    const sourcesByAsset = new Map();
+    for (const row of fragmentRows) {
+      if (sourcesByAsset.has(row.asset_id)) continue;
+      const perm = permSelect.get(row.asset_id);
+      sourcesByAsset.set(row.asset_id, {
+        assetId: row.asset_id,
+        title: row.asset_title,
+        authority: row.asset_authority,
+        authorityLevel: perm?.authority_level ?? null,
+        permissionStatus: perm?.permission_status ?? null,
+        permissions: perm
+          ? {
+              deterministicParsingAllowed: perm.deterministic_parsing_allowed === 1,
+              lexicalIndexingAllowed: perm.lexical_indexing_allowed === 1,
+              llmInputAllowed: perm.llm_input_allowed === 1,
+              embeddingAllowed: perm.embedding_allowed === 1,
+              publicRedistributionAllowed: perm.public_redistribution_allowed === 1,
+              permissionBasis: perm.permission_basis,
+              permissionUpdatedBy: perm.permission_updated_by,
+              permissionUpdatedAt: perm.permission_updated_at,
+            }
+          : null,
+      });
+    }
+
+    const fragments = fragmentRows.map((row) => {
+      const meta = JSON.parse(row.parser_metadata_json ?? "{}");
+      const sectionPath = kbSectionAnchor(row.asset_version_id, row.order_index);
+      return {
+        fragmentId: row.fragment_id,
+        blockType: row.block_type,
+        orderIndex: row.order_index,
+        assetId: row.asset_id,
+        assetVersionId: row.asset_version_id,
+        sourceId: meta.sourceId ?? null,
+        docId: meta.docId ?? null,
+        pageIndex: row.page_index,
+        pageLabel: row.page_label,
+        sectionAnchor: sectionPath.length > 0 ? sectionPath.join(" > ") : null,
+        verbatim: row.content_raw,
+        contentHash: row.content_hash,
+        sourceStatus: row.source_status,
+        effectiveDate: row.effective_date,
+      };
+    });
+
+    const auditTimeline = pcdb
+      .prepare("SELECT * FROM audit_events WHERE entity_id = ? ORDER BY created_at, rowid")
+      .all(unit.id)
+      .map(kbAuditRow);
+
+    return {
+      id: unit.id,
+      layer,
+      courseId: unit.course_id,
+      chapterId: unit.chapter_id,
+      reviewStatus: unit.review_status,
+      knowledgePoint: kbKnowledgePoint(layer, unit),
+      supersedesUnitId: unit.supersedes_unit_id,
+      supersededBy: unit.superseded_by,
+      content: kbUnitContent(layer, unit),
+      sources: [...sourcesByAsset.values()],
+      fragments,
+      // 模型处理状态:当前权限口径全量禁模型处理(manifest defaultDeny,llmInputAllowed=true
+      // 即 FAIL),单元恒"未使用模型";theory 的 created_from_model_run_id 如实回显(恒 null)。
+      modelProcessing: {
+        status: "unused",
+        label: "未使用模型",
+        createdFromModelRunId: layer === "theory" ? unit.created_from_model_run_id : null,
+      },
+      createdBy: unit.created_by,
+      createdAt: unit.created_at,
+      auditTimeline,
+    };
+  }
+
+  // revised 语义:editedStatement 非空时,按 supersedes 链新建修订版单元(继承来源片段),
+  // 原单元只置 superseded_by、原文只字不动。新单元初始 needs_review,随后走统一状态流转。
+  // 非事务:调用方(review 路由)负责 BEGIN/COMMIT 包裹本函数与状态流转。
+  function kbCreateRevision(layer, layerDef, unit, editedStatement, actor) {
+    const newUnitId = newId(layerDef.idPrefix);
+    const now = nowIso();
+    if (layer === "theory") {
+      // 修订版是教师人工修订产物(extraction_method='manual')。006 UNIQUE(course,chapter,
+      // concept,extraction_method) 下同 concept 已有 manual 单元时无法另建修订,显式报错不覆盖。
+      const clash = pcdb
+        .prepare("SELECT id FROM kb_knowledge_units WHERE course_id = ? AND chapter_id = ? AND concept = ? AND extraction_method = 'manual'")
+        .get(unit.course_id, unit.chapter_id, unit.concept);
+      if (clash) {
+        failCode("KB_UNIT_INPUT_INVALID", `概念 "${unit.concept}" 已存在 manual 单元,无法创建修订版`, { conflictUnitId: clash.id });
+      }
+      pcdb
+        .prepare(
+          `INSERT INTO kb_knowledge_units(
+             id, course_id, chapter_id, concept, definition, claim, conditions, counterexample,
+             related_concepts_json, confidence, review_status, extraction_method,
+             created_from_model_run_id, supersedes_unit_id, superseded_by,
+             schema_version, created_by, created_at
+           ) VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, ?, ?, 'needs_review', 'manual', NULL, ?, NULL, '1.0.0', ?, ?)`,
+        )
+        .run(newUnitId, unit.course_id, unit.chapter_id, unit.concept, editedStatement, unit.related_concepts_json, unit.confidence, unit.id, actor.actorId, now);
+      pcdb
+        .prepare("INSERT INTO kb_unit_fragments(unit_id, fragment_id, role, order_index) SELECT ?, fragment_id, role, order_index FROM kb_unit_fragments WHERE unit_id = ?")
+        .run(newUnitId, unit.id);
+    } else if (layer === "pharma_context") {
+      pcdb
+        .prepare(
+          `INSERT INTO kb_pharma_context_units(
+             id, course_id, chapter_id, industry_stage, aspect, statement, regulator_context,
+             review_status, supersedes_unit_id, superseded_by, schema_version, created_by, created_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, 'needs_review', ?, NULL, '1.0.0', ?, ?)`,
+        )
+        .run(newUnitId, unit.course_id, unit.chapter_id, unit.industry_stage, unit.aspect, editedStatement, unit.regulator_context, unit.id, actor.actorId, now);
+      pcdb
+        .prepare("INSERT INTO kb_pharma_context_fragments(unit_id, fragment_id) SELECT ?, fragment_id FROM kb_pharma_context_fragments WHERE unit_id = ?")
+        .run(newUnitId, unit.id);
+    } else {
+      pcdb
+        .prepare(
+          `INSERT INTO kb_company_fact_units(
+             id, course_id, chapter_id, company, report_period, fact_type, statement,
+             review_status, case_candidate, supersedes_unit_id, superseded_by, schema_version, created_by, created_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, 'needs_review', 0, ?, NULL, '1.0.0', ?, ?)`,
+        )
+        .run(newUnitId, unit.course_id, unit.chapter_id, unit.company, unit.report_period, unit.fact_type, editedStatement, unit.id, actor.actorId, now);
+      pcdb
+        .prepare("INSERT INTO kb_company_fact_fragments(unit_id, fragment_id) SELECT ?, fragment_id FROM kb_company_fact_fragments WHERE unit_id = ?")
+        .run(newUnitId, unit.id);
+    }
+    pcdb.prepare(`UPDATE ${layerDef.table} SET superseded_by = ? WHERE id = ?`).run(newUnitId, unit.id);
+    appendAuditEvent(pcdb, {
+      eventType: "kb.unit.revised",
+      actorType: actor.actorType,
+      actorId: actor.actorId,
+      entityType: layerDef.entityType,
+      entityId: newUnitId,
+      payload: {
+        layer,
+        supersedesUnitId: unit.id,
+        courseId: unit.course_id,
+        chapterId: unit.chapter_id,
+        // 审计纪律:长正文不落 payload,只留哈希与字数(可核验、可比对)。
+        editedStatementSha256: hashState(editedStatement),
+        editedStatementChars: editedStatement.length,
+      },
+    });
+    return newUnitId;
+  }
+
+  // 状态流转:theory 复用 knowledge-unit-service.setUnitReviewStatus(同语义:枚举校验 +
+  // 审计 kb.unit.reviewed 含前后状态);pharma/company 在此实现同纪律的流转(008 与 006 同构)。
+  function kbSetReviewStatus(layer, layerDef, unitId, { reviewStatus, reviewerId, comment }, actor) {
+    if (layer === "theory") {
+      return setUnitReviewStatus(pcdb, unitId, { reviewStatus, reviewerId, comment }, actor);
+    }
+    const unit = pcdb.prepare(`SELECT * FROM ${layerDef.table} WHERE id = ?`).get(unitId);
+    if (!unit) failCode("KB_UNIT_NOT_FOUND", `知识单元不存在(layer=${layer}): ${unitId}`, { layer, unitId });
+    pcdb.prepare(`UPDATE ${layerDef.table} SET review_status = ? WHERE id = ?`).run(reviewStatus, unitId);
+    appendAuditEvent(pcdb, {
+      eventType: "kb.unit.reviewed",
+      actorType: actor.actorType ?? "teacher",
+      actorId: reviewerId,
+      entityType: layerDef.entityType,
+      entityId: unitId,
+      previousState: unit.review_status,
+      nextState: reviewStatus,
+      payload: { layer, courseId: unit.course_id, chapterId: unit.chapter_id, comment },
+    });
+    return { unitId, previousStatus: unit.review_status, reviewStatus };
+  }
+
+  // 检索工作流(spec §7):每次检索必须落在某个 workflow_instance 上。请求未指定
+  // workflowInstanceId 时,复用该 actor 首个 KB_RETRIEVAL 工作流(留痕聚合,run 级区分);
+  // 没有则建锚点课程/班/课时,由 searchKnowledge 内部创建工作流并翻转状态。
+  function kbRetrievalScope(actorId) {
+    const existing = pcdb
+      .prepare("SELECT id FROM workflow_instances WHERE workflow_type = 'KB_RETRIEVAL' AND created_by = ? ORDER BY created_at, rowid LIMIT 1")
+      .get(actorId);
+    if (existing) return { workflowInstanceId: existing.id, workflowScope: null };
+    const actor = { actorType: "teacher", actorId };
+    const course = insertCourse(pcdb, { name: "知识库检索锚点课程", code: "KB-RETRIEVAL", actorContext: actor });
+    const cohort = insertCohort(pcdb, { courseId: course.id, name: "知识库检索锚点班", academicTerm: "", actorContext: actor });
+    const lesson = insertLesson(pcdb, { courseId: course.id, classId: cohort.id, title: "知识库检索", actorContext: actor });
+    return { workflowInstanceId: null, workflowScope: { courseId: course.id, classId: cohort.id, lessonId: lesson.id } };
+  }
+
+  async function handleKbApi(req, res, url) {
+    // 三层单元统一列表:layer/reviewStatus/concept/chapterId 等值过滤(concept 按层落到
+    // 各自知识点字段:theory→concept、pharma_context→aspect、company_fact→factType 或 company,
+    // 大小写不敏感);每条含单元内容、所属层、review_status、关联知识点与来源数。
+    if (req.method === "GET" && url.pathname === "/api/product-core/kb/units") {
+      const layerParam = url.searchParams.get("layer");
+      const reviewStatus = url.searchParams.get("reviewStatus");
+      const concept = url.searchParams.get("concept");
+      const chapterId = url.searchParams.get("chapterId");
+      if (layerParam !== null) kbLayerOr400(layerParam);
+      if (reviewStatus !== null && !KB_REVIEW_STATUSES.includes(reviewStatus)) {
+        fail(400, "KB_REVIEW_STATUS_INVALID", `reviewStatus 必须是 ${KB_REVIEW_STATUSES.join("/")},收到 ${JSON.stringify(reviewStatus)}`);
+      }
+      const layers = layerParam === null ? Object.keys(KB_LAYERS) : [layerParam];
+      const units = [];
+      for (const layer of layers) {
+        const def = KB_LAYERS[layer];
+        const where = [];
+        const params = [];
+        if (reviewStatus !== null) {
+          where.push("u.review_status = ?");
+          params.push(reviewStatus);
+        }
+        if (chapterId !== null) {
+          where.push("u.chapter_id = ?");
+          params.push(chapterId);
+        }
+        if (concept !== null) {
+          if (layer === "theory") {
+            where.push("lower(u.concept) = lower(?)");
+            params.push(concept);
+          } else if (layer === "pharma_context") {
+            where.push("lower(u.aspect) = lower(?)");
+            params.push(concept);
+          } else {
+            where.push("(lower(u.fact_type) = lower(?) OR lower(u.company) = lower(?))");
+            params.push(concept, concept);
+          }
+        }
+        const rows = pcdb
+          .prepare(
+            `SELECT u.*, (SELECT COUNT(*) FROM ${def.fragments} f WHERE f.unit_id = u.id) AS source_count
+             FROM ${def.table} u${where.length > 0 ? ` WHERE ${where.join(" AND ")}` : ""}
+             ORDER BY u.id`,
+          )
+          .all(...params);
+        for (const row of rows) {
+          units.push({
+            id: row.id,
+            layer,
+            courseId: row.course_id,
+            chapterId: row.chapter_id,
+            reviewStatus: row.review_status,
+            knowledgePoint: kbKnowledgePoint(layer, row),
+            content: kbUnitContent(layer, row),
+            sourceCount: row.source_count,
+            supersedesUnitId: row.supersedes_unit_id,
+            supersededBy: row.superseded_by,
+            createdBy: row.created_by,
+            createdAt: row.created_at,
+          });
+        }
+      }
+      sendJson(res, 200, { unitCount: units.length, units });
+      return;
+    }
+
+    const unitDetailMatch = url.pathname.match(/^\/api\/product-core\/kb\/units\/([^/]+)\/([^/]+)$/);
+    if (req.method === "GET" && unitDetailMatch) {
+      const layer = unitDetailMatch[1];
+      const layerDef = kbLayerOr400(layer);
+      const unit = kbGetUnitOr404(layer, layerDef, unitDetailMatch[2]);
+      sendJson(res, 200, { unit: kbUnitDetailView(layer, layerDef, unit) });
+      return;
+    }
+
+    const reviewMatch = url.pathname.match(/^\/api\/product-core\/kb\/units\/([^/]+)\/([^/]+)\/review$/);
+    if (req.method === "POST" && reviewMatch) {
+      const layer = reviewMatch[1];
+      const layerDef = kbLayerOr400(layer);
+      const unitId = reviewMatch[2];
+      const body = await readJson(req, config.bodyLimitBytes);
+      if (!body || typeof body !== "object" || Array.isArray(body)) fail(400, "INVALID_BODY", "请求体必须是对象");
+      const reviewStatus = typeof body.reviewStatus === "string" ? body.reviewStatus.trim() : "";
+      if (!KB_REVIEW_STATUSES.includes(reviewStatus)) {
+        failCode("KB_REVIEW_STATUS_INVALID", `reviewStatus 必须是 ${KB_REVIEW_STATUSES.join("/")},收到 ${JSON.stringify(body.reviewStatus)}`);
+      }
+      const reviewerId = pcText(body.reviewerId, "reviewerId", { max: 80 });
+      // actorType 默认 teacher;非教师身份可提交普通审核动作(留痕),但不可置 case_candidate。
+      const actorType = body.actorType == null ? "teacher" : pcText(body.actorType, "actorType", { max: 20 });
+      const comment = typeof body.comment === "string" && body.comment.trim() ? body.comment.trim() : null;
+      const editedStatement = typeof body.editedStatement === "string" && body.editedStatement.trim() ? body.editedStatement.trim() : null;
+      const caseCandidate = body.caseCandidate === true;
+      if (caseCandidate) {
+        // case_candidate 纪律(008 表头:只允许教师审核后置位)——教师身份 + company_fact 层
+        // + 本次审核结论为 teacher_verified,三者缺一即拒。
+        if (actorType !== "teacher") {
+          fail(403, "KB_CASE_CANDIDATE_TEACHER_ONLY", "case_candidate 只允许教师置位");
+        }
+        if (layer !== "company_fact") {
+          fail(400, "KB_CASE_CANDIDATE_INVALID", "caseCandidate 仅适用于 company_fact 层单元");
+        }
+        if (reviewStatus !== "teacher_verified") {
+          fail(400, "KB_CASE_CANDIDATE_INVALID", "case_candidate 仅在 reviewStatus=teacher_verified 时可置位");
+        }
+      }
+      const unit = kbGetUnitOr404(layer, layerDef, unitId);
+      const actor = { actorType, actorId: reviewerId };
+
+      pcdb.exec("BEGIN IMMEDIATE");
+      try {
+        let activeUnitId = unitId;
+        let revisedUnitId = null;
+        if (editedStatement) {
+          // revised:supersedes 链建修订版(保留原文),状态流转作用于修订版单元。
+          revisedUnitId = kbCreateRevision(layer, layerDef, unit, editedStatement, actor);
+          activeUnitId = revisedUnitId;
+        }
+        const transition = kbSetReviewStatus(layer, layerDef, activeUnitId, { reviewStatus, reviewerId, comment }, actor);
+        if (caseCandidate) {
+          pcdb.prepare("UPDATE kb_company_fact_units SET case_candidate = 1 WHERE id = ?").run(activeUnitId);
+          appendAuditEvent(pcdb, {
+            eventType: "kb.unit.case_candidate.set",
+            actorType,
+            actorId: reviewerId,
+            entityType: layerDef.entityType,
+            entityId: activeUnitId,
+            payload: { layer, courseId: unit.course_id, chapterId: unit.chapter_id, reviewerId },
+          });
+        }
+        pcdb.exec("COMMIT");
+        sendJson(res, 200, {
+          unitId: activeUnitId,
+          reviewedUnitId: unitId,
+          previousStatus: transition.previousStatus,
+          reviewStatus,
+          revisedUnitId,
+          caseCandidateSet: caseCandidate,
+        });
+      } catch (error) {
+        pcdb.exec("ROLLBACK");
+        throw error;
+      }
+      return;
+    }
+
+    // 非模型检索(spec §5/§7):调 searchKnowledge(FTS5+bm25+门禁,零模型),返回结果 +
+    // retrievalRunId + evidenceIds + corpusVersionHash;未指定工作流时创建/复用 KB_RETRIEVAL。
+    if (req.method === "POST" && url.pathname === "/api/product-core/kb/retrieve") {
+      const body = await readJson(req, config.bodyLimitBytes);
+      if (!body || typeof body !== "object" || Array.isArray(body)) fail(400, "INVALID_BODY", "请求体必须是对象");
+      const query = pcText(body.query, "query", { max: 2_000 });
+      const actorId = pcText(body.actorId, "actorId", { max: 80 });
+      const filters = {};
+      if (body.filters != null) {
+        if (typeof body.filters !== "object" || Array.isArray(body.filters)) {
+          fail(400, "KB_RETRIEVAL_INPUT_INVALID", "filters 必须是对象");
+        }
+        for (const [key, value] of Object.entries(body.filters)) {
+          if (typeof value !== "string" || !value.trim()) {
+            fail(400, "KB_RETRIEVAL_INPUT_INVALID", `filters.${key} 必须是非空文本`);
+          }
+          filters[key] = value.trim();
+        }
+      }
+      const limit = body.limit == null ? undefined : Number(body.limit);
+      let workflowInstanceId = null;
+      if (body.workflowInstanceId != null) {
+        workflowInstanceId = pcText(body.workflowInstanceId, "workflowInstanceId", { max: 80 });
+      }
+      let workflowScope = null;
+      if (workflowInstanceId === null) {
+        const scoped = kbRetrievalScope(actorId);
+        workflowInstanceId = scoped.workflowInstanceId;
+        workflowScope = scoped.workflowScope;
+      }
+      const result = searchKnowledge(pcdb, {
+        query,
+        filters,
+        ...(limit === undefined ? {} : { limit }),
+        actorContext: { actorType: "teacher", actorId },
+        workflowInstanceId,
+        workflowScope,
+      });
+      sendJson(res, 200, result);
+      return;
+    }
+
+    // 证据缺口只读列表(gap 流转由 kb-unit-builder 管理,本轮不开 resolve 路由)。
+    if (req.method === "GET" && url.pathname === "/api/product-core/kb/gaps") {
+      const status = url.searchParams.get("status");
+      if (status !== null && !KB_GAP_STATUSES.includes(status)) {
+        fail(400, "KB_GAP_INPUT_INVALID", `status 必须是 ${KB_GAP_STATUSES.join("/")},收到 ${JSON.stringify(status)}`);
+      }
+      const rows = status === null
+        ? pcdb.prepare("SELECT * FROM kb_evidence_gaps ORDER BY created_at, id").all()
+        : pcdb.prepare("SELECT * FROM kb_evidence_gaps WHERE status = ? ORDER BY created_at, id").all(status);
+      sendJson(res, 200, {
+        gapCount: rows.length,
+        gaps: rows.map((row) => ({
+          id: row.id,
+          questionId: row.question_id,
+          topic: row.topic,
+          neededSourceType: row.needed_source_type,
+          status: row.status,
+          resolutionNote: row.resolution_note,
+          createdAt: row.created_at,
+          resolvedAt: row.resolved_at,
+        })),
+      });
+      return;
+    }
+
+    const runMatch = url.pathname.match(/^\/api\/product-core\/kb\/retrieval-runs\/([^/]+)$/);
+    if (req.method === "GET" && runMatch) {
+      const runId = runMatch[1];
+      const run = pcdb.prepare("SELECT * FROM kb_retrieval_runs WHERE id = ?").get(runId);
+      if (!run) failCode("KB_RETRIEVAL_RUN_NOT_FOUND", `检索 run 不存在: ${runId}`, { retrievalRunId: runId });
+      const evidenceLinks = pcdb
+        .prepare(
+          `SELECT id, claim_id, evidence_type, source_id, source_version_id, content_block_id,
+                  page_index, page_label, verbatim_quote, content_hash, source_status, retrieved_at
+           FROM evidence_links WHERE retrieval_run_id = ? ORDER BY id`,
+        )
+        .all(run.id);
+      sendJson(res, 200, {
+        id: run.id,
+        workflowInstanceId: run.workflow_instance_id,
+        query: run.query_text,
+        filters: JSON.parse(run.filters_json),
+        corpusVersionHash: run.corpus_version_hash,
+        resultCount: run.result_count,
+        // results_json 逐条含:unitId(单元)/fragmentId+mergedFragmentIds(片段)/sourceId+assetVersionId
+        // (来源)/sectionAnchor/pageLabel(锚点)/score+queryTermCoverage(分值)/contentHash。
+        results: JSON.parse(run.results_json),
+        evidenceLinks: evidenceLinks.map((row) => ({
+          id: row.id,
+          claimId: row.claim_id,
+          evidenceType: row.evidence_type,
+          sourceId: row.source_id,
+          sourceVersionId: row.source_version_id,
+          contentBlockId: row.content_block_id,
+          pageIndex: row.page_index,
+          pageLabel: row.page_label,
+          verbatimQuote: row.verbatim_quote,
+          contentHash: row.content_hash,
+          sourceStatus: row.source_status,
+          retrievedAt: row.retrieved_at,
+        })),
+        createdBy: run.created_by,
+        createdAt: run.created_at,
+      });
+      return;
+    }
+
+    fail(404, "API_NOT_FOUND", "API 路径不存在");
+  }
+
   async function handleProductCoreApi(req, res, url) {
+    // 知识库(KB)子路由:教师审核 + 检索闭环(见上方 handleKbApi)。
+    if (url.pathname.startsWith("/api/product-core/kb/")) {
+      await handleKbApi(req, res, url);
+      return;
+    }
+
     if (req.method === "POST" && url.pathname === "/api/product-core/courses") {
       const body = await readJson(req, config.bodyLimitBytes);
       const course = insertCourse(pcdb, {
