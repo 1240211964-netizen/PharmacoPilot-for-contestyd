@@ -1,0 +1,3 @@
+import { CRITICAL_MOMENT_TYPES } from './contracts.mjs';
+const TYPE_BY_EVENT = Object.freeze({ silence:'SILENCE', misconception:'MISCONCEPTION', conflict:'CONFLICT', off_topic:'OFF_TOPIC', pace_anomaly:'PACE_ANOMALY', assessment_ambiguity:'ASSESSMENT_AMBIGUITY' });
+export function detectCriticalMoments(events) { return events.filter((event) => TYPE_BY_EVENT[event.eventType] && event.severity >= 3).map((event) => ({ momentType: TYPE_BY_EVENT[event.eventType], eventId:event.eventId, relatedStage:event.relatedStage, reason:event.observedSignal })).filter((m) => CRITICAL_MOMENT_TYPES.includes(m.momentType)); }
