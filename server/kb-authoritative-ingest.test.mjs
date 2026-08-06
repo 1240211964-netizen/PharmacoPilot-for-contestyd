@@ -11,7 +11,7 @@
 //   6. 权限闸门:llmInputAllowed=true 即 KB_PERMISSION_GATE;
 //   7. 无 legacy 预摄入的净库:30 条全部新建(legacy 条目同样可独立摄入)。
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -82,12 +82,14 @@ function writeTamperedManifest(t, mutate) {
 test("migration 008:空库 000→008 全量应用且幂等,foreign_key_check 干净", (t) => {
   const db = migratedDb(t);
   const applied = db.prepare("SELECT name FROM schema_migrations ORDER BY name").all().map((r) => r.name);
-  assert.equal(applied.length, 9);
-  assert.equal(applied.at(-1), M008);
+  // 数量随后续 migration(009+)增长,不断言死数字;008 必须已应用且全部已应用项与目录一一对应。
+  const expectedFiles = readdirSync(MIGRATIONS_DIR).filter((name) => /^\d{3}_[a-z0-9_]+\.sql$/.test(name)).sort();
+  assert.deepEqual(applied, expectedFiles);
+  assert.ok(applied.includes(M008));
   assert.deepEqual(db.prepare("PRAGMA foreign_key_check").all(), []);
   // 幂等:再跑一遍不多应用、不报错。
   runMigrations(db);
-  assert.equal(db.prepare("SELECT COUNT(*) AS c FROM schema_migrations").get().c, 9);
+  assert.equal(db.prepare("SELECT COUNT(*) AS c FROM schema_migrations").get().c, expectedFiles.length);
   const tables = db
     .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'kb_%' ORDER BY name")
     .all()

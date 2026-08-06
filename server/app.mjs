@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash } from "node:crypto";
 import { createReadStream, existsSync, realpathSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -22,6 +22,7 @@ import {
 } from "./product-core/decisions.mjs";
 import { appendAuditEvent } from "./product-core/audit.mjs";
 import { failCode, ProductCoreError } from "./product-core/errors.mjs";
+import { resolveActor } from "./product-core/identity.mjs";
 import { newId, nowIso } from "./product-core/ids.mjs";
 import { searchKnowledge } from "./product-core/knowledge-retrieval-service.mjs";
 import { setUnitReviewStatus } from "./product-core/knowledge-unit-service.mjs";
@@ -489,13 +490,11 @@ function cloneJson(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-function authorized(req, expectedToken) {
-  if (!expectedToken) return true;
+// 从请求头提取 API 令牌(Bearer 优先,兼容 x-pharmaco-token)。
+// 校验逻辑在 handleApi:resolveActor 把令牌解析为教师/管理员身份或 null。
+function extractToken(req) {
   const bearer = req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.slice(7) : "";
-  const supplied = bearer || req.headers["x-pharmaco-token"] || "";
-  const left = Buffer.from(String(supplied));
-  const right = Buffer.from(expectedToken);
-  return left.length === right.length && timingSafeEqual(left, right);
+  return bearer || req.headers["x-pharmaco-token"] || "";
 }
 
 // 后端迁入仓库根后,webRoot 与源码/依赖/状态库同级。静态路由使用正向白名单,
@@ -571,7 +570,15 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
   const practiceReviewCache = new Map();
 
   async function handleApi(req, res, url) {
-    if (!authorized(req, config.apiToken)) {
+    // 鉴权与身份解析(migration 009):教师令牌 → 真实教师身份;旧静态 config token →
+    // admin(兼容现有单 token 部署);无令牌且未配置静态 token(回环开发态)→ 放行,
+    // actor 为 null,写操作沿用请求体自报身份(既有行为不变)。其余一律 401。
+    const suppliedToken = extractToken(req);
+    let actor = null;
+    if (suppliedToken) {
+      actor = resolveActor(database.db, suppliedToken, { staticToken: config.apiToken });
+    }
+    if (suppliedToken ? !actor : Boolean(config.apiToken)) {
       sendJson(res, 401, { error: { code: "UNAUTHORIZED", message: "API token 无效" } }, { "www-authenticate": "Bearer" });
       return;
     }
@@ -598,7 +605,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
 
     // 产品内核 S1:路由层只做参数校验与编排调用,状态字段一律经服务层转移。
     if (url.pathname.startsWith("/api/product-core/")) {
-      await handleProductCoreApi(req, res, url);
+      await handleProductCoreApi(req, res, url, actor);
       return;
     }
 
@@ -871,6 +878,26 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
 
   function pcActor(body, field = "actorId") {
     return { actorType: "teacher", actorId: pcText(body?.[field], field, { max: 80 }) };
+  }
+
+  // 身份以令牌解析结果为准(migration 009):教师令牌绑定真实教师身份——body 里的
+  // actorId/reviewerId 与令牌不一致即 403 ACTOR_MISMATCH,未提供则用令牌身份;
+  // 旧静态 token(admin)与回环开发态(actor=null)维持请求体自报身份,兼容现有部署。
+  function pcBoundActor(actor, body, field = "actorId") {
+    if (actor?.source === "teacher-token") {
+      const claimed = body?.[field];
+      if (claimed != null && String(claimed).trim() !== "") {
+        const text = pcText(claimed, field, { max: 80 });
+        if (text !== actor.actorId) {
+          fail(403, "ACTOR_MISMATCH", `请求中的 ${field} 与令牌身份不一致`, { tokenActorId: actor.actorId });
+        }
+      }
+      return { actorType: "teacher", actorId: actor.actorId };
+    }
+    if (actor?.source === "static-token" && (body?.[field] == null || String(body[field]).trim() === "")) {
+      return { actorType: "admin", actorId: actor.actorId };
+    }
+    return pcActor(body, field);
   }
 
   function pcGetWorkflowOr404(workflowId) {
@@ -1391,7 +1418,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
     return { workflowInstanceId: null, workflowScope: { courseId: course.id, classId: cohort.id, lessonId: lesson.id } };
   }
 
-  async function handleKbApi(req, res, url) {
+  async function handleKbApi(req, res, url, actor) {
     // 三层单元统一列表:layer/reviewStatus/concept/chapterId 等值过滤(concept 按层落到
     // 各自知识点字段:theory→concept、pharma_context→aspect、company_fact→factType 或 company,
     // 大小写不敏感);每条含单元内容、所属层、review_status、关联知识点与来源数。
@@ -1478,9 +1505,14 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       if (!KB_REVIEW_STATUSES.includes(reviewStatus)) {
         failCode("KB_REVIEW_STATUS_INVALID", `reviewStatus 必须是 ${KB_REVIEW_STATUSES.join("/")},收到 ${JSON.stringify(body.reviewStatus)}`);
       }
-      const reviewerId = pcText(body.reviewerId, "reviewerId", { max: 80 });
+      // reviewerId 以令牌身份为准(教师令牌时 body 可省略;不一致即 403)。
+      const reviewerActor = pcBoundActor(actor, body, "reviewerId");
+      const reviewerId = reviewerActor.actorId;
       // actorType 默认 teacher;非教师身份可提交普通审核动作(留痕),但不可置 case_candidate。
-      const actorType = body.actorType == null ? "teacher" : pcText(body.actorType, "actorType", { max: 20 });
+      // 令牌身份在场时 actorType 以令牌角色为准,不回读 body.actorType。
+      const actorType = actor
+        ? reviewerActor.actorType
+        : body.actorType == null ? "teacher" : pcText(body.actorType, "actorType", { max: 20 });
       const comment = typeof body.comment === "string" && body.comment.trim() ? body.comment.trim() : null;
       const editedStatement = typeof body.editedStatement === "string" && body.editedStatement.trim() ? body.editedStatement.trim() : null;
       const caseCandidate = body.caseCandidate === true;
@@ -1498,7 +1530,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         }
       }
       const unit = kbGetUnitOr404(layer, layerDef, unitId);
-      const actor = { actorType, actorId: reviewerId };
+      const reviewActor = { actorType, actorId: reviewerId };
 
       pcdb.exec("BEGIN IMMEDIATE");
       try {
@@ -1506,10 +1538,10 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         let revisedUnitId = null;
         if (editedStatement) {
           // revised:supersedes 链建修订版(保留原文),状态流转作用于修订版单元。
-          revisedUnitId = kbCreateRevision(layer, layerDef, unit, editedStatement, actor);
+          revisedUnitId = kbCreateRevision(layer, layerDef, unit, editedStatement, reviewActor);
           activeUnitId = revisedUnitId;
         }
-        const transition = kbSetReviewStatus(layer, layerDef, activeUnitId, { reviewStatus, reviewerId, comment }, actor);
+        const transition = kbSetReviewStatus(layer, layerDef, activeUnitId, { reviewStatus, reviewerId, comment }, reviewActor);
         if (caseCandidate) {
           pcdb.prepare("UPDATE kb_company_fact_units SET case_candidate = 1 WHERE id = ?").run(activeUnitId);
           appendAuditEvent(pcdb, {
@@ -1543,7 +1575,9 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       const body = await readJson(req, config.bodyLimitBytes);
       if (!body || typeof body !== "object" || Array.isArray(body)) fail(400, "INVALID_BODY", "请求体必须是对象");
       const query = pcText(body.query, "query", { max: 2_000 });
-      const actorId = pcText(body.actorId, "actorId", { max: 80 });
+      // actorId 以令牌身份为准(教师令牌时 body 可省略;不一致即 403)。
+      const retrievalActor = pcBoundActor(actor, body, "actorId");
+      const actorId = retrievalActor.actorId;
       const filters = {};
       if (body.filters != null) {
         if (typeof body.filters !== "object" || Array.isArray(body.filters)) {
@@ -1571,7 +1605,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         query,
         filters,
         ...(limit === undefined ? {} : { limit }),
-        actorContext: { actorType: "teacher", actorId },
+        actorContext: { actorType: retrievalActor.actorType, actorId },
         workflowInstanceId,
         workflowScope,
       });
@@ -1649,10 +1683,10 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
     fail(404, "API_NOT_FOUND", "API 路径不存在");
   }
 
-  async function handleProductCoreApi(req, res, url) {
+  async function handleProductCoreApi(req, res, url, actor) {
     // 知识库(KB)子路由:教师审核 + 检索闭环(见上方 handleKbApi)。
     if (url.pathname.startsWith("/api/product-core/kb/")) {
-      await handleKbApi(req, res, url);
+      await handleKbApi(req, res, url, actor);
       return;
     }
 
@@ -1661,7 +1695,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       const course = insertCourse(pcdb, {
         name: pcText(body.name, "name"),
         code: pcText(body.code, "code", { max: 60 }),
-        actorContext: pcActor(body),
+        actorContext: pcBoundActor(actor, body),
       });
       sendJson(res, 201, { course });
       return;
@@ -1678,7 +1712,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         courseId,
         name: pcText(body.name, "name"),
         academicTerm: typeof body.academicTerm === "string" ? body.academicTerm.trim() : "",
-        actorContext: pcActor(body),
+        actorContext: pcBoundActor(actor, body),
       });
       sendJson(res, 201, { cohort });
       return;
@@ -1701,7 +1735,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         courseId,
         classId,
         title: pcText(body.title, "title"),
-        actorContext: pcActor(body),
+        actorContext: pcBoundActor(actor, body),
       });
       sendJson(res, 201, { lesson });
       return;
@@ -1721,7 +1755,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       if (!pcdb.prepare("SELECT id FROM lessons WHERE id = ?").get(lessonId)) {
         fail(404, "LESSON_NOT_FOUND", `课时不存在: ${lessonId}`, { lessonId });
       }
-      const actorContext = pcActor(body);
+      const actorContext = pcBoundActor(actor, body);
       const workflow = startS1Workflow(pcdb, { courseId, classId, lessonId, createdBy: actorContext.actorId, actorContext });
       sendJson(res, 201, { workflow: pcWorkflowSummary(workflow) });
       return;
@@ -1730,14 +1764,17 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
     const decisionMatch = url.pathname.match(/^\/api\/product-core\/s1\/decision-records\/([^/]+)\/decisions$/);
     if (req.method === "POST" && decisionMatch) {
       const body = await readJson(req, config.bodyLimitBytes);
-      const reviewerId = pcText(body.reviewerId, "reviewerId", { max: 80 });
+      // reviewerId 以令牌身份为准:教师令牌时 body 可省略 reviewerId;
+      // 若提供且与令牌身份不一致 → 403 ACTOR_MISMATCH。
+      const reviewerActor = pcBoundActor(actor, body, "reviewerId");
+      const reviewerId = reviewerActor.actorId;
       const result = await submitTeacherDecision(pcdb, {
         decisionRecordId: decisionMatch[1],
         decision: pcText(body.decision, "decision", { max: 20 }),
         reviewerId,
         editedStatement: typeof body.editedStatement === "string" ? body.editedStatement : null,
         comment: typeof body.comment === "string" ? body.comment : null,
-        actorContext: { actorType: "teacher", actorId: reviewerId },
+        actorContext: { actorType: reviewerActor.actorType, actorId: reviewerId },
       });
       sendJson(res, 201, {
         teacherDecisionId: result.teacherDecisionId,
@@ -1792,7 +1829,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       }
       if (req.method === "POST" && action === "input") {
         const body = await readJson(req, config.bodyLimitBytes);
-        const actorContext = pcActor(body);
+        const actorContext = pcBoundActor(actor, body);
         pcGetWorkflowOr404(workflowId);
         const fixture = await pcLoadFixture(body);
         const workflow = importPretestAndAdvance(pcdb, { workflowId, fixture, actorContext });
@@ -1802,14 +1839,14 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       if (req.method === "POST" && action === "compute-facts") {
         const body = await readJson(req, config.bodyLimitBytes);
         pcGetWorkflowOr404(workflowId);
-        const { workflow, facts } = computeFactsAndAdvance(pcdb, { workflowId, actorContext: pcActor(body) });
+        const { workflow, facts } = computeFactsAndAdvance(pcdb, { workflowId, actorContext: pcBoundActor(actor, body) });
         sendJson(res, 200, { workflow: pcWorkflowSummary(workflow), facts });
         return;
       }
       if (req.method === "POST" && action === "generate-claims") {
         const body = await readJson(req, config.bodyLimitBytes);
         pcGetWorkflowOr404(workflowId);
-        const result = await generateClaimsAndAdvance(pcdb, { workflowId, actorContext: pcActor(body) });
+        const result = await generateClaimsAndAdvance(pcdb, { workflowId, actorContext: pcBoundActor(actor, body) });
         sendJson(res, 200, {
           workflow: pcWorkflowSummary(result.workflow),
           modelRunId: result.modelRunId,
@@ -1821,7 +1858,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       }
       if (req.method === "POST" && action === "validate") {
         const body = await readJson(req, config.bodyLimitBytes);
-        const actorContext = pcActor(body);
+        const actorContext = pcBoundActor(actor, body);
         pcGetWorkflowOr404(workflowId);
         const { gate } = validateAndAdvance(pcdb, { workflowId, actorContext });
         const { review } = reviewAndAdvance(pcdb, { workflowId, actorContext });
@@ -1832,7 +1869,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       if (req.method === "POST" && action === "publish") {
         const body = await readJson(req, config.bodyLimitBytes);
         pcGetWorkflowOr404(workflowId);
-        const result = publish(pcdb, { workflowId, actorContext: pcActor(body) });
+        const result = publish(pcdb, { workflowId, actorContext: pcBoundActor(actor, body) });
         sendJson(res, 200, {
           workflow: pcWorkflowSummary(pcGetWorkflowOr404(workflowId)),
           lessonVersionId: result.lessonVersionId,
