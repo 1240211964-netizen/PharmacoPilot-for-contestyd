@@ -31,6 +31,7 @@ import {
   enterTeacherReview,
   generateClaimsAndAdvance,
   importPretestAndAdvance,
+  importPretestCsvAndAdvance,
   insertCohort,
   insertCourse,
   insertLesson,
@@ -39,6 +40,7 @@ import {
   startS1Workflow,
   validateAndAdvance,
 } from "./product-core/s1-service.mjs";
+import { PRETEST_ITEMS_TEMPLATE, PRETEST_RESPONSES_TEMPLATE } from "./product-core/pretest-csv.mjs";
 import { SchemaValidationError } from "./product-core/schemas.mjs";
 import { getWorkflow, TERMINAL_STATES, TRANSITIONS } from "./product-core/workflow.mjs";
 
@@ -94,6 +96,9 @@ const PRODUCT_CORE_HTTP_STATUS = new Map([
   ["OBSERVATION_RECALC_MISMATCH", 422],
   ["CROSS_SCOPE_REFERENCE", 422],
   ["PRETEST_FIXTURE_INVALID", 422],
+  ["PRETEST_CSV_INVALID", 422],
+  ["PRETEST_DATA_EXISTS", 409],
+  ["PRETEST_RECOMPUTE_ACK_REQUIRED", 409],
   ["TEACHER_DECISION_INVALID", 422],
   ["PROVIDER_NOT_ENABLED", 422],
   ["PROVIDER_CONTRACT_VIOLATION", 422],
@@ -1813,8 +1818,14 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       return;
     }
 
+    // 前测 CSV 模板(教师自助导入通道):返回 items/responses 两份模板文本,客户端触发下载。
+    if (req.method === "GET" && url.pathname === "/api/product-core/s1/pretest-template") {
+      sendJson(res, 200, { itemsCsv: PRETEST_ITEMS_TEMPLATE, responsesCsv: PRETEST_RESPONSES_TEMPLATE });
+      return;
+    }
+
     const workflowMatch = url.pathname.match(
-      /^\/api\/product-core\/s1\/workflows\/([^/]+?)(?:\/(input|compute-facts|generate-claims|validate|publish|audit))?$/,
+      /^\/api\/product-core\/s1\/workflows\/([^/]+?)(?:\/(input|compute-facts|generate-claims|validate|publish|audit|import-pretest))?$/,
     );
     if (workflowMatch) {
       const workflowId = workflowMatch[1];
@@ -1834,6 +1845,29 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         const fixture = await pcLoadFixture(body);
         const workflow = importPretestAndAdvance(pcdb, { workflowId, fixture, actorContext });
         sendJson(res, 200, { workflow: pcWorkflowSummary(workflow) });
+        return;
+      }
+      if (req.method === "POST" && action === "import-pretest") {
+        // 教师自助 CSV 导入:行级错误一次聚合返回(422 PRETEST_CSV_INVALID),有错即零写入;
+        // replace/acknowledgeRecompute 语义见 s1-service.importPretestCsvAndAdvance。
+        const body = await readJson(req, config.bodyLimitBytes);
+        const actorContext = pcBoundActor(actor, body);
+        pcGetWorkflowOr404(workflowId);
+        if (typeof body?.itemsCsv !== "string" || !body.itemsCsv.trim()) {
+          fail(400, "INVALID_PRODUCT_CORE_BODY", "itemsCsv 必填且必须是非空 CSV 文本");
+        }
+        if (typeof body?.responsesCsv !== "string" || !body.responsesCsv.trim()) {
+          fail(400, "INVALID_PRODUCT_CORE_BODY", "responsesCsv 必填且必须是非空 CSV 文本");
+        }
+        const result = importPretestCsvAndAdvance(pcdb, {
+          workflowId,
+          itemsCsv: body.itemsCsv,
+          responsesCsv: body.responsesCsv,
+          replace: body.replace === true,
+          acknowledgeRecompute: body.acknowledgeRecompute === true,
+          actorContext,
+        });
+        sendJson(res, 200, { workflow: pcWorkflowSummary(result.workflow), import: result.import });
         return;
       }
       if (req.method === "POST" && action === "compute-facts") {

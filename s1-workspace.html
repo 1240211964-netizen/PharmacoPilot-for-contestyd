@@ -103,6 +103,24 @@
       <button class="ghost" id="refresh">刷新工作区</button>
     </div>
     <div class="ids" id="wf-state"></div>
+    <div class="card" style="margin-top:10px;margin-bottom:0">
+      <h3 style="font-size:var(--fs-sm);margin:0 0 8px">导入前测 CSV(教师自助)</h3>
+      <div class="row">
+        <label>题目 CSV(items)<input type="file" id="items-file" accept=".csv,text/csv" style="min-width:220px"></label>
+        <label>作答 CSV(responses)<input type="file" id="responses-file" accept=".csv,text/csv" style="min-width:220px"></label>
+        <button class="ghost" id="dl-items-tpl" type="button">下载题目模板</button>
+        <button class="ghost" id="dl-resp-tpl" type="button">下载作答模板</button>
+      </div>
+      <label>或直接粘贴 items CSV<textarea id="items-csv" placeholder="item_no,stem,options,correct_option,knowledge_tags"></textarea></label>
+      <label>或直接粘贴 responses CSV<textarea id="responses-csv" placeholder="student_anon_id,item_no,selected_option,participated(匿名 ID,勿填姓名/学号)"></textarea></label>
+      <div class="row">
+        <label style="flex-direction:row;align-items:center;gap:4px"><input type="checkbox" id="import-replace" style="min-width:0"> 替换已有数据</label>
+        <label style="flex-direction:row;align-items:center;gap:4px"><input type="checkbox" id="import-ack" style="min-width:0"> 已知晓:替换后需重新计算事实</label>
+        <button id="do-import" type="button">导入 CSV 前测</button>
+      </div>
+      <div id="import-errors" style="color:var(--maroon);font-size:var(--fs-2xs);white-space:pre-wrap"></div>
+      <div class="ids" id="import-summary"></div>
+    </div>
   </section>
 
   <section>
@@ -247,6 +265,65 @@
     }).catch(showError);
   });
   $("refresh").addEventListener("click", function () { refresh(); });
+
+  // ---- 前测 CSV 导入(教师自助通道) ----
+  function fillFromFile(inputId, textareaId) {
+    $(inputId).addEventListener("change", function () {
+      var file = $(inputId).files && $(inputId).files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () { $(textareaId).value = String(reader.result || ""); };
+      reader.onerror = function () { say("读取文件失败: " + file.name, "err"); };
+      reader.readAsText(file, "utf-8");
+    });
+  }
+  fillFromFile("items-file", "items-csv");
+  fillFromFile("responses-file", "responses-csv");
+
+  function downloadTemplate(kind, filename) {
+    api("GET", "/api/product-core/s1/pretest-template").then(function (r) {
+      var blob = new Blob([r[kind]], { type: "text/csv;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }).catch(showError);
+  }
+  $("dl-items-tpl").addEventListener("click", function () { downloadTemplate("itemsCsv", "pretest-items-template.csv"); });
+  $("dl-resp-tpl").addEventListener("click", function () { downloadTemplate("responsesCsv", "pretest-responses-template.csv"); });
+
+  $("do-import").addEventListener("click", function () {
+    var itemsCsv = $("items-csv").value;
+    var responsesCsv = $("responses-csv").value;
+    $("import-errors").textContent = "";
+    $("import-summary").textContent = "";
+    if (!itemsCsv.trim() || !responsesCsv.trim()) { say("请先选择或粘贴两份 CSV(items 与 responses)。", "err"); return; }
+    post(
+      "/api/product-core/s1/workflows/" + encodeURIComponent(wfId()) + "/import-pretest",
+      Object.assign({
+        itemsCsv: itemsCsv,
+        responsesCsv: responsesCsv,
+        replace: $("import-replace").checked,
+        acknowledgeRecompute: $("import-ack").checked,
+      }, actorBody())
+    ).then(function (r) {
+      $("import-summary").textContent =
+        "导入成功:题目 " + r.import.itemCount + " 题 · 作答 " + r.import.responseCount +
+        " 条 · 学生 " + r.import.studentCount + " 人" + (r.import.replaced ? "(已替换旧数据)" : "") +
+        " → " + r.workflow.currentState;
+      say("CSV 前测导入完成。", "ok");
+      refresh();
+    }).catch(function (error) {
+      var e = error && error.error ? error.error : null;
+      if (e && e.code === "PRETEST_CSV_INVALID" && e.details && Array.isArray(e.details.errors)) {
+        $("import-errors").textContent = e.details.errors.map(function (err) {
+          return "第 " + err.row + " 行" + (err.field ? " [" + err.field + "]" : "") + ": " + err.message;
+        }).join("\n");
+      }
+      showError(error);
+    });
+  });
 
   var DECISION_LABEL = { accept: "已采纳", revise: "修改后采纳", reject: "已驳回", defer: "暂缓" };
   function tdrFor(view, claimId) {

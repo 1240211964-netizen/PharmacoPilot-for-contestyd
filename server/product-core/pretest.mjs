@@ -76,7 +76,10 @@ export function validatePretestFixture(fixture) {
 
 // ---------- 导入 ----------
 
-export function importPretest(db, lessonId, fixture, actorContext = {}) {
+// options.replace:同事务先删除该 lesson 旧 items/responses 再导入(pretest 是运行数据,可删;
+// runtime_observations.source_record_ids_json 只是 JSON 引用,不挡删除)。
+// options.source:审计 payload 标记导入来源(如 'csv'),缺省不加该字段。
+export function importPretest(db, lessonId, fixture, actorContext = {}, options = {}) {
   const lesson = db.prepare('SELECT id, course_id FROM lessons WHERE id = ?').get(lessonId);
   if (!lesson) failCode('PRETEST_FIXTURE_INVALID', `课时不存在: ${lessonId}`, { lessonId });
   const problems = validatePretestFixture(fixture);
@@ -89,6 +92,12 @@ export function importPretest(db, lessonId, fixture, actorContext = {}) {
   let responseCount = 0;
   db.exec('BEGIN IMMEDIATE');
   try {
+    if (options.replace) {
+      db.prepare(
+        'DELETE FROM pretest_responses WHERE item_id IN (SELECT id FROM pretest_items WHERE lesson_id = ?)',
+      ).run(lessonId);
+      db.prepare('DELETE FROM pretest_items WHERE lesson_id = ?').run(lessonId);
+    }
     const insertItem = db.prepare(
       `INSERT INTO pretest_items(id, lesson_id, item_no, stem, options_json, correct_option, knowledge_tags_json)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -132,7 +141,14 @@ export function importPretest(db, lessonId, fixture, actorContext = {}) {
       entityType: 'lesson',
       entityId: lessonId,
       workflowInstanceId: actorContext.workflowInstanceId ?? null,
-      payload: { itemCount, responseCount, studentCount: fixture.students.length, courseId: lesson.course_id },
+      payload: {
+        itemCount,
+        responseCount,
+        studentCount: fixture.students.length,
+        courseId: lesson.course_id,
+        ...(options.source ? { source: options.source } : {}),
+        ...(options.replace ? { replaced: true } : {}),
+      },
     });
     db.exec('COMMIT');
   } catch (error) {

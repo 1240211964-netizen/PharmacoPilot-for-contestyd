@@ -2,8 +2,10 @@
 // 每个方法内部按"领域服务 -> 状态机转移"的顺序组合;事务由各服务自行管理(不嵌套)。
 import { generateClaimsRuleBased } from './claims.mjs';
 import { createDecisionRecords } from './decisions.mjs';
+import { failCode } from './errors.mjs';
 import { runMechanicalValidation } from './mechanical-gates.mjs';
 import { computeFacts, importPretest } from './pretest.mjs';
+import { fixtureFromCsv } from './pretest-csv.mjs';
 import { publishS1 } from './publish.mjs';
 import { insertCohort, insertCourse, insertLesson } from './repository.mjs';
 import { runSemanticReview } from './semantic-review.mjs';
@@ -29,6 +31,58 @@ export function importPretestAndAdvance(db, { workflowId, fixture, actorContext 
   // workflowInstanceId 随 actorContext 透传:005 起 input.imported 等审计事件必带 workflow 维度。
   importPretest(db, wf.lesson_id, fixture, { ...actorContext, workflowInstanceId: workflowId });
   return transitionWorkflow(db, workflowId, 'markInputReady', actorContext);
+}
+
+// 教师 CSV 导入通道:先整批校验(行级错误一次聚合返回,有错即零写入),再复用 importPretest 落库。
+// replace=false 且已有数据 -> 409 PRETEST_DATA_EXISTS;
+// replace=true 且该 lesson 已算过事实 -> 需 acknowledgeRecompute=true(导入后不自动重算,由教师再点 compute);
+// 仅 DRAFT 态做 markInputReady 转移,INPUT_READY 及以后替换数据不重复转移。
+export function importPretestCsvAndAdvance(
+  db,
+  { workflowId, itemsCsv, responsesCsv, replace = false, acknowledgeRecompute = false, actorContext = {} } = {},
+) {
+  const wf = db.prepare('SELECT * FROM workflow_instances WHERE id = ?').get(workflowId);
+  if (!wf) failCode('WF_INSTANCE_NOT_FOUND', `工作流实例不存在: ${workflowId}`, { workflowInstanceId: workflowId });
+  const fixture = fixtureFromCsv({ itemsCsv, responsesCsv });
+  const existingItems = db
+    .prepare('SELECT COUNT(*) AS n FROM pretest_items WHERE lesson_id = ?')
+    .get(wf.lesson_id).n;
+  const replacing = replace && existingItems > 0;
+  if (existingItems > 0 && !replace) {
+    failCode('PRETEST_DATA_EXISTS', `该课时已导入前测数据(items=${existingItems});如需覆盖请置 replace=true`, {
+      lessonId: wf.lesson_id,
+      itemCount: existingItems,
+    });
+  }
+  if (replacing) {
+    const observations = db
+      .prepare('SELECT COUNT(*) AS n FROM runtime_observations WHERE lesson_id = ?')
+      .get(wf.lesson_id).n;
+    if (observations > 0 && !acknowledgeRecompute) {
+      failCode(
+        'PRETEST_RECOMPUTE_ACK_REQUIRED',
+        `该课时已计算过事实(observations=${observations});替换数据需确认知晓旧事实已过期(acknowledgeRecompute=true),导入后请重新计算`,
+        { lessonId: wf.lesson_id, observationCount: observations },
+      );
+    }
+  }
+  const result = importPretest(db, wf.lesson_id, fixture, { ...actorContext, workflowInstanceId: workflowId }, {
+    replace: replacing,
+    source: 'csv',
+  });
+  const workflow =
+    wf.current_state === 'DRAFT'
+      ? transitionWorkflow(db, workflowId, 'markInputReady', actorContext)
+      : db.prepare('SELECT * FROM workflow_instances WHERE id = ?').get(workflowId);
+  return {
+    workflow,
+    import: {
+      itemCount: result.itemCount,
+      responseCount: result.responseCount,
+      studentCount: fixture.students.length,
+      replaced: replacing,
+    },
+  };
 }
 
 // 事实计算 -> FACTS_COMPUTED
