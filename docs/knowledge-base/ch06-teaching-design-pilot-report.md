@@ -50,3 +50,16 @@
 ## 多章节扩展
 
 不允许。在 CH06 单章的模型候选—教师裁决—试教—修订版本链完成并通过全部门禁前，不得进入多章节扩展。
+
+---
+
+## 2026-08-06 恢复尝试（追加记录，不改写上述 BLOCKED 结论）
+
+本次恢复闸门确认本地模型服务已恢复，详情见
+[ch06-model-service-recovery.md](ch06-model-service-recovery.md)。P1 tag 已核验仍精确指向
+`9a78dfe963a96199e7af08f79e60f32458615afa`，未移动、未重打。
+
+本次不以模型可达替代 P2 的全链路门禁。经重新核查，旧报告从未创建可恢复的 CH06 P2
+Product Core workflow，且当前 Product Core 只实现 `S1_DIAGNOSIS` 状态机；现有虚拟课堂也仅为
+SWOT 浏览器端仿真，没有 CH06 批准设计的后端运行契约。因此保持
+`CH06_TEACHING_DESIGN_PILOT_BLOCKED`，不生成或伪造 S2—S9、教师裁决、试教结果、版本链或 S9 资产候选。
