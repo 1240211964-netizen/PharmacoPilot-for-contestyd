@@ -51,7 +51,7 @@ import { PRETEST_ITEMS_TEMPLATE, PRETEST_RESPONSES_TEMPLATE } from "./product-co
 import { SchemaValidationError } from "./product-core/schemas.mjs";
 import { getWorkflow, TERMINAL_STATES, TRANSITIONS } from "./product-core/workflow.mjs";
 import { runCh06FixtureDemo } from "./product-core/teaching-orchestration-demo.mjs";
-import { runCh06RealPilot, completeCh06RealPilot, CH06_MODEL_PROFILE } from "./product-core/ch06-real-pilot.mjs";
+import { runCh06RealPilot, completeCh06RealPilot, patchCompletedCh06RealPilot, CH06_MODEL_PROFILE } from "./product-core/ch06-real-pilot.mjs";
 import { recordDecision, teachingWorkflowDetail } from "./product-core/teaching-orchestration.mjs";
 
 const MIME = new Map([
@@ -1862,6 +1862,13 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       const reviewer = pcBoundActor(actor, body, "actorId");
       const seed = typeof body?.seed === "string" && body.seed.trim() ? body.seed.trim() : "ch06-real-pilot-001";
       sendJson(res, 201, completeCh06RealPilot(pcdb, { workflowId: teachingCompleteMatch[1], seed, actorContext: reviewer }));
+      return;
+    }
+    const teachingEffectiveRevisionMatch = url.pathname.match(/^\/api\/product-core\/teaching-orchestration\/workflows\/([^/]+)\/effective-revision$/);
+    if (req.method === "POST" && teachingEffectiveRevisionMatch) {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const reviewer = pcBoundActor(actor, body, "actorId");
+      sendJson(res, 201, patchCompletedCh06RealPilot(pcdb, { workflowId: teachingEffectiveRevisionMatch[1], actorContext: reviewer }));
       return;
     }
     const teachingWorkflowMatch = url.pathname.match(/^\/api\/product-core\/teaching-orchestration\/workflows\/([^/]+)$/);

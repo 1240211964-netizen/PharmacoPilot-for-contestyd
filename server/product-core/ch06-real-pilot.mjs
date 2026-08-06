@@ -5,7 +5,7 @@ import { failCode } from './errors.mjs';
 import { newId, nowIso } from './ids.mjs';
 import { insertCourse, insertCohort, insertLesson } from './repository.mjs';
 import { persistManagementRetrieval, managementEvidencePackage } from './management-kb-service.mjs';
-import { createTeachingWorkflow, saveS1Context, attachEvidencePackage, saveCandidateStage, beginReview, completeReview, approveDesignV1, runSimulation, createS8AndV2AndS9, completeTeachingWorkflow, teachingWorkflowDetail } from './teaching-orchestration.mjs';
+import { createTeachingWorkflow, saveS1Context, attachEvidencePackage, saveCandidateStage, beginReview, completeReview, approveDesignV1, runSimulation, createEffectiveRevision, completeTeachingWorkflow, teachingWorkflowDetail } from './teaching-orchestration.mjs';
 
 export const CH06_REAL_PROMPT_VERSION = 'ch06-real-pilot-p2b.v1';
 export const CH06_MODEL_PROFILE = 'mlx-community/Qwen3.5-9B-4bit';
@@ -150,8 +150,48 @@ export function completeCh06RealPilot(db, { workflowId, seed, actorContext }) {
     ] },
   };
   const simulation = runSimulation(db, workflowId, input, actorContext, { idempotencyKey: key('simulation') });
-  createS8AndV2AndS9(db, workflowId, actorContext, { idempotencyKey: key('s8-v2-s9'), provenance: 'deterministic_simulation' });
+  const revisionPlan = buildCh06EffectiveRevisionPlan(teachingWorkflowDetail(db, workflowId));
+  const revision = createEffectiveRevision(db, workflowId, revisionPlan, actorContext, { idempotencyKey: key('s8-v2-s9') });
   const completed = completeTeachingWorkflow(db, workflowId, actorContext, { idempotencyKey: key('complete') });
   const detail = teachingWorkflowDetail(db, workflowId);
-  return { workflowInstanceId: workflowId, status: completed.current_state, teachingDesignV1Id: v1.versionId, simulationRunId: simulation.runId, teachingDesignV2Id: detail.designVersions.find((item) => item.version_number === 2)?.id ?? null, s9AssetCandidateId: detail.s9Candidates[0]?.id ?? null, criticalMomentCount: detail.criticalMoments.length };
+  return { workflowInstanceId: workflowId, status: completed.current_state, teachingDesignV1Id: v1.versionId, simulationRunId: simulation.runId, teachingDesignV2Id: revision.revisedDesignVersionId, s9AssetCandidateId: revision.s9AssetCandidateId, criticalMomentCount: detail.criticalMoments.length };
+}
+
+export function buildCh06EffectiveRevisionPlan(detail) {
+  const v1=detail.designVersions.find((item)=>item.version_number===1);
+  const simulation=detail.simulationRuns.at(-1);
+  if(!v1||!simulation) failCode('GATE_VALIDATION_FAILED','CH06 有效修订缺少 v1 或 simulation run');
+  const base=JSON.parse(v1.payload_json),events=new Map(detail.simulationEvents.map((item)=>[item.id,item]));
+  const s5Moment=detail.criticalMoments.find((item)=>item.related_stage==='S5'&&item.moment_type==='MISCONCEPTION');
+  const s7Moment=detail.criticalMoments.find((item)=>item.related_stage==='S7'&&item.moment_type==='ASSESSMENT_AMBIGUITY');
+  if(!s5Moment||!s7Moment) failCode('GATE_VALIDATION_FAILED','CH06 有效修订必须同时包含 S5 误解与 S7 评价歧义关键时刻');
+  const s5Before=base?.stages?.S5?.items??[],s7Before=base?.stages?.S7?.items??[];
+  const s5Activity={
+    title:'矩阵制双重领导冲突诊断',claimType:'pedagogical_recommendation',evidenceLinkIds:[],chunkIds:[],citations:[],
+    content:'给学生一个项目经理与职能经理指令不一致的简短虚构情境。学生标出两条命令链，判断冲突属于职责、优先级、资源还是评价权，提出一种明确协调机制，并解释矩阵制的“双重领导”为什么增加协调需求，而不是自动解决协调问题。',
+  };
+  const s5Scaffold={
+    title:'角色—权责—命令来源对照表',claimType:'pedagogical_recommendation',evidenceLinkIds:[],chunkIds:[],citations:[],
+    content:'支架列出角色、职责、可调配资源、命令来源、优先级规则与冲突升级路径。结论要求明确：双重领导不是无需协调，而是需要更清晰的权责界面、优先级规则和冲突升级机制。',
+  };
+  const s7Assessment={
+    title:'授权—分权辨析评价任务与评价标准补充',claimType:'pedagogical_recommendation',evidenceLinkIds:[],chunkIds:[],citations:[],
+    content:'给出两个虚构组织管理情境，判断其分别属于授权、分权或二者均不是，并依据决策权的持续性、适用范围、责任归属和可撤回性说明理由。评价时区分：授权是管理者针对具体事项将任务及相应权限交给下属，可以调整或收回，上级仍承担最终责任；分权是组织层级或单位之间较稳定的决策权配置，属于结构和制度安排。评价标准独立检查概念分类是否正确、是否使用持续性与适用范围、是否说明最终责任归属、是否指出授权与分权可能同时存在但不等同。',
+  };
+  const s5After=[...s5Before,s5Activity,s5Scaffold],s7After=[...s7Before,s7Assessment];
+  const oldCandidate=detail.s9Candidates.at(-1)?.id??null;
+  return {
+    sourceDesignVersionId:v1.id,sourceSimulationRunId:simulation.id,
+    consumedCriticalMomentIds:[s5Moment.id,s7Moment.id],supersedesCandidateId:oldCandidate,
+    revisionLabel:'simulation-informed revision',provenance:'deterministic_simulation',
+    changedFields:[
+      {stage:'S5',fieldPath:'/stages/S5/items',before:s5Before,after:s5After,reason:`针对关键时刻“${events.get(s5Moment.event_id)?.observed_signal??s5Moment.reason}”加入冲突诊断活动与权责支架。`,criticalMomentId:s5Moment.id},
+      {stage:'S7',fieldPath:'/stages/S7/items',before:s7Before,after:s7After,reason:`针对关键时刻“${events.get(s7Moment.event_id)?.observed_signal??s7Moment.reason}”加入授权—分权辨析任务与独立评价标准。`,criticalMomentId:s7Moment.id},
+    ],
+  };
+}
+
+export function patchCompletedCh06RealPilot(db,{workflowId,actorContext}) {
+  const detail=teachingWorkflowDetail(db,workflowId),plan=buildCh06EffectiveRevisionPlan(detail);
+  return createEffectiveRevision(db,workflowId,plan,actorContext,{idempotencyKey:`p2b.1:${workflowId}:effective-revision`});
 }

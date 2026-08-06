@@ -49,3 +49,52 @@
 
 教师的实际裁决尚未发生，故版本链的后半段尚未生成。这是有意保留的人工权限门，不是以
 fixture 冒充真实审核。全量 schema、权限系统、通用多章节 API、任务队列与正式工作台视觉仍 deferred。
+
+## P2B.1 有效修订补丁（2026-08-06）
+
+本节追加记录教师审核及首次仿真完成后的修订修复；上面的“当前边界”是修复前快照，予以保留，
+不作为当前状态。原工作流 `twf_W9X4nF8UD2QRJw6mHQIyJ`、v1
+`tdv_rZmwm3ijM1kMjwNy9NUqD`、仿真 `sim_TZXqiN2OeA6FyFSXvjdtC`、未形成正文变化的 v2
+`tdv_2UgsTeGAox2IAXim0cIdd` 和旧 S9 候选 `sac_h7tqeuVUuZ2VkUR6cpDdl` 均未覆盖或删除。
+
+### 根因
+
+- 旧 S8 生成只读取第一条关键时刻，动作固定为 `investigate`，没有生成 `changedFields`。
+- 旧 v2 创建逻辑直接复用 v1 的 `payload_json`，没有字段路径校验或修订应用步骤，因此 payload 与
+  hash 均未发生变化。
+- 旧 S9 只是引用这个无正文变化的 v2，无法证明仿真反馈已进入教学设计。
+
+### 实际修订
+
+新的 S8 `srev_0TMtSIiLBF7I41WuQRTp4` 同时消费两条关键时刻：
+
+- S5 `km_2dy8xXovMzSvROlVU8idA`：加入“矩阵制双重领导冲突诊断”和
+  “角色—权责—命令来源对照表”，要求学生识别两条命令链、冲突类型、协调机制和升级路径，
+  明确双重领导会增加协调需求，而非自动消除协调问题。
+- S7 `km_KznszzEKtpIehzskJFjm8`：在表现性任务和评价标准中加入授权—分权辨析，要求依据
+  决策权持续性、适用范围、最终责任和可撤回性进行分类，并说明二者可以并存但不等同。
+
+两项变化均保存 `stage`、`fieldPath`、`before`、`after`、`reason` 和
+`criticalMomentId`。修订应用器以 v1 为基线，只允许当前补丁声明的 S5/S7 路径，验证前值一致后
+写入后值，并计算新 payload hash；它不是再次复制 v1。
+
+有效修订版本为 `tdv_DF3sMRIKjFkCOpslOiBcY`（数据库 `versionIndex=3`），父版本仍是 v1，
+标记为 `effectiveRevision=true`、`revisionLabel=simulation-informed revision`。其 payload hash 为
+`83c34e3013f0618ab9c3a0c607f0805620912e382fe6cd2d3342708c4c052bec`，与 v1 及旧 no-op v2
+的 `8fbe6de734...` 不同。查询层将旧 v2 派生标记为 `revisionOutcome=NO_OP`，不改写旧记录。
+
+新 S9 候选为 `sac_RTANzmnsuyBbEVAxivSur`，状态保持 `candidate`，引用新的有效修订版本，
+并通过 metadata 记录 `supersedesCandidateId=sac_h7tqeuVUuZ2VkUR6cpDdl`。旧候选仍可查询。
+
+### 验收
+
+- 新增集成测试验证两个关键时刻被完整消费、S5/S7 两项 `changedFields` 均为真实前后差异、
+  v3 payload 与 v1/no-op v2 均不同、新 S9 引用 v3，且旧版本和旧候选保留。
+- 实际工作流仍为 `COMPLETED`；版本数由 2 增至 3，S8 记录由 1 增至 2，S9 候选由 1 增至 2。
+- 模型运行记录仍为 6，没有新增 LLM 或 Embedding 调用。
+- 课程 SQLite 修订前后 SHA-256 均为
+  `8524f6b700728a6417fec00191c7e912615ae6fcc363b2a4161b0e516d14bfa9`。
+- 教师结果页展示旧 v2“未形成正文变化”、两条关键时刻、S5/S7 前后差异、
+  v3“仿真驱动修订版”和新 S9 候选 ID。
+
+当前判定：`CH06_REAL_PILOT_RUNNABLE`。
