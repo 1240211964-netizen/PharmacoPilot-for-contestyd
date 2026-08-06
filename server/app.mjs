@@ -21,6 +21,7 @@ import {
   submitTeacherDecision,
 } from "./product-core/decisions.mjs";
 import { appendAuditEvent } from "./product-core/audit.mjs";
+import { AUDIT_VIEW_VERSION, canonicalizeAuditEvents } from "./product-core/audit-view.mjs";
 import { failCode, ProductCoreError } from "./product-core/errors.mjs";
 import { resolveActor } from "./product-core/identity.mjs";
 import { newId, nowIso } from "./product-core/ids.mjs";
@@ -1072,27 +1073,30 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       entityIds.add(row.id);
     }
     const placeholders = [...entityIds].map(() => "?").join(", ");
-    return pcdb
-      .prepare(
-        `SELECT * FROM audit_events
-         WHERE workflow_instance_id = ? OR (workflow_instance_id IS NULL AND entity_id IN (${placeholders}))
-         ORDER BY created_at, rowid`,
-      )
-      .all(workflowId, ...entityIds)
-      .map((row) => ({
-        id: row.id,
-        eventType: row.event_type,
-        actorType: row.actor_type,
-        actorId: row.actor_id,
-        entityType: row.entity_type,
-        entityId: row.entity_id,
-        workflowInstanceId: row.workflow_instance_id,
-        previousState: row.previous_state,
-        nextState: row.next_state,
-        payload: row.payload_json ? JSON.parse(row.payload_json) : null,
-        eventHash: row.event_hash,
-        createdAt: row.created_at,
-      }));
+    // 读时规范视图(eventNameCanonical 1.0):双名并写的事件对在此折叠为规范名,落库原样不变。
+    return canonicalizeAuditEvents(
+      pcdb
+        .prepare(
+          `SELECT * FROM audit_events
+           WHERE workflow_instance_id = ? OR (workflow_instance_id IS NULL AND entity_id IN (${placeholders}))
+           ORDER BY created_at, rowid`,
+        )
+        .all(workflowId, ...entityIds)
+        .map((row) => ({
+          id: row.id,
+          eventType: row.event_type,
+          actorType: row.actor_type,
+          actorId: row.actor_id,
+          entityType: row.entity_type,
+          entityId: row.entity_id,
+          workflowInstanceId: row.workflow_instance_id,
+          previousState: row.previous_state,
+          nextState: row.next_state,
+          payload: row.payload_json ? JSON.parse(row.payload_json) : null,
+          eventHash: row.event_hash,
+          createdAt: row.created_at,
+        })),
+    );
   }
 
   function pcVersionView(row) {
@@ -1283,10 +1287,13 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       };
     });
 
-    const auditTimeline = pcdb
-      .prepare("SELECT * FROM audit_events WHERE entity_id = ? ORDER BY created_at, rowid")
-      .all(unit.id)
-      .map(kbAuditRow);
+    // 与 S1 时间线同口径:读时规范视图折叠双名事件对(见 product-core/audit-view.mjs)。
+    const auditTimeline = canonicalizeAuditEvents(
+      pcdb
+        .prepare("SELECT * FROM audit_events WHERE entity_id = ? ORDER BY created_at, rowid")
+        .all(unit.id)
+        .map(kbAuditRow),
+    );
 
     return {
       id: unit.id,
@@ -1309,6 +1316,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       },
       createdBy: unit.created_by,
       createdAt: unit.created_at,
+      eventNameCanonical: AUDIT_VIEW_VERSION,
       auditTimeline,
     };
   }
@@ -1835,7 +1843,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         return;
       }
       if (req.method === "GET" && action === "audit") {
-        sendJson(res, 200, { workflowId, events: pcAuditTimeline(workflowId) });
+        sendJson(res, 200, { workflowId, eventNameCanonical: AUDIT_VIEW_VERSION, events: pcAuditTimeline(workflowId) });
         return;
       }
       if (req.method === "POST" && action === "input") {

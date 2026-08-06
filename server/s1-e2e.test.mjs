@@ -263,30 +263,52 @@ test("S1 HTTP API 端到端闭环", async (t) => {
     const republish = await api(base, "POST", `/api/product-core/s1/workflows/${workflowId}/publish`, ACTOR);
     expectError(republish, 409, "WF_ILLEGAL_TRANSITION");
 
-    // 审计时间线:覆盖全链路关键事件
+    // 审计时间线(读时规范视图 eventNameCanonical 1.0):双名对折叠为规范名 + 别名计数
     const audit = await api(base, "GET", `/api/product-core/s1/workflows/${workflowId}/audit`);
     assert.equal(audit.status, 200);
+    assert.equal(audit.body.eventNameCanonical, "1.0");
     const eventTypes = new Set(audit.body.events.map((e) => e.eventType));
     for (const required of [
       "workflow.created",
       "input.imported",
-      "inputs.submitted",
       "facts.computed",
       "claim.created",
       "mechanical.validation.completed",
-      "gate.mechanical.completed",
       "semantic.review.completed",
+      "teacher.decision.recorded",
+      "version.published",
+      "workflow.transitioned",
+    ]) {
+      assert.ok(eventTypes.has(required), `审计时间线缺少 ${required}`);
+    }
+    // 别名事件名折叠后不再作为独立事件出现(进 aliases)
+    for (const folded of [
+      "inputs.submitted",
+      "observation.computed",
+      "gate.mechanical.completed",
       "review.semantic.completed",
       "teacher.accepted",
       "teacher.revised",
       "teacher.rejected",
       "teacher.deferred",
-      "version.published",
       "lesson.published",
-      "workflow.transitioned",
     ]) {
-      assert.ok(eventTypes.has(required), `审计时间线缺少 ${required}`);
+      assert.ok(!eventTypes.has(folded), `别名 ${folded} 应折叠进规范事件`);
     }
+    // 折叠留痕:别名计数 + 别名行可溯
+    const importedEvent = audit.body.events.find((e) => e.eventType === "input.imported");
+    assert.ok(importedEvent.aliasCount >= 1);
+    assert.ok(importedEvent.aliases.some((a) => a.eventType === "inputs.submitted"));
+    const decisionEvents = audit.body.events.filter((e) => e.eventType === "teacher.decision.recorded");
+    // 每条决策记录一条裁决事件(fold=entity:同秒不同记录不互折),动作在 payload.decision
+    assert.equal(decisionEvents.length, view.decisionRecords.length);
+    assert.deepEqual(
+      [...new Set(decisionEvents.map((e) => e.payload.decision))].sort(),
+      ["accept", "defer", "reject", "revise"],
+    );
+    for (const event of decisionEvents) assert.equal(event.aliasCount, 1);
+    const publishedEvent = audit.body.events.find((e) => e.eventType === "version.published");
+    assert.ok(publishedEvent.aliases.some((a) => a.eventType === "lesson.published"));
     for (const event of audit.body.events) assert.match(event.eventHash, /^[a-f0-9]{64}$/);
     // 状态转移序列完整且有序
     const transitions = audit.body.events
