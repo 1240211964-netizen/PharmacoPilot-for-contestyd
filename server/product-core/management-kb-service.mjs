@@ -322,7 +322,7 @@ export class ManagementKbService {
     }
 
     const rows = this.db.prepare(
-      `SELECT c.*, s.lexical_indexing_allowed
+      `SELECT c.*, s.lexical_indexing_allowed, s.llm_input_allowed
        FROM chunks c JOIN sources s ON s.source_id = c.source_id
        WHERE s.lexical_indexing_allowed = 1
          AND s.authority_rank <= ?
@@ -356,6 +356,9 @@ export class ManagementKbService {
         contentHash: row.content_hash,
         excerpt: excerpt.text,
         excerptTruncated: excerpt.truncated,
+        // 检索许可与模型输入许可是两道不同的门。调用方只能把这一真值为 1 的切片
+        // 放入模型上下文，不能由“能检索到”推断“能给模型”。
+        llmInputAllowed: Boolean(row.llm_input_allowed),
         score: Number(score.toFixed(4)),
       });
     }

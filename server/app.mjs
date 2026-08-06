@@ -51,7 +51,8 @@ import { PRETEST_ITEMS_TEMPLATE, PRETEST_RESPONSES_TEMPLATE } from "./product-co
 import { SchemaValidationError } from "./product-core/schemas.mjs";
 import { getWorkflow, TERMINAL_STATES, TRANSITIONS } from "./product-core/workflow.mjs";
 import { runCh06FixtureDemo } from "./product-core/teaching-orchestration-demo.mjs";
-import { teachingWorkflowDetail } from "./product-core/teaching-orchestration.mjs";
+import { runCh06RealPilot, completeCh06RealPilot, CH06_MODEL_PROFILE } from "./product-core/ch06-real-pilot.mjs";
+import { recordDecision, teachingWorkflowDetail } from "./product-core/teaching-orchestration.mjs";
 
 const MIME = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -1819,6 +1820,48 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       const seed = typeof body?.seed === "string" && body.seed.trim() ? body.seed.trim() : "ch06-demo-001";
       if (seed.length > 120) fail(400, "INVALID_PRODUCT_CORE_BODY", "seed 不能超过 120 字符");
       sendJson(res, 201, runCh06FixtureDemo(pcdb, { seed }));
+      return;
+    }
+    if (req.method === "POST" && url.pathname === "/api/product-core/teaching-orchestration/ch06/run") {
+      const body = await readJson(req, config.bodyLimitBytes);
+      if (body?.generationMode !== "local_model" || body?.s1ContextMode !== "simulated_fixture") {
+        fail(422, "INVALID_PRODUCT_CORE_BODY", "P2B 真实试点必须显式使用 local_model 与 simulated_fixture");
+      }
+      const seed = typeof body?.seed === "string" && body.seed.trim() ? body.seed.trim() : "ch06-real-pilot-001";
+      if (seed.length > 120) fail(400, "INVALID_PRODUCT_CORE_BODY", "seed 不能超过 120 字符");
+      const { service, corpus } = requireManagementKb();
+      const status = await modelClient.status();
+      if (!status.ready || !status.advertisedModels?.includes(CH06_MODEL_PROFILE)) {
+        fail(503, "MODEL_UNAVAILABLE", "本地模型未就绪或模型 ID 与 P2B 配置不一致", { expectedModel: CH06_MODEL_PROFILE, status });
+      }
+      sendJson(res, 201, await runCh06RealPilot(pcdb, { modelClient, managementKbService: service, managementCorpus: corpus, seed }));
+      return;
+    }
+    const teachingDecisionMatch = url.pathname.match(/^\/api\/product-core\/teaching-orchestration\/workflows\/([^/]+)\/teacher-decisions$/);
+    if (req.method === "POST" && teachingDecisionMatch) {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const reviewer = pcBoundActor(actor, body, "actorId");
+      const workflowId = teachingDecisionMatch[1];
+      const fieldPath = pcText(body?.fieldPath, "fieldPath", { max: 120 });
+      const decision = pcText(body?.decision, "decision", { max: 40 });
+      const reason = pcText(body?.reason, "reason", { max: 1_000 });
+      const candidateId = pcText(body?.candidateId, "candidateId", { max: 80 });
+      if (!fieldPath.match(/^\/stages\/S[2-7]$/)) fail(422, "INVALID_PRODUCT_CORE_BODY", "fieldPath 必须是 /stages/S2 至 /stages/S7");
+      if (!Array.isArray(body?.evidenceLinkIds) || body.evidenceLinkIds.some((id) => typeof id !== "string")) fail(422, "INVALID_PRODUCT_CORE_BODY", "evidenceLinkIds 必须是字符串数组");
+      const result = recordDecision(pcdb, workflowId, {
+        candidateId, fieldPath, decision, originalContent: body.originalContent,
+        revisedContent: body.revisedContent ?? null, reason, evidenceLinkIds: body.evidenceLinkIds,
+        decisionSource: "teacher",
+      }, reviewer, { idempotencyKey: pcText(body?.idempotencyKey, "idempotencyKey", { max: 180 }) });
+      sendJson(res, 201, { workflow: result });
+      return;
+    }
+    const teachingCompleteMatch = url.pathname.match(/^\/api\/product-core\/teaching-orchestration\/workflows\/([^/]+)\/complete-real-pilot$/);
+    if (req.method === "POST" && teachingCompleteMatch) {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const reviewer = pcBoundActor(actor, body, "actorId");
+      const seed = typeof body?.seed === "string" && body.seed.trim() ? body.seed.trim() : "ch06-real-pilot-001";
+      sendJson(res, 201, completeCh06RealPilot(pcdb, { workflowId: teachingCompleteMatch[1], seed, actorContext: reviewer }));
       return;
     }
     const teachingWorkflowMatch = url.pathname.match(/^\/api\/product-core\/teaching-orchestration\/workflows\/([^/]+)$/);

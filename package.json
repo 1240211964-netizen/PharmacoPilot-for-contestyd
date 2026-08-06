@@ -15,6 +15,7 @@
     "test:frontend": "node tools/verify-style-tokens.mjs && node tools/verify-color-tokens.mjs && node tools/verify-terminology.mjs && node tools/verify-stage-names.mjs && node tools/verify-data-detail.mjs && node tools/verify-payloads.mjs && node tools/verify-practice-catalog.mjs && node tools/verify-practice-review.mjs && node tools/verify-anchor-gate.mjs && node tools/verify-s1-decision-sheet.mjs && node tools/verify-agent-persona.mjs && node tools/verify-sim-determinism.mjs && node tools/verify-sched-single-source.mjs && node tools/verify-persona-metamorphic.mjs && node tools/prove-learning-trace-km.mjs",
     "test:backend": "node --disable-warning=ExperimentalWarning --test server/*.test.mjs",
     "verify:management-kb": "node --disable-warning=ExperimentalWarning tools/verify-management-kb-product-integration.mjs",
+    "pilot:ch06-real": "node tools/run-ch06-real-pilot.mjs",
     "check": "node build.mjs --check && npm test && npm run test:smoke",
     "test:smoke": "node tools/smoke-data-detail.mjs && node tools/smoke-data-detail-mobile.mjs"
   },

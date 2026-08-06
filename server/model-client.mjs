@@ -58,7 +58,7 @@ export class ModelClient {
     }
   }
 
-  async chat({ messages, stream, temperature, maxTokens, signal }) {
+  async chat({ messages, stream, temperature, maxTokens, signal, chatTemplateKwargs = undefined }) {
     const timeoutSignal = AbortSignal.timeout(this.timeoutMs);
     const combinedSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
     let response;
@@ -73,6 +73,7 @@ export class ModelClient {
           stream,
           temperature,
           max_tokens: maxTokens,
+          ...(chatTemplateKwargs === undefined ? {} : { chat_template_kwargs: chatTemplateKwargs }),
         }),
       });
     } catch (error) {
