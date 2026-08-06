@@ -153,6 +153,14 @@ test("PharmacoPilot backend contract", async (t) => {
     assert.equal((await fetch(`${base}/shared/vendor/three/build/three.module.min.js`)).status, 200);
   });
 
+  await t.test("serves the explicitly allowlisted CH06 review page only", async () => {
+    const reviewPage = await fetch(`${base}/ch06-real-pilot.html`);
+    assert.equal(reviewPage.status, 200);
+    assert.match(await reviewPage.text(), /CH06 真实教学设计试点/);
+    const nonAllowlistedPage = await fetch(`${base}/gsap-demo.html`);
+    assert.equal(nonAllowlistedPage.status, 403);
+  });
+
   await t.test("exposes public agent metadata without system prompts", async () => {
     const response = await fetch(`${base}/api/agents`);
     const body = await response.json();

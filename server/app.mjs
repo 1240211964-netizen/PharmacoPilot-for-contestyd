@@ -524,7 +524,7 @@ function extractToken(req) {
 const PUBLIC_ROOT_FILES = new Set([
   "index.html", "login.html", "nav-detail.html", "data-detail.html",
   "practice-detail.html", "opening-story.html", "nav-3d.html",
-  "s1-workspace.html",
+  "s1-workspace.html", "ch06-real-pilot.html",
 ]);
 const PUBLIC_DIR_EXTENSIONS = new Map([
   ["assets", new Set([".svg", ".png", ".jpg", ".jpeg", ".webp", ".woff2"])],
