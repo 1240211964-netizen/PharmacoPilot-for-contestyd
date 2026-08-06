@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "::1", "localhost"]);
 
@@ -20,6 +20,18 @@ function normalizeModelBaseUrl(value) {
   return url.toString().replace(/\/$/, "");
 }
 
+function booleanEnv(name, fallback) {
+  const raw = process.env[name];
+  if (raw == null || raw === "") return fallback;
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  throw new Error(`${name} 必须是 true 或 false`);
+}
+
+function optionalResolvedPath(value) {
+  return value ? resolve(value) : null;
+}
+
 export function loadConfig(overrides = {}) {
   const rootDir = resolve(overrides.rootDir || process.cwd());
   const host = overrides.host || process.env.PHARMACO_HOST || "127.0.0.1";
@@ -29,6 +41,27 @@ export function loadConfig(overrides = {}) {
   if (!LOOPBACK_HOSTS.has(host) && !apiToken) {
     throw new Error("非回环地址启动时必须设置 PHARMACO_API_TOKEN");
   }
+
+  // 管理学课程库是部署时挂载的冻结资产，而不是 Product Core 数据目录的一部分。
+  // 不给默认路径，避免开发机上的某份同名资料被静默当成正式语料。
+  const managementKbPath = optionalResolvedPath(
+    overrides.managementKbPath ?? process.env.MANAGEMENT_KB_PATH ?? "",
+  );
+  const managementKbExpectedSha256 = (
+    overrides.managementKbExpectedSha256 ?? process.env.MANAGEMENT_KB_EXPECTED_SHA256 ?? ""
+  ).trim().toLowerCase();
+  const managementKbManifestPath = optionalResolvedPath(
+    overrides.managementKbManifestPath
+      ?? process.env.MANAGEMENT_KB_MANIFEST_PATH
+      ?? (managementKbPath ? resolve(dirname(managementKbPath), "..", "00_manifest", "source_manifest.json") : ""),
+  );
+  const managementKbCorpusVersionPath = optionalResolvedPath(
+    overrides.managementKbCorpusVersionPath
+      ?? process.env.MANAGEMENT_KB_CORPUS_VERSION_PATH
+      ?? (managementKbPath ? resolve(dirname(managementKbPath), "..", "00_manifest", "corpus_version.json") : ""),
+  );
+  const managementKbReadOnly = overrides.managementKbReadOnly
+    ?? booleanEnv("MANAGEMENT_KB_READ_ONLY", true);
 
   return Object.freeze({
     rootDir,
@@ -47,5 +80,13 @@ export function loadConfig(overrides = {}) {
     modelApiKey: overrides.modelApiKey ?? process.env.PHARMACO_MODEL_API_KEY ?? "",
     modelTimeoutMs: overrides.modelTimeoutMs ?? integerEnv("PHARMACO_MODEL_TIMEOUT_MS", 120_000, { min: 1_000 }),
     modelStatusTimeoutMs: overrides.modelStatusTimeoutMs ?? 2_500,
+    managementKb: Object.freeze({
+      enabled: Boolean(managementKbPath || managementKbExpectedSha256 || managementKbManifestPath || managementKbCorpusVersionPath),
+      path: managementKbPath,
+      expectedSha256: managementKbExpectedSha256 || null,
+      manifestPath: managementKbManifestPath,
+      corpusVersionPath: managementKbCorpusVersionPath,
+      readOnly: managementKbReadOnly,
+    }),
   });
 }

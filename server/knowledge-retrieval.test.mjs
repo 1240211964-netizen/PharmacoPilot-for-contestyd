@@ -588,12 +588,13 @@ test("007: evidence_links 重建后 claim_id 可空、retrieval_run_id 列与约
   assert.ok(cols.has("retrieval_run_id"), "evidence_links 应有 retrieval_run_id 列");
   assert.equal(cols.get("claim_id").notnull, 0, "claim_id 应已放宽为可空");
   assert.equal(cols.get("retrieval_run_id").notnull, 0);
-  // 原列逐字保留(19 列)+ 新增 1 列。
-  assert.equal(cols.size, 20);
+  // 原列逐字保留(19 列)+ 007 retrieval run + 010 外挂课程语料三列。
+  assert.equal(cols.size, 23);
   for (const expected of [
     "id", "claim_id", "decision_id", "evidence_type", "source_id", "source_version_id",
     "content_block_id", "runtime_observation_id", "page_index", "page_label", "bbox_json",
     "bbox_coordinate_system", "verbatim_quote", "normalized_quote", "source_status",
+    "external_corpus_id", "external_chunk_id", "external_locator_json",
     "effective_date", "superseded_by", "content_hash", "retrieved_at", "retrieval_run_id",
   ]) {
     assert.ok(cols.has(expected), `evidence_links 缺少列 ${expected}`);

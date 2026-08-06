@@ -32,6 +32,7 @@ const MIGRATIONS_DIR = join(SERVER_DIR, "migrations");
 const MANIFEST_PATH = join(PROJECT_ROOT, "docs/knowledge-base/organization-design-source-manifest.json");
 const M006 = "006_knowledge_base.sql";
 const M007 = "007_kb_retrieval_evidence.sql";
+const M010 = "010_management_kb_external_corpora.sql";
 const NOW = "2026-08-03T00:00:00.000Z";
 const COURSE_ID = "course_mgmt_principles";
 const CHAPTER_ID = "ch_organization_design";
@@ -174,6 +175,7 @@ test("006: 老库(000–005,S1 行)升级 —— 旧行无损、引用完整、C
   // 老库 = 000–005:006 及其依赖项 007(引用 006 的 kb_retrieval_runs)一并排除。
   rmSync(join(migrationsCopy, M006));
   rmSync(join(migrationsCopy, M007));
+  rmSync(join(migrationsCopy, M010));
 
   const db = new DatabaseSync(join(dir, "legacy.sqlite"));
   db.exec("PRAGMA foreign_keys = ON;");
@@ -192,6 +194,7 @@ test("006: 老库(000–005,S1 行)升级 —— 旧行无损、引用完整、C
   // 应用 006 与 007(007 依赖 006 的 kb_retrieval_runs,必须同批或其后)
   cpSync(join(MIGRATIONS_DIR, M006), join(migrationsCopy, M006));
   cpSync(join(MIGRATIONS_DIR, M007), join(migrationsCopy, M007));
+  cpSync(join(MIGRATIONS_DIR, M010), join(migrationsCopy, M010));
   runMigrations(db, { migrationsDir: migrationsCopy });
 
   // 旧行无损(全部列逐字)

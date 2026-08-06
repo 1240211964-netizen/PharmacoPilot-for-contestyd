@@ -26,6 +26,12 @@ import { failCode, ProductCoreError } from "./product-core/errors.mjs";
 import { resolveActor } from "./product-core/identity.mjs";
 import { newId, nowIso } from "./product-core/ids.mjs";
 import { searchKnowledge } from "./product-core/knowledge-retrieval-service.mjs";
+import {
+  ManagementKbService,
+  managementEvidencePackage,
+  persistManagementRetrieval,
+  registerManagementCorpus,
+} from "./product-core/management-kb-service.mjs";
 import { setUnitReviewStatus } from "./product-core/knowledge-unit-service.mjs";
 import {
   computeFactsAndAdvance,
@@ -105,6 +111,12 @@ const PRODUCT_CORE_HTTP_STATUS = new Map([
   ["PROVIDER_CONTRACT_VIOLATION", 422],
   ["WF_INSTANCE_NOT_FOUND", 404],
   ["DECISION_RECORD_NOT_FOUND", 404],
+  ["MANAGEMENT_KB_NOT_CONFIGURED", 503],
+  ["MANAGEMENT_KB_INTEGRITY_FAILED", 503],
+  ["MANAGEMENT_KB_SCHEMA_MISMATCH", 503],
+  ["MANAGEMENT_KB_CORPUS_REGISTRY_CONFLICT", 409],
+  ["MANAGEMENT_KB_RETRIEVAL_INPUT_INVALID", 422],
+  ["MANAGEMENT_KB_RETRIEVAL_RUN_NOT_FOUND", 404],
 ]);
 function productCoreHttpStatus(code) {
   if (PRODUCT_CORE_HTTP_STATUS.has(code)) return PRODUCT_CORE_HTTP_STATUS.get(code);
@@ -872,6 +884,29 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
   // ---------- 产品内核 S1 API(/api/product-core/) ----------
   // 只做:参数校验 -> 服务层编排调用 -> 视图组装。绝不直接 UPDATE 任何状态字段(B8)。
   const pcdb = database.db;
+  let managementKbService = null;
+  let managementKbCorpus = null;
+  if (config.managementKb?.enabled) {
+    // 配置一旦声明，启动期即完成 hash/schema/只读探针验证并登记；任何失败均阻止启动。
+    managementKbService = new ManagementKbService(config.managementKb);
+    managementKbService.open();
+    pcdb.exec("BEGIN IMMEDIATE");
+    try {
+      managementKbCorpus = registerManagementCorpus(pcdb, managementKbService);
+      pcdb.exec("COMMIT");
+    } catch (error) {
+      pcdb.exec("ROLLBACK");
+      managementKbService.close();
+      throw error;
+    }
+  }
+
+  function requireManagementKb() {
+    if (!managementKbService || !managementKbCorpus) {
+      failCode("MANAGEMENT_KB_NOT_CONFIGURED", "管理学知识库未配置，系统不会使用空库、Embedding 或模型记忆替代", {});
+    }
+    return { service: managementKbService, corpus: managementKbCorpus };
+  }
 
   function pcText(value, name, { max = 200 } = {}) {
     if (typeof value !== "string" || !value.trim()) {
@@ -1315,8 +1350,8 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
         createdFromModelRunId: layer === "theory" ? unit.created_from_model_run_id : null,
       },
       createdBy: unit.created_by,
-      createdAt: unit.created_at,
       eventNameCanonical: AUDIT_VIEW_VERSION,
+      createdAt: unit.created_at,
       auditTimeline,
     };
   }
@@ -1432,6 +1467,76 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
   }
 
   async function handleKbApi(req, res, url, actor) {
+    // 冻结《管理学》课程库状态：只暴露可核验版本信息，不泄露本地磁盘路径。
+    if (req.method === "GET" && url.pathname === "/api/product-core/kb/management/status") {
+      const { service, corpus } = requireManagementKb();
+      const snapshot = service.open();
+      sendJson(res, 200, {
+        corpus: {
+          id: corpus.id,
+          corpusId: corpus.corpus_id,
+          corpusVersion: corpus.corpus_version,
+          corpusVersionHash: corpus.corpus_version_hash,
+          sqliteSha256: corpus.sqlite_sha256,
+          manifestSha256: corpus.manifest_sha256,
+          schemaVersion: corpus.schema_version,
+          sourceCount: corpus.source_count,
+          chunkCount: corpus.chunk_count,
+          accessMode: corpus.access_mode,
+          status: corpus.status,
+          registeredAt: corpus.registered_at,
+        },
+        runtime: {
+          sqliteUserVersion: snapshot.sqliteUserVersion,
+          embeddingUsed: false,
+          llmUsed: false,
+        },
+      });
+      return;
+    }
+
+    // 真实课程库检索：确定性词法匹配 + 课程库中的概念别名，结果统一落在现有 run/evidence/audit 链。
+    if (req.method === "POST" && url.pathname === "/api/product-core/kb/management/retrieve") {
+      const { service, corpus } = requireManagementKb();
+      const body = await readJson(req, config.bodyLimitBytes);
+      if (!body || typeof body !== "object" || Array.isArray(body)) fail(400, "INVALID_BODY", "请求体必须是对象");
+      const query = pcText(body.query, "query", { max: 2_000 });
+      const retrievalActor = pcBoundActor(actor, body, "actorId");
+      const chapterIds = body.chapterIds ?? [];
+      if (!Array.isArray(chapterIds) || chapterIds.length > 16 || chapterIds.some((item) => typeof item !== "string")) {
+        failCode("MANAGEMENT_KB_RETRIEVAL_INPUT_INVALID", "chapterIds 必须是至多 16 个章节 ID 的数组", {});
+      }
+      const authorityMaxRank = body.authorityMaxRank == null ? 4 : Number(body.authorityMaxRank);
+      const limit = body.limit == null ? 5 : Number(body.limit);
+      let workflowInstanceId = null;
+      let workflowScope = null;
+      if (body.workflowInstanceId != null) {
+        workflowInstanceId = pcText(body.workflowInstanceId, "workflowInstanceId", { max: 80 });
+      } else {
+        const scoped = kbRetrievalScope(retrievalActor.actorId);
+        workflowInstanceId = scoped.workflowInstanceId;
+        workflowScope = scoped.workflowScope;
+      }
+      const result = persistManagementRetrieval(pcdb, service, corpus, {
+        query,
+        chapterIds,
+        authorityMaxRank,
+        limit,
+        workflowInstanceId,
+        workflowScope,
+        actorContext: { actorType: retrievalActor.actorType, actorId: retrievalActor.actorId },
+      });
+      sendJson(res, 200, result);
+      return;
+    }
+
+    const managementEvidenceMatch = url.pathname.match(/^\/api\/product-core\/kb\/management\/retrieval-runs\/([^/]+)\/evidence-package$/);
+    if (req.method === "GET" && managementEvidenceMatch) {
+      const { corpus } = requireManagementKb();
+      sendJson(res, 200, managementEvidencePackage(pcdb, corpus, managementEvidenceMatch[1]));
+      return;
+    }
+
     // 三层单元统一列表:layer/reviewStatus/concept/chapterId 等值过滤(concept 按层落到
     // 各自知识点字段:theory→concept、pharma_context→aspect、company_fact→factType 或 company,
     // 大小写不敏感);每条含单元内容、所属层、review_status、关联知识点与来源数。
@@ -1659,6 +1764,7 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       const evidenceLinks = pcdb
         .prepare(
           `SELECT id, claim_id, evidence_type, source_id, source_version_id, content_block_id,
+                  external_corpus_id, external_chunk_id, external_locator_json,
                   page_index, page_label, verbatim_quote, content_hash, source_status, retrieved_at
            FROM evidence_links WHERE retrieval_run_id = ? ORDER BY id`,
         )
@@ -1680,6 +1786,9 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
           sourceId: row.source_id,
           sourceVersionId: row.source_version_id,
           contentBlockId: row.content_block_id,
+          externalCorpusId: row.external_corpus_id,
+          externalChunkId: row.external_chunk_id,
+          externalLocator: row.external_locator_json ? JSON.parse(row.external_locator_json) : null,
           pageIndex: row.page_index,
           pageLabel: row.page_label,
           verbatimQuote: row.verbatim_quote,
@@ -1972,5 +2081,6 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
       sendJson(res, 500, { error: { code: "INTERNAL_ERROR", message: "服务器内部错误" } });
     }
   });
+  server.once("close", () => managementKbService?.close());
   return server;
 }

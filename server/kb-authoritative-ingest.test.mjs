@@ -99,6 +99,7 @@ test("migration 008:空库 000→008 全量应用且幂等,foreign_key_check 干
     "kb_company_fact_fragments",
     "kb_company_fact_units",
     "kb_evidence_gaps",
+    "kb_external_corpora",
     "kb_knowledge_units",
     "kb_pharma_context_fragments",
     "kb_pharma_context_units",

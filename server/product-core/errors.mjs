@@ -57,6 +57,14 @@ export const ERROR_CODES = Object.freeze({
   KB_RELATION_INPUT_INVALID: 422,
   KB_GAP_INPUT_INVALID: 422,
   KB_GAP_NOT_FOUND: 404,
+  // 外挂冻结课程语料库(管理学 P1)补充码。缺配置、哈希或 schema 不一致一律 fail closed，
+  // 不回退到空结果、Embedding 或模型记忆。
+  MANAGEMENT_KB_NOT_CONFIGURED: 503,
+  MANAGEMENT_KB_INTEGRITY_FAILED: 503,
+  MANAGEMENT_KB_SCHEMA_MISMATCH: 503,
+  MANAGEMENT_KB_CORPUS_REGISTRY_CONFLICT: 409,
+  MANAGEMENT_KB_RETRIEVAL_INPUT_INVALID: 422,
+  MANAGEMENT_KB_RETRIEVAL_RUN_NOT_FOUND: 404,
 });
 
 export function failCode(code, message, details) {
