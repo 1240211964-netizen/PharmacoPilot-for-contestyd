@@ -50,6 +50,8 @@ import {
 import { PRETEST_ITEMS_TEMPLATE, PRETEST_RESPONSES_TEMPLATE } from "./product-core/pretest-csv.mjs";
 import { SchemaValidationError } from "./product-core/schemas.mjs";
 import { getWorkflow, TERMINAL_STATES, TRANSITIONS } from "./product-core/workflow.mjs";
+import { runCh06FixtureDemo } from "./product-core/teaching-orchestration-demo.mjs";
+import { teachingWorkflowDetail } from "./product-core/teaching-orchestration.mjs";
 
 const MIME = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -1809,6 +1811,19 @@ export function createPharmacoServer({ config, database, modelClient, logger = c
     // 知识库(KB)子路由:教师审核 + 检索闭环(见上方 handleKbApi)。
     if (url.pathname.startsWith("/api/product-core/kb/")) {
       await handleKbApi(req, res, url, actor);
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/product-core/teaching-orchestration/demo/ch06/run") {
+      const body = await readJson(req, config.bodyLimitBytes);
+      const seed = typeof body?.seed === "string" && body.seed.trim() ? body.seed.trim() : "ch06-demo-001";
+      if (seed.length > 120) fail(400, "INVALID_PRODUCT_CORE_BODY", "seed 不能超过 120 字符");
+      sendJson(res, 201, runCh06FixtureDemo(pcdb, { seed }));
+      return;
+    }
+    const teachingWorkflowMatch = url.pathname.match(/^\/api\/product-core\/teaching-orchestration\/workflows\/([^/]+)$/);
+    if (req.method === "GET" && teachingWorkflowMatch) {
+      sendJson(res, 200, teachingWorkflowDetail(pcdb, teachingWorkflowMatch[1]));
       return;
     }
 
